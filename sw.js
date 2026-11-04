@@ -1,0 +1,7 @@
+/* Compagnon : coquille hors ligne versionnée, aucune requête de données distante. */
+const CACHE='compagnon-cache-6200c1c7f449';
+const ASSETS=["./","./index.html","./app.js","./styles.css","./manifest.webmanifest","./icons/icon-192.png","./icons/icon-512.png","./icons/icon-maskable-512.png","./icons/apple-touch-icon.png","./fonts/alegreya-latin-500-normal.woff2","./fonts/alegreya-latin-700-normal.woff2","./fonts/alegreya-sans-latin-400-normal.woff2","./fonts/alegreya-sans-latin-500-normal.woff2","./fonts/alegreya-sans-latin-700-normal.woff2"];
+self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS))));
+self.addEventListener('activate',event=>event.waitUntil((async()=>{for(const key of await caches.keys())if(key.startsWith('compagnon-cache-')&&key!==CACHE)await caches.delete(key);await self.clients.claim();})()));
+self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting();});
+self.addEventListener('fetch',event=>{const url=new URL(event.request.url);if(event.request.method!=='GET'||url.origin!==self.location.origin)return;event.respondWith((async()=>{const cache=await caches.open(CACHE);const cached=await cache.match(event.request,{ignoreSearch:true});if(cached)return cached;try{return await fetch(event.request);}catch(error){if(event.request.mode==='navigate')return await cache.match(new URL('./index.html',self.location).href);throw error;}})());});

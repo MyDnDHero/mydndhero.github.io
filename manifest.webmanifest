@@ -1,0 +1,33 @@
+{
+  "id": "./",
+  "name": "Compagnon · Personnage 5e (2014)",
+  "short_name": "Compagnon",
+  "description": "Crée, joue et fais évoluer ton personnage D&D 5e (règles 2014), en français et hors ligne.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#eceef1",
+  "theme_color": "#22356b",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
