@@ -1,8 +1,8 @@
 {
-  "id": "625b2d6a0ccf7ce186efa060c3653472e77fb036c81fb43f504eb536927b5167",
+  "id": "fbff2d2a78dd68cec86f8cd5bf8cabe7866c6e9ff21b3f30c70ab7156cff61b4",
   "schemaVersion": 1,
   "edition": "2014",
-  "appBuild": "19eba11c8fcbb3cf2461330e6ac6653370d1a7f6834e32ccd77dd69e43ab3915",
+  "appBuild": "9c03b132099705c844b1205bb79a79fae914fcf0e6bd531b9caffb95c723b58c",
   "sourceVersion": "874dd65a9321be74f393534661c70ca80b896e95",
   "count": 18356,
   "sourceCount": 13286,
@@ -2174,19 +2174,19 @@
     {
       "url": "./index.html",
       "bytes": 1618,
-      "sha256": "34365adfac54f922e6a5442776d51723e845f5d8b8ed368b20c2e00c65ef8592",
+      "sha256": "060f587adf5647aa9c6c7bd464104cb8e70d03db5e7cd0d4e214ccf56b8f1d69",
       "kind": "application"
     },
     {
       "url": "./app.js",
-      "bytes": 5266625,
-      "sha256": "eae754a07a4b2191d5cd38592c876337544fef6344e0dc28936f0e1ae3fc3195",
+      "bytes": 5269904,
+      "sha256": "aabead4d7532c4297ddfcf071eeab7f4d1482deec3135580de9a79cbef461ffc",
       "kind": "application"
     },
     {
       "url": "./styles.css",
-      "bytes": 71209,
-      "sha256": "f83617ef604bd6cab1e495af5963e34e37045c0bf08381d36d206e038fac2859",
+      "bytes": 75176,
+      "sha256": "9d261defd8b13eab9e86b8040d9cdbf4833186567d64e0528acc7c34b3616ece",
       "kind": "application"
     },
     {
@@ -2252,7 +2252,7 @@
     {
       "url": "./sw.js",
       "bytes": 17603,
-      "sha256": "ca08e217daf6a8935b629a9a5fba7baac41558d46200e02487f2d9ec702bc910",
+      "sha256": "749b033a85c7a700ee7c15fa6cba48fcc7a67a5ec55aea46916bc3085ec4a37b",
       "kind": "application"
     },
     {

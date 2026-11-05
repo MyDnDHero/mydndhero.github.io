@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-preview.4";
+const APP_VERSION = "2.0.0-preview.5";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -14834,6 +14834,9 @@ const iconPaths={
  more:'<circle cx="4" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="20" cy="12" r="1"/>',
  search:'<circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/>',info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v1"/>',warning:'<path d="m12 3 10 18H2Z"/><path d="M12 9v5m0 3v1"/>',
  dice:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M7 7h.01M17 7h.01M12 12h.01M7 17h.01M17 17h.01" stroke-width="3"/>',
+ clipboard:'<rect x="5" y="4" width="14" height="18" rx="2"/><path d="M9 4V2h6v2M9 9h6m-6 4h6"/>',
+ coffee:'<path d="M4 8h12v8a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4ZM16 9h2a3 3 0 0 1 0 6h-2M2 22h18M7 2v3m5-3v3"/>',
+ bed:'<path d="M3 4v17m18-9v9M3 17h18M3 12h18M7 12V8h4v4m0-4h7a3 3 0 0 1 3 3v1"/>',
  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/>',zap:'<path d="m13 2-9 12h7l-1 8 10-13h-7Z"/>',
  cloud:'<path d="M7 18a5 5 0 1 1 0-10 7 7 0 0 1 13 3 4 4 0 0 1-1 7Z"/>',
  lock:'<rect x="4" y="10" width="16" height="12" rx="3"/><path d="M7 10V7a5 5 0 0 1 10 0v3m-5 5v3"/>',
@@ -14962,8 +14965,9 @@ const LIVERY = {
 const liveryOf = (c) => (c ? LIVERY[primaryClassId(c)] || "#22356b" : "#22356b");
 function characterPortrait(c, { editable = false, small = false } = {}) {
   const url = portraitUrl(c);
+  const portraitStyle = c.portrait?.kind === "custom" ? "portrait-photo" : "portrait-library";
   const content = `${url ? `<img src="${esc(url)}" alt="${editable ? "" : `Portrait de ${esc(c.name || "ton personnage")}`}" width="512" height="512" decoding="async">` : ""}<span class="portrait-fallback" aria-hidden="true">${icon("user", 32)}</span>${editable ? `<span class="portrait-edit-hint">${icon("edit", 12)} Portrait</span>` : ""}`;
-  return editable ? `<button type="button" class="avatar character-portrait${url ? "" : " portrait-unavailable"}${small ? " small-avatar" : ""}" data-action="edit-portrait" aria-label="Choisir le portrait de ${esc(c.name || "ton personnage")}">${content}</button>` : `<div class="avatar character-portrait${url ? "" : " portrait-unavailable"}${small ? " small-avatar" : ""}">${content}</div>`;
+  return editable ? `<button type="button" class="avatar character-portrait ${portraitStyle}${url ? "" : " portrait-unavailable"}${small ? " small-avatar" : ""}" data-action="edit-portrait" aria-label="Choisir le portrait de ${esc(c.name || "ton personnage")}">${content}</button>` : `<div class="avatar character-portrait ${portraitStyle}${url ? "" : " portrait-unavailable"}${small ? " small-avatar" : ""}">${content}</div>`;
 }
 
 function disposePortraitEditor() {
@@ -15100,8 +15104,10 @@ function render() {
   }
   const c = activeCharacter(),
     wizardActive = !!ui.wizard || !!ui.levelFlow;
-  root.innerHTML = `<a class="skip" href="#main-content">Aller au contenu</a><div class="app-shell" style="--livery:${liveryOf(c)}"><aside class="sidebar"><button class="brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 30)}</span><span><span class="brand-name">Compagnon</span><span class="brand-sub">L’aventure, en poche</span></span></button><div class="sidebar-label">À la table</div>${navFor(c).map(([route, ico, label]) => `<button class="nav-btn ${ui.route === route && !wizardActive ? "active" : ""}" data-action="navigate" data-route="${route}" ${ui.route === route && !wizardActive ? 'aria-current="page"' : ""} ${!c ? "disabled" : ""}>${icon(ico, 20)}${label}</button>`).join("")}<div class="sidebar-bottom"><button class="nav-btn ${ui.route === "library" ? "active" : ""}" data-action="navigate" data-route="library">${icon("book", 20)}Bibliothèque</button><button class="nav-btn ${ui.route === "offline" ? "active" : ""}" data-action="navigate" data-route="offline">${icon("download", 20)}Contenu hors ligne</button><button class="nav-btn ${ui.route === "home" && !wizardActive ? "active" : ""}" data-action="navigate" data-route="home">${icon("users", 20)}Mes personnages</button><button class="nav-btn ${ui.route === "settings" ? "active" : ""}" data-action="navigate" data-route="settings">${icon("settings", 20)}Réglages & sauvegardes</button><div class="local-note">${icon("lock", 19)}<div><strong>Sur ton appareil.</strong>Sans compte. Sans publicité.<br>Tes fiches restent chez toi.</div></div><div class="side-footer"><span>Règles 2014</span><span>v${APP_VERSION}</span></div></div></aside><div class="main-shell"><header class="topbar"><div class="top-title">Ton carnet <span>/</span> <strong>${wizardActive ? "Création & choix" : routeNames[ui.route]}</strong></div><button class="brand mobile-brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 26)}</span><span><span class="brand-name">Compagnon</span><span class="brand-sub">Règles 2014</span></span></button><div class="top-actions"><span class="save-status"><span class="status-dot" style="${localStore.mode === "memory" ? "background:var(--warning)" : ""}"></span><span class="status-text">${ui.saving ? "Enregistrement…" : localStore.readOnly ? "Lecture seule" : localStore.mode === "memory" ? "Mémoire temporaire" : ui.online ? "Enregistré sur cet appareil" : "Hors ligne · données locales"}</span></span>${c ? smallIcon("download", "export-one", "Exporter ce personnage") : ""}${smallIcon("phone", "install", "Installer l’application")}</div></header>${ui.update ? `<div class="update-banner">Une nouvelle version est prête. Tes fiches seront conservées.${button("Mettre à jour", "update-app", "", "small-btn")}</div>` : ""}${localStore.mode === "memory" ? notice("Le navigateur bloque le stockage. <strong>Les changements ne survivront pas à la fermeture.</strong> Exporte tes fiches et ouvre l’application hors navigation privée.", "error") : ""}${localStore.readOnly ? notice("Le stockage de ce navigateur est en lecture seule. Exporte tes fiches pour les conserver dans un navigateur compatible.", "warning") : ""}${localStore.pendingState ? notice(`Une modification n’a pas été enregistrée. ${button("Exporter les modifications en attente", "export-pending", "", "small-btn")}`, "warning") : ""}${appData.recovery?.length ? notice(`${appData.recovery.length} fiche(s) nécessitent une récupération. Les autres restent accessibles. ${button("Exporter les données à récupérer", "export-recovery", "", "small-btn")}`, "warning") : ""}<main class="main ${wizardActive ? "wizard-active" : ""}" id="main-content" tabindex="-1">${ui.wizard ? renderWizard() : ui.levelFlow ? renderLevelFlow() : renderPage(c)}${c ? printSheet(c) : ""}</main></div></div><nav class="mobile-nav" aria-label="Navigation principale">${[
-    ["sheet", "user", "Fiche"],
+  const saveLabel = ui.saving ? "Enregistrement…" : localStore.readOnly ? "Lecture seule" : localStore.mode === "memory" ? "Mémoire temporaire" : ui.online ? "Enregistré sur cet appareil" : "Hors ligne · données locales";
+  const mobileStatus = ui.saving ? "Enregistrement…" : localStore.readOnly ? "Lecture seule" : localStore.mode === "memory" ? "Non sauvegardé" : ui.online ? "Enregistré" : "Hors ligne";
+  root.innerHTML = `<a class="skip" href="#main-content">Aller au contenu</a><div class="app-shell" style="--livery:${liveryOf(c)}"><aside class="sidebar"><button class="brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 30)}</span><span><span class="brand-name">Compagnon</span><span class="brand-sub">L’aventure, en poche</span></span></button><div class="sidebar-label">À la table</div>${navFor(c).map(([route, ico, label]) => `<button class="nav-btn ${ui.route === route && !wizardActive ? "active" : ""}" data-action="navigate" data-route="${route}" ${ui.route === route && !wizardActive ? 'aria-current="page"' : ""} ${!c ? "disabled" : ""}>${icon(ico, 20)}${label}</button>`).join("")}<div class="sidebar-bottom"><button class="nav-btn ${ui.route === "library" ? "active" : ""}" data-action="navigate" data-route="library">${icon("book", 20)}Bibliothèque</button><button class="nav-btn ${ui.route === "offline" ? "active" : ""}" data-action="navigate" data-route="offline">${icon("download", 20)}Contenu hors ligne</button><button class="nav-btn ${ui.route === "home" && !wizardActive ? "active" : ""}" data-action="navigate" data-route="home">${icon("users", 20)}Mes personnages</button><button class="nav-btn ${ui.route === "settings" ? "active" : ""}" data-action="navigate" data-route="settings">${icon("settings", 20)}Réglages & sauvegardes</button><div class="local-note">${icon("lock", 19)}<div><strong>Sur ton appareil.</strong>Sans compte. Sans publicité.<br>Tes fiches restent chez toi.</div></div><div class="side-footer"><span>Règles 2014</span><span>v${APP_VERSION}</span></div></div></aside><div class="main-shell"><header class="topbar"><div class="top-title">Ton carnet <span>/</span> <strong>${wizardActive ? "Création & choix" : routeNames[ui.route]}</strong></div><button class="brand mobile-brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 26)}</span><span><span class="brand-name">Compagnon</span><span class="brand-sub">Règles 2014</span></span></button><div class="top-actions"><span class="save-status" title="${esc(saveLabel)}" role="status"><span class="status-dot" style="${localStore.mode === "memory" || localStore.readOnly ? "background:var(--warning)" : ""}" aria-hidden="true"></span><span class="status-text">${esc(saveLabel)}</span><span class="status-mobile">${esc(mobileStatus)}</span></span><span class="top-utility">${c ? smallIcon("download", "export-one", "Exporter ce personnage") : ""}${smallIcon("phone", "install", "Installer l’application")}</span></div></header>${ui.update ? `<div class="update-banner">Une nouvelle version est prête. Tes fiches seront conservées.${button("Mettre à jour", "update-app", "", "small-btn")}</div>` : ""}${localStore.mode === "memory" ? notice("Le navigateur bloque le stockage. <strong>Les changements ne survivront pas à la fermeture.</strong> Exporte tes fiches et ouvre l’application hors navigation privée.", "error") : ""}${localStore.readOnly ? notice("Le stockage de ce navigateur est en lecture seule. Exporte tes fiches pour les conserver dans un navigateur compatible.", "warning") : ""}${localStore.pendingState ? notice(`Une modification n’a pas été enregistrée. ${button("Exporter les modifications en attente", "export-pending", "", "small-btn")}`, "warning") : ""}${appData.recovery?.length ? notice(`${appData.recovery.length} fiche(s) nécessitent une récupération. Les autres restent accessibles. ${button("Exporter les données à récupérer", "export-recovery", "", "small-btn")}`, "warning") : ""}<main class="main ${wizardActive ? "wizard-active" : ""}" id="main-content" tabindex="-1">${ui.wizard ? renderWizard() : ui.levelFlow ? renderLevelFlow() : renderPage(c)}${c ? printSheet(c) : ""}</main></div></div><nav class="mobile-nav" aria-label="Navigation principale">${[
+    ["sheet", "clipboard", "Fiche"],
     ["spells", "book", "Sorts"],
     ["features", "swords", "Aptitudes"],
     ["inventory", "bag", "Sac"],
@@ -15179,19 +15185,19 @@ function renderSheet(c) {
   const d = derive(c),
     res = resources(c),
     issues = characterIssues(c),
-    hpPercent = clamp((d.currentHp / d.maxHp) * 100, 0, 100),
     effectiveConditions = d.wildShape?.conditions || c.state.conditions,
     effectiveExhaustion = d.wildShape?.conditionImmunities.includes("exhaustion") ? 0 : c.state.exhaustion,
     subs = subclassSummary(c);
-  return `<section class="hero"><div class="hero-identity">${characterPortrait(c, { editable: true })}<div><div class="eyebrow">Fiche de personnage</div><h1>${esc(c.name)}</h1><p class="hero-origin">${esc(d.race.name)} · ${esc(d.background.name)}</p><p class="subtitle">${esc(classSummary(c))}${subs ? `, ${esc(subs)}` : ""}</p></div></div><div class="hero-actions">${button(`${icon("edit", 16)} Modifier`, "edit-character", "", "ghost")}${button(`${icon("tree", 17)} ${d.level < 20 ? "Niveau " + (d.level + 1) : "Niveau 20 atteint"}`, "level-up", d.level >= 20 ? "disabled" : "", "ghost small-btn")}</div></section>${renderActiveForm(c, d)}<div class="split sheet-panels"><div class="stack"><section class="panel hp-panel"><div class="panel-head"><h2 class="panel-title">${icon("heart", 19)} Points de vie</h2><span class="pill ${d.currentHp === 0 ? "red" : ""}">${d.currentHp === 0 ? "À 0 PV" : d.currentHp < d.maxHp / 2 ? "Blessé" : "Prêt à l’aventure"}</span></div><div class="hp-line"><div class="hp-reading"><strong class="hp-current">${d.currentHp}</strong><span class="hp-max">/ ${d.maxHp}</span></div><button class="link-btn hp-temp" data-action="temporary-hp"><span><strong>${c.state.tempHp ? `+${c.state.tempHp}` : "0"}</strong>PV temporaires ${icon("edit", 12)}</span></button></div><div class="bar ${hpPercent < 35 ? "low" : ""}"><span style="width:${hpPercent}%"></span></div><div class="small muted">Dés de vie : ${hitDiceLabel(d)}${effectiveExhaustion >= 4 ? " · maximum réduit par l’épuisement" : ""}</div><div class="hp-actions">${button(`${icon("minus", 18)} Dégâts`, "damage", "", "primary")}${button(`${icon("plus", 18)} Soins`, "heal", "", "ghost")}</div>${d.currentHp === 0 ? renderDeathSaves(c) : ""}</section><div class="stats-strip sheet-stats">${[
-    ["shield", d.ac, "Classe d’armure", "ac-info"],
+  const classes = classLevels(c), sheetClass = classes.length === 1 ? `${CLASSES[classes[0].classId].name} · Niveau ${d.level}` : `${classSummary(c)} · Niveau ${d.level}`;
+  return `<section class="hero sheet-hero"><div class="hero-identity">${characterPortrait(c, { editable: true })}<div class="hero-summary"><div class="eyebrow">Fiche de personnage</div><h1>${esc(c.name)}</h1><p class="hero-origin">${esc(d.race.name)}</p><p class="subtitle">${esc(sheetClass)}</p><p class="hero-context">${esc(d.background.name)}${subs ? ` · ${esc(subs)}` : ""}</p></div></div><div class="hero-actions">${button(`${icon("edit", 16)} Modifier`, "edit-character", "", "ghost")}</div></section>${renderActiveForm(c, d)}<div class="split sheet-panels"><div class="stack"><section class="panel hp-panel"><div class="panel-head"><h2 class="panel-title">Points de vie</h2>${d.currentHp < d.maxHp / 2 ? `<span class="pill ${d.currentHp === 0 ? "red" : ""}">${d.currentHp === 0 ? "À 0 PV" : "Blessé"}</span>` : ""}<button class="icon-btn hp-details" data-action="hp-details" aria-label="Détails des points de vie et dés de vie">${icon("info", 18)}</button></div><div class="hp-line"><div class="hp-reading"><strong class="hp-current">${d.currentHp}</strong><span class="hp-max">/ ${d.maxHp}</span></div><button class="link-btn hp-temp${c.state.tempHp ? " has-value" : ""}" data-action="temporary-hp" aria-label="${c.state.tempHp ? `${c.state.tempHp} points de vie temporaires. Modifier la réserve` : "Ajouter des points de vie temporaires"}">${c.state.tempHp ? `<span><strong>+${c.state.tempHp}</strong>PV temporaires</span>` : `<span>${icon("plus", 13)} PV temporaires</span>`}</button></div>${effectiveExhaustion >= 4 ? '<p class="small hp-warning">Maximum réduit par l’épuisement.</p>' : ""}<div class="hp-actions">${button(`${icon("sun", 18)} Dégâts`, "damage", "", "primary")}${button(`${icon("plus", 18)} Soins`, "heal", "", "ghost")}</div>${d.currentHp === 0 ? renderDeathSaves(c) : ""}</section><div class="stats-strip sheet-stats">${[
+    ["shield", d.ac, "CA", "ac-info"],
     ["zap", signed(d.initiative), "Initiative", "roll-initiative"],
     ["compass", `${String(d.speed || d.flySpeed || d.swimSpeed || d.burrowSpeed || 0).replace(".", ",")} <small>m</small>`, d.speed ? "Vitesse" : d.flySpeed ? "Vol" : d.swimSpeed ? "Nage" : d.burrowSpeed ? "Fouissement" : "Vitesse", ""],
     ["gem", signed(d.prof), "Maîtrise", ""],
   ]
     .map(
       ([ico, value, label, action]) =>
-        `<${action ? `button type="button" data-action="${action}"` : "div"} class="stat-box"><span class="stat-symbol">${icon(ico, 20)}</span><div><div class="stat-value">${value}</div><div class="stat-label">${label}</div></div></${action ? "button" : "div"}>`,
+        `<${action ? `button type="button" data-action="${action}"${action === "ac-info" ? ` aria-label="Classe d’armure ${d.ac}, détail du calcul"` : ""}` : "div"} class="stat-box"><span class="stat-symbol">${icon(ico, 20)}</span><div><div class="stat-value">${value}</div><div class="stat-label">${label}</div></div></${action ? "button" : "div"}>`,
     )
     .join("")}</div><section class="panel ability-panel"><div class="panel-head"><h2 class="panel-title">${icon("gem", 19)} Caractéristiques</h2><span class="tiny muted">Touche pour lancer</span></div><div class="ability-grid">${Object.entries(ABILITIES)
     .map(
@@ -15223,9 +15229,9 @@ function renderSheet(c) {
           )
           .join("")
       : '<p class="small muted">Pas de ressource à suivre à ce niveau.</p>'
-  }</div>${renderArcaneWard(c)}${wildShapeRules(c) ? `<button type="button" class="link-btn beast-link" data-action="navigate" data-route="wildshape">${icon("paw", 15)} Voir les formes animales disponibles</button>` : ""}<div class="rest-actions">${button(`${icon("clock", 16)} Repos court`, "rest-short")}${button(`${icon("moon", 16)} Repos long`, "rest-long")}${resourceConversionOptions(c).length ? button("Conversion de magie", "resource-conversions", "", "small-btn") : ""}${button("Récupération particulière", "resource-event", "", "small-btn ghost")}</div></section>${
+  }</div>${renderArcaneWard(c)}${wildShapeRules(c) ? `<button type="button" class="link-btn beast-link" data-action="navigate" data-route="wildshape">${icon("paw", 15)} Voir les formes animales disponibles</button>` : ""}<div class="rest-actions">${button(`${icon("coffee", 18)} Repos court`, "rest-short")}${button(`${icon("bed", 18)} Repos long`, "rest-long")}</div><details class="session-tools" data-detail="session-tools"><summary>Autres récupérations</summary><div class="actions">${resourceConversionOptions(c).length ? button("Conversion de magie", "resource-conversions", "", "small-btn") : ""}${button("Récupération particulière", "resource-event", "", "small-btn ghost")}</div></details></section>${
     d.slots.length || d.pact
-      ? `<section class="panel magic-panel"><div class="panel-head"><h2 class="panel-title">${icon("sparkles", 18)} Emplacements de sorts</h2><button class="link-btn" data-action="navigate" data-route="spells">Grimoire ${icon("chevron", 13)}</button></div>${renderSlots(c)}${c.state.concentration ? `<div class="notice purple section-gap">${icon("sparkles", 17)}<div><strong>Concentration</strong>${esc(c.state.concentration)}<br><button class="link-btn" data-action="end-concentration">Mettre fin</button></div></div>` : ""}</section>`
+      ? `<section class="panel magic-panel"><div class="panel-head"><h2 class="panel-title"><button class="panel-heading-link" data-action="navigate" data-route="spells">Emplacements de sorts ${icon("chevron", 17)}</button></h2><button class="icon-btn slot-help" data-action="slot-help" aria-label="Comment utiliser les emplacements de sorts">${icon("info", 17)}</button></div>${renderSlots(c, { compact: true })}${c.state.concentration ? `<div class="notice purple section-gap">${icon("sparkles", 17)}<div><strong>Concentration</strong>${esc(c.state.concentration)}<br><button class="link-btn" data-action="end-concentration">Mettre fin</button></div></div>` : ""}</section>`
       : ""
   }<section class="panel conditions-panel"><div class="panel-head"><h2 class="panel-title">${icon("flag", 18)} États & vigilance</h2><button class="link-btn" data-action="conditions">Gérer</button></div>${effectiveConditions.length ? `<div class="condition-chips">${effectiveConditions.map((s) => `<span class="pill red">${esc(s)}</span>`).join("")}</div>` : '<p class="small muted">Aucun état actif.</p>'}<div class="summary-row"><span>Épuisement</span><strong>${effectiveExhaustion} / 6</strong></div>${effectiveExhaustion ? `<p class="tiny muted">Effets cumulés : ${EXHAUSTION.slice(1, effectiveExhaustion + 1).join(" ; ")}.</p>` : ""}</section><section class="panel features-panel"><div class="panel-head"><h2 class="panel-title">${icon("book", 18)} Aptitudes</h2><button class="link-btn" data-action="navigate" data-route="features">Tout voir ${icon("chevron", 13)}</button></div>${featureGroups(c, d)
     .map(
@@ -15271,7 +15277,7 @@ function renderFeaturesPage(c) {
 function renderDeathSaves(c) {
   return `<div class="section-gap"><div class="small"><strong>Sauvegardes contre la mort</strong></div><div class="summary-row"><span>Réussites</span><div class="actions">${[1, 2, 3].map((n) => `<button class="condition-chip ${c.state.deathSuccess >= n ? "active" : ""}" data-action="death-mark" data-kind="deathSuccess" data-value="${n}" aria-label="${n} réussite(s)">${c.state.deathSuccess >= n ? "●" : "○"}</button>`).join("")}</div></div><div class="summary-row"><span>Échecs</span><div class="actions">${[1, 2, 3].map((n) => `<button class="condition-chip ${c.state.deathFailure >= n ? "active" : ""}" data-action="death-mark" data-kind="deathFailure" data-value="${n}" aria-label="${n} échec(s)">${c.state.deathFailure >= n ? "●" : "○"}</button>`).join("")}</div></div>${button(`${icon("dice", 16)} Lancer la sauvegarde`, "death-roll", "", "small-btn")}<p class="tiny muted">${c.state.deathFailure >= 3 ? "Trois échecs : personnage mort. Vérifie les effets particuliers avec le MJ." : c.state.deathSuccess >= 3 ? "Stabilisé : plus de sauvegardes jusqu’à de nouveaux dégâts." : "Un 1 naturel vaut deux échecs. Un 20 naturel rend 1 PV."}</p></div>`;
 }
-function renderSlots(c) {
+function renderSlots(c, { compact = false } = {}) {
   const d = derive(c);
   const regular = d.slots.map((max, index) => max + (c.state.temporarySlots?.[index + 1] || 0))
     .map((max, i) =>
@@ -15283,7 +15289,7 @@ function renderSlots(c) {
   const pact = d.pact
     ? `<div class="pact-slots"><div class="slot-label">Pacte · niveau ${d.pact.slotLevel}</div><div class="slots">${Array.from({ length: d.pact.count }, (_, index) => `<button class="slot pact ${index < (c.state.pactUsed || 0) ? "used" : ""}" data-action="toggle-pact" data-index="${index}" aria-label="Emplacement de pacte, ${index < (c.state.pactUsed || 0) ? "dépensé" : "disponible"}"></button>`).join("")}</div></div>`
     : "";
-  return `<div class="slot-groups">${regular}${pact}</div><div class="tiny muted" style="margin-top:13px">Cercle plein : disponible. Touche un emplacement pour corriger sa dépense.${d.pact ? " Les emplacements de pacte reviennent au repos court." : ""}</div>`;
+  return `<div class="slot-groups${compact ? " sheet-slots" : ""}">${regular}${pact}</div>${compact ? "" : `<div class="tiny muted" style="margin-top:13px">Cercle plein : disponible. Touche un emplacement pour corriger sa dépense.${d.pact ? " Les emplacements de pacte reviennent au repos court." : ""}</div>`}`;
 }
 function renderSpellDescription(spell) {
   const reference = referenceEntity(spell.referenceId), translated = reference?.complete;
@@ -15550,7 +15556,7 @@ function renderMore(c) {
     )
     .join(
       "",
-    )}</div>${c ? `<div class="panel section-gap"><h3>${esc(c.name)}</h3><div class="actions section-gap">${button(`${icon("edit", 16)} Modifier`, "edit-character")}${button(`${icon("download", 16)} Exporter`, "export-one")}${IS_ARTIFACT ? "" : button(`${icon("print", 16)} Imprimer`, "print", "", "ghost")}</div></div>` : ""}`;
+    )}</div>${c ? `<div class="panel section-gap"><h3>${esc(c.name)}</h3><p class="small section-gap">${esc(raceOf(c).name)} · ${esc(backgroundOf(c).name)}<br>${esc(classSummary(c))}${subclassSummary(c) ? `<br>${esc(subclassSummary(c))}` : ""}</p><div class="actions section-gap">${button(`${icon("edit", 16)} Modifier`, "edit-character")}${button(`${icon("download", 16)} Exporter`, "export-one")}${IS_ARTIFACT ? "" : button(`${icon("print", 16)} Imprimer`, "print", "", "ghost")}</div></div>` : ""}`;
 }
 function contentSize(bytes) { return `${(bytes / 1048576).toFixed(1).replace(".", ",")} Mo`; }
 function renderOffline() {
@@ -16240,6 +16246,10 @@ function renderModal() {
   const c = activeCharacter(),
     d = c ? derive(c) : null,
     cancel = button("Annuler", "close-modal", "", "ghost");
+  if (ui.modal === "hp-details") {
+    const exhaustion = d.wildShape?.conditionImmunities.includes("exhaustion") ? 0 : c.state.exhaustion;
+    return modalShell("Points de vie et repos", `<div class="summary-row"><span>Points de vie</span><strong>${d.currentHp} / ${d.maxHp}</strong></div><div class="summary-row"><span>PV temporaires</span><strong>${c.state.tempHp}</strong></div><div class="summary-row"><span>Dés de vie disponibles</span><strong>${hitDiceLabel(d)}</strong></div><p class="modal-copy section-gap">Les dés de vie se dépensent pendant un repos court. Les repos sont accessibles sous tes ressources.</p>${exhaustion >= 4 ? notice("Le maximum de PV est réduit par l’épuisement.", "warning") : ""}`, button("PV temporaires", "temporary-hp", "", "ghost") + button("Fermer", "close-modal", "", "primary"));
+  }
   if (["damage", "heal", "temporary", "gold", "xp"].includes(ui.modal)) {
     const details = {
       damage: ["Subir des dégâts", d.arcaneWard?.hp > 0 ? "La Protection arcanique absorbe les dégâts avant tes PV temporaires et corporels. Vérifie avec le MJ les résistances ou immunités applicables au reliquat." : "Les PV temporaires absorbent les dégâts en premier. Déduis d’abord résistances et immunités.", "Appliquer les dégâts"],
@@ -17384,6 +17394,10 @@ async function perform(action, el) {
       ui.amount = action === "gold" ? c.gold : action === "xp" ? c.xp : 5;
       openModal(action);
       break;
+    case "hp-details": openModal("hp-details"); break;
+    case "slot-help":
+      openInfo("Emplacements de sorts", "Un cercle plein indique un emplacement disponible ; un cercle vide indique un emplacement dépensé. Touche un cercle pour corriger la dépense. Pour lancer un sort et suivre ses effets, ouvre le grimoire." + (d.pact ? "\n\nLes emplacements de pacte se récupèrent au repos court ou long." : ""));
+      break;
     case "temporary-hp":
       ui.amount = c.state.tempHp;
       openModal("temporary");
@@ -17438,6 +17452,12 @@ async function perform(action, el) {
       if (resource && resource.max !== null) {
         const next = Number(data.delta) > 0 ? spendResources(c, [{ id: resource.id, amount: 1 }]) : recoverResourceEvent(c, { kind: "manual", resourceId: resource.id, amount: 1 });
         await saveCharacter(next, `Compteur : ${resource.name}`, "session", c);
+        const restoreFocus = document.activeElement === el;
+        render();
+        if (restoreFocus) {
+          const controls = [...root.querySelectorAll('button[data-action="resource-use"]:not(:disabled)')].filter((control) => control.dataset.key === resource.id);
+          (controls.find((control) => control.dataset.delta === data.delta) || controls[0])?.focus({ preventScroll: true });
+        }
       }
       break;
     }
