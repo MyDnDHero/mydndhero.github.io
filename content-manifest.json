@@ -1,8 +1,8 @@
 {
-  "id": "ad69adea8cfd4f66306741df4fe16652fec84aa07844e3f7058ea2a8a2294c7f",
+  "id": "df5e7f413628df796f6ad79a3c0cd017eb84ba190ac3d62defb5359a50a59341",
   "schemaVersion": 1,
   "edition": "2014",
-  "appBuild": "a9184e0d44d1fd2cd873226b84527f1c1800fc221d1d49fd0c666ba8368784fa",
+  "appBuild": "db617860cb7bed83630292ea7b54549d796f24b38b89cbf274bdd52954d9b63a",
   "sourceVersion": "874dd65a9321be74f393534661c70ca80b896e95",
   "count": 18356,
   "sourceCount": 13286,
@@ -2174,19 +2174,19 @@
     {
       "url": "./index.html",
       "bytes": 1618,
-      "sha256": "0464e150c3991e522a7f0056d3a5d45fc27d7e0bc9af1d84af91597480b62675",
+      "sha256": "f6f8cbe7ad3324e7e3bcced824e3eef9e9b212f0caa03fe814ad3e3f6e635a95",
       "kind": "application"
     },
     {
       "url": "./app.js",
-      "bytes": 5310465,
-      "sha256": "36b6919b867efb5f9709a0c5b588627d891c26b463f0cf3c10cdd5bb05f03041",
+      "bytes": 5368187,
+      "sha256": "6dae523648b6a44907626919104981332cbcdf6faa05b552942b1935c9774a34",
       "kind": "application"
     },
     {
       "url": "./styles.css",
-      "bytes": 78432,
-      "sha256": "d1f744b54426fa574e38a36ac8b033a3bdb64f93638abbf815d04c9cb2d87ae0",
+      "bytes": 121024,
+      "sha256": "8ab0632dc8fec56b374514b991bdb6453af5c2289fb23b3a65565b1371754265",
       "kind": "application"
     },
     {
@@ -2250,9 +2250,15 @@
       "kind": "application"
     },
     {
+      "url": "./fonts/caveat-latin-variable.woff2",
+      "bytes": 74932,
+      "sha256": "891951df5e8b5b0f0bc760d31375405e795c666b5add70437de12d4a6482b33f",
+      "kind": "application"
+    },
+    {
       "url": "./sw.js",
-      "bytes": 17603,
-      "sha256": "3b503ac496f0d64d28d4b6681efb2a9ea8889c77ef98e8ad0231b66952137c13",
+      "bytes": 17641,
+      "sha256": "f4618a0b031adf928e5b589434f201920932235f26a4d48633571948b5c3b374",
       "kind": "application"
     },
     {

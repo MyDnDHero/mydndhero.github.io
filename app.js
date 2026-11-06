@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-preview.6";
+const APP_VERSION = "2.0.0-preview.11";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -391,7 +391,7 @@ const UI_FR = Object.freeze({
   "items.error.origin": "Provenance d’objet temporaire invalide.",
   "items.error.equipment": "Cet exemplaire ne peut pas occuper cet emplacement.",
   "items.error.weaponLimit": "Tu peux préparer au maximum six armes à la fois.",
-  "items.unsupported": "Les propriétés de cet objet demandent un adaptateur mécanique supplémentaire. Ses textes et son état sont conservés.",
+  "items.unsupported": "Certains effets de cet objet ne sont pas encore calculés. Son texte et son état sont conservés.",
   "items.instance": "Exemplaire",
   "items.carried": "Objet emporté",
   "items.owner": "Propriétaire",
@@ -412,7 +412,7 @@ const UI_FR = Object.freeze({
   "items.slot.armor": "Armure portée",
   "items.slot.shield": "Bouclier porté",
   "items.equipmentReview": "Vérifie la CA, les mains et les attaques avant de confirmer.",
-  "items.instancesHelp": "Chaque exemplaire conserve son porteur, son harmonisation et ses charges. Le texte de l’objet reste sa référence pour les effets non encore automatisés.",
+  "items.instancesHelp": "Chaque exemplaire conserve son porteur, son harmonisation et ses charges. Consulte la référence pour les effets non calculés.",
   "items.catalogue": "Chercher dans le catalogue complet",
   "items.instanceArmorBonus": "objets portés",
   "background.base": "Historique de base",
@@ -428,7 +428,7 @@ const UI_FR = Object.freeze({
   "repair.resources": "Conséquences sur les réserves",
   "repair.returnLevels": "Revenir aux corrections de niveaux",
   "repair.spentPreserved": "dépenses conservées",
-  "spells.catalogueNote": "Les références complètes sont consultables dans la bibliothèque. Télécharge le contenu avant de jouer hors ligne.",
+  "spells.catalogueNote": "Références complètes dans la bibliothèque. Télécharge-les pour les consulter hors ligne.",
   "spells.quota": "Le quota de cette classe est atteint ({max}). Retire d’abord un sort ou vérifie les options de ta table."
 });
 
@@ -4951,6 +4951,8 @@ const SPELLS = [...SPELL_ROWS_A, ...SPELL_ROWS_B].map(
     revision: SPELL_ACCESS[id]?.revision || null,
   }),
 ).map((spell) => ({ ...spell, classes: SPELL_ACCESS[spell.id]?.classes.filter((entry) => !entry.optional && entry.accessKind !== "class-feature").map((entry) => entry.id) || spell.classes })).concat(ADDITIONAL_SPELLS);
+/** Index des sorts livrés. Le catalogue ne change pas après le chargement : chercher un sort par identifiant ne le parcourt pas. */
+const SPELL_BY_ID = new Map(SPELLS.map((spell) => [spell.id, spell]));
 const SPELL_SCHOOLS = ["Abjuration", "Divination", "Enchantement", "Évocation", "Illusion", "Invocation", "Nécromancie", "Transmutation"];
 
 
@@ -10893,6 +10895,407 @@ function createRuntimeItem(ref, ownerId, { id = itemId() } = {}) {
 }
 
 
+// Module : journal
+/** Journal personnel : dates de séance sans fuseau, mutations sur des copies. */
+const JOURNAL_LEGACY_ID = "legacy-campaign-notes";
+const JOURNAL_TITLE_LIMIT = 120;
+const JOURNAL_BODY_LIMIT = 20000;
+const JOURNAL_LEGACY_BODY_LIMIT = 50000;
+const JOURNAL_PHOTO_MAX_BYTES = 1.5 * 1024 * 1024;
+const JOURNAL_PHOTO_MAX_SIDE = 2560;
+const JOURNAL_PHOTOS_MAX_BYTES = 12 * 1024 * 1024;
+const _journalEntryLimit = 1500;
+const _journalClone = (value) => JSON.parse(JSON.stringify(value));
+const _journalPlain = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
+const _journalOwn = (value, key) => Object.hasOwn(value, key);
+const _journalPhotoPrefix = "data:image/jpeg;base64,";
+const _journalEncodedPhotoBytes = (dataUrl) => (dataUrl.length - _journalPhotoPrefix.length) / 4 * 3 - (dataUrl.endsWith("==") ? 2 : dataUrl.endsWith("=") ? 1 : 0);
+const _journalPhotoValidationCache = new WeakMap();
+const _journalPhotoFailure = () => { throw new Error("Photo du journal invalide : utilise une image JPEG de 1 à 2560 pixels, de 1,5 Mio maximum."); };
+const _journalPhotoWord = (bytes, offset) => bytes[offset] * 256 + bytes[offset + 1];
+
+/** Parcourt la structure JPEG, ses tables et ses scans jusqu’à EOI (ITU-T T.81, annexe B).
+ * Les pixels sont décodés puis réencodés par le navigateur lors du choix d’une photo.
+ */
+function _journalJpegSize(bytes) {
+  if (bytes.length < 14 || bytes[0] !== 0xff || bytes[1] !== 0xd8) _journalPhotoFailure();
+  let offset = 2, frame = null, scans = 0, restartInterval = 0;
+  const quantization = new Set(), huffman = new Set(), scannedComponents = new Set();
+  while (offset < bytes.length) {
+    if (bytes[offset++] !== 0xff) _journalPhotoFailure();
+    while (bytes[offset] === 0xff) offset++;
+    const marker = bytes[offset++];
+    if (marker === 0xd9) {
+      if (offset !== bytes.length || !frame || !scans || scannedComponents.size !== frame.components.size) _journalPhotoFailure();
+      return { width: frame.width, height: frame.height };
+    }
+    if (offset + 2 > bytes.length) _journalPhotoFailure();
+    const length = _journalPhotoWord(bytes, offset), start = offset + 2, end = offset + length;
+    if (length < 2 || end > bytes.length) _journalPhotoFailure();
+    if ([0xc0, 0xc1, 0xc2].includes(marker)) {
+      const count = bytes[start + 5];
+      if (frame || bytes[start] !== 8 || ![1, 3].includes(count) || length !== 8 + 3 * count) _journalPhotoFailure();
+      const width = _journalPhotoWord(bytes, start + 3), height = _journalPhotoWord(bytes, start + 1), components = new Map();
+      if (![width, height].every((side) => side >= 1 && side <= JOURNAL_PHOTO_MAX_SIDE)) _journalPhotoFailure();
+      for (let pos = start + 6; pos < end; pos += 3) {
+        const id = bytes[pos], horizontal = bytes[pos + 1] >> 4, vertical = bytes[pos + 1] & 15, table = bytes[pos + 2];
+        if (components.has(id) || horizontal < 1 || horizontal > 4 || vertical < 1 || vertical > 4 || table > 3) _journalPhotoFailure();
+        components.set(id, table);
+      }
+      frame = { width, height, components, progressive: marker === 0xc2 };
+    } else if (marker === 0xdb) {
+      if (start === end) _journalPhotoFailure();
+      for (let pos = start; pos < end;) {
+        const table = bytes[pos++];
+        if (table > 3 || pos + 64 > end) _journalPhotoFailure();
+        for (let i = 0; i < 64; i++) if (bytes[pos + i] === 0) _journalPhotoFailure();
+        quantization.add(table); pos += 64;
+      }
+    } else if (marker === 0xc4) {
+      if (start === end) _journalPhotoFailure();
+      for (let pos = start; pos < end;) {
+        const table = bytes[pos++];
+        if (table >> 4 > 1 || (table & 15) > 3 || pos + 16 > end) _journalPhotoFailure();
+        let symbols = 0, available = 1;
+        for (let i = 0; i < 16; i++) {
+          const count = bytes[pos++];
+          symbols += count; available = available * 2 - count;
+          if (available < 0) _journalPhotoFailure();
+        }
+        if (!symbols || symbols > 256 || available === 0 || pos + symbols > end) _journalPhotoFailure();
+        huffman.add(table); pos += symbols;
+      }
+    } else if (marker === 0xdd) {
+      if (length !== 4) _journalPhotoFailure();
+      restartInterval = _journalPhotoWord(bytes, start);
+    } else if (marker === 0xda) {
+      const count = bytes[start];
+      if (!frame || !count || count > frame.components.size || length !== 6 + 2 * count) _journalPhotoFailure();
+      const first = bytes[end - 3], last = bytes[end - 2], high = bytes[end - 1] >> 4, low = bytes[end - 1] & 15;
+      if (frame.progressive ? first > last || last > 63 || first === 0 && last !== 0 || first !== 0 && count !== 1 || high > 13 || low > 13 || high !== 0 && high !== low + 1 : first !== 0 || last !== 63 || high !== 0 || low !== 0) _journalPhotoFailure();
+      const selected = new Set();
+      for (let pos = start + 1; pos < end - 3; pos += 2) {
+        const id = bytes[pos], dc = bytes[pos + 1] >> 4, ac = bytes[pos + 1] & 15;
+        if (!frame.components.has(id) || selected.has(id) || !quantization.has(frame.components.get(id)) || dc > 3 || ac > 3) _journalPhotoFailure();
+        if ((!frame.progressive || first === 0 && high === 0) && !huffman.has(dc)) _journalPhotoFailure();
+        if ((!frame.progressive || first > 0) && !huffman.has(16 + ac)) _journalPhotoFailure();
+        selected.add(id); scannedComponents.add(id);
+      }
+      offset = end;
+      let entropyBytes = 0, restart = 0;
+      while (offset < bytes.length) {
+        if (bytes[offset] !== 0xff) { entropyBytes++; offset++; continue; }
+        const boundary = offset++;
+        while (bytes[offset] === 0xff) offset++;
+        const next = bytes[offset++];
+        if (next === 0) { entropyBytes++; continue; }
+        if (next >= 0xd0 && next <= 0xd7) {
+          if (!restartInterval || !entropyBytes || next !== 0xd0 + restart) _journalPhotoFailure();
+          restart = (restart + 1) % 8;
+          continue;
+        }
+        offset = boundary;
+        break;
+      }
+      if (!entropyBytes) _journalPhotoFailure();
+      scans++;
+      continue;
+    } else if (!(marker >= 0xe0 && marker <= 0xef) && marker !== 0xfe) _journalPhotoFailure();
+    offset = end;
+  }
+  _journalPhotoFailure();
+}
+
+/** Base64 canonique, signature réelle, segments complets et dimensions internes bornées. */
+function journalPhotoInfo(dataUrl) {
+  if (typeof dataUrl !== "string" || dataUrl.length > _journalPhotoPrefix.length + Math.ceil(JOURNAL_PHOTO_MAX_BYTES / 3) * 4 || !dataUrl.startsWith(_journalPhotoPrefix)) _journalPhotoFailure();
+  const encoded = dataUrl.slice(_journalPhotoPrefix.length);
+  if (!encoded || encoded.length % 4 !== 0 || !/^[A-Za-z0-9+/]+={0,2}$/.test(encoded)) _journalPhotoFailure();
+  let decoded;
+  try { decoded = atob(encoded); } catch { _journalPhotoFailure(); }
+  if (!decoded.length || decoded.length > JOURNAL_PHOTO_MAX_BYTES || btoa(decoded) !== encoded) _journalPhotoFailure();
+  const bytes = new Uint8Array(decoded.length);
+  for (let i = 0; i < bytes.length; i++) bytes[i] = decoded.charCodeAt(i);
+  return { mime: "image/jpeg", bytes: bytes.length, ..._journalJpegSize(bytes) };
+}
+
+function validateJournalPhoto(value) {
+  if (value == null) return null;
+  if (!_journalPlain(value) || ![Object.prototype, null].includes(Object.getPrototypeOf(value)) || Object.keys(value).some((key) => !["dataUrl", "width", "height"].includes(key))) _journalPhotoFailure();
+  const { dataUrl, width, height } = value, cached = _journalPhotoValidationCache.get(value);
+  if (cached && cached.dataUrl === dataUrl && cached.width === width && cached.height === height) return { ...cached };
+  const info = journalPhotoInfo(dataUrl);
+  if (width !== info.width || height !== info.height) _journalPhotoFailure();
+  const validated = Object.freeze({ dataUrl, width: info.width, height: info.height });
+  _journalPhotoValidationCache.set(value, validated);
+  return { ...validated };
+}
+
+/** Une date civile est vérifiée directement, sans conversion UTC ni correction du calendrier. */
+function isValidJournalDate(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split("-").map(Number);
+  if (year < 1 || month < 1 || month > 12 || day < 1) return false;
+  const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  return day <= [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1];
+}
+
+/** Date proposée à la rédaction : celle de l’appareil, pas celle du fuseau UTC. */
+function journalLocalDate(now = new Date()) {
+  const date = now instanceof Date ? now : new Date(now);
+  if (!Number.isFinite(date.getTime())) throw new Error("Date du journal invalide.");
+  const value = `${String(date.getFullYear()).padStart(4, "0")}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  if (!isValidJournalDate(value)) throw new Error("Date du journal invalide.");
+  return value;
+}
+
+function _journalTimestampIsValid(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value) || !isValidJournalDate(value.slice(0, 10))) return false;
+  const time = new Date(value);
+  return Number.isFinite(time.getTime()) && time.toISOString() === (value.length === 20 ? value.replace("Z", ".000Z") : value);
+}
+
+function _journalNow(now) {
+  const date = now instanceof Date ? now : new Date(now);
+  if (!Number.isFinite(date.getTime())) throw new Error("Horodatage du journal invalide.");
+  const value = date.toISOString();
+  if (!_journalTimestampIsValid(value)) throw new Error("Horodatage du journal invalide.");
+  return value;
+}
+
+/** Refuse les entrées incomplètes, les doublons et les textes excessifs sans les tronquer. */
+function validateJournalEntries(character) {
+  const entries = character?.journalEntries;
+  if (!Array.isArray(entries) || entries.length > _journalEntryLimit) throw new Error("Liste du journal invalide.");
+  const ids = new Set();
+  let photoBytes = 0;
+  for (const entry of entries) {
+    if (!_journalPlain(entry) || typeof entry.id !== "string" || !/^[a-zA-Z0-9][a-zA-Z0-9_.:-]{0,119}$/.test(entry.id)) throw new Error("Identifiant de page du journal invalide.");
+    if (ids.has(entry.id)) throw new Error("Deux pages du journal ont le même identifiant.");
+    ids.add(entry.id);
+    const legacy = entry.id === JOURNAL_LEGACY_ID;
+    if (!isValidJournalDate(entry.date) && !(legacy && entry.date === "")) throw new Error("Date de page du journal invalide.");
+    if (typeof entry.title !== "string" || entry.title.length > JOURNAL_TITLE_LIMIT) throw new Error(`Le titre du journal est limité à ${JOURNAL_TITLE_LIMIT} caractères.`);
+    const bodyLimit = legacy ? JOURNAL_LEGACY_BODY_LIMIT : JOURNAL_BODY_LIMIT;
+    if (typeof entry.body !== "string" || entry.body.length > bodyLimit) throw new Error(`Le texte du journal est limité à ${bodyLimit} caractères.`);
+    const photo = validateJournalPhoto(entry.image);
+    if (photo) {
+      photoBytes += _journalEncodedPhotoBytes(photo.dataUrl);
+      if (photoBytes > JOURNAL_PHOTOS_MAX_BYTES) throw new Error("Les photos de ce personnage dépassent 12 Mio. Retire ou remplace une photo par une version plus légère ; rien n’a été enregistré.");
+    }
+    if (!legacy && !entry.body.trim() && !photo) throw new Error("Écris un texte ou ajoute une photo pour cette page du journal.");
+    for (const key of ["createdAt", "updatedAt"]) {
+      if (!_journalTimestampIsValid(entry[key]) && !(legacy && entry[key] === "")) throw new Error("Horodatage de page du journal invalide.");
+    }
+  }
+  return true;
+}
+
+/** Garde un suffixe de 30 versions au plus et de 12 Mio de photos cumulées.
+ * Les photos de ces versions ont déjà été validées : aucun décodage ni reclonage ici.
+ * Chaque copie compte, même identique. Une dernière version héritée hors budget reste seule.
+ */
+function retainJournalSnapshots(snapshots) {
+  if (!Array.isArray(snapshots)) throw new Error("Historique du journal invalide.");
+  let start = snapshots.length, total = 0;
+  for (let index = snapshots.length - 1; index >= Math.max(0, snapshots.length - 30); index--) {
+    let bytes = 0;
+    for (const entry of snapshots[index]?.character?.journalEntries || []) {
+      const dataUrl = entry?.image?.dataUrl;
+      if (typeof dataUrl === "string" && dataUrl.startsWith(_journalPhotoPrefix)) bytes += _journalEncodedPhotoBytes(dataUrl);
+    }
+    if (start < snapshots.length && total + bytes > JOURNAL_PHOTOS_MAX_BYTES) break;
+    total += bytes;
+    start = index;
+    if (total > JOURNAL_PHOTOS_MAX_BYTES) break;
+  }
+  return snapshots.slice(start);
+}
+
+/** Le tableau présent, même vide, fait autorité : une ancienne note supprimée ne réapparaît pas. */
+function journalEntriesOf(character) {
+  if (!_journalPlain(character)) throw new Error("Personnage du journal invalide.");
+  let entries;
+  if (_journalOwn(character, "journalEntries")) entries = character.journalEntries;
+  else {
+    if (character.notes !== undefined && typeof character.notes !== "string") throw new Error("Anciennes notes du journal invalides.");
+    entries = character.notes?.length ? [{
+      id: JOURNAL_LEGACY_ID,
+      date: "",
+      title: "Notes de campagne",
+      body: character.notes,
+      createdAt: _journalTimestampIsValid(character.createdAt) ? character.createdAt : "",
+      updatedAt: _journalTimestampIsValid(character.updatedAt) ? character.updatedAt : "",
+    }] : [];
+  }
+  validateJournalEntries({ journalEntries: entries });
+  return _journalClone(entries).sort((a, b) => {
+    if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+    if (!a.createdAt !== !b.createdAt) return a.createdAt ? -1 : 1;
+    const timeDifference = Date.parse(b.createdAt) - Date.parse(a.createdAt);
+    if (Number.isFinite(timeDifference) && timeDifference) return timeDifference;
+    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+  });
+}
+
+const _journalSearchText = (text) => text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().replaceAll("œ", "oe").replaceAll("æ", "ae");
+function _journalSearchExcerpt(text, match) {
+  let offset = 0, normalizedOffset = 0;
+  // Retrouve la position originale après suppression des accents ou expansion des ligatures.
+  for (const character of text) {
+    const length = _journalSearchText(character).length;
+    if (normalizedOffset + length > match) break;
+    normalizedOffset += length;
+    offset += character.length;
+  }
+  let start = Math.max(0, offset - 48);
+  const firstSpace = text.indexOf(" ", start);
+  if (start > 0 && firstSpace >= start && firstSpace < offset) start = firstSpace + 1;
+  let end = Math.min(text.length, start + 180);
+  const lastSpace = text.lastIndexOf(" ", end);
+  if (end < text.length && lastSpace > offset) end = lastSpace;
+  return `${start ? "… " : ""}${text.slice(start, end)}${end < text.length ? " …" : ""}`;
+}
+
+/** Recherche littérale AND dans le titre et le texte, sans lire les photos ni les métadonnées.
+ * Les entrées reçues sont déjà validées et triées ; leurs identités et leur ordre restent intacts.
+ * L’extrait est du texte brut : l’interface doit l’échapper comme les autres textes du joueur.
+ */
+function searchJournalEntries(entries, query) {
+  const words = [...new Set(_journalSearchText(String(query ?? "")).trim().split(/\s+/u).filter(Boolean))];
+  const results = [];
+  for (const entry of entries) {
+    const text = entry.body.replace(/\s+/gu, " ").trim(), body = _journalSearchText(text), title = _journalSearchText(entry.title);
+    if (!words.every((word) => title.includes(word) || body.includes(word))) continue;
+    let first = Infinity;
+    for (const word of words) {
+      const found = body.indexOf(word);
+      if (found >= 0 && found < first) first = found;
+    }
+    results.push({ entry, excerpt: _journalSearchExcerpt(text, Number.isFinite(first) ? first : 0) });
+  }
+  return results;
+}
+
+/** Ajoute une page ou modifie ses champs fournis, en conservant son identité et sa création. */
+function upsertJournalEntry(character, input, now = new Date()) {
+  if (!_journalPlain(input)) throw new Error("Page du journal invalide.");
+  const entries = journalEntriesOf(character), timestamp = _journalNow(now);
+  let id = input.id;
+  if (id === undefined) {
+    do { id = globalThis.crypto?.randomUUID?.() || `journal-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`; }
+    while (entries.some((entry) => entry.id === id));
+  }
+  const previous = entries.find((entry) => entry.id === id);
+  if (id === JOURNAL_LEGACY_ID && !previous) throw new Error("Cette ancienne page du journal n’existe plus.");
+  const entry = {
+    ...(previous || {}),
+    id,
+    date: _journalOwn(input, "date") ? input.date : previous?.date,
+    title: input.title === undefined ? previous?.title ?? "" : input.title,
+    body: _journalOwn(input, "body") ? input.body : previous?.body ?? "",
+    createdAt: previous ? previous.createdAt : timestamp,
+    updatedAt: timestamp,
+  };
+  if (_journalOwn(input, "image") && input.image !== undefined) entry.image = validateJournalPhoto(input.image);
+  const nextEntries = previous ? entries.map((value) => value.id === id ? entry : value) : [...entries, entry];
+  validateJournalEntries({ journalEntries: nextEntries });
+  const next = _journalClone(character);
+  next.journalEntries = nextEntries;
+  next.updatedAt = timestamp;
+  return next;
+}
+
+/** Supprimer une page matérialise aussi la migration des anciennes notes. */
+function removeJournalEntry(character, id, now = new Date()) {
+  const entries = journalEntriesOf(character);
+  if (typeof id !== "string" || !entries.some((entry) => entry.id === id)) throw new Error("Page du journal introuvable.");
+  const next = _journalClone(character);
+  next.journalEntries = entries.filter((entry) => entry.id !== id);
+  next.updatedAt = _journalNow(now);
+  return next;
+}
+
+
+// Module : journal-photos
+
+function journalPhotoFileSignature(header, mime) {
+  if (mime === "image/jpeg") return [255, 216, 255].every((byte, index) => header[index] === byte);
+  if (mime === "image/png") return [137, 80, 78, 71, 13, 10, 26, 10].every((byte, index) => header[index] === byte);
+  return String.fromCharCode(...header.slice(0, 4)) === "RIFF" && String.fromCharCode(...header.slice(8, 12)) === "WEBP";
+}
+
+function journalPhotoEncode(canvas, quality) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => blob?.type === "image/jpeg" && blob.size
+      ? resolve(blob)
+      : reject(new Error("La photo n’a pas pu être préparée. Essaie une autre image JPEG ou PNG.")), "image/jpeg", quality);
+  });
+}
+
+function journalPhotoReadDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reader.onabort = () => reject(new Error("La photo n’a pas pu être lue. Essaie de la sélectionner à nouveau."));
+    reader.readAsDataURL(blob);
+  });
+}
+
+/** Prépare une photo entière, sans OCR ni réseau, et efface ses métadonnées EXIF. */
+async function loadJournalPhoto(file) {
+  if (!file || !file.size) throw new Error("Choisis une photo non vide.");
+  if (file.size > 25 * 1024 * 1024) throw new Error("Cette photo dépasse 25 Mo. Choisis une version plus petite.");
+  const mime = String(file.type || "").toLowerCase();
+  if (!["image/jpeg", "image/png", "image/webp"].includes(mime))
+    throw new Error("Choisis une photo JPEG, PNG ou WebP. Pour une photo HEIC, exporte-la d’abord en JPEG.");
+  const header = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+  if (!journalPhotoFileSignature(header, mime))
+    throw new Error("Le fichier ne correspond pas au format annoncé. Essaie une copie JPEG, PNG ou WebP.");
+
+  const url = URL.createObjectURL(file), picture = new Image();
+  let canvas;
+  try {
+    picture.src = url;
+    try { await picture.decode(); }
+    catch { throw new Error("Cette photo n’a pas pu être ouverte. Essaie une copie JPEG ou PNG."); }
+    // Le navigateur applique l’orientation EXIF avant de fournir ces dimensions.
+    const width = picture.naturalWidth, height = picture.naturalHeight;
+    if (!width || !height || width * height > 50000000)
+      throw new Error("La photo dépasse 50 mégapixels ou ne contient pas d’image lisible.");
+    canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Ton navigateur ne peut pas préparer cette photo.");
+    let scale = Math.min(1, JOURNAL_PHOTO_MAX_SIDE / Math.max(width, height));
+    for (let attempt = 0; attempt < 6; attempt++) {
+      canvas.width = Math.max(1, Math.round(width * scale));
+      canvas.height = Math.max(1, Math.round(height * scale));
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = "high";
+      context.fillStyle = "#fff";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(picture, 0, 0, canvas.width, canvas.height);
+      let blob;
+      // Conserve la résolution pour l’écriture ; baisse d’abord la qualité JPEG.
+      for (const quality of [0.94, 0.90, 0.84, 0.78, 0.70, 0.62]) {
+        blob = await journalPhotoEncode(canvas, quality);
+        if (blob.size <= JOURNAL_PHOTO_MAX_BYTES) {
+          const photo = { dataUrl: await journalPhotoReadDataUrl(blob), width: canvas.width, height: canvas.height };
+          return validateJournalPhoto(photo);
+        }
+      }
+      // Les photos très bruitées peuvent encore dépasser le budget à 2560 px.
+      scale *= Math.min(0.9, Math.max(0.5, Math.sqrt(JOURNAL_PHOTO_MAX_BYTES / blob.size) * 0.95));
+    }
+    throw new Error("Cette photo reste trop volumineuse. Essaie une copie plus légère.");
+  } finally {
+    URL.revokeObjectURL(url);
+    picture.removeAttribute("src");
+    if (canvas) canvas.width = canvas.height = 0;
+  }
+}
+
+
 // Module : engine
 /** Moteur de règles D&D 5e (2014) : calculs purs, sans accès au DOM ni au stockage.
  * Modèle de personnage version 2 : multiclassage, sous-races, sous-classes, dons, choix génériques (picks).
@@ -11137,6 +11540,7 @@ function createCharacter(classId = "fighter") {
     languages: "",
     biography: "",
     notes: "",
+    journalEntries: [],
     details: { age: "", height: "", weight: "", eyes: "", skin: "", hair: "", traits: "", ideals: "", bonds: "", flaws: "" },
     xp: 0,
     levels: [defaultLevel(classId, 1)],
@@ -11174,10 +11578,10 @@ function createCharacter(classId = "fighter") {
 }
 
 /* -------------------------------------------------------------- migration */
-/** Convertit une fiche version 1 (mono-classe) en version 2. Ne modifie pas l’objet reçu. */
+/** Met à niveau les fiches et leur journal. Ne modifie pas l’objet reçu. */
 function migrateCharacter(raw) {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return raw;
-  if (raw.schemaVersion === SCHEMA_VERSION) return raw;
+  if (raw.schemaVersion === SCHEMA_VERSION) return Object.hasOwn(raw, "journalEntries") ? raw : { ...clone(raw), journalEntries: journalEntriesOf(raw) };
   if (raw.schemaVersion !== 1) return raw;
   const c = clone(raw),
     classId = c.classId in CLASSES ? c.classId : "fighter";
@@ -11241,6 +11645,7 @@ function migrateCharacter(raw) {
   }
   c.state = s;
   c.schemaVersion = SCHEMA_VERSION;
+  c.journalEntries = journalEntriesOf(c);
   return c;
 }
 
@@ -11714,7 +12119,7 @@ function spellLimits(c, classId = spellcasters(c)[0]?.classId, acc = collect(c))
 function catalogue(c) {
   return [...SPELLS, ...c.custom.spells];
 }
-const spellById = (c, id) => catalogue(c).find((s) => s.id === id);
+const spellById = (c, id) => SPELL_BY_ID.get(id) || c.custom.spells.find((s) => s.id === id);
 /** Sorts toujours préparés (domaine, serment, cercle de la Terre), avec la classe concernée. */
 function alwaysPrepared(c) {
   const out = [];
@@ -11799,17 +12204,20 @@ function innateSpells(c, acc = collect(c)) {
 
 /** Acquisitions indépendantes : les listes historiques restent lisibles et sont converties à la demande. */
 function spellAcquisitions(c, spellId = null) {
-  const out = [], explicit = c.spells.acquisitions || [], add = (entry) => {
-    if ((!spellId || entry.spellId === spellId) && !entry.endedAtLevel && !out.some((old) => old.id === entry.id)) out.push(entry);
+  const out = [], seen = new Set(), explicit = c.spells.acquisitions || [], wanted = (id) => !spellId || id === spellId, add = (entry) => {
+    if (entry.endedAtLevel || seen.has(entry.id)) return;
+    seen.add(entry.id);
+    out.push(entry);
   };
-  for (const entry of explicit) add({ ...entry, source: CLASSES[entry.classId]?.name || entry.sourceKey });
+  for (const entry of explicit) if (wanted(entry.spellId)) add({ ...entry, source: CLASSES[entry.classId]?.name || entry.sourceKey });
   for (const id of _uniq([...c.spells.known, ...c.spells.prepared])) {
+    if (!wanted(id)) continue;
     const classId = spellClassOf(c, id);
     if (explicit.some((entry) => entry.spellId === id && entry.classId === classId)) continue;
     add({ id: `class:${classId}:${id}`, spellId: id, classId, sourceKey: `class|${classId}`, ability: CLASSES[classId]?.ability || spellcasters(c).find((entry) => entry.classId === classId)?.ability,
       known: c.spells.known.includes(id), prepared: c.spells.prepared.includes(id), acquiredLevel: levelOf(c), referenceId: spellById(c, id)?.referenceId || null, revision: spellById(c, id)?.revision || null, source: CLASSES[classId]?.name || classId });
   }
-  for (const entry of alwaysPrepared(c)) add({ id: `always:${entry.classId}:${entry.id}`, spellId: entry.id, classId: entry.classId, sourceKey: `sub|${entry.classId}`, ability: CLASSES[entry.classId]?.ability, known: true, prepared: true, always: true, acquiredLevel: levelOf(c), referenceId: spellById(c, entry.id)?.referenceId || null, revision: spellById(c, entry.id)?.revision || null, source: subclassOf(c, entry.classId)?.name || CLASSES[entry.classId]?.name });
+  for (const entry of alwaysPrepared(c)) if (wanted(entry.id)) add({ id: `always:${entry.classId}:${entry.id}`, spellId: entry.id, classId: entry.classId, sourceKey: `sub|${entry.classId}`, ability: CLASSES[entry.classId]?.ability, known: true, prepared: true, always: true, acquiredLevel: levelOf(c), referenceId: spellById(c, entry.id)?.referenceId || null, revision: spellById(c, entry.id)?.revision || null, source: subclassOf(c, entry.classId)?.name || CLASSES[entry.classId]?.name });
   return out;
 }
 function setSpellAcquisition(c, spellId, classId, { known = true, prepared = false, acquiredLevel = levelOf(c), secret = false } = {}) {
@@ -13050,10 +13458,12 @@ function characterIssues(c, { strict = false } = {}) {
   for (const sc of spellcasters(c)) {
     const limits = spellLimits(c, sc.classId),
       mine = (ids) => ids.filter((id) => spellAcquisitions(c, id).some((entry) => entry.classId === sc.classId && (ids === c.spells.prepared ? entry.prepared : entry.known))),
-      known = list.filter((s) => mine(c.spells.known).includes(s.id)),
+      mineKnown = mine(c.spells.known),
+      minePrepared = mine(c.spells.prepared),
+      known = list.filter((s) => mineKnown.includes(s.id)),
       cantrips = known.filter((s) => s.level === 0 && !spellAcquisitions(c, s.id).some((entry) => entry.classId === sc.classId && entry.secret)),
       leveled = known.filter((s) => s.level > 0 || spellAcquisitions(c, s.id).some((entry) => entry.classId === sc.classId && entry.secret)),
-      prepared = list.filter((s) => mine(c.spells.prepared).includes(s.id) && !always.includes(s.id));
+      prepared = list.filter((s) => minePrepared.includes(s.id) && !always.includes(s.id));
     const label = spellcasters(c).length > 1 ? `${sc.label} : ` : "";
     if (cantrips.length !== limits.cantrips) warnings.push(`${label}sorts mineurs ${cantrips.length}/${limits.cantrips}.`);
     if (limits.mode === "known" && leveled.length !== limits.known) warnings.push(`${label}sorts connus ${leveled.length}/${limits.known}.`);
@@ -13509,7 +13919,10 @@ function validateImport(input) {
   function safeTree(v, depth = 0, path = []) {
     if (depth > 24) throw new Error("Structure trop profonde.");
     const isPortraitData = path.length === 2 && path[0] === "portrait" && path[1] === "dataUrl" && portrait?.kind === "custom" && v === portrait.dataUrl;
-    if (typeof v === "string" && v.length > 50000 && !isPortraitData) throw new Error("Texte trop long.");
+    const isJournalPhotoData = typeof v === "string" && v.length > 50000 && path.length === 4 && path[0] === "journalEntries" &&
+      Number.isInteger(path[1]) && Array.isArray(input.journalEntries) && path[2] === "image" && path[3] === "dataUrl" &&
+      validateJournalPhoto(input.journalEntries[path[1]]?.image)?.dataUrl === v;
+    if (typeof v === "string" && v.length > 50000 && !isPortraitData && !isJournalPhotoData) throw new Error("Texte trop long.");
     if (Array.isArray(v)) {
       if (v.length > 1500) throw new Error("Tableau trop grand.");
       v.forEach((x, i) => safeTree(x, depth + 1, [...path, i]));
@@ -13557,6 +13970,7 @@ function validateImport(input) {
   ])
     if (!Array.isArray(arr)) errors.push(`Liste invalide : ${label}.`);
   if (errors.length) throw new Error(_uniq(errors).join(" "));
+  validateJournalEntries(c);
   for (const [k, v] of Object.entries(c.picks))
     if (typeof k !== "string" || !Array.isArray(v) || v.some((x) => typeof x !== "string")) throw new Error("Choix invalides.");
   for (const [k, v] of Object.entries(c.subclasses))
@@ -13889,11 +14303,11 @@ function spendResources(c, costs) {
   for (const [id, amount] of combined) next.state.resourcesUsed[id] = (next.state.resourcesUsed[id] || 0) + amount;
   return next;
 }
-function recoverResourceEvent(c, { kind, amount = null, resourceId = null, days = 0 } = {}) {
+function _recoverResourceEvent(c, { kind, amount = null, resourceId = null, days = 0 } = {}, stateOnly = false) {
   if (!["dawn", "dusk", "initiative", "spell", "days", "manual"].includes(kind)) throw new Error("Déclencheur de récupération inconnu.");
   if (amount !== null && (!Number.isInteger(amount) || amount < 0)) throw new Error("Récupération invalide.");
   if (kind === "days" && (!Number.isInteger(days) || days < 1)) throw new Error("Délai en jours invalide.");
-  const next = clone(c);
+  const next = stateOnly ? { ...c, state: clone(c.state) } : clone(c);
   next.state.resourceEvents ||= [];
   next.state.resourceCooldowns ||= {};
   if (kind === "days") for (const [id, remaining] of Object.entries(next.state.resourceCooldowns)) {
@@ -13914,10 +14328,42 @@ function recoverResourceEvent(c, { kind, amount = null, resourceId = null, days 
   next.state.resourceEvents.push({ kind, amount, resourceId, days });
   return next;
 }
+function recoverResourceEvent(c, event = {}) {
+  return _recoverResourceEvent(c, event);
+}
 function resolveDivineIntervention(c, success) {
   const next = spendResources(c, [{ id: "divine-intervention", amount: 1 }]);
   if (success) { next.state.resourceCooldowns ||= {}; next.state.resourceCooldowns["divine-intervention"] = 7; }
   return next;
+}
+/** Simule les événements utiles sans modifier la fiche ni son journal d’événements. */
+function resourceRecoveryOptions(c, { days = 1 } = {}) {
+  if (!Number.isInteger(days) || days < 1) throw new Error("Délai en jours invalide.");
+  const before = resources(c), candidates = new Set();
+  for (const resource of before) {
+    if (c.state.resourceCooldowns?.[resource.id] > 0) candidates.add("days");
+    else if (resource.remaining !== null && resource.remaining < resource.max && ["dawn", "dusk", "initiative", "spell"].includes(resource.reset)) candidates.add(resource.reset);
+  }
+  if ([["bard", "inspiration"], ["monk", "ki"]].some(([classId, id]) => classLevel(c, classId) >= 20 && before.some((resource) => resource.id === id && resource.remaining === 0))) candidates.add("initiative");
+  return ["dawn", "dusk", "initiative", "spell", "days"].filter((kind) => candidates.has(kind)).flatMap((kind) => {
+    const event = kind === "days" ? { kind, days } : { kind },
+      next = _recoverResourceEvent(c, event, true),
+      after = new Map(resources(next).map((resource) => [resource.id, resource]));
+    const gains = before.flatMap((resource) => {
+      const available = after.get(resource.id)?.remaining;
+      return resource.remaining !== null && available > resource.remaining
+        ? [{ id: resource.id, name: resource.name, amount: available - resource.remaining, before: resource.remaining, after: available, max: resource.max }]
+        : [];
+    });
+    const cooldowns = before.flatMap((resource) => {
+      const previous = c.state.resourceCooldowns?.[resource.id] || 0,
+        remaining = next.state.resourceCooldowns?.[resource.id] || 0;
+      return previous > remaining
+        ? [{ id: resource.id, name: resource.name, before: previous, after: remaining }]
+        : [];
+    });
+    return gains.length || cooldowns.length ? [{ kind, event, gains, cooldowns }] : [];
+  });
 }
 function resourceConversionOptions(c) {
   const sorcery = resources(c).find((entry) => entry.id === "sorcery");
@@ -14179,6 +14625,29 @@ function _reconcileBackgroundKit(before, next) {
   if (removed.length) next.background.kitArchive = [...(next.background.kitArchive || []), ...removed];
   applyInventoryEquipment(next);
   return next;
+}
+
+
+// Module : carry-summary
+/** Même périmètre pour le sac et la fiche ; aucune pénalité de déplacement. */
+function carriedWeightSummary(character, derived) {
+  const carried = character.inventory.filter((item) => !item.instance || item.instance.carried && item.instance.ownerId === character.id);
+  const weight = carried.reduce((sum, item) => sum + item.qty * item.weight, 0);
+  const hasUnknownWeight = carried.some((item) => item.qty > 0 && item.weightUnknown);
+  const equipment = derived.wildShape?.equipment || null;
+  // Fusionner ou déposer l’équipement ne réécrit pas les objets de l’inventaire.
+  // Leur somme ne décrit donc plus une charge effectivement portée par la forme.
+  const comparable = !equipment || equipment === "worn";
+  const capacity = derived.carry;
+  return {
+    weight,
+    capacity,
+    hasUnknownWeight,
+    equipment,
+    comparable,
+    overCapacity: comparable && weight > capacity,
+    percent: comparable && capacity > 0 ? Math.min(100, Math.max(0, weight / capacity * 100)) : 0,
+  };
 }
 
 
@@ -14849,6 +15318,9 @@ const iconPaths={
  undo:'<path d="M3 10h12a6 6 0 0 1 0 12M3 10l5-5m-5 5 5 5"/>',
  compass:'<circle cx="12" cy="12" r="9"/><path d="m16 8-2 6-6 2 2-6Z"/>',eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
  flag:'<path d="M5 22V3m0 0c5-5 9 5 15 0v11c-6 5-10-5-15 0"/>',copy:'<rect x="8" y="8" width="13" height="13" rx="2"/><path d="M5 16H3V3h13v2"/>',
+ camera:'<path d="M9 4h6l2 3h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h3Z"/><circle cx="12" cy="13" r="4"/>',
+ image:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>',
+ replace:'<path d="M20 7v5h-5M4 17v-5h5M6 8a7 7 0 0 1 12-2l2 3M4 15l2 3a7 7 0 0 0 12-2"/>',
  print:'<path d="M6 8V2h12v6M6 17H3V8h18v9h-3M6 14h12v8H6Z"/>'
 };
 function icon(name,size=22){return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${iconPaths[name]||iconPaths.sparkles}</svg>`;}
@@ -15059,8 +15531,8 @@ const dice3DInternals = (() => {
     return [(p[0] + 1) * width / 2, (1 - p[1]) * height / 2, p[2]];
   };
 
-  function palette(die) {
-    if (!die.kept) return { base: [174, 164, 147], ink: "#51483d", edge: [159, 147, 128] };
+  function palette(die, muted = false) {
+    if (muted) return { base: [174, 164, 147], ink: "#51483d", edge: [159, 147, 128] };
     if (die.color === "terracotta" || die.color === "red") return { base: [167, 76, 56], ink: "#fff2d8", edge: [150, 65, 47] };
     return { base: [240, 221, 189], ink: "#51351f", edge: [222, 199, 165] };
   }
@@ -15151,14 +15623,23 @@ const dice3DInternals = (() => {
     const vertexShader = shader(gl.VERTEX_SHADER, `
       attribute vec3 position; attribute vec3 normal; attribute vec2 uv;
       uniform mat4 camera; uniform mat4 model;
-      varying vec3 worldNormal; varying vec3 worldPosition; varying vec2 textureUV;
+      varying vec3 worldNormal; varying vec3 worldPosition; varying vec3 localPosition; varying vec2 textureUV;
       void main(){ vec4 world=model*vec4(position,1.0); worldPosition=world.xyz;
-        worldNormal=mat3(model)*normal; textureUV=uv; gl_Position=camera*world; }
+        worldNormal=mat3(model)*normal; localPosition=position; textureUV=uv; gl_Position=camera*world; }
     `);
     const fragmentShader = shader(gl.FRAGMENT_SHADER, `
       precision mediump float;
-      uniform sampler2D atlas; uniform float shadow; uniform float opacity;
-      varying vec3 worldNormal; varying vec3 worldPosition; varying vec2 textureUV;
+      uniform sampler2D atlas; uniform float shadow; uniform float opacity; uniform float dissolve; uniform float muted;
+      varying vec3 worldNormal; varying vec3 worldPosition; varying vec3 localPosition; varying vec2 textureUV;
+      // Un petit multiplicateur conserve les fractions sur les GPU mediump 16 bits.
+      float grain(vec3 p){ return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*31.7); }
+      float noise(vec3 p){
+        vec3 cell=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);
+        return mix(mix(mix(grain(cell),grain(cell+vec3(1,0,0)),f.x),
+                       mix(grain(cell+vec3(0,1,0)),grain(cell+vec3(1,1,0)),f.x),f.y),
+                   mix(mix(grain(cell+vec3(0,0,1)),grain(cell+vec3(1,0,1)),f.x),
+                       mix(grain(cell+vec3(0,1,1)),grain(cell+vec3(1,1,1)),f.x),f.y),f.z);
+      }
       void main(){
         if(shadow>0.5){ vec2 p=(textureUV-0.5)*2.0; float d=dot(p,p);
           gl_FragColor=vec4(0.13,0.09,0.05,exp(-d*3.0)*0.52*opacity*(1.0-smoothstep(0.6,1.0,d))); }
@@ -15166,6 +15647,14 @@ const dice3DInternals = (() => {
           float diffuse=max(dot(n,light),0.0); vec3 eye=normalize(vec3(0.0,7.8,10.0)-worldPosition);
           float shine=pow(max(dot(n,normalize(light+eye)),0.0),38.0)*0.17;
           vec3 color=texture2D(atlas,textureUV).rgb*(0.57+0.43*diffuse)+vec3(shine);
+          if(muted>0.5){ float grey=dot(color,vec3(0.299,0.587,0.114)); color=mix(color,vec3(grey)*0.78,0.85); }
+          if(dissolve>0.0){
+            float field=(localPosition.y+1.0)*0.3+noise(localPosition*7.0)*0.3+noise(localPosition*19.0)*0.1;
+            float edge=field-(dissolve*1.16-0.08);
+            if(edge<0.0) discard;
+            color=mix(vec3(0.24,0.10,0.04),color,smoothstep(0.035,0.10,edge));
+            color=mix(color,vec3(1.0,0.46,0.10),1.0-smoothstep(0.0,0.035,edge));
+          }
           gl_FragColor=vec4(color,1.0); }
       }
     `);
@@ -15173,7 +15662,7 @@ const dice3DInternals = (() => {
     gl.deleteShader(vertexShader); gl.deleteShader(fragmentShader);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) { gl.deleteProgram(program); throw new Error("Rendu des dés indisponible."); }
     gl.useProgram(program);
-    const locations = Object.fromEntries(["camera", "model", "atlas", "shadow", "opacity"].map((name) => [name, gl.getUniformLocation(program, name)]));
+    const locations = Object.fromEntries(["camera", "model", "atlas", "shadow", "opacity", "dissolve", "muted"].map((name) => [name, gl.getUniformLocation(program, name)]));
     const attributes = Object.fromEntries(["position", "normal", "uv"].map((name) => [name, gl.getAttribLocation(program, name)]));
     gl.uniform1i(locations.atlas, 0); gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND);
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
@@ -15188,7 +15677,7 @@ const dice3DInternals = (() => {
       }
     }
     function resource(item) {
-      const key = [item.die.sides, item.die.color, item.die.kept, item.die.percentile].join(":");
+      const key = [item.die.sides, item.die.color, item.die.percentile].join(":");
       if (resources.has(key)) return resources.get(key);
       const atlas = makeAtlas(item.mesh, item.die), vertices = meshVertices(item.mesh, atlas), texture = gl.createTexture();
       gl.bindTexture(gl.TEXTURE_2D, texture); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
@@ -15203,13 +15692,16 @@ const dice3DInternals = (() => {
         gl.viewport(0, 0, width, height); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); gl.useProgram(program);
         gl.uniformMatrix4fv(locations.camera, false, camera); gl.uniform1f(locations.shadow, 1); gl.depthMask(false); bind(ground);
         for (const item of items) {
-          gl.uniform1f(locations.opacity, 1 / (1 + item.lift * 0.55));
+          if (item.dissolve === 1) continue;
+          gl.uniform1f(locations.opacity, (1 - item.dissolve) / (1 + item.lift * 0.55));
           gl.uniformMatrix4fv(locations.model, false, modelMatrix([0, 0, 0, 1], [item.position[0], 0.005, item.position[2]], item.scale * (1.38 + item.lift * 0.15)));
           gl.drawArrays(gl.TRIANGLES, 0, 6);
         }
         gl.depthMask(true); gl.uniform1f(locations.shadow, 0); gl.uniform1f(locations.opacity, 1);
         for (const item of items) {
+          if (item.dissolve === 1) continue;
           const data = resource(item); bind(data.buffer); gl.bindTexture(gl.TEXTURE_2D, data.texture);
+          gl.uniform1f(locations.dissolve, item.dissolve); gl.uniform1f(locations.muted, item.muted ? 1 : 0);
           gl.uniformMatrix4fv(locations.model, false, modelMatrix(item.rotation, item.position, item.scale)); gl.drawArrays(gl.TRIANGLES, 0, data.count);
         }
       },
@@ -15225,9 +15717,10 @@ const dice3DInternals = (() => {
     ctx.clearRect(0, 0, width, height);
     const faces = [], light = unit([-3, 7, 5]);
     for (const item of items) {
+      if (item.dissolve === 1) continue;
       const ground = project([item.position[0], 0, item.position[2]], camera, width, height);
       const edge = project([item.position[0] + item.scale * 1.1, 0, item.position[2]], camera, width, height), radius = Math.max(1, Math.abs(edge[0] - ground[0]));
-      ctx.save(); ctx.translate(ground[0], ground[1]); ctx.scale(1, 0.48);
+      ctx.save(); ctx.globalAlpha = 1 - item.dissolve; ctx.translate(ground[0], ground[1]); ctx.scale(1, 0.48);
       const shadow = ctx.createRadialGradient(0, 0, 0, 0, 0, radius); shadow.addColorStop(0, `rgba(40,28,16,${0.28 / (1 + item.lift)})`); shadow.addColorStop(1, "rgba(40,28,16,0)");
       ctx.fillStyle = shadow; ctx.fillRect(-radius, -radius, radius * 2, radius * 2); ctx.restore();
       for (const face of item.mesh.faces) {
@@ -15240,8 +15733,8 @@ const dice3DInternals = (() => {
     }
     faces.sort((a, b) => b.depth - a.depth);
     for (const { item, face, normal, points, transform } of faces) {
-      const colors = palette(item.die), shade = 0.57 + 0.43 * Math.max(0, dot(normal, light));
-      ctx.save(); ctx.beginPath(); points.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath();
+      const colors = palette(item.die, item.muted), shade = 0.57 + 0.43 * Math.max(0, dot(normal, light));
+      ctx.save(); ctx.globalAlpha = 1 - item.dissolve; ctx.beginPath(); points.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath();
       ctx.fillStyle = `rgb(${colors.base.map((v) => Math.round(v * shade)).join(",")})`; ctx.fill();
       ctx.strokeStyle = `rgba(255,244,218,${item.die.color === "terracotta" ? 0.13 : 0.5})`; ctx.lineWidth = Math.max(1, width / 350); ctx.lineJoin = "round"; ctx.stroke(); ctx.clip();
       const center = project(transform(face.center), camera, width, height), pu = project(transform(add(face.center, mul(face.u, face.radius))), camera, width, height), pv = project(transform(add(face.center, mul(face.v, face.radius))), camera, width, height);
@@ -15262,12 +15755,12 @@ const dice3DInternals = (() => {
   function create(canvas, options = {}) {
     if (!canvas || typeof canvas.getContext !== "function") throw new TypeError("Un canvas est attendu pour les dés.");
     let gpu = null, context = null, fallbackCanvas = null, disposed = false, frame = 0, finish = null, start = 0, rolling = false, items = [], camera;
-    let mode = "webgl", width = 0, height = 0;
+    let mode = "webgl", width = 0, height = 0, phase = "ready", motionProgress = 1, revealProgress = 0, centerProgress = 0, survivor = null;
     const previousVisibility = canvas.style.visibility, parent = canvas.parentNode, previousParentPosition = parent?.style?.position;
     let changedParentPosition = false;
     const media = typeof matchMedia === "function" ? matchMedia("(prefers-reduced-motion: reduce)") : null;
     const reducedMotion = () => options.reducedMotion === true || media?.matches === true;
-    const setState = () => { canvas.dataset.renderer = mode; canvas.dataset.rolling = String(rolling); };
+    const setState = () => { canvas.dataset.renderer = mode; canvas.dataset.rolling = String(rolling); canvas.dataset.dicePhase = phase; };
     function fallback() {
       if (disposed || context) return;
       mode = "fallback";
@@ -15284,8 +15777,8 @@ const dice3DInternals = (() => {
     try { gpu = options.forceFallback ? null : webGL(canvas); } catch {}
     if (!gpu) fallback();
     setState();
-    function settle() {
-      if (frame) cancelAnimationFrame(frame); frame = 0; rolling = false; setState();
+    function settle(nextPhase = "result") {
+      if (frame) cancelAnimationFrame(frame); frame = 0; rolling = false; phase = nextPhase; setState();
       const resolve = finish; finish = null; resolve?.();
     }
     function measure() {
@@ -15304,14 +15797,20 @@ const dice3DInternals = (() => {
         item.base = [(index % columns - (inRow - 1) / 2) * 2.6, 0, (row - (rows - 1) / 2) * 3.25];
       });
     }
-    function draw(progress = 1) {
+    function draw(progress = motionProgress, reveal = revealProgress, center = centerProgress) {
       if (disposed || !camera) return;
+      motionProgress = progress; revealProgress = reveal; centerProgress = center;
+      const slide = center * center * (3 - 2 * center);
       items.forEach((item, index) => {
+        // La sélection mécanique ne modifie jamais l’apparence pendant le lancer.
+        item.muted = !item.die.kept && reveal === 1 && reducedMotion();
+        item.dissolve = item.die.kept || item.muted ? 0 : reveal;
         const rest = 1 - progress, phase = progress * Math.PI * 3;
         item.rotation = progress === 1 ? item.target : quaternionMultiply(axisAngle(item.axis, rest * rest * (Math.PI * 5.2 + index * 0.53)), item.target);
         item.lift = progress === 1 ? 0 : Math.abs(Math.sin(phase)) * rest * rest * 1.05;
         const bottom = Math.min(...item.mesh.vertices.map((v) => rotate(v, item.rotation)[1])) * item.scale;
-        item.position = [item.base[0] + Math.sin(progress * Math.PI * 2 + index) * rest * 0.3, -bottom + item.lift + 0.025, item.base[2] + Math.sin(progress * Math.PI * 2) * rest * 0.24];
+        const spread = item === survivor ? 1 - slide : 1;
+        item.position = [item.base[0] * spread + Math.sin(progress * Math.PI * 2 + index) * rest * 0.3, -bottom + item.lift + 0.025, item.base[2] * spread + Math.sin(progress * Math.PI * 2) * rest * 0.24];
       });
       try {
         if (mode === "webgl" && gpu) gpu.draw(items, camera, width, height);
@@ -15325,16 +15824,23 @@ const dice3DInternals = (() => {
         const mesh = geometry(die.sides);
         return { die, mesh, target: orientation(die, mesh), rotation: [0, 0, 0, 1], position: [0, 0, 0], scale: die.sides === 6 ? 1.35 : die.sides === 10 ? 1.2 : 1.13, axis: unit([1 + index * 0.17, 0.6, 0.8 + index * 0.11]), lift: 0 };
       });
+      const kept = items.filter((item) => item.die.kept);
+      survivor = items.length > 1 && kept.length === 1 ? kept[0] : null;
       measure();
     }
     function tick(now) {
       if (disposed) return;
-      const progress = reducedMotion() ? 1 : Math.min(1, (now - start) / 1250);
-      draw(progress);
-      if (progress === 1) settle(); else frame = requestAnimationFrame(tick);
+      const reduced = reducedMotion(), elapsed = now - start, discarded = items.some((item) => !item.die.kept);
+      const progress = reduced ? 1 : Math.min(1, elapsed / 1250);
+      // 450 ms pour lire les faces immobiles, une dissolution de 650 ms, puis 350 ms pour recentrer le dé restant.
+      const reveal = reduced ? 1 : discarded ? Math.max(0, Math.min(1, (elapsed - 1700) / 650)) : 0;
+      const center = survivor && !reduced ? Math.max(0, Math.min(1, (elapsed - 2350) / 350)) : 0;
+      phase = progress < 1 ? "rolling" : discarded && !reduced && elapsed < 1700 ? "settled" : discarded && reveal < 1 ? "dissolving" : survivor && !reduced && center < 1 ? "centering" : "result";
+      setState(); draw(progress, reveal, center);
+      if (phase === "result") settle(); else frame = requestAnimationFrame(tick);
     }
-    function resize() { if (!disposed) { measure(); draw(rolling ? Math.min(1, (performance.now() - start) / 1250) : 1); } }
-    function contextLost(event) { event.preventDefault(); fallback(); if (!disposed) { measure(); draw(); settle(); } }
+    function resize() { if (!disposed) { measure(); draw(); } }
+    function contextLost(event) { event.preventDefault(); fallback(); if (!disposed) { measure(); draw(); } }
     canvas.addEventListener("webglcontextlost", contextLost);
     const observer = typeof ResizeObserver === "function" ? new ResizeObserver(resize) : null;
     observer?.observe(canvas);
@@ -15342,12 +15848,15 @@ const dice3DInternals = (() => {
     return {
       get mode() { return mode; },
       get rolling() { return rolling; },
-      show(dice) { if (disposed) return; settle(); setDice(dice); draw(); },
+      show(dice, { reveal = true } = {}) {
+        if (disposed) return;
+        settle(reveal ? "result" : "ready"); setDice(dice); draw(1, reveal ? 1 : 0, reveal && !reducedMotion() ? 1 : 0);
+      },
       roll(dice) {
         if (disposed) return Promise.resolve();
         settle(); setDice(dice);
-        if (reducedMotion()) { draw(); return Promise.resolve(); }
-        rolling = true; setState(); start = performance.now(); draw(0);
+        if (reducedMotion()) { draw(1, 1, 0); return Promise.resolve(); }
+        rolling = true; phase = "rolling"; setState(); start = performance.now(); draw(0, 0, 0);
         return new Promise((resolve) => { finish = resolve; frame = requestAnimationFrame(tick); });
       },
       resize,
@@ -15369,7 +15878,7 @@ function dice3DGeometry(sides) { return dice3DInternals.geometry(sides); }
 /** Décompose le percentile : 00 + 0 représente 100 ; les autres paires valent 1 à 99. */
 function dice3DVisibleDice(dice) { return dice3DInternals.visibleDice(dice); }
 
-/** show() pose les dés ; roll() anime puis résout sa promesse ; dispose() libère tout. */
+/** show(dés, {reveal:false}) prépare ; roll() roule, stabilise puis révèle ; dispose() libère tout. */
 function createDice3D(canvas, options = {}) { return dice3DInternals.create(canvas, options); }
 
 
@@ -15407,7 +15916,16 @@ const ui = {
   saving: false,
   online: navigator.onLine,
   update: false,
-  noteDraft: "",
+  journalSelectedId: null,
+  journalQuery: "",
+  journalCharacterId: null,
+  journalDraft: null,
+  journalError: "",
+  journalSaving: false,
+  journalPhotoLoading: false,
+  journalPhotoSourceOpen: false,
+  journalPhotoSourceTrigger: "journal-photo-source",
+  journalPhotoViewer: null,
   fatal: null,
   amount: 5,
   rest: null,
@@ -15467,7 +15985,7 @@ const routeNames = {
   notes: "Journal",
   homebrew: "Contenus maison",
   settings: "Réglages",
-  more: "À portée de main",
+  more: "Plus",
   wildshape: "Formes animales",
   library: "Bibliothèque 2014",
   offline: "Contenu hors ligne",
@@ -15511,8 +16029,8 @@ function renderPortraitEditor() {
   const session = portraitSession;
   if (!session) return "";
   const selected = { ...session.character, portrait: session.selected }, entry = portraitEntryOf(selected);
-  const controls = session.upload ? `<div class="portrait-crop-layout"><canvas id="portrait-crop" width="512" height="512" aria-label="Aperçu du cadrage du portrait"></canvas><div class="portrait-crop-controls"><h3>Cadre ton portrait</h3><p class="small muted">Déplace la photo avec le doigt, ou utilise les curseurs.</p>${[["zoom", "Zoom", 1, 3, 0.05], ["x", "Position horizontale", 0, 1, 0.01], ["y", "Position verticale", 0, 1, 0.01]].map(([key, label, min, max, step]) => `<label class="portrait-slider" for="portrait-${key}">${label}<input id="portrait-${key}" data-portrait-crop="${key}" type="range" min="${min}" max="${max}" step="${step}" value="${session.crop[key]}"></label>`).join("")}${button("Recentrer", "portrait-center", 'id="portrait-center"', "small-btn ghost")}${button("Annuler cette photo", "portrait-cancel-upload", 'id="portrait-cancel-upload"', "small-btn ghost")}</div></div>` : `<div class="portrait-current">${characterPortrait(selected)}<div><strong>${session.selected?.kind === "none" ? "Sans portrait" : session.selected?.kind === "custom" ? "Ta photo" : entry.name}</strong><p class="small muted">Le portrait reste libre, quelle que soit l’origine de ton personnage.</p>${button("Portrait par défaut", "portrait-default", 'id="portrait-default"', "small-btn ghost")}${button("Sans portrait", "portrait-none", 'id="portrait-none"', "small-btn ghost")}</div></div><div class="portrait-filters"><label class="field" for="portrait-family">Origine<select id="portrait-family" data-portrait-filter="family">${PORTRAIT_FAMILIES.map((family) => `<option value="${family.id}" ${session.family === family.id ? "selected" : ""}>${esc(family.name)}</option>`).join("")}</select></label><label class="field" for="portrait-sex">Portraits<select id="portrait-sex" data-portrait-filter="sex"><option value="female" ${session.sex === "female" ? "selected" : ""}>Féminins</option><option value="male" ${session.sex === "male" ? "selected" : ""}>Masculins</option></select></label></div><p class="portrait-gallery-note notice warning" role="status" hidden>Certaines illustrations ne sont pas disponibles. Retrouve une connexion et rouvre cette galerie. Pour toutes les garder, prépare le Contenu hors ligne.</p><div class="portrait-grid" role="group" aria-label="Choix du portrait">${PORTRAITS.filter((portrait) => portrait.family === session.family && portrait.sex === session.sex).map((portrait) => `<button type="button" class="portrait-option" data-action="portrait-pick" data-id="${portrait.id}" aria-label="${esc(portrait.name)}" aria-pressed="${!["custom", "none"].includes(session.selected?.kind) && entry.id === portrait.id}"><img src="${esc(portraitUrl({ portrait: { kind: "preset", id: portrait.id } }))}" alt="" width="512" height="512" loading="lazy"><span>Portrait ${portrait.variant}${!["custom", "none"].includes(session.selected?.kind) && entry.id === portrait.id ? ` ${icon("check", 14)}` : ""}</span></button>`).join("")}</div>`;
-  return modalShell("Ton portrait", `<p class="modal-copy">Choisis une illustration ou <button type="button" class="link-btn portrait-import-link" data-action="portrait-upload" ${session.busy ? "disabled" : ""}>importe une photo</button> depuis ton téléphone.</p>${controls}<div class="portrait-import"><input id="portrait-file" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Importer une photo" ${session.busy ? "disabled" : ""}>${button(`${icon("upload", 17)} ${session.busy ? "Ouverture de l’image…" : "Choisir une photo"}`, "portrait-upload", session.busy ? "disabled" : "", "ghost")}<p class="tiny muted">JPEG, PNG ou WebP, jusqu’à 25 Mo. Tu peux aussi coller une image ici. Elle reste sur ton appareil et suit les exports de ta fiche.</p></div>${session.error ? `<p class="notice error" role="alert">${esc(session.error)}</p>` : ""}`, button("Annuler", "close-modal", "", "ghost") + button(session.upload ? "Utiliser ce cadrage" : "Choisir ce portrait", "portrait-save", session.busy ? "disabled" : "", "primary"), true);
+  const controls = session.upload ? `<div class="portrait-crop-layout"><canvas id="portrait-crop" width="512" height="512" aria-label="Aperçu du cadrage du portrait"></canvas><div class="portrait-crop-controls"><h3>Cadre ton portrait</h3><p class="small muted">Déplace la photo avec le doigt, ou utilise les curseurs.</p>${[["zoom", "Zoom", 1, 3, 0.05], ["x", "Position horizontale", 0, 1, 0.01], ["y", "Position verticale", 0, 1, 0.01]].map(([key, label, min, max, step]) => `<label class="portrait-slider" for="portrait-${key}">${label}<input id="portrait-${key}" data-portrait-crop="${key}" type="range" min="${min}" max="${max}" step="${step}" value="${session.crop[key]}"></label>`).join("")}${button("Recentrer", "portrait-center", 'id="portrait-center"', "small-btn ghost")}${button("Annuler cette photo", "portrait-cancel-upload", 'id="portrait-cancel-upload"', "small-btn ghost")}</div></div>` : `<div class="portrait-current">${characterPortrait(selected)}<div><strong>${session.selected?.kind === "none" ? "Sans portrait" : session.selected?.kind === "custom" ? "Ta photo" : entry.name}</strong>${button("Portrait par défaut", "portrait-default", 'id="portrait-default"', "small-btn ghost")}${button("Sans portrait", "portrait-none", 'id="portrait-none"', "small-btn ghost")}</div></div><div class="portrait-filters"><label class="field" for="portrait-family">Origine<select id="portrait-family" data-portrait-filter="family">${PORTRAIT_FAMILIES.map((family) => `<option value="${family.id}" ${session.family === family.id ? "selected" : ""}>${esc(family.name)}</option>`).join("")}</select></label><label class="field" for="portrait-sex">Portraits<select id="portrait-sex" data-portrait-filter="sex"><option value="female" ${session.sex === "female" ? "selected" : ""}>Féminins</option><option value="male" ${session.sex === "male" ? "selected" : ""}>Masculins</option></select></label></div><p class="portrait-gallery-note notice warning" role="status" hidden>Certaines illustrations ne sont pas disponibles. Retrouve une connexion et rouvre cette galerie. Pour toutes les garder, prépare le Contenu hors ligne.</p><div class="portrait-grid" role="group" aria-label="Choix du portrait">${PORTRAITS.filter((portrait) => portrait.family === session.family && portrait.sex === session.sex).map((portrait) => `<button type="button" class="portrait-option" data-action="portrait-pick" data-id="${portrait.id}" aria-label="${esc(portrait.name)}" aria-pressed="${!["custom", "none"].includes(session.selected?.kind) && entry.id === portrait.id}"><img src="${esc(portraitUrl({ portrait: { kind: "preset", id: portrait.id } }))}" alt="" width="512" height="512" loading="lazy"><span>Portrait ${portrait.variant}${!["custom", "none"].includes(session.selected?.kind) && entry.id === portrait.id ? ` ${icon("check", 14)}` : ""}</span></button>`).join("")}</div>`;
+  return modalShell("Ton portrait", `<div class="portrait-import portrait-import-top"><input id="portrait-file" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Importer une photo" ${session.busy ? "disabled" : ""}>${button(`${icon("upload", 17)} ${session.busy ? "Ouverture de l’image…" : "Choisir une photo"}`, "portrait-upload", session.busy ? "disabled" : "", "ghost")}${renderCompactHelp("JPEG, PNG ou WebP, jusqu’à 25 Mo. Tu peux aussi coller une image ici. Elle reste sur ton appareil et suit les exports de ta fiche.", "Formats et conservation")}</div>${session.error ? `<p class="notice error" role="alert">${esc(session.error)}</p>` : ""}${controls}`, button("Annuler", "close-modal", "", "ghost") + button(session.upload ? "Utiliser ce cadrage" : "Choisir ce portrait", "portrait-save", session.busy ? "disabled" : "", "primary"), true);
 }
 
 function paintPortraitEditor() {
@@ -15565,6 +16083,9 @@ function smallIcon(name, action, label, extra = "") {
 function notice(text, type = "") {
   return `<div class="notice ${type}">${icon(type === "error" || type === "warning" ? "warning" : "info", 18)}<div>${text}</div></div>`;
 }
+function renderCompactHelp(text, title = "Aide") {
+  return `<details class="compact-help"><summary>${esc(title)}</summary><p>${esc(text)}</p></details>`;
+}
 function field(label, path, value, type = "text", help = "", attributes = "") {
   return `<label class="field" for="${formId(path)}"><span>${esc(label)}</span>${type === "textarea" ? `<textarea id="${formId(path)}" data-bind="${path}" ${attributes}>${esc(value)}</textarea>` : `<input id="${formId(path)}" data-bind="${path}" type="${type}" value="${esc(value)}" ${type === "number" ? 'inputmode="decimal"' : ""} ${attributes}>`}${help ? `<small>${help}</small>` : ""}</label>`;
 }
@@ -15613,7 +16134,7 @@ function miniPreview(c) {
   const d = derive(c);
   return `<aside class="preview-panel" style="--livery:${liveryOf(c)}"><div class="eyebrow">Aperçu du personnage</div><div class="preview-name">${esc(c.name || "Ton aventurier")}</div><div class="preview-meta">${esc(d.race.name)} · ${esc(classSummary(c))}</div><div class="preview-stats"><div class="preview-stat">${d.maxHp}<span>PV maximum</span></div><div class="preview-stat">${d.ac}<span>Classe d’armure</span></div><div class="preview-stat">${signed(d.initiative)}<span>Initiative</span></div><div class="preview-stat">${d.spellDC ?? signed(d.attack)}<span>${d.spellDC ? "DD des sorts" : "Attaque principale"}</span></div></div><div class="preview-abilities">${Object.entries(ABILITIES)
     .map(([a, v]) => `<span><small>${v.short}</small>${d.scores[a]}</span>`)
-    .join("")}</div><div class="preview-tip">${icon("eye", 16)} Les valeurs suivent tes choix. Rien n’est enregistré avant validation.</div></aside>`;
+    .join("")}</div><div class="preview-tip">${icon("eye", 16)} La fiche sera mise à jour après validation.</div></aside>`;
 }
 function render() {
   const focused = document.activeElement,
@@ -15622,15 +16143,18 @@ function render() {
       focused && "selectionStart" in focused ? { start: focused.selectionStart, end: focused.selectionEnd } : null;
   const openDetails = [...document.querySelectorAll("details[data-detail][open]")].map((el) => el.dataset.detail),
     modalScroll = modalRoot.querySelector(".modal-body")?.scrollTop || 0;
+  const workflowScroll = document.getElementById("workflow-spell-scroll");
+  const workflowPosition = workflowScroll ? { key: workflowScroll.dataset.scrollKey, top: workflowScroll.scrollTop } : null;
+  const workflowFocus = focused?.closest(".workflow-spell-scroll") && focused.dataset.action ? { ...focused.dataset } : null;
   if (ui.fatal) {
-    root.innerHTML = `<div class="fatal">${icon("warning", 35)}<h1>Les données restent à l’abri.</h1><p class="section-gap">${esc(ui.fatal)}</p>${button("Réessayer", "reload", "", "primary")}</div>`;
+    root.innerHTML = `<div class="fatal">${icon("warning", 35)}<h1>Impossible de charger les données</h1><p class="section-gap">${esc(ui.fatal)}</p>${button("Réessayer", "reload", "", "primary")}</div>`;
     return;
   }
   const c = activeCharacter(),
     wizardActive = !!ui.wizard || !!ui.levelFlow;
   const saveLabel = ui.saving ? "Enregistrement…" : localStore.readOnly ? "Lecture seule" : localStore.mode === "memory" ? "Mémoire temporaire" : ui.online ? "Enregistré sur cet appareil" : "Hors ligne · données locales";
   const mobileStatus = ui.saving ? "Enregistrement…" : localStore.readOnly ? "Lecture seule" : localStore.mode === "memory" ? "Non sauvegardé" : ui.online ? "Enregistré" : "Hors ligne";
-  root.innerHTML = `<a class="skip" href="#main-content">Aller au contenu</a><div class="app-shell" style="--livery:${liveryOf(c)}"><aside class="sidebar"><button class="brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 30)}</span><span><span class="brand-name">Compagnon</span><span class="brand-sub">L’aventure, en poche</span></span></button><div class="sidebar-label">À la table</div>${navFor(c).map(([route, ico, label]) => `<button class="nav-btn ${ui.route === route && !wizardActive ? "active" : ""}" data-action="navigate" data-route="${route}" ${ui.route === route && !wizardActive ? 'aria-current="page"' : ""} ${!c ? "disabled" : ""}>${icon(ico, 20)}${label}</button>`).join("")}<div class="sidebar-bottom"><button class="nav-btn ${ui.route === "library" ? "active" : ""}" data-action="navigate" data-route="library">${icon("book", 20)}Bibliothèque</button><button class="nav-btn ${ui.route === "offline" ? "active" : ""}" data-action="navigate" data-route="offline">${icon("download", 20)}Contenu hors ligne</button><button class="nav-btn ${ui.route === "home" && !wizardActive ? "active" : ""}" data-action="navigate" data-route="home">${icon("users", 20)}Mes personnages</button><button class="nav-btn ${ui.route === "settings" ? "active" : ""}" data-action="navigate" data-route="settings">${icon("settings", 20)}Réglages & sauvegardes</button><div class="local-note">${icon("lock", 19)}<div><strong>Sur ton appareil.</strong>Sans compte. Sans publicité.<br>Tes fiches restent chez toi.</div></div><div class="side-footer"><span>Règles 2014</span><span>v${APP_VERSION}</span></div></div></aside><div class="main-shell"><header class="topbar"><div class="top-title">Ton carnet <span>/</span> <strong>${wizardActive ? "Création & choix" : routeNames[ui.route]}</strong></div><button class="brand mobile-brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 26)}</span><span><span class="brand-name">Compagnon</span><span class="brand-sub">Règles 2014</span></span></button><div class="top-actions"><span class="save-status" title="${esc(saveLabel)}" role="status"><span class="status-dot" style="${localStore.mode === "memory" || localStore.readOnly ? "background:var(--warning)" : ""}" aria-hidden="true"></span><span class="status-text">${esc(saveLabel)}</span><span class="status-mobile">${esc(mobileStatus)}</span></span><span class="top-utility">${c ? smallIcon("download", "export-one", "Exporter ce personnage") : ""}${smallIcon("phone", "install", "Installer l’application")}</span></div></header>${ui.update ? `<div class="update-banner">Une nouvelle version est prête. Tes fiches seront conservées.${button("Mettre à jour", "update-app", "", "small-btn")}</div>` : ""}${localStore.mode === "memory" ? notice("Le navigateur bloque le stockage. <strong>Les changements ne survivront pas à la fermeture.</strong> Exporte tes fiches et ouvre l’application hors navigation privée.", "error") : ""}${localStore.readOnly ? notice("Le stockage de ce navigateur est en lecture seule. Exporte tes fiches pour les conserver dans un navigateur compatible.", "warning") : ""}${localStore.pendingState ? notice(`Une modification n’a pas été enregistrée. ${button("Exporter les modifications en attente", "export-pending", "", "small-btn")}`, "warning") : ""}${appData.recovery?.length ? notice(`${appData.recovery.length} fiche(s) nécessitent une récupération. Les autres restent accessibles. ${button("Exporter les données à récupérer", "export-recovery", "", "small-btn")}`, "warning") : ""}<main class="main ${wizardActive ? "wizard-active" : ""}" id="main-content" tabindex="-1">${ui.wizard ? renderWizard() : ui.levelFlow ? renderLevelFlow() : renderPage(c)}${c ? printSheet(c) : ""}</main></div></div><nav class="mobile-nav" aria-label="Navigation principale">${[
+  root.innerHTML = `<a class="skip" href="#main-content">Aller au contenu</a><div class="app-shell" style="--livery:${liveryOf(c)}"><aside class="sidebar"><button class="brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 30)}</span><span><span class="brand-name">Compagnon</span></span></button><div class="sidebar-label">À la table</div>${navFor(c).map(([route, ico, label]) => `<button class="nav-btn ${ui.route === route && !wizardActive ? "active" : ""}" data-action="navigate" data-route="${route}" ${ui.route === route && !wizardActive ? 'aria-current="page"' : ""} ${!c ? "disabled" : ""}>${icon(ico, 20)}${label}</button>`).join("")}<div class="sidebar-bottom"><button class="nav-btn ${ui.route === "library" ? "active" : ""}" data-action="navigate" data-route="library">${icon("book", 20)}Bibliothèque</button><button class="nav-btn ${ui.route === "offline" ? "active" : ""}" data-action="navigate" data-route="offline">${icon("download", 20)}Contenu hors ligne</button><button class="nav-btn ${ui.route === "home" && !wizardActive ? "active" : ""}" data-action="navigate" data-route="home">${icon("users", 20)}Mes personnages</button><button class="nav-btn ${ui.route === "settings" ? "active" : ""}" data-action="navigate" data-route="settings">${icon("settings", 20)}Réglages & sauvegardes</button><div class="local-note">${icon("lock", 19)}<div>Données sur cet appareil</div></div><div class="side-footer"><span>Règles 2014</span><span>v${APP_VERSION}</span></div></div></aside><div class="main-shell"><header class="topbar"><div class="top-title"><strong>${wizardActive ? "Création & choix" : routeNames[ui.route]}</strong></div><button class="brand mobile-brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 26)}</span><span><span class="brand-name">Compagnon</span><span class="brand-sub">Règles 2014</span></span></button><div class="top-actions"><span class="save-status" title="${esc(saveLabel)}" role="status"><span class="status-dot" style="${localStore.mode === "memory" || localStore.readOnly ? "background:var(--warning)" : ""}" aria-hidden="true"></span><span class="status-text">${esc(saveLabel)}</span><span class="status-mobile">${esc(mobileStatus)}</span></span><span class="top-utility">${c ? smallIcon("download", "export-one", "Exporter ce personnage") : ""}${smallIcon("phone", "install", "Installer l’application")}</span></div></header>${ui.update ? `<div class="update-banner">Une nouvelle version est prête. Tes fiches seront conservées.${button("Mettre à jour", "update-app", "", "small-btn")}</div>` : ""}${localStore.mode === "memory" ? notice("Le navigateur bloque le stockage. <strong>Les changements ne survivront pas à la fermeture.</strong> Exporte tes fiches et ouvre l’application hors navigation privée.", "error") : ""}${localStore.readOnly ? notice("Le stockage de ce navigateur est en lecture seule. Exporte tes fiches pour les conserver dans un navigateur compatible.", "warning") : ""}${localStore.pendingState ? notice(`Une modification n’a pas été enregistrée. ${button("Exporter les modifications en attente", "export-pending", "", "small-btn")}`, "warning") : ""}${appData.recovery?.length ? notice(`${appData.recovery.length} fiche(s) nécessitent une récupération. Les autres restent accessibles. ${button("Exporter les données à récupérer", "export-recovery", "", "small-btn")}`, "warning") : ""}<main class="main ${wizardActive ? "wizard-active" : ""}" id="main-content" tabindex="-1">${ui.wizard ? renderWizard() : ui.levelFlow ? renderLevelFlow() : renderPage(c)}${c ? printSheet(c) : ""}</main></div></div><nav class="mobile-nav" aria-label="Navigation principale">${[
     ["sheet", "clipboard", "Fiche"],
     ["spells", "book", "Sorts"],
     ["features", "swords", "Aptitudes"],
@@ -15651,6 +16175,13 @@ function render() {
   for (const key of openDetails) {
     const detail = [...document.querySelectorAll("details[data-detail]")].find((el) => el.dataset.detail === key);
     if (detail) detail.open = true;
+  }
+  syncWorkflowLayout();
+  const nextWorkflowScroll = document.getElementById("workflow-spell-scroll");
+  if (workflowPosition && nextWorkflowScroll?.dataset.scrollKey === workflowPosition.key) nextWorkflowScroll.scrollTop = workflowPosition.top;
+  if (!focusId && workflowFocus && nextWorkflowScroll) {
+    const sameControl = [...nextWorkflowScroll.querySelectorAll("[data-action]")].find((el) => Object.entries(workflowFocus).every(([key, value]) => el.dataset[key] === value));
+    sameControl?.focus({ preventScroll: true });
   }
   if (focusId) {
     const input = document.getElementById(focusId);
@@ -15686,27 +16217,38 @@ function renderPage(c) {
   )(c);
 }
 function renderHome() {
-  return `${IS_ARTIFACT ? notice("<strong>Version d’essai en ligne.</strong>Tes fiches restent dans ce navigateur, sans garantie de conservation. Pour jouer avec ta table, installe la version hébergée et transfère tes fiches avec « Copier la sauvegarde » puis « Coller une sauvegarde ».", "warning") + '<div class="spacer"></div>' : ""}<div class="page-head"><div><div class="eyebrow">Ton carnet d’aventures</div><h1>Mes personnages</h1><p class="page-subtitle">Des choix qui ont du sens. Une fiche qui te suit.</p></div>${appData.characters.length ? button(`${icon("plus", 18)} Nouveau`, "new-character", "", "primary") : ""}</div>${appData.draft && !ui.wizard ? `<div class="notice section-gap">${icon("note", 19)}<div><strong>Un brouillon t’attend : ${esc(appData.draft.draft?.name || "personnage sans nom")}</strong>La fiche validée n’a pas été modifiée.<div class="actions">${button("Reprendre", "resume-draft", "", "small-btn")}${button("Oublier le brouillon", "discard-draft", "", "small-btn ghost")}</div></div></div><div class="spacer"></div>` : ""}${
+  return `${IS_ARTIFACT ? notice("<strong>Version d’essai en ligne.</strong>Tes fiches restent dans ce navigateur, sans garantie de conservation. Pour jouer avec ta table, installe la version hébergée et transfère tes fiches avec « Copier la sauvegarde » puis « Coller une sauvegarde ».", "warning") + '<div class="spacer"></div>' : ""}<div class="page-head"><div><h1>${appData.characters.length ? "Mes personnages" : "Crée ton premier personnage"}</h1></div>${appData.characters.length ? button(`${icon("plus", 18)} Nouveau`, "new-character", "", "primary") : ""}</div>${appData.draft && !ui.wizard ? `<div class="notice section-gap">${icon("note", 19)}<div><strong>Brouillon : ${esc(appData.draft.draft?.name || "personnage sans nom")}</strong>La fiche validée n’a pas été modifiée.<div class="actions">${button("Reprendre", "resume-draft", "", "small-btn")}${button("Oublier le brouillon", "discard-draft", "", "small-btn ghost")}</div></div></div><div class="spacer"></div>` : ""}${
     !appData.characters.length
-      ? `<section class="welcome"><div class="welcome-copy"><p class="welcome-kicker">Une histoire commence par un choix</p><h1>À toi d’écrire la prochaine page.</h1><p>Choisis une classe pour commencer, ou crée ton personnage pas à pas : origine, classe, historique, caractéristiques, équipement et sorts. Tout reste modifiable.</p><div class="actions">${button(`${icon("plus", 18)} Créer mon personnage`, "new-character", "", "primary")}${button("Voir un exemple", "demo", "", "ghost on-dark")}</div></div><div class="welcome-shields" role="list" aria-label="Commencer avec une classe">${Object.entries(CLASSES)
+      ? `<section class="welcome welcome-compact"><div class="welcome-copy"><p>Choisis une classe ou commence la création.</p><div class="actions">${button(`${icon("plus", 18)} Créer mon personnage`, "new-character", "", "primary")}${button("Voir un exemple", "demo", "", "ghost on-dark")}</div></div><div class="welcome-shields" role="list" aria-label="Commencer avec une classe">${Object.entries(CLASSES)
           .map(
             ([id, k]) =>
               `<button type="button" role="listitem" class="shield-btn" data-action="new-character" data-class="${id}" style="--livery:${LIVERY[id]}" aria-label="Créer un personnage ${esc(k.name.toLowerCase())}"><span class="shield-shape"><svg viewBox="0 0 84 96" aria-hidden="true"><path d="M5 5h74v38c0 27-17 41-37 49C22 84 5 70 5 43z" fill="var(--livery)" stroke="#c9962f" stroke-width="3"/></svg>${icon(k.icon, 22)}</span><span class="shield-name">${k.name}</span></button>`,
           )
-          .join("")}</div></section><ul class="promise-list">${[
-          ["eye", "Chaque choix montre son effet sur la fiche avant d’être validé."],
-          ["tree", "Sous-classes, dons et multiclassage jusqu’au niveau 20."],
-          ["lock", "Tout reste sur ton appareil, même sans connexion."],
-        ]
-          .map(([ico, text]) => `<li>${icon(ico, 20)}<span>${text}</span></li>`)
-          .join("")}</ul>`
+          .join("")}</div></section>`
       : `<div class="grid-2">${appData.characters
           .map((c) => {
             const d = derive(c);
             return `<article class="char-card" style="--livery:${liveryOf(c)}"><div class="char-card-head">${characterPortrait(c, { small: true })}<div><h3>${esc(c.name)}</h3><div class="meta">${esc(d.race.name)} · ${esc(classSummary(c))}</div></div></div><div class="card-footer"><div class="card-stats"><span><strong>${d.currentHp}/${d.maxHp}</strong> PV</span><span><strong>${d.ac}</strong> CA</span><span><strong>${d.level}</strong> niv.</span></div>${button(`Ouvrir ${icon("arrow", 16)}`, "open-character", `data-id="${esc(c.id)}"`, "small-btn green")}</div></article>`;
           })
           .join("")}</div>`
-  }<div class="actions section-gap">${button(`${icon("upload", 17)} Importer une sauvegarde`, "import", "", "ghost")}${appData.characters.length ? button(`${icon("download", 17)} Sauvegarder toutes mes fiches`, "export-all", "", "ghost") : ""}</div><div class="footnote">Règles de 2014 : 12 classes, ${Object.values(SUBCLASSES).reduce((n, x) => n + Object.keys(x).length, 0)} sous-classes, ${Object.keys(RACES).length} origines, ${Object.keys(BACKGROUNDS).length} historiques, ${Object.keys(FEATS).length} dons et ${SPELLS.length} sorts. Résumés originaux : une aide de jeu, pas le texte des livres.</div>`;
+  }<div class="actions section-gap">${button(`${icon("upload", 17)} Importer une sauvegarde`, "import", "", "ghost")}${appData.characters.length ? button(`${icon("download", 17)} Sauvegarder toutes mes fiches`, "export-all", "", "ghost") : ""}</div><div class="footnote">Règles de 2014 : 12 classes, ${Object.values(SUBCLASSES).reduce((n, x) => n + Object.keys(x).length, 0)} sous-classes, ${Object.keys(RACES).length} origines, ${Object.keys(BACKGROUNDS).length} historiques, ${Object.keys(FEATS).length} dons et ${SPELLS.length} sorts.</div>`;
+}
+function formatCarriedWeight(value) {
+  return value.toLocaleString("fr-FR", { maximumFractionDigits: 2 });
+}
+function renderSheetCarryWarning(c, d) {
+  const load = carriedWeightSummary(c, d);
+  if (!load.overCapacity) return "";
+  const text = load.hasUnknownWeight
+    ? `Au moins ${formatCarriedWeight(load.weight)} kg pour ${formatCarriedWeight(load.capacity)} kg de capacité.`
+    : `Sac trop lourd : ${formatCarriedWeight(load.weight)} / ${formatCarriedWeight(load.capacity)} kg.`;
+  return `<aside class="sheet-carry-warning" aria-label="Capacité de portage dépassée"><div>${icon("warning", 20)}<span>${esc(text)}</span></div>${button("Voir le sac", "navigate", 'data-route="inventory"', "small-btn ghost")}</aside>`;
+}
+function renderInventoryCarrySummary(c, d) {
+  const load = carriedWeightSummary(c, d);
+  const modeNote = load.equipment === "merged" ? "Équipement fusionné : ce poids n’est pas comparé à la capacité de la forme."
+    : load.equipment === "dropped" ? "Équipement déposé : ce poids n’est pas comparé à la capacité de la forme." : "";
+  return `<div class="panel carry-summary"><div class="summary-row"><span>${load.hasUnknownWeight ? "Poids connu du sac" : "Poids du sac"}</span><strong>${formatCarriedWeight(load.weight)} kg</strong></div><div class="summary-row"><span>${d.wildShape ? "Capacité de la forme" : "Capacité de portage"}</span><strong>${formatCarriedWeight(load.capacity)} kg</strong></div>${load.comparable ? `<div class="bar ${load.overCapacity ? "low" : ""}"><span style="width:${load.percent}%"></span></div>` : ""}${modeNote || load.hasUnknownWeight ? `<p class="tiny muted carry-summary-note">${esc(modeNote)}${modeNote && load.hasUnknownWeight ? " " : ""}${load.hasUnknownWeight ? "Certains objets du sac ont un poids inconnu." : ""}</p>` : ""}</div>`;
 }
 function renderSheet(c) {
   const d = derive(c),
@@ -15716,7 +16258,7 @@ function renderSheet(c) {
     effectiveExhaustion = d.wildShape?.conditionImmunities.includes("exhaustion") ? 0 : c.state.exhaustion,
     subs = subclassSummary(c);
   const classes = classLevels(c), sheetClass = classes.length === 1 ? `${CLASSES[classes[0].classId].name} · Niveau ${d.level}` : `${classSummary(c)} · Niveau ${d.level}`;
-  return `<section class="hero sheet-hero"><div class="hero-identity">${characterPortrait(c, { editable: true })}<div class="hero-summary"><div class="eyebrow">Fiche de personnage</div><h1>${esc(c.name)}</h1><p class="hero-origin">${esc(d.race.name)}</p><p class="subtitle">${esc(sheetClass)}</p><p class="hero-context">${esc(d.background.name)}${subs ? ` · ${esc(subs)}` : ""}</p></div></div><div class="hero-actions">${button(`${icon("edit", 16)} Modifier`, "edit-character", "", "ghost")}</div></section>${renderActiveForm(c, d)}<div class="split sheet-panels"><div class="stack"><section class="panel hp-panel"><div class="panel-head"><h2 class="panel-title">Points de vie</h2>${d.currentHp < d.maxHp / 2 ? `<span class="pill ${d.currentHp === 0 ? "red" : ""}">${d.currentHp === 0 ? "À 0 PV" : "Blessé"}</span>` : ""}<button class="icon-btn hp-details" data-action="hp-details" aria-label="Détails des points de vie et dés de vie">${icon("info", 18)}</button></div><div class="hp-line"><div class="hp-reading"><strong class="hp-current">${d.currentHp}</strong><span class="hp-max">/ ${d.maxHp}</span></div><button class="link-btn hp-temp${c.state.tempHp ? " has-value" : ""}" data-action="temporary-hp" aria-label="${c.state.tempHp ? `${c.state.tempHp} points de vie temporaires. Modifier la réserve` : "Ajouter des points de vie temporaires"}">${c.state.tempHp ? `<span><strong>+${c.state.tempHp}</strong>PV temporaires</span>` : `<span>${icon("plus", 13)} PV temporaires</span>`}</button></div>${effectiveExhaustion >= 4 ? '<p class="small hp-warning">Maximum réduit par l’épuisement.</p>' : ""}<div class="hp-actions">${button(`${icon("sun", 18)} Dégâts`, "damage", "", "primary")}${button(`${icon("plus", 18)} Soins`, "heal", "", "ghost")}</div>${d.currentHp === 0 ? renderDeathSaves(c) : ""}</section><div class="stats-strip sheet-stats">${[
+  return `<section class="hero sheet-hero"><div class="hero-identity">${characterPortrait(c, { editable: true })}<div class="hero-summary"><h1>${esc(c.name)}</h1><p class="hero-origin">${esc(d.race.name)}</p><p class="subtitle">${esc(sheetClass)}</p><p class="hero-context">${esc(d.background.name)}${subs ? ` · ${esc(subs)}` : ""}</p></div></div><div class="hero-actions">${button(`${icon("edit", 16)} Modifier`, "edit-character", "", "ghost")}</div></section>${renderActiveForm(c, d)}${renderSheetCarryWarning(c, d)}<div class="split sheet-panels"><div class="stack"><section class="panel hp-panel"><div class="panel-head"><h2 class="panel-title">Points de vie</h2>${d.currentHp < d.maxHp / 2 ? `<span class="pill ${d.currentHp === 0 ? "red" : ""}">${d.currentHp === 0 ? "À 0 PV" : "Blessé"}</span>` : ""}<button class="icon-btn hp-details" data-action="hp-details" aria-label="Détails des points de vie et dés de vie">${icon("info", 18)}</button></div><div class="hp-line"><div class="hp-reading"><strong class="hp-current">${d.currentHp}</strong><span class="hp-max">/ ${d.maxHp}</span></div><button class="link-btn hp-temp${c.state.tempHp ? " has-value" : ""}" data-action="temporary-hp" aria-label="${c.state.tempHp ? `${c.state.tempHp} points de vie temporaires. Modifier la réserve` : "Ajouter des points de vie temporaires"}">${c.state.tempHp ? `<span><strong>+${c.state.tempHp}</strong>PV temporaires</span>` : `<span>${icon("plus", 13)} PV temporaires</span>`}</button></div>${effectiveExhaustion >= 4 ? '<p class="small hp-warning">Maximum réduit par l’épuisement.</p>' : ""}<div class="hp-actions">${button(`${icon("sun", 18)} Dégâts`, "damage", "", "primary")}${button(`${icon("plus", 18)} Soins`, "heal", "", "ghost")}</div>${d.currentHp === 0 ? renderDeathSaves(c) : ""}</section><div class="stats-strip sheet-stats">${[
     ["shield", d.ac, "CA", "ac-info"],
     ["zap", signed(d.initiative), "Initiative", "roll-initiative"],
     ["compass", `${String(d.speed || d.flySpeed || d.swimSpeed || d.burrowSpeed || 0).replace(".", ",")} <small>m</small>`, d.speed ? "Vitesse" : d.flySpeed ? "Vol" : d.swimSpeed ? "Nage" : d.burrowSpeed ? "Fouissement" : "Vitesse", ""],
@@ -15726,7 +16268,7 @@ function renderSheet(c) {
       ([ico, value, label, action]) =>
         `<${action ? `button type="button" data-action="${action}"${action === "ac-info" ? ` aria-label="Classe d’armure ${d.ac}, détail du calcul"` : ""}` : "div"} class="stat-box"><span class="stat-symbol">${icon(ico, 20)}</span><div><div class="stat-value">${value}</div><div class="stat-label">${label}</div></div></${action ? "button" : "div"}>`,
     )
-    .join("")}</div><section class="panel ability-panel"><div class="panel-head"><h2 class="panel-title">${icon("gem", 19)} Caractéristiques</h2><span class="tiny muted">Touche pour lancer</span></div><div class="ability-grid">${Object.entries(ABILITIES)
+    .join("")}</div><section class="panel ability-panel"><div class="panel-head"><h2 class="panel-title">${icon("gem", 19)} Caractéristiques</h2>${renderCompactHelp("Appuie sur une caractéristique pour lancer un dé.")}</div><div class="ability-grid">${Object.entries(ABILITIES)
     .map(
       ([a, info]) =>
         `<button class="ability" data-action="roll-ability" data-key="${a}" aria-label="Test de ${info.name}, ${signed(d.mods[a])}"><div class="label">${info.short}</div><span class="score">${d.scores[a]}</span><div class="modifier">${signed(d.mods[a])}</div></button>`,
@@ -15748,19 +16290,12 @@ function renderSheet(c) {
           .join("")}</div>`,
     )
     .join("")}</div><div class="tiny muted section-gap">Point plein : maîtrise. Point cerclé : expertise.</div></section>${renderProficiencies(d)}</div><div class="stack"><section class="panel resource-panel"><div class="panel-head"><h2 class="panel-title">${icon("sun", 19)} Ressources</h2><span class="tiny muted">Restantes</span></div><div class="resources">${
-    res.length
-      ? res
-          .map(
-            (r) =>
-              `<div class="resource-row"><div><button class="link-btn resource-name" data-action="resource-info" data-key="${esc(r.id)}">${esc(r.name)}</button><div class="resource-reset">${r.reset === "short" ? "Repos court ou long" : r.reset === "long" ? "Repos long" : "Récupération manuelle"}</div></div><div class="counter">${r.max === null ? '<span class="counter-value">∞</span>' : `${smallIcon("minus", "resource-use", `Dépenser ${r.name}`, `data-key="${esc(r.id)}" data-delta="1" ${r.used >= r.max ? "disabled" : ""}`)}<span class="counter-value">${r.max - r.used}<small> / ${r.max}</small></span>${smallIcon("plus", "resource-use", `Récupérer ${r.name}`, `data-key="${esc(r.id)}" data-delta="-1" ${r.used <= 0 ? "disabled" : ""}`)}`}</div></div>`,
-          )
-          .join("")
-      : '<p class="small muted">Pas de ressource à suivre à ce niveau.</p>'
-  }</div>${renderArcaneWard(c)}${wildShapeRules(c) ? `<button type="button" class="link-btn beast-link" data-action="navigate" data-route="wildshape">${icon("paw", 15)} Voir les formes animales disponibles</button>` : ""}<div class="rest-actions">${button(`${icon("coffee", 18)} Repos court`, "rest-short")}${button(`${icon("bed", 18)} Repos long`, "rest-long")}</div><details class="session-tools" data-detail="session-tools"><summary>Autres récupérations</summary><div class="actions">${resourceConversionOptions(c).length ? button("Conversion de magie", "resource-conversions", "", "small-btn") : ""}${button("Récupération particulière", "resource-event", "", "small-btn ghost")}</div></details></section>${
+    renderResourceGroups(c, res)
+  }</div>${renderArcaneWard(c)}${wildShapeRules(c) ? `<button type="button" class="link-btn beast-link" data-action="navigate" data-route="wildshape">${icon("paw", 15)} Voir les formes animales disponibles</button>` : ""}<div class="rest-actions">${button(`${icon("coffee", 18)} Repos court`, "rest-short")}${button(`${icon("bed", 18)} Repos long`, "rest-long")}</div>${renderResourceSessionTools(c)}</section>${
     d.slots.length || d.pact
       ? `<section class="panel magic-panel"><div class="panel-head"><h2 class="panel-title"><button class="panel-heading-link" data-action="navigate" data-route="spells">Emplacements de sorts ${icon("chevron", 17)}</button></h2><button class="icon-btn slot-help" data-action="slot-help" aria-label="Comment utiliser les emplacements de sorts">${icon("info", 17)}</button></div>${renderSlots(c, { compact: true })}${c.state.concentration ? `<div class="notice purple section-gap">${icon("sparkles", 17)}<div><strong>Concentration</strong>${esc(c.state.concentration)}<br><button class="link-btn" data-action="end-concentration">Mettre fin</button></div></div>` : ""}</section>`
       : ""
-  }<section class="panel conditions-panel"><div class="panel-head"><h2 class="panel-title">${icon("flag", 18)} États & vigilance</h2><button class="link-btn" data-action="conditions">Gérer</button></div>${effectiveConditions.length ? `<div class="condition-chips">${effectiveConditions.map((s) => `<span class="pill red">${esc(s)}</span>`).join("")}</div>` : '<p class="small muted">Aucun état actif.</p>'}<div class="summary-row"><span>Épuisement</span><strong>${effectiveExhaustion} / 6</strong></div>${effectiveExhaustion ? `<p class="tiny muted">Effets cumulés : ${EXHAUSTION.slice(1, effectiveExhaustion + 1).join(" ; ")}.</p>` : ""}</section><section class="panel features-panel"><div class="panel-head"><h2 class="panel-title">${icon("book", 18)} Aptitudes</h2><button class="link-btn" data-action="navigate" data-route="features">Tout voir ${icon("chevron", 13)}</button></div>${featureGroups(c, d)
+  }<section class="panel conditions-panel"><div class="panel-head"><h2 class="panel-title">${icon("flag", 18)} États</h2><button class="link-btn" data-action="conditions">Gérer</button></div>${effectiveConditions.length ? `<div class="condition-chips">${effectiveConditions.map((s) => `<span class="pill red">${esc(s)}</span>`).join("")}</div>` : '<p class="small muted">Aucun état actif.</p>'}<div class="summary-row"><span>Épuisement</span><strong>${effectiveExhaustion} / 6</strong></div>${effectiveExhaustion ? `<p class="tiny muted">Effets cumulés : ${EXHAUSTION.slice(1, effectiveExhaustion + 1).join(" ; ")}.</p>` : ""}</section><section class="panel features-panel"><div class="panel-head"><h2 class="panel-title">${icon("book", 18)} Aptitudes</h2><button class="link-btn" data-action="navigate" data-route="features">Tout voir ${icon("chevron", 13)}</button></div>${featureGroups(c, d)
     .map(
       ([title, items], g) =>
         `<div class="feature-group-title">${esc(title)}</div>${items
@@ -15780,12 +16315,44 @@ function renderReference(id) {
 function renderActiveForm(c, d = derive(c)) {
   if (!d.wildShape) return "";
   const shape = d.wildShape, moon = hasSubclass(c, "druid", "moon"), cost = shape.elemental ? 2 : 1, unlimited = wildShapeRules(c).uses === null;
-  return `<section class="panel section-gap"><div class="panel-head"><h2 class="panel-title">${icon("paw", 20)} ${esc(shape.name)}</h2><span class="pill">Forme active</span></div><p class="small">${d.currentHp} / ${d.maxHp} PV de forme · ${shape.remainingMinutes} min restantes</p><p class="small muted">Corps d’origine : ${d.body.hp} / ${d.body.maxHp} PV. ${shape.equipment === "worn" ? "Équipement porté avec l’accord du MJ." : shape.equipment === "dropped" ? "Équipement déposé au sol." : "Équipement fusionné, sans effet."}</p><div class="actions">${button("Reprendre ma forme", "leave-wildshape", "", "small-btn")}${button("10 min passent", "wildshape-time", 'data-value="10"', "small-btn ghost")}${button("1 h passe", "wildshape-time", 'data-value="60"', "small-btn ghost")}${button(unlimited ? "Prolonger" : `Prolonger (${cost} usage${cost > 1 ? "s" : ""})`, "renew-wildshape", !unlimited && (c.state.resourcesUsed.wildshape || 0) + cost > 2 ? "disabled" : "", "small-btn ghost")}</div>${moon ? `<details class="section-gap" data-detail="moon-heal"><summary>Soins du Cercle de la Lune</summary><p class="small">Action bonus : dépense un emplacement pour récupérer 1d8 PV par niveau d’emplacement.</p><div class="actions">${d.slots.map((max, i) => max > (c.state.slotsUsed[i + 1] || 0) ? button(`Niveau ${i + 1} · ${i + 1}d8`, "moon-heal", `data-value="${i + 1}"`, "small-btn") : "").join("")}${d.pact && (c.state.pactUsed || 0) < d.pact.count ? button(`Pacte · ${d.pact.slotLevel}d8`, "moon-heal", `data-value="${d.pact.slotLevel}" data-pact="true"`, "small-btn") : ""}</div></details>` : ""}<details class="section-gap" data-detail="wildshape-actions"><summary>Traits et actions de la forme</summary><div class="detail-copy">${[...shape.traits, ...shape.actions].map((action) => `<p><strong>${esc(action.name)}</strong><br>${esc(action.description || referenceEntries(action.entries, "en"))}</p>`).join("")}</div></details><p class="tiny muted">Les capacités conservées dépendent de ce que cette forme peut physiquement accomplir. Vérifie les situations particulières avec le MJ.</p></section>`;
+  return `<section class="panel section-gap"><div class="panel-head"><h2 class="panel-title">${icon("paw", 20)} ${esc(shape.name)}</h2><span class="pill">Forme active</span></div><p class="small">${d.currentHp} / ${d.maxHp} PV de forme · ${shape.remainingMinutes} min restantes</p><p class="small muted">Corps d’origine : ${d.body.hp} / ${d.body.maxHp} PV. ${shape.equipment === "worn" ? "Équipement porté avec l’accord du MJ." : shape.equipment === "dropped" ? "Équipement déposé au sol." : "Équipement fusionné, sans effet."}</p><div class="actions">${button("Reprendre ma forme", "leave-wildshape", "", "small-btn")}${button("10 min passent", "wildshape-time", 'data-value="10"', "small-btn ghost")}${button("1 h passe", "wildshape-time", 'data-value="60"', "small-btn ghost")}${button(unlimited ? "Prolonger" : `Prolonger (${cost} usage${cost > 1 ? "s" : ""})`, "renew-wildshape", !unlimited && (c.state.resourcesUsed.wildshape || 0) + cost > 2 ? "disabled" : "", "small-btn ghost")}</div>${moon ? `<details class="section-gap" data-detail="moon-heal"><summary>Soins du Cercle de la Lune</summary><p class="small">Action bonus : dépense un emplacement pour récupérer 1d8 PV par niveau d’emplacement.</p><div class="actions">${d.slots.map((max, i) => max > (c.state.slotsUsed[i + 1] || 0) ? button(`Niveau ${i + 1} · ${i + 1}d8`, "moon-heal", `data-value="${i + 1}"`, "small-btn") : "").join("")}${d.pact && (c.state.pactUsed || 0) < d.pact.count ? button(`Pacte · ${d.pact.slotLevel}d8`, "moon-heal", `data-value="${d.pact.slotLevel}" data-pact="true"`, "small-btn") : ""}</div></details>` : ""}<details class="section-gap" data-detail="wildshape-actions"><summary>Traits et actions de la forme</summary><div class="detail-copy">${[...shape.traits, ...shape.actions].map((action) => `<p><strong>${esc(action.name)}</strong><br>${esc(action.description || referenceEntries(action.entries, "en"))}</p>`).join("")}<p class="tiny muted">Les capacités conservées dépendent des possibilités physiques de la forme; vérifie les cas particuliers avec le MJ.</p></div></details></section>`;
 }
 function renderArcaneWard(c) {
   const ward = arcaneWardStatus(c);
   if (!ward.available) return "";
   return `<section class="panel section-gap" data-arcane-ward><div class="panel-head"><h2 class="panel-title">${icon("shield", 19)} Protection arcanique</h2><strong>${ward.hp} / ${ward.maxHp} PV</strong></div><p class="small">${ward.created ? "Les dégâts sont absorbés par cette protection avant tes PV temporaires et corporels. Tes abjurations de niveau 1 ou plus la rechargent, même à 0 PV." : "Lance une abjuration de niveau 1 ou plus et choisis de créer ta protection."}</p><p class="tiny muted">Elle prend fin au prochain repos long ; le repos ne la recrée pas.</p><button class="link-btn" data-action="navigate" data-route="spells">Ouvrir le grimoire</button></section>`;
+}
+const RESOURCE_EVENT_LABELS = { dawn: "Aube", dusk: "Crépuscule", initiative: "Jet d’initiative", spell: "Sort", days: "Jours écoulés" };
+function resourceResetLabel(reset) {
+  return { short: "Repos court ou long", long: "Repos long", dawn: "À l’aube", dusk: "Au crépuscule", initiative: "À l’initiative", spell: "Après un sort", none: "Récupération manuelle", manual: "Récupération manuelle" }[reset] || "Selon l’aptitude";
+}
+function resourceRecoveryLabel(option) {
+  if (!option.gains.length) return `Avancer le délai : ${option.cooldowns.map((entry) => entry.name).join(", ")}`;
+  const gains = option.gains.map((entry) => `${entry.amount} ${{ ki: "ki", inspiration: "inspiration bardique" }[entry.id] || entry.name.toLocaleLowerCase("fr")}`).join(", "),
+    when = { dawn: "à l’aube", dusk: "au crépuscule", initiative: "à l’initiative", spell: "après un sort", days: "après le délai" }[option.kind];
+  return `Récupérer ${gains} ${when}`;
+}
+function resourceRecoverySummary(option) {
+  return [...option.gains.map((entry) => `${entry.name} : +${entry.amount}, ${entry.after} / ${entry.max} disponibles.`),
+    ...option.cooldowns.map((entry) => `${entry.name} : délai de ${entry.before} à ${entry.after} jour${entry.before > 1 ? "s" : ""}.`)].join("\n");
+}
+function renderResourceGroups(c, entries) {
+  if (!entries.length) return '<p class="small muted">Pas de ressource à suivre à ce niveau.</p>';
+  const groups = new Map();
+  for (const entry of entries) {
+    const reset = resourceResetLabel(entry.reset);
+    if (!groups.has(reset)) groups.set(reset, []);
+    groups.get(reset).push(entry);
+  }
+  return [...groups].map(([reset, rows]) => `<div class="resource-family"><h3 class="resource-family-heading">${esc(reset)}</h3><div class="resource-family-rows">${rows.map((r) => {
+    const cooldown = c.state.resourceCooldowns?.[r.id] || 0;
+    return `<div class="resource-row"><div><button class="link-btn resource-name" data-action="resource-info" data-key="${esc(r.id)}">${esc(r.name)} ${icon("info", 13)}</button>${cooldown ? `<div class="resource-cooldown">Encore ${cooldown} jour${cooldown > 1 ? "s" : ""} avant récupération</div>` : ""}</div><div class="counter">${r.max === null ? '<span class="counter-value" aria-label="À volonté">∞</span>' : `${smallIcon("minus", "resource-use", `Dépenser ${r.name}`, `data-key="${esc(r.id)}" data-delta="1" ${r.remaining <= 0 ? "disabled" : ""}`)}<span class="counter-value">${r.remaining}<small> / ${r.max}</small></span>${smallIcon("plus", "resource-use", `Corriger la dépense de ${r.name} : récupérer un usage`, `data-key="${esc(r.id)}" data-delta="-1" ${r.spent <= 0 ? "disabled" : ""}`)}`}</div></div>`;
+  }).join("")}</div></div>`).join("");
+}
+function renderResourceSessionTools(c) {
+  const options = resourceRecoveryOptions(c), conversion = resourceConversionOptions(c).length > 0;
+  if (!conversion && !options.length) return "";
+  return `<div class="session-tools resource-session-actions"><div class="actions">${conversion ? button("Conversion de magie", "resource-conversions", "", "small-btn") : ""}${options.map((option) => button(esc(resourceRecoveryLabel(option)), "resource-event", `data-kind="${option.kind}"`, "small-btn ghost")).join("")}</div></div>`;
 }
 function renderFeaturesPage(c) {
   const all = characterFeatures(c),
@@ -15795,28 +16362,31 @@ function renderFeaturesPage(c) {
     list = all.filter((f) => (ui.featureFilter === "all" || f.category === ui.featureFilter) &&
       normalize(`${f.name} ${f.description} ${f.source} ${f.group}`).includes(query)),
     res = resources(c).filter((r) => !r.id.startsWith("innate-"));
-  return `<div class="page-head"><div><div class="eyebrow">${esc(c.name)} · ${esc(classSummary(c))}</div><h1>Aptitudes</h1><p class="page-subtitle">Tes capacités de classe, traits d’origine et dons.</p></div>${button(`${icon("tree", 17)} Niveaux & choix`, "navigate", 'data-route="progression"', "ghost")}</div>
+  return `<div class="page-head"><div><div class="eyebrow">${esc(c.name)} · ${esc(classSummary(c))}</div><h1>Aptitudes</h1>${renderCompactHelp("Les compétences sont dans la fiche.")}</div>${button(`${icon("tree", 17)} Niveaux & choix`, "navigate", 'data-route="progression"', "ghost")}</div>
     <div class="spell-toolbar"><div class="search-wrap">${icon("search", 18)}<input id="feature-search" class="search-input" data-bind="ui.featureQuery" value="${esc(ui.featureQuery)}" placeholder="Nom, effet, classe…" aria-label="Rechercher une aptitude"></div><select id="feature-filter" class="select-plain" data-bind="ui.featureFilter" aria-label="Origine des aptitudes"><option value="all">Toutes les aptitudes</option>${Object.entries(labels).map(([id, label]) => `<option value="${id}" ${ui.featureFilter === id ? "selected" : ""}>${label}</option>`).join("")}</select></div>
-    <p class="small muted" role="status">${list.length} aptitude${list.length > 1 ? "s" : ""} affichée${list.length > 1 ? "s" : ""} sur ${all.length}. Les compétences comme Discrétion et Athlétisme sont dans la fiche.</p>
+    <p class="small muted" role="status">${list.length} aptitude${list.length > 1 ? "s" : ""} affichée${list.length > 1 ? "s" : ""} sur ${all.length}.</p>
     ${list.length ? `<div class="aptitude-grid">${list.map((f) => `<article class="panel aptitude-card" data-feature-id="${esc(f.id)}"><div class="tiny muted">${esc(labels[f.category])} · ${esc(f.source)}</div><h2>${esc(f.name)}</h2>${f.current ? `<p class="pill purple">${esc(f.current)}</p>` : ""}<p class="aptitude-copy">${esc(f.description)}</p>${renderReference(f.referenceId)}</article>`).join("")}</div>` : notice("Aucune aptitude ne correspond. Change la recherche ou le filtre.")}
-    ${renderArcaneWard(c)}${res.length ? `<section class="panel section-gap"><div class="panel-head"><h2 class="panel-title">${icon("sun", 19)} Ressources des aptitudes</h2><span class="tiny muted">Restantes</span></div><div class="aptitude-resources">${res.map((r) => `<div class="resource-row"><div><button class="link-btn resource-name" data-action="resource-info" data-key="${esc(r.id)}">${esc(r.name)}</button><div class="resource-reset">${r.reset === "short" ? "Repos court ou long" : r.reset === "long" ? "Repos long" : "Récupération manuelle"}</div><p class="tiny muted">${esc(r.note || "")}</p></div><div class="counter">${r.max === null ? '<span class="counter-value">∞</span>' : `${smallIcon("minus", "resource-use", `Dépenser ${r.name}`, `data-key="${esc(r.id)}" data-delta="1" ${r.used >= r.max ? "disabled" : ""}`)}<span class="counter-value">${r.max - r.used}<small> / ${r.max}</small></span>${smallIcon("plus", "resource-use", `Récupérer ${r.name}`, `data-key="${esc(r.id)}" data-delta="-1" ${r.used <= 0 ? "disabled" : ""}`)}`}</div></div>`).join("")}</div><div class="rest-actions">${button(`${icon("clock", 16)} Repos court`, "rest-short")}${button(`${icon("moon", 16)} Repos long`, "rest-long")}${resourceConversionOptions(c).length ? button("Conversion de magie", "resource-conversions", "", "small-btn") : ""}${button("Récupération particulière", "resource-event", "", "small-btn ghost")}</div></section>` : ""}`;
+    ${renderArcaneWard(c)}<section class="panel section-gap aptitude-resource-panel"><div class="panel-head"><h2 class="panel-title">${icon("sun", 19)} Ressources des aptitudes</h2><span class="tiny muted">Restantes</span></div><div class="aptitude-resources">${renderResourceGroups(c, res)}</div><div class="rest-actions">${button(`${icon("clock", 16)} Repos court`, "rest-short")}${button(`${icon("moon", 16)} Repos long`, "rest-long")}</div>${renderResourceSessionTools(c)}</section>`;
 }
 function renderDeathSaves(c) {
   return `<div class="section-gap"><div class="small"><strong>Sauvegardes contre la mort</strong></div><div class="summary-row"><span>Réussites</span><div class="actions">${[1, 2, 3].map((n) => `<button class="condition-chip ${c.state.deathSuccess >= n ? "active" : ""}" data-action="death-mark" data-kind="deathSuccess" data-value="${n}" aria-label="${n} réussite(s)">${c.state.deathSuccess >= n ? "●" : "○"}</button>`).join("")}</div></div><div class="summary-row"><span>Échecs</span><div class="actions">${[1, 2, 3].map((n) => `<button class="condition-chip ${c.state.deathFailure >= n ? "active" : ""}" data-action="death-mark" data-kind="deathFailure" data-value="${n}" aria-label="${n} échec(s)">${c.state.deathFailure >= n ? "●" : "○"}</button>`).join("")}</div></div>${button(`${icon("dice", 16)} Lancer la sauvegarde`, "death-roll", "", "small-btn")}<p class="tiny muted">${c.state.deathFailure >= 3 ? "Trois échecs : personnage mort. Vérifie les effets particuliers avec le MJ." : c.state.deathSuccess >= 3 ? "Stabilisé : plus de sauvegardes jusqu’à de nouveaux dégâts." : "Un 1 naturel vaut deux échecs. Un 20 naturel rend 1 PV."}</p></div>`;
 }
 function renderSlots(c, { compact = false } = {}) {
   const d = derive(c);
-  const regular = d.slots.map((max, index) => max + (c.state.temporarySlots?.[index + 1] || 0))
-    .map((max, i) =>
-      max
-        ? `<div><div class="slot-label">Niveau ${i + 1}</div><div class="slots">${Array.from({ length: max }, (_, index) => `<button class="slot ${index < (c.state.slotsUsed[i + 1] || 0) ? "used" : ""}" data-action="toggle-slot" data-level="${i + 1}" data-index="${index}" aria-label="Emplacement niveau ${i + 1}, ${index < (c.state.slotsUsed[i + 1] || 0) ? "dépensé" : "disponible"}"></button>`).join("")}</div></div>`
-        : "",
-    )
-    .join("");
-  const pact = d.pact
-    ? `<div class="pact-slots"><div class="slot-label">Pacte · niveau ${d.pact.slotLevel}</div><div class="slots">${Array.from({ length: d.pact.count }, (_, index) => `<button class="slot pact ${index < (c.state.pactUsed || 0) ? "used" : ""}" data-action="toggle-pact" data-index="${index}" aria-label="Emplacement de pacte, ${index < (c.state.pactUsed || 0) ? "dépensé" : "disponible"}"></button>`).join("")}</div></div>`
-    : "";
-  return `<div class="slot-groups${compact ? " sheet-slots" : ""}">${regular}${pact}</div>${compact ? "" : `<div class="tiny muted" style="margin-top:13px">Cercle plein : disponible. Touche un emplacement pour corriger sa dépense.${d.pact ? " Les emplacements de pacte reviennent au repos court." : ""}</div>`}`;
+  const group = (level, max, spent, temporary = 0, pact = false) => {
+    const name = pact ? `Pacte · niveau ${level}` : `Niveau ${level}`,
+      remaining = Math.max(0, max - spent),
+      slots = `<div class="slots">${Array.from({ length: max }, (_, index) => `<button type="button" id="${pact ? "pact" : `slot-${level}`}-${index}" class="slot ${pact ? "pact " : ""}${index < spent ? "used" : ""}" data-action="${pact ? "toggle-pact" : "toggle-slot"}" ${pact ? "" : `data-level="${level}"`} data-index="${index}" aria-pressed="${index < spent}" aria-label="${pact ? "Emplacement de pacte" : "Emplacement"} niveau ${level}, ${index + 1} sur ${max}, ${index < spent ? "dépensé" : "disponible"}"></button>`).join("")}</div>`,
+      temporaryNote = temporary ? `Dont ${temporary} temporaire${temporary > 1 ? "s" : ""}` : "";
+    if (compact) return `<div class="${pact ? "pact-slots " : ""}sheet-slot-group"><div class="slot-label">${name}${temporary ? `<small>${temporaryNote}</small>` : ""}</div>${slots}</div>`;
+    return `<details class="slot-detail${pact ? " pact-slots" : ""}" data-detail="slots-${c.id}-${pact ? "pact" : level}"><summary aria-label="${name} : ${remaining} disponibles sur ${max} ; corriger la dépense"><span class="slot-summary-label">${pact ? name : `Niv. ${level}`}</span><span class="slot-summary-count">${remaining} <small>/ ${max}</small></span><span class="slot-summary-action">Corriger ${icon("down", 12)}</span>${temporary ? `<span class="slot-temp-flag">${temporaryNote}</span>` : ""}</summary>${slots}${temporary ? `<p class="slot-temporary-note">${temporaryNote} ; expiration au repos long.</p>` : pact ? '<p class="slot-temporary-note">Réserve distincte, récupérée au repos court ou long.</p>' : ""}</details>`;
+  };
+  const regular = Array.from({ length: 9 }, (_, index) => {
+    const level = index + 1, temporary = c.state.temporarySlots?.[level] || 0, max = (d.slots[index] || 0) + temporary;
+    return max ? group(level, max, c.state.slotsUsed[level] || 0, temporary) : "";
+  }).join("");
+  const pact = d.pact ? group(d.pact.slotLevel, d.pact.count, c.state.pactUsed || 0, 0, true) : "";
+  return `<div class="slot-groups${compact ? " sheet-slots" : " slot-summary-grid"}">${regular}${pact}</div>${compact ? "" : `<p class="slot-summary-help">Restants / total. Ouvre un niveau pour corriger sa dépense.${d.pact ? " Pacte : réserve séparée, repos court ou long." : ""}</p>`}`;
 }
 function renderSpellDescription(spell) {
   const reference = referenceEntity(spell.referenceId), translated = reference?.complete;
@@ -15902,6 +16472,8 @@ function renderSpells(c) {
         `<div class="spell-metric-group">${d.casting.length > 1 ? `<div class="tiny upper">${esc(m.label)}</div>` : ""}<div class="spell-metrics"><div class="spell-metric"><strong>${m.dc}</strong><span>DD de sauvegarde</span></div><div class="spell-metric"><strong>${signed(m.attack)}</strong><span>Attaque de sort</span></div><div class="spell-metric"><strong>${d.scores[m.ability]}</strong><span>${ABILITIES[m.ability].name}</span></div></div></div>`,
     )
     .join("");
+  const slotGroupCount = Array.from({ length: 9 }, (_, index) => (d.slots[index] || 0) + (c.state.temporarySlots?.[index + 1] || 0)).filter((count) => count > 0).length + (d.pact ? 1 : 0),
+    overview = Boolean(metrics && slotGroupCount);
   const innateNote = d.innateAbilities.filter((a) => !d.casting.some((m) => m.ability === a));
   let lastLevel = -1;
   const grouped = list
@@ -15911,14 +16483,14 @@ function renderSpells(c) {
       return head + spellCard(c, s);
     })
     .join("");
-  return `<div class="page-head mobile-stack"><div><div class="eyebrow">${esc(c.name)} · Magie & concentration</div><h1>Le grimoire</h1><p class="page-subtitle">Connaître un sort, le préparer, le lancer. Trois gestes distincts.</p></div><div class="actions">${casters.length ? button(`${icon("edit", 17)} Choisir mes sorts`, "edit-magic", "", "primary") : ""}</div></div>${metrics}${innateNote.length ? `<p class="tiny muted">Magie d’origine ou de don : ${innateNote.map((a) => `${ABILITIES[a].name} DD ${8 + d.prof + d.mods[a]}, attaque ${signed(d.prof + d.mods[a])}`).join(" · ")}.</p>` : ""}${
-    d.slots.length || d.pact
-      ? `<div class="panel"><div class="panel-head"><h2 class="panel-title">${icon("sparkles", 18)} Emplacements disponibles</h2></div>${renderSlots(c)}</div>`
+  return `<div class="page-head mobile-stack"><div><div class="eyebrow">${esc(c.name)}</div><h1>Le grimoire</h1></div><div class="actions">${casters.length ? button(`${icon("edit", 17)} Choisir mes sorts`, "edit-magic", "", "primary") : ""}</div></div>${overview ? `<div class="desktop-magic-overview magic-overview"><div class="desktop-magic-metrics">` : ""}${metrics}${innateNote.length ? `<p class="tiny muted">Magie d’origine ou de don : ${innateNote.map((a) => `${ABILITIES[a].name} DD ${8 + d.prof + d.mods[a]}, attaque ${signed(d.prof + d.mods[a])}`).join(" · ")}.</p>` : ""}${overview ? "</div>" : ""}${
+    slotGroupCount
+      ? `<div class="panel slot-summary-panel"><div class="panel-head"><h2 class="panel-title">${icon("sparkles", 18)} Emplacements disponibles</h2></div>${renderSlots(c)}</div>`
       : notice(casters.length ? "Tes premiers emplacements arrivent avec le prochain niveau de ta classe." : "Ta classe ne lance pas de sorts. La magie d’origine, de don ou maison reste utilisable.")
-  }${c.state.concentration ? `<div class="notice purple section-gap">${icon("sparkles", 19)}<div><strong>Concentration : ${esc(c.state.concentration)}</strong>Un seul sort de concentration à la fois.<button class="link-btn" data-action="end-concentration">Mettre fin à la concentration</button></div></div>` : ""}<div class="segmented section-gap"><button data-action="spell-tab" data-value="mine" class="${ui.spellTab === "mine" ? "active" : ""}">Mes sorts (${ids.size})</button><button data-action="spell-tab" data-value="catalogue" class="${ui.spellTab === "catalogue" ? "active" : ""}">Catalogue de ma classe</button></div><div class="spell-toolbar"><div class="search-wrap">${icon("search", 18)}<input id="spell-search" class="search-input" data-bind="ui.spellQuery" value="${esc(ui.spellQuery)}" placeholder="Rechercher un sort…" aria-label="Rechercher un sort"></div><select id="spell-filter" class="select-plain" data-bind="ui.spellLevel" aria-label="Niveau de sort"><option value="all">Tous niveaux</option>${Array.from({ length: 10 }, (_, i) => `<option value="${i}" ${ui.spellLevel === String(i) ? "selected" : ""}>${i === 0 ? "Sorts mineurs" : "Niveau " + i}</option>`).join("")}</select></div>${
+  }${overview ? "</div>" : ""}${c.state.concentration ? `<div class="notice purple section-gap">${icon("sparkles", 19)}<div><strong>Concentration : ${esc(c.state.concentration)}</strong><button class="link-btn" data-action="end-concentration">Mettre fin à la concentration</button>${renderCompactHelp("Un seul sort de concentration à la fois.")}</div></div>` : ""}<div class="segmented section-gap"><button data-action="spell-tab" data-value="mine" class="${ui.spellTab === "mine" ? "active" : ""}">Mes sorts (${ids.size})</button><button data-action="spell-tab" data-value="catalogue" class="${ui.spellTab === "catalogue" ? "active" : ""}">Catalogue de ma classe</button></div><div class="spell-toolbar"><div class="search-wrap">${icon("search", 18)}<input id="spell-search" class="search-input" data-bind="ui.spellQuery" value="${esc(ui.spellQuery)}" placeholder="Rechercher un sort…" aria-label="Rechercher un sort"></div><select id="spell-filter" class="select-plain" data-bind="ui.spellLevel" aria-label="Niveau de sort"><option value="all">Tous niveaux</option>${Array.from({ length: 10 }, (_, i) => `<option value="${i}" ${ui.spellLevel === String(i) ? "selected" : ""}>${i === 0 ? "Sorts mineurs" : "Niveau " + i}</option>`).join("")}</select></div>${
     list.length
       ? `<div class="spell-grid">${grouped}</div>`
-      : `<div class="panel empty"><span class="empty-icon">${icon("book", 29)}</span><h2>${ui.spellQuery ? "Aucun sort trouvé" : "Les premières pages sont vierges."}</h2><p>${ui.spellQuery ? "Essaie un autre nom ou ajoute un sort maison." : "Sélectionne tes sorts et découvre leurs usages avant de partir à l’aventure."}</p>${casters.length ? button("Choisir mes sorts", "edit-magic", "", "primary") : ""}</div>`
+      : `<div class="panel empty"><span class="empty-icon">${icon("book", 29)}</span><h2>${ui.spellQuery ? "Aucun sort trouvé" : "Aucun sort sélectionné"}</h2>${ui.spellQuery ? "<p>Essaie un autre nom ou ajoute un sort maison.</p>" : ""}${casters.length ? button("Choisir mes sorts", "edit-magic", "", "primary") : ""}</div>`
   }<div class="catalogue-note">${esc(UI_FR["spells.catalogueNote"].replace("{count}", SPELLS.length))}</div>`;
 }
 function magicDraft(target) {
@@ -15933,12 +16505,14 @@ function renderMagicEditor(c, target) {
     all = catalogue(c),
     always = domainSpells(c),
     mine = (ids) => ids.filter((id) => spellAcquisitions(c, id).some((entry) => entry.classId === classId && (entry.known || entry.prepared))),
-    known = all.filter((s) => mine(c.spells.known).includes(s.id)),
+    mineKnown = mine(c.spells.known),
+    minePrepared = mine(c.spells.prepared),
+    known = all.filter((s) => mineKnown.includes(s.id)),
     query = ui.editorQuery.toLocaleLowerCase("fr-FR");
   let list = all
     .filter(
       (s) =>
-        (canReadySpell(c, s, classId) || mine(c.spells.known).includes(s.id) || mine(c.spells.prepared).includes(s.id)) &&
+        (canReadySpell(c, s, classId) || mineKnown.includes(s.id) || minePrepared.includes(s.id)) &&
         (ui.editorLevel === "all" || s.level === Number(ui.editorLevel)) &&
         [s.name, s.referenceEnglishName, s.englishName].filter(Boolean).some((name) => name.toLocaleLowerCase("fr-FR").includes(query)),
     )
@@ -15960,7 +16534,9 @@ function renderMagicEditor(c, target) {
       : limits.mode === "prepared"
         ? "Toute la liste de ta classe t’est ouverte. Choisis les sorts préparés pour la journée ; les sorts mineurs restent connus."
         : "Les sorts appris sont toujours disponibles. Tu peux en remplacer un à chaque niveau gagné.";
-  return `${tabs}<div class="sticky-tools"><div class="learn-counts"><span class="pill purple">Mineurs : ${cantripCount}/${limits.cantrips}</span>${["known", "book"].includes(limits.mode) ? `<span class="pill purple">${limits.mode === "book" ? "Grimoire" : "Connus"} : ${knownCount}/${limits.known}${limits.mode === "book" ? " min." : ""}</span>` : ""}${["prepared", "book"].includes(limits.mode) ? `<span class="pill purple">Préparés : ${mine(c.spells.prepared).filter((id) => !always.includes(id)).length}/${limits.prepared}</span>` : ""}${always.length ? `<span class="pill">${always.length} toujours préparés</span>` : ""}<span class="pill outline">Jusqu’au niveau ${limits.maxLevel || 0}</span>${secrets}${school}</div><div class="spell-toolbar"><div class="search-wrap">${icon("search", 18)}<input id="editor-search" class="search-input" data-bind="ui.editorQuery" value="${esc(ui.editorQuery)}" placeholder="Nom du sort…" aria-label="Chercher dans les choix de sorts"></div><select id="editor-filter" class="select-plain" data-bind="ui.editorLevel" aria-label="Filtrer les choix par niveau"><option value="all">Tous niveaux</option>${Array.from({ length: 10 }, (_, i) => `<option value="${i}" ${ui.editorLevel === String(i) ? "selected" : ""}>${i === 0 ? "Sorts mineurs" : "Niveau " + i}</option>`).join("")}</select></div></div><div class="small muted" style="margin-bottom:16px">${help}</div>${list.length ? `<div class="spell-grid">${list.map((s) => spellCard(c, s, { editor: true, target, scope: "editor-" + target, classId })).join("")}</div>` : notice("Aucun sort dans ce filtre. Change le niveau ou la recherche.")}<div class="section-gap">${limits.mode === "known" || secretSlots.size ? button("Remplacer un sort ou corriger un Secret", "replace-spell", `data-target="${target}"`, "small-btn") : ""}${checkField("Autoriser les exceptions du MJ", `${prefix}.spells.allowExceptions`, c.spells.allowExceptions, "Affiche toutes les listes et tous les niveaux, sans bloquer les quotas. Utile pour les règles maison.")}</div>`;
+  const workflow = target === "wizard" || target === "level";
+  const scrollKey = `${target}|${classId}|${ui.editorQuery}|${ui.editorLevel}`;
+  return `${workflow ? '<div class="workflow-magic-editor"><div class="workflow-magic-tools">' : ""}${tabs}<div class="sticky-tools"><div class="learn-counts"><span class="pill purple">Mineurs : ${cantripCount}/${limits.cantrips}</span>${["known", "book"].includes(limits.mode) ? `<span class="pill purple">${limits.mode === "book" ? "Grimoire" : "Connus"} : ${knownCount}/${limits.known}${limits.mode === "book" ? " min." : ""}</span>` : ""}${["prepared", "book"].includes(limits.mode) ? `<span class="pill purple">Préparés : ${minePrepared.filter((id) => !always.includes(id)).length}/${limits.prepared}</span>` : ""}${always.length ? `<span class="pill">${always.length} toujours préparés</span>` : ""}<span class="pill outline">Jusqu’au niveau ${limits.maxLevel || 0}</span>${secrets}${school}</div><div class="spell-toolbar"><div class="search-wrap">${icon("search", 18)}<input id="editor-search" class="search-input" data-bind="ui.editorQuery" value="${esc(ui.editorQuery)}" placeholder="Nom du sort…" aria-label="Chercher dans les choix de sorts"></div><select id="editor-filter" class="select-plain" data-bind="ui.editorLevel" aria-label="Filtrer les choix par niveau"><option value="all">Tous niveaux</option>${Array.from({ length: 10 }, (_, i) => `<option value="${i}" ${ui.editorLevel === String(i) ? "selected" : ""}>${i === 0 ? "Sorts mineurs" : "Niveau " + i}</option>`).join("")}</select></div></div><div class="small muted" style="margin-bottom:16px">${help}</div>${workflow ? `</div><div class="workflow-spell-scroll" id="workflow-spell-scroll" role="region" tabindex="0" aria-label="Choix de sorts" data-scroll-key="${esc(scrollKey)}">` : ""}${list.length ? `<div class="spell-grid">${list.map((s) => spellCard(c, s, { editor: true, target, scope: "editor-" + target, classId })).join("")}</div>` : notice("Aucun sort dans ce filtre. Change le niveau ou la recherche.")}<div class="section-gap">${limits.mode === "known" || secretSlots.size ? button("Remplacer un sort ou corriger un Secret", "replace-spell", `data-target="${target}"`, "small-btn") : ""}${checkField("Autoriser les exceptions du MJ", `${prefix}.spells.allowExceptions`, c.spells.allowExceptions, "Affiche toutes les listes et tous les niveaux, sans bloquer les quotas.")}</div>${workflow ? "</div></div>" : ""}`;
 }
 function renderInventoryRow(c, item) {
   const state = item.instance, slots = inventoryItemSlots(item), adapter = itemRuntimeAdapter(item);
@@ -15969,19 +16545,18 @@ function renderInventoryRow(c, item) {
 function renderInstanceFields(item) {
   const state = item.instance;
   if (!state) return "";
-  return `<hr class="section-gap"><p class="small muted">${esc(UI_FR["items.instancesHelp"])}</p>${checkField(UI_FR["items.carried"], "form.instance.carried", state.carried)}${field(UI_FR["items.owner"], "form.instance.ownerId", state.ownerId, "text", UI_FR["items.ownerHelp"], 'maxlength="120"')}${state.attunement.required ? checkField(UI_FR["items.attuned"], "form.instance.attunement.active", state.attunement.active, UI_FR["items.attunementHelp"]) : ""}${state.charges ? field(UI_FR["items.charges"], "form.instance.charges.current", state.charges.current, "number", `${state.charges.max} maximum`, `min="0" max="${state.charges.max}" step="1"`) : ""}${state.reference ? `<p class="tiny muted">${esc(state.reference.source)} · ${esc(state.reference.revision.slice(0, 12))}</p>` : ""}`;
+  return `<hr class="section-gap">${renderCompactHelp(UI_FR["items.instancesHelp"])}${checkField(UI_FR["items.carried"], "form.instance.carried", state.carried)}${field(UI_FR["items.owner"], "form.instance.ownerId", state.ownerId, "text", UI_FR["items.ownerHelp"], 'maxlength="120"')}${state.attunement.required ? checkField(UI_FR["items.attuned"], "form.instance.attunement.active", state.attunement.active, UI_FR["items.attunementHelp"]) : ""}${state.charges ? field(UI_FR["items.charges"], "form.instance.charges.current", state.charges.current, "number", `${state.charges.max} maximum`, `min="0" max="${state.charges.max}" step="1"`) : ""}${state.reference ? `<p class="tiny muted">${esc(state.reference.source)} · ${esc(state.reference.revision.slice(0, 12))}</p>` : ""}`;
 }
 function renderInventory(c) {
   const d = derive(c),
     armor = ARMORS[c.equipment.armor] || ARMORS.none,
-    weight = c.inventory.filter((i) => !i.instance || i.instance.carried && i.instance.ownerId === c.id).reduce((s, i) => s + i.qty * i.weight, 0),
     hands = heldWeapons(c);
-  return `<div class="page-head mobile-stack"><div><div class="eyebrow">${esc(c.name)} · Équipement & trésors</div><h1>Le sac d’aventure</h1><p class="page-subtitle">Ce que tu portes. Ce que tu gardes. Ce qui change ta défense.</p></div><div class="actions">${button(`${icon("plus", 17)} Objet du catalogue`, "catalog-item", "", "primary")}${button(`${icon("edit", 16)} Objet libre`, "new-item", "", "ghost")}</div></div><div class="grid-2"><section class="panel"><div class="panel-head"><h2 class="panel-title">${icon("shield", 19)} Équipement actif</h2><button class="link-btn" data-action="equipment">Modifier ${icon("edit", 14)}</button></div><div class="equipment-summary"><div><div class="item-label">Armure</div><div class="item-name">${esc(armor.name)}${c.equipment.shield ? " + bouclier" : ""}</div></div><span class="pill">CA ${d.ac}</span></div>${d.attacks
+  return `<div class="page-head mobile-stack"><div><div class="eyebrow">${esc(c.name)}</div><h1>Le sac d’aventure</h1></div><div class="actions">${button(`${icon("plus", 17)} Objet du catalogue`, "catalog-item", "", "primary")}${button(`${icon("edit", 16)} Objet libre`, "new-item", "", "ghost")}</div></div><div class="grid-2 desktop-inventory-layout"><div class="desktop-inventory-summary"><section class="panel"><div class="panel-head"><h2 class="panel-title">${icon("shield", 19)} Équipement actif</h2><button class="link-btn" data-action="equipment">Modifier ${icon("edit", 14)}</button></div><div class="equipment-summary"><div><div class="item-label">Armure</div><div class="item-name">${esc(armor.name)}${c.equipment.shield ? " + bouclier" : ""}</div></div><span class="pill">CA ${d.ac}</span></div>${d.attacks
     .map(
       (a) =>
         `<div class="equipment-summary"><div><div class="item-label">Arme</div><div class="item-name">${esc(a.name)}</div></div><span class="pill">${signed(a.attack)} · ${esc(a.damageDice)} ${signed(a.damageBonus)}</span></div>`,
     )
-    .join("")}<p class="small section-gap">${esc(UI_FR["equipment.mainHand"])} : ${esc(hands.main ? weaponOf(hands.main.id)?.name : UI_FR["equipment.free"])} · ${esc(UI_FR["equipment.offHand"])} : ${esc(c.equipment.shield ? UI_FR["equipment.shield"] : hands.off ? weaponOf(hands.off.id)?.name : UI_FR["equipment.free"])}</p><p class="tiny muted section-gap">CA : ${esc(d.acExplanation)}.</p>${armor.stealth ? notice("Cette armure impose le désavantage aux tests de Discrétion.", "warning") : ""}${!d.armorProficient ? notice("Armure ou bouclier non maîtrisé : tu ne peux pas lancer de sorts avec cet équipement.", "warning") : ""}${d.strTooLow ? notice(`Force insuffisante pour ${esc(armor.name)} : vitesse réduite de 3 m.`, "warning") : ""}</section><div class="stack"><div class="coins">${icon("gem", 28)}<div><strong>${c.gold.toLocaleString("fr-FR")}</strong><span> pièces d’or</span></div><button class="link-btn" style="margin-left:auto;color:inherit" data-action="gold">Ajuster</button></div><div class="panel"><div class="summary-row"><span>${c.inventory.some((item) => item.weightUnknown && item.instance?.carried) ? "Poids connu du sac" : "Poids du sac"}</span><strong>${String(Math.round(weight * 100) / 100).replace(".", ",")} kg</strong></div><div class="summary-row"><span>Capacité (FOR × ${String(7.5 * d.acc.carryMultiplier).replace(".", ",")} kg)</span><strong>${String(d.carry).replace(".", ",")} kg</strong></div><div class="bar ${weight > d.carry ? "low" : ""}"><span style="width:${clamp((weight / d.carry) * 100, 0, 100)}%"></span></div></div></div></div><section class="section-gap"><div class="section-title"><h2>Dans le sac</h2><span class="tiny muted">${c.inventory.length} entrée(s)</span></div>${
+    .join("")}<p class="small section-gap">${esc(UI_FR["equipment.mainHand"])} : ${esc(hands.main ? weaponOf(hands.main.id)?.name : UI_FR["equipment.free"])} · ${esc(UI_FR["equipment.offHand"])} : ${esc(c.equipment.shield ? UI_FR["equipment.shield"] : hands.off ? weaponOf(hands.off.id)?.name : UI_FR["equipment.free"])}</p><p class="tiny muted section-gap">CA : ${esc(d.acExplanation)}.</p>${armor.stealth ? notice("Cette armure impose le désavantage aux tests de Discrétion.", "warning") : ""}${!d.armorProficient ? notice("Armure ou bouclier non maîtrisé : tu ne peux pas lancer de sorts avec cet équipement.", "warning") : ""}${d.strTooLow ? notice(`Force insuffisante pour ${esc(armor.name)} : vitesse réduite de 3 m.`, "warning") : ""}</section><div class="stack"><div class="coins">${icon("gem", 28)}<div><strong>${c.gold.toLocaleString("fr-FR")}</strong><span> pièces d’or</span></div><button class="link-btn" style="margin-left:auto;color:inherit" data-action="gold">Ajuster</button></div>${renderInventoryCarrySummary(c, d)}</div></div><section class="section-gap"><div class="section-title"><h2>Dans le sac</h2><span class="tiny muted">${c.inventory.length} entrée(s)</span></div>${
     c.inventory.length
       ? `<div class="inventory-list">${c.inventory
           .map(
@@ -15989,8 +16564,8 @@ function renderInventory(c) {
               renderInventoryRow(c, item),
           )
           .join("")}</div>`
-      : `<div class="panel empty"><span class="empty-icon">${icon("bag", 28)}</span><h3>Il reste de la place.</h3><p>Ajoute provisions, cordes et trésors depuis le catalogue ou à la main.</p>${button("Ajouter un objet", "catalog-item", "", "small-btn")}</div>`
-  }</section>${c.background.kitArchive?.length ? `<details class="section-gap"><summary>Équipement d’historique remplacé (${c.background.kitArchive.length})</summary><p class="small muted">Ces exemplaires ne sont plus portés. Leurs descriptions et leurs notes restent conservées.</p>${c.background.kitArchive.map((item) => `<article class="panel section-gap"><h3>${esc(item.name)} ×${item.qty}</h3><p class="small preserve">${esc(item.description || "Aucune note.")}</p></article>`).join("")}</details>` : ""}<div class="notice section-gap">${icon("info", 18)}<div><strong>Un objet magique ou une règle maison ?</strong>Utilise les ajustements du MJ pour un bonus ponctuel, ou une aptitude maison pour un effet durable.<div class="actions">${button("Ajustements du MJ", "adjustments", "", "small-btn")}${button("Contenus maison", "navigate", 'data-route="homebrew"', "small-btn ghost")}</div></div></div>`;
+      : `<div class="panel empty"><span class="empty-icon">${icon("bag", 28)}</span><h3>Le sac est vide</h3>${button("Ajouter un objet", "catalog-item", "", "small-btn")}</div>`
+  }</section></div>${c.background.kitArchive?.length ? `<details class="section-gap"><summary>Équipement d’historique remplacé (${c.background.kitArchive.length})</summary><p class="small muted">Ces exemplaires ne sont plus portés. Leurs descriptions et leurs notes restent conservées.</p>${c.background.kitArchive.map((item) => `<article class="panel section-gap"><h3>${esc(item.name)} ×${item.qty}</h3><p class="small preserve">${esc(item.description || "Aucune note.")}</p></article>`).join("")}</details>` : ""}<div class="section-gap"><div class="actions">${button("Ajustements du MJ", "adjustments", "", "small-btn")}${button("Contenus maison", "navigate", 'data-route="homebrew"', "small-btn ghost")}</div>${renderCompactHelp("Ajustement du MJ : bonus chiffré. Aptitude maison : effet décrit et suivi.")}</div>`;
 }
 const BEAST_SIZES = { TP: "Très petite", P: "Petite", M: "Moyenne", G: "Grande", TG: "Très grande", Gig: "Gigantesque" };
 function summarizeChoice(c, l) {
@@ -16012,7 +16587,7 @@ function summarizeChoice(c, l) {
 }
 function renderProgression(c) {
   const d = derive(c);
-  return `<div class="page-head mobile-stack"><div><div class="eyebrow">${esc(c.name)}, du premier pas aux légendes</div><h1>Ton parcours</h1><p class="page-subtitle">Chaque décision reste lisible, et chaque niveau peut être corrigé.</p></div><div class="actions">${button(`${icon("plus", 17)} Niveau ${Math.min(d.level + 1, 20)}`, "level-up", d.level >= 20 ? "disabled" : "", "primary")}${button("Options de règles", "rule-options", "", "small-btn")}${button("Historique des choix", "acquisition-history", "", "small-btn ghost")}${button("Détail des calculs", "calculation-details", "", "small-btn ghost")}</div></div><div class="panel" style="margin-bottom:25px"><div class="summary-row"><span>${esc(classSummary(c))}</span><strong>${c.xp.toLocaleString("fr-FR")} XP <button class="link-btn" data-action="xp" aria-label="Modifier l’expérience">${icon("edit", 14)}</button></strong></div><p class="small muted">${d.level < 20 ? `Prochain seuil : ${d.nextXP.toLocaleString("fr-FR")} XP. Le passage de niveau reste manuel, pour suivre les jalons décidés par le MJ.` : "Niveau maximal atteint."}</p><div class="bar"><span style="width:${d.level < 20 ? clamp((c.xp / d.nextXP) * 100, 0, 100) : 100}%"></span></div></div><div class="timeline">${[...c.levels]
+  return `<div class="page-head mobile-stack"><div><div class="eyebrow">${esc(c.name)}</div><h1>Ton parcours</h1></div><div class="actions">${button(`${icon("plus", 17)} Niveau ${Math.min(d.level + 1, 20)}`, "level-up", d.level >= 20 ? "disabled" : "", "primary")}${button("Options de règles", "rule-options", "", "small-btn")}${button("Historique des choix", "acquisition-history", "", "small-btn ghost")}${button("Détail des calculs", "calculation-details", "", "small-btn ghost")}</div></div><div class="panel" style="margin-bottom:25px"><div class="summary-row"><span>${esc(classSummary(c))}</span><strong>${c.xp.toLocaleString("fr-FR")} XP <button class="link-btn" data-action="xp" aria-label="Modifier l’expérience">${icon("edit", 14)}</button></strong></div><p class="small muted">${d.level < 20 ? `Prochain seuil : ${d.nextXP.toLocaleString("fr-FR")} XP. Passage de niveau manuel.` : "Niveau maximal atteint."}</p><div class="bar"><span style="width:${d.level < 20 ? clamp((c.xp / d.nextXP) * 100, 0, 100) : 100}%"></span></div></div><div class="timeline progression-timeline">${[...c.levels]
     .reverse()
     .map((l) => {
       const fs = features(c, l.level),
@@ -16020,7 +16595,7 @@ function renderProgression(c) {
         cls = CLASSES[l.classId];
       return `<article class="level-card"><div class="level-marker">${l.level}</div><div class="level-body"><div class="level-head"><h3>${cls.name} ${k}${k === 1 && l.level > 1 ? ' <span class="pill sand">multiclasse</span>' : ""}</h3>${smallIcon("edit", "edit-level", `Corriger le niveau ${l.level}`, `data-level="${l.level}"`)}</div><div class="level-meta">PV : ${l.level === 1 ? `${cls.die} (maximum)` : `${l.hpDie} sur d${cls.die}`} ${signed(d.mods.con)} CON</div><div>${fs.map((f) => `<span class="feature-tag" title="${esc(f.description)}">${esc(f.name)}</span>`).join("") || '<span class="tiny muted">Progression des ressources et de la magie.</span>'}</div>${summarizeChoice(c, l)}</div></article>`;
     })
-    .join("")}</div>${d.level > 1 ? `<div class="actions section-gap">${button(`${icon("undo", 16)} Retirer le dernier niveau`, "remove-level", "", "danger ghost")}</div>` : ""}<div class="notice section-gap">${icon("info", 18)}<div><strong>La Constitution compte pour tous les niveaux.</strong>Modifier sa valeur recalcule les PV de tous les niveaux. Les blessures sont conservées : une hausse du maximum s’ajoute aux PV actuels, sauf à 0 PV.</div></div>`;
+    .join("")}</div>${d.level > 1 ? `<div class="actions section-gap">${button(`${icon("undo", 16)} Retirer le dernier niveau`, "remove-level", "", "danger ghost")}</div>` : ""}${renderCompactHelp("La Constitution modifie les PV de tous les niveaux. Modifier la Constitution recalcule tous les niveaux. Les blessures sont conservées; une hausse du maximum augmente les PV actuels, sauf à 0 PV.", "Points de vie")}`;
 }
 function renderNotes(c) {
   const d = derive(c),
@@ -16040,10 +16615,119 @@ function renderNotes(c) {
     ["Liens", details.bonds],
     ["Défauts", details.flaws],
   ].filter(([, v]) => v);
-  return `<div class="page-head"><div><div class="eyebrow">${esc(c.name)} · Ce qui ne tient pas dans une statistique</div><h1>Le journal</h1><p class="page-subtitle">Alliés, promesses, indices… et le nom de cette auberge.</p></div></div><div class="panel">${field("Notes de campagne", "ui.noteDraft", ui.noteDraft, "textarea", "Les notes ne sont enregistrées qu’après validation.", 'rows="12" maxlength="20000"')}${button(`${icon("check", 17)} Enregistrer mes notes`, "save-notes", "", "primary")}</div><div class="grid-2 section-gap"><div class="panel"><h3>Identité</h3>${detailRows.map(([k, v]) => `<div class="summary-row"><span>${k}</span><strong>${esc(v)}</strong></div>`).join("") || '<p class="small muted">Complète l’identité en modifiant le personnage.</p>'}${persona.map(([k, v]) => `<p class="small preserve section-gap"><strong>${k} :</strong> ${esc(v)}</p>`).join("")}<p class="small muted preserve section-gap">${esc(c.biography || "Ton histoire reste à écrire.")}</p></div><div class="panel"><h3>Historique : ${esc(bg.name)}</h3>${bg.feature?.[0] ? `<p class="small section-gap"><strong>${esc(bg.feature[0])}.</strong> ${esc(bg.feature[1] || "")}</p>` : ""}<div class="summary-row"><span>Langues</span><strong>${esc(d.languages.map((l) => l.name).join(", ") || "Commun")}</strong></div><div class="summary-row"><span>Outils</span><strong>${esc(d.tools.map((t) => t.name).join(", ") || "Aucun")}</strong></div>${c.languages ? `<p class="small muted preserve">${esc(c.languages)}</p>` : ""}</div></div>`;
+  const entries = journalEntriesOf(c);
+  if (ui.journalCharacterId !== c.id) { ui.journalCharacterId = c.id; ui.journalSelectedId = null; ui.journalQuery = ""; }
+  const matches = searchJournalEntries(entries, ui.journalQuery);
+  const search = entries.length ? `<section class="journal-search" aria-label="Recherche dans ce journal"><label class="sr-only" for="journal-search">Rechercher dans le journal</label><div class="journal-search-controls"><div class="search-wrap">${icon("search", 18)}<input id="journal-search" type="search" class="search-input" data-bind="ui.journalQuery" value="${esc(ui.journalQuery)}" placeholder="Rechercher dans le journal…" aria-describedby="journal-search-help journal-search-status" maxlength="200" autocomplete="off"><button type="button" class="journal-search-clear" data-action="journal-search-clear" id="journal-search-clear" aria-label="Effacer la recherche" ${ui.journalQuery ? "" : "hidden"}>×</button></div></div><details class="compact-help journal-search-info"><summary>Aide à la recherche</summary><p id="journal-search-help">La recherche porte sur les titres et le texte saisi, sans reconnaissance du texte des photos.</p></details><p id="journal-search-status" class="small muted" role="status" aria-live="polite" aria-atomic="true" ${ui.journalQuery.trim() ? "" : "hidden"}>${journalSearchStatus(matches.length, entries.length)}</p></section>` : "";
+  return `<div class="journal-toolbar"><div><div class="eyebrow">${esc(c.name)}</div><h1>Le journal</h1></div>${button(`${icon("plus", 17)} Ajouter une page`, "journal-new", "", "primary")}</div>${search}<div id="journal-results">${renderJournalResults(entries, matches)}</div><details class="section-gap"><summary>À propos de ${esc(c.name)}</summary><div class="grid-2 section-gap"><div class="panel"><h3>Identité</h3>${detailRows.map(([k, v]) => `<div class="summary-row"><span>${k}</span><strong>${esc(v)}</strong></div>`).join("") || '<p class="small muted">Complète l’identité en modifiant le personnage.</p>'}${persona.map(([k, v]) => `<p class="small preserve section-gap"><strong>${k} :</strong> ${esc(v)}</p>`).join("")}${c.biography ? `<p class="small muted preserve section-gap">${esc(c.biography)}</p>` : ""}</div><div class="panel"><h3>Historique : ${esc(bg.name)}</h3>${bg.feature?.[0] ? `<p class="small section-gap"><strong>${esc(bg.feature[0])}.</strong> ${esc(bg.feature[1] || "")}</p>` : ""}<div class="summary-row"><span>Langues</span><strong>${esc(d.languages.map((l) => l.name).join(", ") || "Commun")}</strong></div><div class="summary-row"><span>Outils</span><strong>${esc(d.tools.map((t) => t.name).join(", ") || "Aucun")}</strong></div>${c.languages ? `<p class="small muted preserve">${esc(c.languages)}</p>` : ""}</div></div></details>`;
 }
+function journalSearchStatus(found, total) {
+  return ui.journalQuery.trim() ? `${found} ${found === 1 ? "page trouvée" : "pages trouvées"} sur ${total}` : "";
+}
+function renderJournalResults(entries, matches) {
+  const selected = matches.find(({ entry }) => entry.id === ui.journalSelectedId)?.entry || matches[0]?.entry;
+  ui.journalSelectedId = selected?.id || null;
+  if (!entries.length) return `<div class="journal-sheet journal-empty"><h2 class="journal-title">Aucune page</h2><p>Ajoute du texte ou une photo de tes notes.</p></div>`;
+  if (!matches.length) return `<div class="journal-no-results"><h2>Aucune page trouvée</h2><p>Essaie un autre terme.</p>${button("Voir toutes les pages", "journal-search-clear", "", "ghost")}</div>`;
+  return `<div class="journal-layout"><nav class="journal-index" aria-label="Pages du journal"><h2 class="journal-index-heading"><span>Sessions${ui.journalQuery.trim() ? "" : ` (${entries.length})`}</span><small>Récentes d’abord</small></h2><ol class="journal-entry-list">${matches.map(({ entry, excerpt }) => `<li><button type="button" class="journal-entry-link" data-action="journal-open" data-id="${esc(entry.id)}" ${entry.id === selected.id ? 'aria-current="page"' : ""}><span class="journal-date">${esc(journalDateLabel(entry.date))}</span><span class="journal-entry-title">${esc(entry.title || "Notes de session")}</span>${ui.journalQuery.trim() && excerpt ? `<span class="journal-entry-preview">${esc(excerpt)}</span>` : ""}</button></li>`).join("")}</ol></nav><article class="journal-sheet" aria-labelledby="journal-page-title"><header class="journal-sheet-head"><span class="journal-date">${esc(journalDateLabel(selected.date, true))}</span><h2 id="journal-page-title" class="journal-title" tabindex="-1">${esc(selected.title || "Notes de session")}</h2></header>${selected.image ? `<button type="button" class="journal-photo" data-action="journal-photo-view" data-id="${esc(selected.id)}" aria-label="Agrandir la photo de cette page"><img src="${esc(selected.image.dataUrl)}" width="${selected.image.width}" height="${selected.image.height}" alt="Feuille photographiée : ${esc(selected.title || "Notes de session")}"><span>Agrandir la photo</span></button>` : ""}${selected.body ? `<div class="journal-body">${esc(selected.body)}</div>` : ""}<footer class="journal-page-actions">${button(`${icon("edit", 16)} Modifier`, "journal-edit", `data-id="${esc(selected.id)}"`)}${button(`${icon("trash", 16)} Supprimer`, "journal-delete", `data-id="${esc(selected.id)}"`, "character-delete-button")}</footer></article></div>`;
+}
+function updateJournalSearch() {
+  const target = document.getElementById("journal-results"), c = activeCharacter();
+  if (!target || !c || ui.route !== "notes") return;
+  const entries = journalEntriesOf(c), matches = searchJournalEntries(entries, ui.journalQuery);
+  target.innerHTML = renderJournalResults(entries, matches);
+  const status = document.getElementById("journal-search-status");
+  status.textContent = journalSearchStatus(matches.length, entries.length);
+  status.hidden = !ui.journalQuery.trim();
+  document.getElementById("journal-search-clear").hidden = !ui.journalQuery;
+}
+
+function journalDateLabel(date, full = false) {
+  if (!date) return "Sans date";
+  return new Date(`${date}T12:00:00Z`).toLocaleDateString("fr-FR", { timeZone: "UTC", day: "numeric", month: full ? "long" : "short", year: "numeric", ...(full ? { weekday: "long" } : {}) });
+}
+function journalDraftDirty() {
+  const draft = ui.journalDraft;
+  return !!draft && (ui.journalPhotoLoading || ["date", "title", "body"].some((key) => draft[key] !== draft.initial[key]) || draft.image?.dataUrl !== draft.initial.image?.dataUrl);
+}
+function openJournalEditor(id = null) {
+  const character = activeCharacter(), entry = id ? journalEntriesOf(character).find((item) => item.id === id) : null;
+  if (id && !entry) { toast("Cette page n’existe plus."); return; }
+  const initial = entry ? { date: entry.date, title: entry.title, body: entry.body, image: entry.image || null } : { date: journalLocalDate(), title: "", body: "", image: null };
+  ui.journalDraft = { id: entry?.id || uid(), isNew: !entry, original: clone(character), initial, ...initial };
+  ui.journalError = "";
+  ui.journalPhotoLoading = false;
+  ui.journalPhotoSourceOpen = false;
+  ui.journalPhotoSourceTrigger = "journal-photo-source";
+  openModal("journal-editor");
+}
+function setJournalPhotoSource(open, { restoreFocus = false } = {}) {
+  ui.journalPhotoSourceOpen = open && !ui.journalPhotoLoading && !ui.journalSaving;
+  const menu = document.getElementById("journal-photo-sources");
+  if (!menu) return;
+  menu.hidden = !ui.journalPhotoSourceOpen;
+  modalRoot.querySelectorAll('[aria-controls="journal-photo-sources"]').forEach((control) => control.setAttribute("aria-expanded", String(ui.journalPhotoSourceOpen)));
+  if (ui.journalPhotoSourceOpen) {
+    menu.scrollIntoView({ block: "nearest", behavior: "instant" });
+    menu.querySelector("button")?.focus({ preventScroll: true });
+  }
+  else if (restoreFocus) modalRoot.querySelector(`[data-action="${ui.journalPhotoSourceTrigger}"]`)?.focus({ preventScroll: true });
+}
+function renderJournalEditor() {
+  const draft = ui.journalDraft, legacy = draft.id === JOURNAL_LEGACY_ID;
+  const busy = ui.journalSaving || ui.journalPhotoLoading, disabled = busy ? "disabled" : "";
+  const expanded = ui.journalPhotoSourceOpen && !busy;
+  const sourceAttributes = `aria-controls="journal-photo-sources" aria-expanded="${expanded}" ${disabled}`;
+  const source = `<div class="journal-photo-source">${smallIcon("camera", "journal-photo-source", draft.image ? "Choisir une autre photo" : "Ajouter une photo", sourceAttributes)}<div id="journal-photo-sources" class="journal-photo-sources" role="group" aria-label="Source de la photo" ${expanded ? "" : "hidden"}>${button(`${icon("camera", 20)} Prendre une photo`, "journal-photo-camera", disabled, "ghost")}${button(`${icon("image", 20)} Choisir une photo`, "journal-photo-upload", disabled, "ghost")}</div></div>`;
+  const photo = draft.image ? `<div class="journal-photo-preview"><button type="button" class="journal-photo" data-action="journal-photo-view" aria-label="Agrandir la photo choisie" ${disabled}><img src="${esc(draft.image.dataUrl)}" width="${draft.image.width}" height="${draft.image.height}" alt="Aperçu de la feuille photographiée"><span>Agrandir la photo</span></button><div class="journal-photo-actions">${smallIcon("replace", "journal-photo-replace", "Remplacer la photo", sourceAttributes)}${smallIcon("trash", "journal-photo-remove", "Retirer la photo", disabled)}</div></div>` : "";
+  const body = `${field("Date de la session", "ui.journalDraft.date", draft.date, "date", legacy ? "Tu peux laisser la date vide pour tes anciennes notes." : "", `min="0001-01-01" max="9999-12-31" ${legacy ? "" : "required"}`)}${field("Titre de la session (facultatif)", "ui.journalDraft.title", draft.title, "text", "", `maxlength="${JOURNAL_TITLE_LIMIT}" placeholder="Ex. Les portes de Valombre"`)}<div class="field journal-writing-field"><div class="journal-writing-heading"><label for="${formId("ui.journalDraft.body")}">Récit et commentaires</label>${source}</div>${ui.journalError ? `<p role="alert" class="notice error">${esc(ui.journalError)}</p>` : ""}<p class="tiny muted journal-photo-status" role="status" ${ui.journalPhotoLoading ? "" : "hidden"}>Préparation de la photo…</p><textarea id="${formId("ui.journalDraft.body")}" data-bind="ui.journalDraft.body" class="journal-composer-text" rows="7" maxlength="${legacy ? JOURNAL_LEGACY_BODY_LIMIT : JOURNAL_BODY_LIMIT}" placeholder="Rencontres, décisions, indices…">${esc(draft.body)}</textarea><small>Facultatif avec une photo.</small></div>${photo}<input id="journal-photo-file" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Choisir une image pour le journal" hidden ${disabled}><input id="journal-camera-file" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" aria-label="Photographier une feuille" hidden ${disabled}>`;
+  const editorBody = busy ? body.replaceAll("<input ", "<input disabled ").replaceAll("<textarea ", "<textarea disabled ") : body;
+  return modalShell(draft.isNew ? "Nouvelle page" : "Modifier la page", editorBody, button("Annuler", "close-modal", ui.journalSaving ? "disabled" : "", "ghost") + button(ui.journalSaving ? "Enregistrement…" : "Enregistrer la page", "journal-save", busy ? 'disabled aria-busy="true"' : "", "primary")).replace('class="modal ', 'class="modal journal-editor ');
+}
+async function receiveJournalPhoto(file) {
+  const draft = ui.journalDraft;
+  if (!file || !draft || ui.modal !== "journal-editor" || ui.journalSaving || ui.journalPhotoLoading) return;
+  ui.journalPhotoSourceOpen = false;
+  ui.journalPhotoLoading = true; ui.journalError = ""; render();
+  try {
+    const image = await loadJournalPhoto(file);
+    if (ui.journalDraft === draft) draft.image = image;
+  } catch (error) {
+    if (ui.journalDraft === draft) ui.journalError = error.message;
+  } finally {
+    if (ui.journalDraft === draft) {
+      ui.journalPhotoLoading = false;
+      render();
+      if (ui.modal === "journal-editor") modalRoot.querySelector(`[data-action="${draft.image ? "journal-photo-replace" : "journal-photo-source"}"]`)?.focus({ preventScroll: true });
+    }
+  }
+}
+function renderJournalPhotoViewer() {
+  const view = ui.journalPhotoViewer;
+  if (!view) return "";
+  const { image, zoom } = view;
+  return modalShell("Photo", `<div class="journal-photo-zoom" role="group" aria-label="Agrandissement de la photo">${button("−", "journal-photo-zoom", `data-zoom="out" aria-label="Réduire la photo" ${zoom <= 1 ? "disabled" : ""}`)}${button("+", "journal-photo-zoom", `data-zoom="in" aria-label="Agrandir la photo" ${zoom >= 6 ? "disabled" : ""}`)}${button("Ajuster", "journal-photo-zoom", 'data-zoom="fit"')}<output id="journal-photo-scale" aria-live="polite">${zoom * 100} %</output></div><p class="small muted">Agrandis la photo, puis fais-la glisser pour lire les détails.</p><div class="journal-photo-viewport" tabindex="0" role="region" aria-label="Photo agrandie, défilement horizontal et vertical"><div class="journal-photo-stage" style="width:${zoom * 100}%"><img src="${esc(image.dataUrl)}" width="${image.width}" height="${image.height}" alt="${esc(view.title || "Feuille manuscrite du journal")}"></div></div>`, button(view.returnTo ? "Revenir à la page" : "Fermer", "close-modal", "", "primary"), true).replace('class="modal ', 'class="modal journal-photo-viewer ');
+}
+function zoomJournalPhoto(direction) {
+  const view = ui.journalPhotoViewer, viewport = modalRoot.querySelector(".journal-photo-viewport"), stage = modalRoot.querySelector(".journal-photo-stage");
+  if (!view || !viewport || !stage) return;
+  const before = view.zoom;
+  view.zoom = direction === "fit" ? 1 : clamp(before + (direction === "in" ? 0.5 : -0.5), 1, 6);
+  const x = (viewport.scrollLeft + viewport.clientWidth / 2) / before, y = (viewport.scrollTop + viewport.clientHeight / 2) / before;
+  stage.style.width = `${view.zoom * 100}%`;
+  viewport.scrollLeft = direction === "fit" ? 0 : x * view.zoom - viewport.clientWidth / 2;
+  viewport.scrollTop = direction === "fit" ? 0 : y * view.zoom - viewport.clientHeight / 2;
+  modalRoot.querySelector("#journal-photo-scale").textContent = `${view.zoom * 100} %`;
+  modalRoot.querySelector('[data-zoom="out"]').disabled = view.zoom <= 1;
+  modalRoot.querySelector('[data-zoom="in"]').disabled = view.zoom >= 6;
+}
+function printableJournal(c) {
+  const entries = journalEntriesOf(c);
+  return `<h2>Journal</h2>${entries.length ? entries.map((entry) => `<h3 class="wrap">${esc(entry.title || "Notes de session")}</h3><p>${esc(journalDateLabel(entry.date, true))}</p>${entry.image ? `<img class="print-journal-photo" src="${esc(entry.image.dataUrl)}" width="${entry.image.width}" height="${entry.image.height}" alt="Feuille photographiée : ${esc(entry.title || "Notes de session")}">` : ""}${entry.body ? `<p class="print-note">${esc(entry.body)}</p>` : ""}`).join("") : '<p>Aucune page pour le moment.</p>'}`;
+}
+
 function renderHomebrew(c) {
-  return `<div class="page-head mobile-stack"><div><div class="eyebrow">${esc(c.name)} · Les règles de ta table</div><h1>Fait maison</h1><p class="page-subtitle">Ajoute une aptitude, un objet à effet ou un sort. Tu décides de ce qui est automatisé.</p></div><div class="actions">${button(`${icon("plus", 16)} Aptitude`, "new-trait", "", "primary")}${button(`${icon("book", 16)} Sort`, "new-custom-spell")}</div></div>${notice("Les effets chiffrés saisis sont appliqués. Le texte descriptif seul ne déclenche aucun calcul. Les contenus maison voyagent avec le personnage dans ses exports JSON.")}<div class="section-title section-gap"><h2>Aptitudes & effets</h2><span class="tiny muted">${c.custom.traits.length} création(s)</span></div>${
+  return `<div class="page-head mobile-stack"><div><div class="eyebrow">${esc(c.name)}</div><h1>Fait maison</h1></div><div class="actions">${button(`${icon("plus", 16)} Aptitude`, "new-trait", "", "primary")}${button(`${icon("book", 16)} Sort`, "new-custom-spell")}</div></div>${notice("Seuls les effets chiffrés sont calculés. Les créations sont incluses dans les sauvegardes du personnage.")}<div class="section-title section-gap"><h2>Aptitudes & effets</h2><span class="tiny muted">${c.custom.traits.length} création(s)</span></div>${
     c.custom.traits.length
       ? `<div class="grid-2">${c.custom.traits
           .map(
@@ -16063,13 +16747,13 @@ function renderHomebrew(c) {
                 )}${t.maxUses ? `<span class="pill purple">${t.maxUses} utilisation(s)</span>` : ""}</div><div class="homebrew-controls">${button(t.active === false ? "Activer" : "Désactiver", "toggle-trait", `data-id="${esc(t.id)}"`, "small-btn ghost")}<div class="actions">${smallIcon("edit", "edit-trait", "Modifier cette aptitude", `data-id="${esc(t.id)}"`)}${smallIcon("trash", "delete-trait", "Supprimer cette aptitude", `data-id="${esc(t.id)}"`)}</div></div></article>`,
           )
           .join("")}</div>`
-      : `<div class="panel empty"><span class="empty-icon">${icon("sparkles", 28)}</span><h3>Une table, ses propres idées.</h3><p>Une bénédiction, une cicatrice magique, un don inventé : décris ses effets, puis vérifie leur impact sur la fiche.</p>${button("Créer une aptitude", "new-trait", "", "small-btn")}</div>`
-  }<div class="section-title section-gap"><h2>Sorts personnalisés</h2></div>${c.custom.spells.length ? `<div class="spell-grid">${c.custom.spells.map((s) => `<div>${spellCard(c, s, { scope: "custom" })}<div class="actions">${button("Modifier", "edit-custom-spell", `data-id="${esc(s.id)}"`, "small-btn ghost")}${button("Supprimer", "delete-custom-spell", `data-id="${esc(s.id)}"`, "small-btn ghost danger")}</div></div>`).join("")}</div>` : `<div class="panel"><p class="small muted">Aucun sort maison. Tu peux aussi transcrire ici un sort SRD manquant dans le catalogue initial.</p></div>`}`;
+      : `<div class="panel empty"><span class="empty-icon">${icon("sparkles", 28)}</span><h3>Aucune aptitude maison</h3>${button("Créer une aptitude", "new-trait", "", "small-btn")}</div>`
+  }<div class="section-title section-gap"><h2>Sorts personnalisés</h2></div>${c.custom.spells.length ? `<div class="spell-grid">${c.custom.spells.map((s) => `<div>${spellCard(c, s, { scope: "custom" })}<div class="actions">${button("Modifier", "edit-custom-spell", `data-id="${esc(s.id)}"`, "small-btn ghost")}${button("Supprimer", "delete-custom-spell", `data-id="${esc(s.id)}"`, "small-btn ghost danger")}</div></div>`).join("")}</div>` : `<div class="panel"><p class="small muted">Aucun sort maison.</p></div>`}`;
 }
 function renderMore(c) {
-  return `<div class="page-head"><div><div class="eyebrow">Tout le nécessaire</div><h1>À portée de main</h1></div></div><div class="mobile-more-grid">${[
-    ["home", "users", "Mes personnages", "Changer d’aventurier"],
-    ["notes", "note", "Journal", "Histoire & notes"],
+  return `<div class="page-head"><div><h1>Plus</h1></div></div><div class="mobile-more-grid">${[
+    ["home", "users", "Mes personnages", ""],
+    ["notes", "note", "Journal", ""],
     ["progression", "tree", "Évolution", "Niveaux & choix de classe"],
     ...(c && classLevel(c, "druid") >= 2 ? [["wildshape", "paw", "Formes animales", "Bêtes de la forme sauvage"]] : []),
     ["homebrew", "sparkles", "Fait maison", "Aptitudes & sorts"],
@@ -16079,18 +16763,18 @@ function renderMore(c) {
   ]
     .map(
       ([route, ico, title, sub]) =>
-        `<button class="menu-tile" data-action="navigate" data-route="${route}" ${!c && ["notes", "homebrew", "progression"].includes(route) ? "disabled" : ""}>${icon(ico, 25)}<span>${title}<small>${sub}</small></span></button>`,
+        `<button class="menu-tile" data-action="navigate" data-route="${route}" ${!c && ["notes", "homebrew", "progression"].includes(route) ? "disabled" : ""}>${icon(ico, 25)}<span>${title}${sub ? `<small>${sub}</small>` : ""}</span></button>`,
     )
     .join(
       "",
-    )}</div>${c ? `<div class="panel section-gap"><h3>${esc(c.name)}</h3><p class="small section-gap">${esc(raceOf(c).name)} · ${esc(backgroundOf(c).name)}<br>${esc(classSummary(c))}${subclassSummary(c) ? `<br>${esc(subclassSummary(c))}` : ""}</p><div class="actions section-gap">${button(`${icon("edit", 16)} Modifier`, "edit-character")}${button(`${icon("download", 16)} Exporter`, "export-one")}${IS_ARTIFACT ? "" : button(`${icon("print", 16)} Imprimer`, "print", "", "ghost")}</div></div>` : ""}`;
+    )}</div>${c ? `<div class="panel section-gap"><h3>${esc(c.name)}</h3><p class="small section-gap">${esc(raceOf(c).name)} · ${esc(backgroundOf(c).name)}<br>${esc(classSummary(c))}${subclassSummary(c) ? `<br>${esc(subclassSummary(c))}` : ""}</p><div class="actions section-gap">${button(`${icon("edit", 16)} Modifier`, "edit-character")}${button(`${icon("download", 16)} Exporter`, "export-one")}${IS_ARTIFACT ? "" : button(`${icon("print", 16)} Imprimer`, "print", "", "ghost")}</div><div class="actions section-gap">${button(`${icon("trash", 16)} Supprimer ce personnage`, "delete-character", "", "character-delete-button")}</div></div>` : ""}`;
 }
 function contentSize(bytes) { return `${(bytes / 1048576).toFixed(1).replace(".", ",")} Mo`; }
 function renderOffline() {
   if (window.COMPANION_STANDALONE) return `<h1>Contenu hors ligne</h1>${notice("Ce fichier autonome contient le socle jouable et son pilote. Ouvre la PWA hébergée pour télécharger le catalogue complet.")}`;
   const state = contentStore.state, labels = { missing: "Contenu à télécharger", checking: "Vérification du contenu…", downloading: "Téléchargement en cours", interrupted: "Téléchargement à reprendre", error: "Téléchargement interrompu", ready: navigator.serviceWorker?.controller || swRegistration?.active ? "Disponible hors ligne" : "Contenu téléchargé, activation hors ligne en attente", update: "Mise à jour disponible", unavailable: "Stockage hors ligne indisponible" };
   const percent = state.totalBytes ? Math.floor(state.bytes * 100 / state.totalBytes) : 0;
-  return `<div class="page-head"><div><div class="eyebrow">Ta prochaine séance</div><h1>Contenu hors ligne</h1><p class="page-subtitle">Prépare le catalogue une fois connecté, puis emporte-le à la table.</p></div></div><section class="panel"><h2>${labels[state.status]}</h2><p class="section-gap">Le téléchargement comprend le catalogue livré, ses textes français disponibles, les originaux anglais et les ressources de l’application.</p>${state.total ? `<p>${contentStore.manifest.count.toLocaleString("fr-FR")} entrées · ${contentSize(state.totalBytes)}</p><progress class="content-progress" max="100" value="${percent}" aria-label="Progression du téléchargement"></progress><p class="small" role="status" aria-live="polite">${state.completed} / ${state.total} fichiers vérifiés · ${contentSize(state.bytes)} sur ${contentSize(state.totalBytes)}</p>` : ""}${state.error ? notice(esc(state.error), "warning") : ""}${state.activeVersion && state.status !== "ready" ? notice("La version locale précédente reste disponible pendant cette mise à jour.") : ""}<div class="actions section-gap">${state.status === "downloading" ? button("Suspendre", "pause-content") : state.status === "checking" ? "" : button(state.status === "ready" ? "Vérifier le contenu" : ["interrupted", "error"].includes(state.status) ? "Reprendre" : state.status === "update" ? "Télécharger la mise à jour" : "Télécharger le contenu", state.status === "ready" ? "check-content" : "download-content", state.status === "unavailable" ? "disabled" : "", "primary")}${button("Ouvrir la bibliothèque", "navigate", 'data-route="library"')}</div>${state.activeVersion ? `<p class="tiny muted section-gap">Version locale ${esc(state.activeVersion.slice(0, 12))} · règles 2014</p>` : ""}<p class="small muted section-gap">Tes personnages sont stockés séparément. Installer la PWA ne télécharge pas automatiquement ce catalogue.</p></section>`;
+  return `<div class="page-head"><div><h1>Contenu hors ligne</h1></div></div><section class="panel"><h2>${labels[state.status]}</h2><p class="section-gap">Catalogue, textes français et anglais, et ressources de l’application.</p>${state.total ? `<p>${contentStore.manifest.count.toLocaleString("fr-FR")} entrées · ${contentSize(state.totalBytes)}</p><progress class="content-progress" max="100" value="${percent}" aria-label="Progression du téléchargement"></progress><p class="small" role="status" aria-live="polite">${state.completed} / ${state.total} fichiers vérifiés · ${contentSize(state.bytes)} sur ${contentSize(state.totalBytes)}</p>` : ""}${state.error ? notice(esc(state.error), "warning") : ""}${state.activeVersion && state.status !== "ready" ? notice("La version locale précédente reste disponible pendant cette mise à jour.") : ""}<div class="actions section-gap">${state.status === "downloading" ? button("Suspendre", "pause-content") : state.status === "checking" ? "" : button(state.status === "ready" ? "Vérifier le contenu" : ["interrupted", "error"].includes(state.status) ? "Reprendre" : state.status === "update" ? "Télécharger la mise à jour" : "Télécharger le contenu", state.status === "ready" ? "check-content" : "download-content", state.status === "unavailable" ? "disabled" : "", "primary")}${button("Ouvrir la bibliothèque", "navigate", 'data-route="library"')}</div>${state.activeVersion ? `<p class="tiny muted section-gap">Version locale ${esc(state.activeVersion.slice(0, 12))} · règles 2014</p>` : ""}<p class="small muted section-gap">Tes personnages sont stockés séparément. Installer la PWA ne télécharge pas automatiquement ce catalogue.</p></section>`;
 }
 async function loadLibrary() {
   ui.libraryLoading = true; ui.libraryError = ""; render();
@@ -16102,11 +16786,11 @@ async function loadLibrary() {
   finally { ui.libraryLoading = false; if (ui.route === "library") render(); }
 }
 function renderLibrary() {
-  const head = `<div class="page-head"><div><div class="eyebrow">Règles 2014</div><h1>Bibliothèque</h1><p class="page-subtitle">Retrouve une règle, un sort, une capacité ou une créature.</p></div>${button("Contenu hors ligne", "navigate", 'data-route="offline"')}</div>`;
+  const head = `<div class="page-head"><div><div class="eyebrow">Règles 2014</div><h1>Bibliothèque</h1></div>${button("Contenu hors ligne", "navigate", 'data-route="offline"')}</div>`;
   if (ui.libraryLoading) return head + '<p role="status">Chargement de l’index…</p>';
   if (ui.libraryError) return head + notice(esc(ui.libraryError), "warning") + button("Réessayer", "reload-library");
   const result = contentLibrary.search(ui.libraryQuery, ui.libraryType, ui.libraryPage), types = [...new Set(contentLibrary.index.map((row) => row.type))].sort();
-  return head + `<div class="spell-toolbar"><div class="search-wrap">${icon("search", 18)}<input id="library-search" class="search-input" data-bind="ui.libraryQuery" value="${esc(ui.libraryQuery)}" placeholder="Nom français, anglais ou source…" aria-label="Rechercher dans la bibliothèque"></div><select id="library-filter" class="select-plain" data-bind="ui.libraryType" aria-label="Type de contenu"><option value="all">Toutes les catégories</option>${types.map((type) => `<option value="${esc(type)}" ${ui.libraryType === type ? "selected" : ""}>${esc(LIBRARY_TYPES[type] || type)}</option>`).join("")}</select></div><p class="small muted" role="status">${result.total.toLocaleString("fr-FR")} résultats · page ${result.page + 1} / ${result.pages}</p><div class="library-list">${result.entries.map((row) => `<button class="library-row" data-action="library-entry" data-id="${esc(row.id)}"><span><strong>${esc(row.name)}</strong><small>${esc(LIBRARY_TYPES[row.type] || row.type)} · ${esc(row.source)}${row.translated ? " · FR" : " · EN"}${row.inherited ? " · variante" : ""}</small></span>${icon("chevron", 18)}</button>`).join("") || notice("Aucune référence ne correspond à cette recherche.")}</div><div class="actions section-gap">${button("Précédent", "library-page", `data-value="${result.page - 1}" ${result.page === 0 ? "disabled" : ""}`)}${button("Suivant", "library-page", `data-value="${result.page + 1}" ${result.page + 1 === result.pages ? "disabled" : ""}`)}</div><p class="small muted section-gap">La bibliothèque contient aussi les références dont les choix et les effets ne sont pas encore raccordés à la fiche. Les options jouables restent proposées dans la création et l’évolution.</p>`;
+  return head + `<div class="spell-toolbar"><div class="search-wrap">${icon("search", 18)}<input id="library-search" class="search-input" data-bind="ui.libraryQuery" value="${esc(ui.libraryQuery)}" placeholder="Nom français, anglais ou source…" aria-label="Rechercher dans la bibliothèque"></div><select id="library-filter" class="select-plain" data-bind="ui.libraryType" aria-label="Type de contenu"><option value="all">Toutes les catégories</option>${types.map((type) => `<option value="${esc(type)}" ${ui.libraryType === type ? "selected" : ""}>${esc(LIBRARY_TYPES[type] || type)}</option>`).join("")}</select></div><p class="small muted" role="status">${result.total.toLocaleString("fr-FR")} résultats · page ${result.page + 1} / ${result.pages}</p><div class="library-list">${result.entries.map((row) => `<button class="library-row" data-action="library-entry" data-id="${esc(row.id)}"><span><strong>${esc(row.name)}</strong><small>${esc(LIBRARY_TYPES[row.type] || row.type)} · ${esc(row.source)}${row.translated ? " · FR" : " · EN"}${row.inherited ? " · variante" : ""}</small></span>${icon("chevron", 18)}</button>`).join("") || notice("Aucune référence ne correspond à cette recherche.")}</div><div class="actions section-gap">${button("Précédent", "library-page", `data-value="${result.page - 1}" ${result.page === 0 ? "disabled" : ""}`)}${button("Suivant", "library-page", `data-value="${result.page + 1}" ${result.page + 1 === result.pages ? "disabled" : ""}`)}</div>${renderCompactHelp("Certaines références sont consultables sans être intégrées aux calculs. Les options disponibles se choisissent dans la création et l’évolution.")}`;
 }
 function libraryDetail() {
   const entry = ui.libraryEntry, lang = ui.libraryLanguage, sourceEntry = ui.libraryRaw ? { ...entry, enDerived: null, texts: [] } : entry;
@@ -16142,13 +16826,13 @@ function renderSettings() {
       .filter((s) => !c || s.characterId === c.id)
       .slice(-12)
       .reverse();
-  return `<div class="page-head"><div><div class="eyebrow">Tes données, tes choix</div><h1>Réglages & sauvegardes</h1><p class="page-subtitle">Le stockage local est pratique. Un export reste ta meilleure assurance.</p></div></div><div class="settings-stack"><section class="panel"><h3>Sur cet appareil</h3><div class="settings-row"><div><strong>Stockage ${localStore.mode === "indexeddb" ? "IndexedDB" : localStore.mode === "localstorage" ? "localStorage" : "temporaire"}</strong><p>Aucun serveur de fiches. Aucun compte. Aucun transfert automatique.</p></div><span class="pill">${appData.characters.length} fiche(s)</span></div><div class="settings-row"><div><strong>Exporter toutes les fiches</strong><p>${appData.lastExport ? "Dernier export : " + dateLabel(appData.lastExport) : "Aucun export effectué sur cet appareil."}</p></div>${button(`${icon("download", 16)} Export JSON`, "export-all", "", "small-btn green")}</div><div class="settings-row"><div><strong>Importer un fichier JSON</strong><p>Les fiches sont ajoutées en copie, jamais écrasées. Les sauvegardes de la version précédente sont converties.</p></div>${button(`${icon("upload", 16)} Importer`, "import", "", "small-btn")}</div><div class="settings-row"><div><strong>Copier ou coller une sauvegarde</strong><p>Pratique sur téléphone, sans passer par un fichier.</p></div><div class="actions">${button("Copier", "export-all", "", "small-btn")}${button("Coller", "paste-import", "", "small-btn")}</div></div><div class="settings-row"><div><strong>Demander un stockage persistant</strong><p>Le navigateur décide de l’accorder. Cela ne remplace pas une sauvegarde.</p></div>${button("Demander", "persist-storage", "", "small-btn")}</div>${notice("Effacer les données du site, changer de navigateur ou de téléphone peut supprimer les fiches. Exporte-les régulièrement.", "warning")}</section><section class="panel"><h3>Affichage</h3><div class="settings-row"><div><strong>Thème</strong><p>Le mode sombre ménage les yeux autour d’une table peu éclairée. « Auto » suit le réglage du téléphone.</p></div><div class="segmented">${[
+  return `<div class="page-head"><div><h1>Réglages & sauvegardes</h1></div></div><div class="settings-stack"><section class="panel"><h3>Sauvegardes</h3><div class="settings-row"><div><strong>Sur cet appareil</strong><p>Les fiches sont enregistrées dans ce navigateur, sans synchronisation.</p></div><span class="pill">${appData.characters.length} fiche(s)</span></div><div class="settings-row"><div><strong>Exporter toutes les fiches</strong><p>${appData.lastExport ? "Dernier export : " + dateLabel(appData.lastExport) : "Aucun export effectué sur cet appareil."}</p></div>${button(`${icon("download", 16)} Export JSON`, "export-all", "", "small-btn green")}</div><div class="settings-row"><div><strong>Importer un fichier JSON</strong><p>Les fiches sont ajoutées en copie, jamais écrasées. Les sauvegardes de la version précédente sont converties.</p></div>${button(`${icon("upload", 16)} Importer`, "import", "", "small-btn")}</div><div class="settings-row"><div><strong>Copier ou coller une sauvegarde</strong></div><div class="actions">${button("Copier", "export-all", "", "small-btn")}${button("Coller", "paste-import", "", "small-btn")}</div></div>${notice("Effacer les données du site, changer de navigateur ou de téléphone peut supprimer les fiches. Exporte-les régulièrement.", "warning")}<details class="settings-details"><summary>Détails du stockage</summary><p class="small muted section-gap">Stockage ${localStore.mode === "indexeddb" ? "IndexedDB" : localStore.mode === "localstorage" ? "localStorage" : "temporaire"}</p><div class="settings-row"><div><strong>Demander un stockage persistant</strong><p>Le navigateur décide de l’accorder. Cela ne remplace pas une sauvegarde.</p></div>${button("Demander", "persist-storage", "", "small-btn")}</div></details></section><section class="panel"><h3>Thème</h3><div class="settings-row"><div><p>« Auto » suit le thème de l’appareil.</p></div><div class="segmented">${[
     ["auto", "Auto"],
     ["light", "Clair"],
     ["dark", "Sombre"],
   ]
     .map(([id, label]) => `<button type="button" data-action="set-theme" data-value="${id}" class="${currentTheme() === id ? "active" : ""}">${label}</button>`)
-    .join("")}</div></div></section><section class="panel"><h3>Installer Compagnon</h3><div class="settings-row"><div><strong>Comme une application</strong><p>Sur Android : menu du navigateur, Installer. Sur iPhone : Safari, Partager, Sur l’écran d’accueil. L’hébergement HTTPS est nécessaire.</p></div>${button(`${icon("phone", 16)} Installer`, "install", "", "small-btn")}</div><div class="settings-row"><div><strong>Contenu hors ligne</strong><p>Télécharge le catalogue complet et vérifie sa disponibilité avant ta séance.</p></div>${button("Préparer le contenu", "navigate", 'data-route="offline"', "small-btn")}</div></section>${history.length ? `<section class="panel"><div class="panel-head"><h3>Retour en arrière</h3><span class="tiny muted">30 derniers changements, toutes fiches</span></div>${history.map((s) => `<div class="history-row"><div>${esc(s.label)}<small>${dateLabel(s.date)} · ${esc(s.character.name)}</small></div>${button("Restaurer", "restore-snapshot", `data-id="${esc(s.id)}"`, "small-btn ghost")}</div>`).join("")}</section>` : ""}<section class="panel"><h3>Ce que l’application calcule pour toi</h3><p class="small muted section-gap">Caractéristiques, maîtrises, expertise, langues et outils ; PV, CA (armures, défense sans armure, styles), initiative, vitesse ; attaques de chaque arme ; emplacements de sorts y compris multiclasse et pacte ; sorts connus, préparés et toujours préparés ; ressources de classe, de sous-classe, d’origine et de dons ; repos et dés de vie.</p><p class="small muted">Restent à appliquer à la table : avantages et désavantages contextuels, effets des sorts, profils de formes sauvages et de compagnons, interactions fines entre pouvoirs. Vérifie ta fiche avec ton MJ.</p></section><section class="panel"><h3>Crédits</h3><p class="small muted section-gap">Ce travail comprend du contenu du Document de Référence du Système 5.1 (« SRD 5.1 ») de Wizards of the Coast LLC, disponible à l’adresse <a href="https://dnd.wizards.com/fr/resources/systems-reference-document" target="_blank" rel="noopener noreferrer">Document de Référence du Système</a>, sous licence <a href="https://creativecommons.org/licenses/by/4.0/legalcode.fr" target="_blank" rel="noopener noreferrer">Creative Commons Attribution 4.0 International</a>.</p><p class="small muted">Terminologie et textes de référence : SRD 5.1 français. Traductions et adaptations : Compagnon. La référence anglaise est consultable lorsqu’elle est disponible. Compagnon est une application indépendante. Version ${APP_VERSION}.</p><p class="small"><a href="${SRD_URL}" target="_blank" rel="noopener noreferrer">Lire le SRD 5.1 français officiel ↗</a></p></section>${c ? `<section class="panel"><div class="settings-row"><div><strong>Supprimer ${esc(c.name)}</strong><p>Exporte d’abord sa fiche. Les autres personnages seront conservés.</p></div>${button("Supprimer", "delete-character", "", "small-btn danger")}</div></section>` : ""}</div>`;
+    .join("")}</div></div></section><section class="panel"><h3>Installer Compagnon</h3><div class="settings-row"><div>${renderCompactHelp("Sur Android : menu du navigateur, Installer. Sur iPhone : Safari, Partager, Sur l’écran d’accueil.", "Aide à l’installation")}</div>${button(`${icon("phone", 16)} Installer`, "install", "", "small-btn")}</div><div class="settings-row"><div><strong>Contenu hors ligne</strong><p>Télécharge le catalogue complet et vérifie sa disponibilité avant ta séance.</p></div>${button("Préparer le contenu", "navigate", 'data-route="offline"', "small-btn")}</div></section>${history.length ? `<section class="panel"><div class="panel-head"><h3>Retour en arrière</h3></div>${renderCompactHelp("Historique limité à 30 versions et 12 Mio de photos. Les versions conservées sont complètes.")}${history.map((s) => `<div class="history-row"><div>${esc(s.label)}<small>${dateLabel(s.date)} · ${esc(s.character.name)}</small></div>${button("Restaurer", "restore-snapshot", `data-id="${esc(s.id)}"`, "small-btn ghost")}</div>`).join("")}</section>` : ""}<details class="panel settings-details"><summary>Calculs et limites</summary><p class="small muted section-gap">Sous-classes, dons et multiclassage jusqu’au niveau 20.</p><p class="small muted section-gap">Caractéristiques, maîtrises, expertise, langues et outils ; PV, CA (armures, défense sans armure, styles), initiative, vitesse ; attaques de chaque arme ; emplacements de sorts y compris multiclasse et pacte ; sorts connus, préparés et toujours préparés ; ressources de classe, de sous-classe, d’origine et de dons ; repos et dés de vie.</p><p class="small muted">À gérer à la table : avantages et désavantages contextuels, effets des sorts, compagnons et interactions particulières entre aptitudes.</p></details><details class="panel settings-details"><summary>Crédits</summary><p class="small muted section-gap">Résumés de jeu. Consulte les références pour le texte complet.</p><p class="small muted section-gap">Ce travail comprend du contenu du Document de Référence du Système 5.1 (« SRD 5.1 ») de Wizards of the Coast LLC, disponible à l’adresse <a href="https://dnd.wizards.com/fr/resources/systems-reference-document" target="_blank" rel="noopener noreferrer">Document de Référence du Système</a>, sous licence <a href="https://creativecommons.org/licenses/by/4.0/legalcode.fr" target="_blank" rel="noopener noreferrer">Creative Commons Attribution 4.0 International</a>.</p><p class="small muted">Terminologie et textes de référence : SRD 5.1 français. Traductions et adaptations : Compagnon. La référence anglaise est consultable lorsqu’elle est disponible. Compagnon est une application indépendante. Version ${APP_VERSION}.</p><p class="small"><a href="${SRD_URL}" target="_blank" rel="noopener noreferrer">Lire le SRD 5.1 français officiel ↗</a></p></details>${c ? `<section class="panel"><div class="settings-row"><div><strong>Supprimer ${esc(c.name)}</strong><p>Exporte d’abord sa fiche. Les autres personnages seront conservés.</p></div>${button("Supprimer", "delete-character", "", "small-btn danger")}</div></section>` : ""}</div>`;
 }
 function spellReplacementCandidate(draft) {
   return ui.form.kind === "secret" ? reassignMagicalSecret(draft, ui.form.from, ui.form.to, { reason: ui.form.reason }) : replaceKnownSpell(draft, ui.form.from, ui.form.to, ui.form.classId, { totalLevel: ui.levelFlow?.level || levelOf(draft) });
@@ -16445,7 +17129,7 @@ function renderRaceStep(w, c) {
           .map(([a, v]) => field(`${v.short}`, `wiz.customRace.bonuses.${a}`, c.customRace.bonuses?.[a] || 0, "number", "", 'min="-5" max="10" step="1"'))
           .join("")}</div>${field("Traits de cette origine", "wiz.customRace.description", c.customRace.description || "", "textarea", "Effets descriptifs. Les effets chiffrés s’ajoutent ensuite dans Maison.", 'maxlength="6000"')}`
       : "";
-  return `<h2>D’où viens-tu ?</h2><p class="wizard-intro">Ton peuple apporte des bonus de caractéristiques, des sens et des talents. Règles 2014 et suppléments, avec la version de chaque origine indiquée.</p>${grid}<div class="race-group"><div class="race-group-label">Maison</div><div class="choice-grid compact">${card("custom", { name: "Origine maison", subtitle: "Crée celle de ta table", grants: c.customRace ? { abilities: c.customRace.bonuses } : {} })}</div></div><div class="selected-description race-detail"><div class="detail-head"><strong>${esc(r.name)}</strong>${sourcePill(r.source)}</div>${esc(r.desc || "")}<div class="fact-row">${facts.map(([k, v]) => `<span><small>${esc(k)}</small>${esc(v)}</span>`).join("")}</div><div class="feature-list">${(r.traits || [])
+  return `<h2>Origine</h2>${renderCompactHelp("L’origine apporte des bonus, des sens et des aptitudes. Les sources indiquent la version utilisée.")}${grid}<div class="race-group"><div class="race-group-label">Maison</div><div class="choice-grid compact">${card("custom", { name: "Origine maison", grants: c.customRace ? { abilities: c.customRace.bonuses } : {} })}</div></div><div class="selected-description race-detail"><div class="detail-head"><strong>${esc(r.name)}</strong>${sourcePill(r.source)}</div>${esc(r.desc || "")}<div class="fact-row">${facts.map(([k, v]) => `<span><small>${esc(k)}</small>${esc(v)}</span>`).join("")}</div><div class="feature-list">${(r.traits || [])
     .map(
       ([name, desc], i) =>
         `<details class="feature-item" data-detail="wizard-race-${i}"><summary><span>${esc(name)}</span><span class="feature-arrow">${icon("chevron", 14)}</span></summary><div class="detail-copy">${esc(desc)}</div></details>`,
@@ -16473,10 +17157,10 @@ function renderClassStep(w, c) {
   const weaponText = cls.weapons.map((x) => (x === "simple" ? "armes courantes" : x === "martial" ? "armes de guerre" : WEAPONS[x]?.name.toLowerCase() || x)).join(", ");
   const startLevel = levelOf(c);
   const choices = choicesFor(c, 1).filter((s) => s.key !== "expertise");
-  return `<h2>Quelle est ta vocation ?</h2><p class="wizard-intro">Choisis une classe pour la façon de jouer qu’elle propose. Tu pourras la combiner avec une autre plus tard (multiclassage).</p>${locked ? notice("Ce personnage est multiclassé : sa classe de départ se corrige depuis Évolution, niveau par niveau.", "warning") : ""}<div class="choice-grid">${cards}</div><div class="selected-description"><div class="detail-head"><strong>${cls.name}</strong><span class="pill">d${cls.die} de vie</span></div>${esc(cls.desc)}<div class="fact-row"><span><small>Sauvegardes</small>${cls.saves.map((a) => ABILITIES[a].name).join(", ")}</span><span><small>Armures</small>${cls.armors.map((a) => armorNames[a]).join(", ") || "aucune"}</span><span><small>Armes</small>${esc(weaponText)}</span><span><small>Magie</small>${casting}</span><span><small>${esc(cls.subLabel)}</small>niveau ${cls.subLevel}</span>${extra.multiclass?.prereq ? `<span><small>Multiclasse</small>${esc(prereqText(extra.multiclass.prereq))}</span>` : ""}</div></div>${
+  return `<h2>Classe</h2>${renderCompactHelp("Le multiclassage permet de choisir une autre classe lors d’une montée de niveau.")}${locked ? notice("Ce personnage est multiclassé : sa classe de départ se corrige depuis Évolution, niveau par niveau.", "warning") : ""}<div class="choice-grid">${cards}</div><div class="selected-description"><div class="detail-head"><strong>${cls.name}</strong><span class="pill">d${cls.die} de vie</span></div>${esc(cls.desc)}<div class="fact-row"><span><small>Sauvegardes</small>${cls.saves.map((a) => ABILITIES[a].name).join(", ")}</span><span><small>Armures</small>${cls.armors.map((a) => armorNames[a]).join(", ") || "aucune"}</span><span><small>Armes</small>${esc(weaponText)}</span><span><small>Magie</small>${casting}</span><span><small>${esc(cls.subLabel)}</small>niveau ${cls.subLevel}</span>${extra.multiclass?.prereq ? `<span><small>Multiclasse</small>${esc(prereqText(extra.multiclass.prereq))}</span>` : ""}</div></div>${
     w.original
       ? ""
-      : `<section class="choice-spec"><h3>Niveau de départ</h3><p class="help">Ta campagne commence plus haut ? Les niveaux supplémentaires se règlent à l’étape Niveaux.</p>${selectField("Niveau", "ui.wizard.startLevel", startLevel, Object.fromEntries(Array.from({ length: 20 }, (_, i) => [i + 1, `Niveau ${i + 1}`])), "", 'data-number="1"')}</section>`
+      : `<section class="choice-spec"><h3>Niveau de départ</h3><p class="help">Les niveaux supplémentaires se règlent à l’étape Niveaux.</p>${selectField("Niveau", "ui.wizard.startLevel", startLevel, Object.fromEntries(Array.from({ length: 20 }, (_, i) => [i + 1, `Niveau ${i + 1}`])), "", 'data-number="1"')}</section>`
   }${cls.subLevel === 1 ? renderSubclassPicker(c, id, "wiz") : ""}${renderPickSpecs(c, pickSpecs(c, (src) => src.key === `sub|${id}|1`).filter((s) => !PICK_CHIP_TYPES.includes(s.type)), "wiz")}${choices.length ? renderChoiceSpecs(c, 1, "wiz", (s) => s.key !== "expertise") : ""}`;
 }
 function renderBackgroundStep(w, c) {
@@ -16501,9 +17185,9 @@ function renderBackgroundStep(w, c) {
     current === "custom"
       ? `<div class="form-grid">${field("Nom de l’historique", "wiz.background.name", c.background.name, "text", "", 'maxlength="80"')}${field("Nom de l’aptitude", "wiz.background.featureName", c.background.featureName || "", "text", "", 'maxlength="120"')}</div><h3 style="margin:6px 0 10px">Deux compétences</h3>${skillChips(c, "wiz.background.skills", c.background.skills, Object.keys(SKILLS), 2)}<div class="spacer"></div>${field("Aptitude d’historique", "wiz.background.feature", c.background.feature || "", "textarea", "Avantage narratif à valider avec le MJ.", 'maxlength="4000"')}${field("Équipement", "wiz.background.equipment", c.background.equipment || "", "text", "", 'maxlength="600"')}`
       : "";
-  return `<h2>Quel a été ton passé ?</h2><p class="wizard-intro">L’historique raconte d’où tu viens : deux compétences, des outils ou des langues, et une aptitude utile en dehors des combats.</p><div class="choice-grid">${cards}<button type="button" class="choice-card ${current === "custom" ? "selected" : ""}" data-action="choose-background" data-id="custom">${current === "custom" ? `<span class="selected-check">${icon("check", 14)}</span>` : ""}<span class="choice-name">Personnalisé</span><span class="choice-meta">Compose le tien avec le MJ</span></button></div><div class="selected-description"><div class="detail-head"><strong>${esc(bg.name)}</strong>${sourcePill(bg.source)}</div>${esc(bg.desc || "")}<div class="fact-row">${facts.map(([k, v]) => `<span><small>${esc(k)}</small>${esc(v)}</span>`).join("")}</div>${
+  return `<h2>Historique</h2>${renderCompactHelp("L’historique apporte des compétences, des outils ou langues, et une aptitude.")}<div class="choice-grid">${cards}<button type="button" class="choice-card ${current === "custom" ? "selected" : ""}" data-action="choose-background" data-id="custom">${current === "custom" ? `<span class="selected-check">${icon("check", 14)}</span>` : ""}<span class="choice-name">Personnalisé</span><span class="choice-meta">Avec l’accord du MJ</span></button></div><div class="selected-description"><div class="detail-head"><strong>${esc(bg.name)}</strong>${sourcePill(bg.source)}</div>${esc(bg.desc || "")}<div class="fact-row">${facts.map(([k, v]) => `<span><small>${esc(k)}</small>${esc(v)}</span>`).join("")}</div>${
     bg.feature?.[0] ? `<details class="feature-item" open data-detail="bg-feature"><summary><span>Aptitude : ${esc(bg.feature[0])}</span><span class="feature-arrow">${icon("chevron", 14)}</span></summary><div class="detail-copy">${esc(bg.feature[1] || "")}</div></details>` : ""
-  }${bg.equipment && current !== "custom" ? `<p class="tiny muted" style="margin-top:8px">Équipement : ${esc(bg.equipment)}</p>` : ""}${BACKGROUNDS[current]?.variants?.length ? selectField(UI_FR["background.variant"], "wiz.background.variantId", c.background.variantId || "", { "": UI_FR["background.base"], ...Object.fromEntries(BACKGROUNDS[current].variants.map((variant) => [variant.id, variant.name])) }) : ""}</div>${custom}${(g.feats || []).map((id) => FEATS[id] ? `<p class="small section-gap">${esc(FEATS[id].summary)}</p>` : "").join("")}${renderPickSpecs(c, pickSpecs(c, (src) => src.key.startsWith("feat|bg|")), "wiz")}${notice("Les compétences, langues et outils au choix se règlent à l’étape suivante, avec tous les autres.")}`;
+  }${bg.equipment && current !== "custom" ? `<p class="tiny muted" style="margin-top:8px">Équipement : ${esc(bg.equipment)}</p>` : ""}${BACKGROUNDS[current]?.variants?.length ? selectField(UI_FR["background.variant"], "wiz.background.variantId", c.background.variantId || "", { "": UI_FR["background.base"], ...Object.fromEntries(BACKGROUNDS[current].variants.map((variant) => [variant.id, variant.name])) }) : ""}</div>${custom}${(g.feats || []).map((id) => FEATS[id] ? `<p class="small section-gap">${esc(FEATS[id].summary)}</p>` : "").join("")}${renderPickSpecs(c, pickSpecs(c, (src) => src.key.startsWith("feat|bg|")), "wiz")}${notice("Les choix de compétences, langues et outils se règlent à l’étape Compétences.")}`;
 }
 function renderAbilitiesStep(w, c) {
   const d = derive(c),
@@ -16533,7 +17217,7 @@ function renderAbilitiesStep(w, c) {
       return `<div class="score-editor ${CLASSES[primaryClassId(c)].primary[0] === a ? "key-ability" : ""}"><div><div class="ability-name">${v.name}${CLASSES[primaryClassId(c)].primary[0] === a ? ' <span class="pill sand">clé</span>' : ""}</div><div class="ability-help">${breakdown}</div></div>${input}<div class="final-score">${d.scores[a]}<small>${signed(d.mods[a])}</small></div></div>`;
     })
     .join("");
-  return `<h2>Trouve ton équilibre.</h2><p class="wizard-intro">À gauche, la valeur de base. À droite, le score final avec ton origine. Le modificateur change tous les deux points.</p><div class="segmented four">${[
+  return `<h2>Caractéristiques</h2><p class="wizard-intro">Valeur de base → score final (modificateur).</p><div class="segmented four">${[
     ["standard", "Série standard"],
     ["points", "27 points"],
     ["rolled", "4d6"],
@@ -16557,7 +17241,7 @@ function renderSkillsStep(w, c) {
   );
   const pickedElsewhere = new Set([...granted.map(([s]) => s), ...otherPicks.filter((s) => s.type === "skill").flatMap((s) => s.selected)]);
   const languageText = d.languages.map((l) => l.name).join(", ") || "Commun";
-  return `<h2>Ce que tu sais faire.</h2><p class="wizard-intro">Une maîtrise ajoute ${signed(d.prof)} au jet. Une compétence déjà acquise ne peut pas être prise deux fois : elle est grisée.</p>${
+  return `<h2>Compétences</h2><p class="wizard-intro">Une maîtrise ajoute ${signed(d.prof)} au jet. Les compétences déjà acquises sont grisées.</p>${
     granted.length
       ? `<div class="granted-row">${granted.map(([s, from]) => `<span class="pill" title="${esc(from)}">${esc(SKILLS[s]?.[0] || s)} <small>· ${esc(from)}</small></span>`).join("")}</div>`
       : ""
@@ -16594,7 +17278,7 @@ function renderGearStep(w, c) {
     })
     .join("");
   const preview = startingItems(c);
-  return `<h2>Ton paquetage.</h2><p class="wizard-intro">Prends l’équipement de départ de ta classe, ou de l’or pour tout acheter toi-même avec le MJ.</p><div class="segmented"><button type="button" data-action="kit-mode" data-value="kit" class="${kit.mode !== "gold" ? "active" : ""}">Équipement de départ</button><button type="button" data-action="kit-mode" data-value="gold" class="${kit.mode === "gold" ? "active" : ""}">Or (${esc(extra.startingGold || "selon la classe")})</button></div>${
+  return `<h2>Équipement</h2><p class="wizard-intro">Choisis l’équipement de départ ou l’or prévu par ta classe.</p><div class="segmented"><button type="button" data-action="kit-mode" data-value="kit" class="${kit.mode !== "gold" ? "active" : ""}">Équipement de départ</button><button type="button" data-action="kit-mode" data-value="gold" class="${kit.mode === "gold" ? "active" : ""}">Or (${esc(extra.startingGold || "selon la classe")})</button></div>${
     kit.mode === "gold"
       ? `${field("Pièces d’or de départ", "wiz.gold", c.gold, "number", `Lance ${esc(extra.startingGold || "les dés indiqués par ta classe")} ou utilise le montant fixé par le MJ.`, 'min="0" max="100000" step="1"')}${extra.startingGold ? button(`${icon("dice", 15)} Lancer ${esc(extra.startingGold)}`, "roll-gold", "", "small-btn") : ""}`
       : `${groups || notice("Aucun équipement de départ n’est défini pour cette classe.")}<div class="panel soft section-gap"><h3>Dans ton sac au départ</h3><p class="small">${esc(preview.map((x) => `${x.info.name}${x.qty > 1 ? ` ×${x.qty}` : ""}`).join(", ") || "Rien")}</p>${bg.equipment ? `<p class="small muted">Historique : ${esc(bg.equipment)}${bg.gold ? `, ${bg.gold} po` : ""}.</p>` : ""}</div>`
@@ -16603,7 +17287,7 @@ function renderGearStep(w, c) {
 function renderMagicStep(w, c) {
   const casters = spellcasters(c),
     innate = innateSpells(c);
-  return `<h2>Choisis ta magie.</h2><p class="wizard-intro">Ouvre un sort pour lire son effet. ${casters.length ? "Les compteurs indiquent ce que ta classe permet à ce niveau." : "Ta classe ne lance pas de sorts, mais ton origine ou un don t’en donne."}</p>${
+  return `<h2>Sorts</h2>${casters.length ? "" : `<p class="wizard-intro">Ta classe ne lance pas de sorts, mais ton origine ou un don t’en donne.</p>`}${
     innate.length
       ? notice(`Magie d’origine ou de don, comptée à part : ${innate.map((x) => esc(spellById(c, x.id)?.name || x.id)).join(", ")}.`)
       : ""
@@ -16611,7 +17295,7 @@ function renderMagicStep(w, c) {
 }
 function renderLevelsStep(w, c) {
   const n = levelOf(c);
-  return `<h2>Les niveaux déjà franchis.</h2><p class="wizard-intro">Ton personnage commence au niveau ${n}. Règle chaque palier comme si tu l’avais vécu : PV, sous-classe, améliorations et choix de classe.</p>${c.levels
+  return `<h2>Niveaux de départ</h2><p class="wizard-intro">Ton personnage commence au niveau ${n}. Renseigne les PV et les choix de chaque niveau.</p>${c.levels
     .slice(1)
     .map((l) => {
       const issues = choicesFor(c, l.level).length + (l.asi ? 1 : 0);
@@ -16624,11 +17308,53 @@ function renderReviewStep(w, c) {
     issues = characterIssues(c),
     details = c.details || {};
   issues.errors = issues.errors.filter((e) => !e.startsWith("Donne un nom"));
-  return `<h2>${w.original ? "Vérifie les changements." : "Qui part à l’aventure ?"}</h2>${w.repairReturn ? button(UI_FR["repair.returnLevels"], "repair-return-level", "", "small-btn") : ""}<p class="wizard-intro">${w.original ? "Rien n’est encore remplacé. Compare les valeurs, puis valide." : "Un nom, un caractère, une histoire. Tout reste modifiable plus tard."}</p><div class="portrait-identity">${characterPortrait(c, { editable: true })}<div><h3>Un visage pour ton personnage</h3><p class="small muted">Une illustration du carnet ou ta propre image.</p>${button("Choisir mon portrait", "edit-portrait", "", "small-btn ghost")}</div></div>${field("Nom du personnage", "wiz.name", c.name, "text", "", 'placeholder="Ex. : Élyra, Brann, Oren…" maxlength="80" autocomplete="off"')}<div class="form-grid">${selectField("Alignement", "wiz.alignment", c.alignment, { "": "Non précisé", ...Object.fromEntries(ALIGNMENTS.map((a) => [a, a])) })}${field("Âge", "wiz.details.age", details.age || "", "text", "", 'maxlength="40"')}${field("Taille", "wiz.details.height", details.height || "", "text", "", 'maxlength="40"')}${field("Poids", "wiz.details.weight", details.weight || "", "text", "", 'maxlength="40"')}${field("Yeux", "wiz.details.eyes", details.eyes || "", "text", "", 'maxlength="40"')}${field("Cheveux", "wiz.details.hair", details.hair || "", "text", "", 'maxlength="40"')}</div><details class="feature-item" data-detail="wiz-personality"><summary><span>Personnalité : traits, idéaux, liens, défauts</span><span class="feature-arrow">${icon("chevron", 14)}</span></summary><div class="form-grid">${field("Traits de personnalité", "wiz.details.traits", details.traits || "", "textarea", "", 'maxlength="1500" rows="3"')}${field("Idéaux", "wiz.details.ideals", details.ideals || "", "textarea", "", 'maxlength="1500" rows="3"')}${field("Liens", "wiz.details.bonds", details.bonds || "", "textarea", "", 'maxlength="1500" rows="3"')}${field("Défauts", "wiz.details.flaws", details.flaws || "", "textarea", "", 'maxlength="1500" rows="3"')}</div></details>${field("Histoire et apparence", "wiz.biography", c.biography, "textarea", "", 'placeholder="Ce qui te pousse à partir…" maxlength="6000" rows="4"')}<div class="review-section"><div class="summary-row"><span>Origine</span><strong>${esc(d.race.name)}</strong></div><div class="summary-row"><span>Classe</span><strong>${esc(classSummary(c))}${subclassSummary(c) ? ` · ${esc(subclassSummary(c))}` : ""}</strong></div><div class="summary-row"><span>Historique</span><strong>${esc(d.background.name)}</strong></div><div class="summary-row"><span>Compétences</span><strong>${Object.keys(d.ranks)
+  return `<h2 class="identity-heading">Identité du personnage</h2>${w.repairReturn ? button(UI_FR["repair.returnLevels"], "repair-return-level", "", "small-btn") : ""}<label class="field identity-name" for="${formId("wiz.name")}"><span>Nom du personnage</span><input id="${formId("wiz.name")}" data-bind="wiz.name" type="text" value="${esc(c.name)}" title="${esc(c.name || "Nom du personnage")}" placeholder="Nom du personnage" maxlength="80" autocomplete="off">${icon("edit", 18)}</label>${w.original ? `<p class="wizard-intro">Rien n’est encore remplacé. Compare les valeurs, puis valide.</p>` : ""}<div class="portrait-identity identity-portrait">${characterPortrait(c, { editable: true })}<div class="identity-side"><div class="identity-adjacent">${field("Âge", "wiz.details.age", details.age || "", "text", "", 'maxlength="40"')}${field("Taille", "wiz.details.height", details.height || "", "text", "", 'maxlength="40"')}</div><div class="identity-lower">${field("Poids", "wiz.details.weight", details.weight || "", "text", "", 'maxlength="40"')}${selectField("Alignement", "wiz.alignment", c.alignment, { "": "Non précisé", ...Object.fromEntries(ALIGNMENTS.map((a) => [a, a])) })}</div></div></div><div class="form-grid identity-remaining">${field("Yeux", "wiz.details.eyes", details.eyes || "", "text", "", 'maxlength="40"')}${field("Cheveux", "wiz.details.hair", details.hair || "", "text", "", 'maxlength="40"')}</div><details class="feature-item" data-detail="wiz-personality"><summary><span>Personnalité : traits, idéaux, liens, défauts</span><span class="feature-arrow">${icon("chevron", 14)}</span></summary><div class="form-grid">${field("Traits de personnalité", "wiz.details.traits", details.traits || "", "textarea", "", 'maxlength="1500" rows="3"')}${field("Idéaux", "wiz.details.ideals", details.ideals || "", "textarea", "", 'maxlength="1500" rows="3"')}${field("Liens", "wiz.details.bonds", details.bonds || "", "textarea", "", 'maxlength="1500" rows="3"')}${field("Défauts", "wiz.details.flaws", details.flaws || "", "textarea", "", 'maxlength="1500" rows="3"')}</div></details>${field("Histoire et apparence", "wiz.biography", c.biography, "textarea", "", 'placeholder="Ce qui te pousse à partir…" maxlength="6000" rows="4"')}<div class="review-section"><div class="summary-row"><span>Origine</span><strong>${esc(d.race.name)}</strong></div><div class="summary-row"><span>Classe</span><strong>${esc(classSummary(c))}${subclassSummary(c) ? ` · ${esc(subclassSummary(c))}` : ""}</strong></div><div class="summary-row"><span>Historique</span><strong>${esc(d.background.name)}</strong></div><div class="summary-row"><span>Compétences</span><strong>${Object.keys(d.ranks)
     .filter((s) => d.ranks[s])
     .map((s) => SKILLS[s][0] + (d.ranks[s] === 2 ? " (expertise)" : ""))
     .join(", ")}</strong></div><div class="summary-row"><span>Langues</span><strong>${esc(d.languages.map((l) => l.name).join(", "))}</strong></div><div class="summary-row"><span>Outils</span><strong>${esc(d.tools.map((t) => t.name).join(", ") || "Aucun")}</strong></div><div class="summary-row"><span>Attaques</span><strong>${esc(d.attacks.map((a) => `${a.name} ${signed(a.attack)}`).join(" · "))}</strong></div></div><div class="review-section"><h3>${w.original ? "Ce qui change sur la fiche" : "Tes valeurs de départ"}</h3>${impactHtml(w.original, wizardPreview(w))}</div>${issues.errors.length ? issueList(issues.errors, "error") : ""}${issues.warnings.length ? `<div class="review-section"><h3>À compléter ou à valider avec le MJ</h3>${issueList(issues.warnings)}</div>` : ""}`;
 }
+function renderWorkflowHeader({ context, steps, index, stepAction, leaveAction, previousAction, nextAction, nextLabel, nextDisabled = false }) {
+  const final = nextAction === "wizard-save" || nextAction === "level-save";
+  const leaveLabel = leaveAction === "cancel-level" ? "Annuler les changements de ce niveau" : "Quitter et conserver le brouillon";
+  return `<div class="workflow-header"><div class="wizard-top"><span class="eyebrow">${esc(context)}</span>${button(icon("x", 18), leaveAction, `id="workflow-close" aria-label="${esc(leaveLabel)}" title="${esc(leaveLabel)}"`, "ghost workflow-close")}</div><div class="workflow-row">${button(`${icon("back", 16)}<span class="workflow-action-label">Précédent</span>`, previousAction, `id="workflow-previous" aria-label="Étape précédente" ${index ? "" : "disabled"}`, "ghost")}<details class="workflow-menu ${steps.length > 3 ? "workflow-many" : ""}" ${window.matchMedia("(min-width:701px)").matches ? "open" : ""}><summary id="workflow-step-summary" aria-label="${esc(`Choisir une étape, étape actuelle ${steps[index][1]}`)}"><span class="workflow-step-title">${esc(steps[index][1])}</span><span class="workflow-step-count"><strong>${index + 1}</strong>/${steps.length}${icon("down", 12)}</span><span class="workflow-segments" aria-hidden="true">${steps.map((entry, i) => `<i class="${i < index ? "done" : i === index ? "current" : ""}"></i>`).join("")}</span></summary><div class="wizard-progress" style="--steps:${steps.length}">${steps.map(([id, label, disabled], i) => `<button type="button" id="workflow-step-${esc(String(id))}" class="wizard-step ${i === index ? "active" : i < index ? "done" : ""}" data-action="${stepAction}" data-step="${esc(String(id))}" aria-label="${esc(`Étape ${i + 1} sur ${steps.length} : ${label}`)}" ${i === index ? 'aria-current="step"' : ""} ${disabled ? "disabled" : ""}><span class="step-number">${i < index ? icon("check", 13) : i + 1}</span><span class="step-label">${esc(label)}</span></button>`).join("")}</div></details>${button(`<span class="workflow-action-label">${final ? "Valider" : "Suivant"}</span>${icon(final ? "check" : "arrow", 16)}`, nextAction, `id="workflow-next" aria-label="${esc(nextLabel)}" ${nextDisabled ? "disabled" : ""}`, `primary ${final ? "workflow-validate" : ""}`)}</div></div>`;
+}
+function renderWorkflowPreview(c, reader) {
+  return reader ? `<details class="workflow-preview" data-detail="workflow-preview"><summary>Aperçu du personnage</summary>${miniPreview(c)}</details>` : miniPreview(c);
+}
+let workflowReaderMode = null;
+function measureWorkflowMenu() {
+  const menu = document.querySelector(".workflow-menu"), summary = menu?.querySelector("summary");
+  if (!summary) return;
+  const bottomNav = document.querySelector(".mobile-nav"), navHeight = bottomNav?.getBoundingClientRect().height || 0;
+  menu.style.setProperty("--workflow-menu-height", `${Math.max(0, innerHeight - summary.getBoundingClientRect().bottom - navHeight - 16)}px`);
+}
+function syncWorkflowLayout({ viewportChanged = false } = {}) {
+  const wrap = document.querySelector(".wizard-wrap"), menu = wrap?.querySelector(".workflow-menu");
+  if (!wrap) { workflowReaderMode = null; return; }
+  if (menu && viewportChanged) menu.open = window.matchMedia("(min-width:701px)").matches;
+  measureWorkflowMenu();
+  if (!wrap.classList.contains("workflow-reader")) { workflowReaderMode = null; return; }
+  wrap.style.setProperty("--workflow-start", `${wrap.getBoundingClientRect().top + scrollY}px`);
+  let fit = window.matchMedia("(min-width:1001px) and (min-height:850px)").matches;
+  wrap.classList.toggle("workflow-reader-space", fit);
+  const preview = wrap.querySelector(".workflow-preview"), scroller = wrap.querySelector(".workflow-spell-scroll"), previewWasOpen = preview.open;
+  if (fit) {
+    preview.open = true;
+    const layout = wrap.querySelector(".wizard-layout");
+    fit = scroller.clientHeight >= 220 && scroller.scrollHeight > 0 && preview.scrollHeight <= layout.clientHeight && wrap.querySelector(".wizard-main").scrollHeight <= wrap.querySelector(".wizard-main").clientHeight + 1;
+    wrap.classList.toggle("workflow-reader-space", fit);
+  }
+  if (fit) preview.open = true;
+  else preview.open = workflowReaderMode === false ? previewWasOpen : false;
+  scroller.setAttribute("aria-label", fit ? "Choix de sorts, liste défilante" : "Choix de sorts");
+  workflowReaderMode = fit;
+}
+function finishWorkflowNavigation() {
+  window.scrollTo({ top: 0 });
+  syncWorkflowLayout();
+  if (window.matchMedia("(max-width:700px)").matches) document.getElementById("workflow-step-summary")?.focus({ preventScroll: true });
+}
+
 const PICK_CHIP_TYPES = ["ability", "skill", "language", "tool", "weapon", "skillOrTool", "toolOrLanguage"];
 function renderWizard() {
   const w = ui.wizard,
@@ -16637,18 +17363,12 @@ function renderWizard() {
   if (!steps.some(([id]) => id === w.step)) w.step = steps[0][0];
   const index = steps.findIndex(([id]) => id === w.step),
     last = index === steps.length - 1,
-    preview = wizardPreview(w);
-  return `<div class="wizard-wrap"><div class="wizard-top"><span class="eyebrow">${w.original ? "Corriger" : "Créer un personnage"} · ${index + 1}/${steps.length} · ${steps[index][1]}</span>${button(`${icon("x", 15)} Quitter`, "leave-wizard", "", "small-btn ghost")}</div><div class="wizard-progress" style="--steps:${steps.length}">${steps
-    .map(
-      ([id, label], i) =>
-        `<button type="button" class="wizard-step ${i === index ? "active" : i < index ? "done" : ""}" data-action="wizard-step" data-step="${id}" ${i > index && !w.visited?.includes(id) ? "disabled" : ""}><span class="step-number">${i < index ? icon("check", 13) : i + 1}</span><span class="step-label">${label}</span></button>`,
-    )
-    .join("")}</div><div class="wizard-layout"><div class="wizard-main">${renderWizardStep(w, c)}${w.error ? `<div class="wizard-error">${notice(esc(w.error), "error")}</div>` : ""}</div>${miniPreview(preview)}</div><div class="wizard-footer">${button(`${icon("back", 16)} ${index ? "Précédent" : "Annuler"}`, "wizard-prev", "", "ghost")}${
-    last
-      ? button(`${icon("check", 17)} ${w.original ? "Valider les corrections" : "Créer la fiche"}`, "wizard-save", "", "primary")
-      : button(`${steps[index + 1][1]} ${icon("arrow", 16)}`, "wizard-next", "", "primary")
-  }</div></div>`;
+    preview = wizardPreview(w),
+    reader = w.step === "magic" && spellcasters(c).length > 0;
+  const context = w.original ? `Corriger ${c.name || "le personnage"}` : `Créer un personnage${levelOf(c) > 1 ? ` · Niveau ${levelOf(c)}` : ""}`;
+  return `<div class="wizard-wrap ${reader ? "workflow-reader" : ""}">${renderWorkflowHeader({ context, steps: steps.map(([id, label], i) => [id, label, i > index && !w.visited?.includes(id)]), index, stepAction: "wizard-step", leaveAction: "leave-wizard", previousAction: "wizard-prev", nextAction: last ? "wizard-save" : "wizard-next", nextLabel: last ? w.original ? "Valider les corrections" : "Créer la fiche" : `Étape suivante : ${steps[index + 1][1]}` })}<div class="wizard-layout"><div class="wizard-main">${renderWizardStep(w, c)}${w.error ? `<div class="wizard-error">${notice(esc(w.error), "error")}</div>` : ""}</div>${renderWorkflowPreview(preview, reader)}</div></div>`;
 }
+
 const RACE_GROUP_ORDER = ["Humain", "Nain", "Elfe", "Halfelin", "Gnome", "Demi-elfe", "Demi-orc", "Drakéide", "Tieffelin"];
 function renderWizardStep(w, c) {
   switch (w.step) {
@@ -16715,18 +17435,16 @@ function renderLevelFlow() {
       };
       classPicker = `<section class="choice-spec"><h3>Dans quelle classe progresser ?</h3><div class="choice-grid compact">${current.map(card).join("")}</div><details class="feature-item" data-detail="multiclass" ${current.some((o) => o.classId === l.classId) ? "" : "open"}><summary><span>Multiclasser vers une autre classe</span><span class="feature-arrow">${icon("chevron", 14)}</span></summary><p class="small muted">Prérequis 2014 : 13 dans la caractéristique principale de ta classe actuelle et de la nouvelle. Tu ne gagnes qu’une partie des maîtrises de la nouvelle classe.</p><div class="choice-grid compact">${others.map(card).join("")}</div></details></section>`;
     }
-    content = `<h2>${f.isNew ? "Une nouvelle étape." : "Revenir sur un choix."}</h2><p class="wizard-intro">${f.isNew ? `Prépare le niveau ${level}. Rien n’est appliqué avant le récapitulatif.` : `Tu corriges le niveau ${level}. Les niveaux suivants sont conservés et recalculés ; les choix devenus invalides seront signalés.`}</p>${classPicker}${renderLevelEditor(c, level, "lvl")}${classLevel(c, "warlock") > 2 && allChoices(c, "invocations").length ? button("Remplacer une manifestation occulte", "replace-choice", "", "small-btn") : ""}`;
+    content = `<h2>${f.isNew ? "Choix du niveau" : "Corriger le niveau"}</h2><p class="wizard-intro">${f.isNew ? `Prépare le niveau ${level}. Rien n’est appliqué avant validation.` : `Tu corriges le niveau ${level}. Les niveaux suivants sont conservés et recalculés ; les choix devenus invalides seront signalés.`}</p>${classPicker}${renderLevelEditor(c, level, "lvl")}${classLevel(c, "warlock") > 2 && allChoices(c, "invocations").length ? button("Remplacer une manifestation occulte", "replace-choice", "", "small-btn") : ""}`;
   } else if (f.step === 1)
-    content = `<h2>Et côté magie ?</h2><p class="wizard-intro">Les nouveaux quotas et niveaux de sorts sont déjà comptés. Choisis maintenant, ou complète plus tard depuis le grimoire.</p>${spellcasters(c).length ? renderMagicEditor(c, "level") : notice("Aucune classe de lanceur de sorts à ce niveau. Passe à la vérification.")}`;
+    content = `<h2>Sorts</h2><p class="wizard-intro">Choisis tes sorts ou complète ce choix plus tard dans le grimoire.</p>${spellcasters(c).length ? renderMagicEditor(c, "level") : notice("Aucune classe de lanceur de sorts à ce niveau. Passe à la vérification.")}`;
   else
-    content = `<h2>Avant de tourner la page.</h2><p class="wizard-intro">${f.isNew ? "Voici les conséquences de cette montée de niveau." : "Voici les conséquences de la correction, sur toute la fiche."}</p>${impactHtml(f.original, c)}${renderRepairConsequences(previewCharacterRepair(beginCharacterRepair(f.original), c))}<div class="section-gap"><h3>Choix du niveau ${level}</h3>${summarizeChoice(c, l)}</div><div class="section-gap">${issueList(issues.errors, "error")}${issueList(issues.warnings)}</div><div class="notice section-gap">${icon("heart", 18)}<div><strong>Les blessures sont conservées.</strong>Les PV actuels suivent le maximum. Un personnage à 0 PV n’est pas relevé par la montée de niveau, et les ressources dépensées ne reviennent pas.</div></div>`;
-  return `<div class="wizard-wrap"><div class="wizard-top"><span class="eyebrow">${esc(c.name)} · ${f.isNew ? "Niveau " + level : "Correction du niveau " + level}</span>${button(`${icon("x", 15)} Annuler`, "cancel-level", "", "small-btn ghost")}</div><div class="wizard-progress" style="--steps:3">${["Classe & choix", "Magie", "Vérification"]
-    .map(
-      (text, i) =>
-        `<button type="button" class="wizard-step ${i === f.step ? "active" : i < f.step ? "done" : ""}" data-action="level-step" data-step="${i}" ${i > f.step ? "disabled" : ""}><span class="step-number">${i < f.step ? icon("check", 13) : i + 1}</span><span class="step-label">${text}</span></button>`,
-    )
-    .join("")}</div><nav class="actions section-gap" aria-label="${esc(UI_FR["repair.levels"])}">${c.levels.map((entry, index) => button(`${UI_FR["repair.level"]} ${index + 1}`, "repair-level", `data-level="${index + 1}" aria-current="${index + 1 === f.level ? "step" : "false"}"`, "small-btn ghost")).join("")}${button(UI_FR["repair.identity"], "repair-identity", "", "small-btn ghost")}</nav><div class="wizard-layout"><div class="wizard-main">${content}${f.error ? `<div class="wizard-error">${notice(esc(f.error), "error")}</div>` : ""}</div>${miniPreview(c)}</div><div class="wizard-footer">${button(`${icon("back", 16)} ${f.step ? "Précédent" : "Annuler"}`, "level-prev", "", "ghost")}${f.step < 2 ? button(`Continuer ${icon("arrow", 16)}`, "level-next", "", "primary") : button(`${icon("check", 17)} ${f.isNew ? "Valider le niveau " + level : "Valider la correction"}`, "level-save", issues.errors.length ? "disabled" : "", "primary")}</div></div>`;
+    content = `<h2>Vérification</h2>${impactHtml(f.original, c)}${renderRepairConsequences(previewCharacterRepair(beginCharacterRepair(f.original), c))}<div class="section-gap"><h3>Choix du niveau ${level}</h3>${summarizeChoice(c, l)}</div><div class="section-gap">${issueList(issues.errors, "error")}${issueList(issues.warnings)}</div><div class="notice section-gap">${icon("heart", 18)}<div><strong>Les blessures sont conservées.</strong>Les PV actuels suivent le maximum. Un personnage à 0 PV n’est pas relevé par la montée de niveau, et les ressources dépensées ne reviennent pas.</div></div>`;
+  const reader = f.step === 1 && spellcasters(c).length > 0;
+  const steps = ["Classe & choix", "Magie", "Vérification"].map((label, i) => [i, label, i > f.step]);
+  return `<div class="wizard-wrap ${reader ? "workflow-reader" : ""}">${renderWorkflowHeader({ context: `${c.name} · ${f.isNew ? "Niveau " + level : "Correction du niveau " + level}`, steps, index: f.step, stepAction: "level-step", leaveAction: "cancel-level", previousAction: "level-prev", nextAction: f.step < 2 ? "level-next" : "level-save", nextLabel: f.step < 2 ? `Étape suivante : ${steps[f.step + 1][1]}` : f.isNew ? `Valider le niveau ${level}` : "Valider la correction", nextDisabled: f.step === 2 && issues.errors.length > 0 })}<nav class="actions section-gap workflow-levels" aria-label="${esc(UI_FR["repair.levels"])}">${c.levels.map((entry, index) => button(`${UI_FR["repair.level"]} ${index + 1}`, "repair-level", `data-level="${index + 1}" aria-current="${index + 1 === f.level ? "step" : "false"}"`, "small-btn ghost")).join("")}${button(UI_FR["repair.identity"], "repair-identity", "", "small-btn ghost")}</nav><div class="wizard-layout"><div class="wizard-main">${content}${f.error ? `<div class="wizard-error">${notice(esc(f.error), "error")}</div>` : ""}</div>${renderWorkflowPreview(c, reader)}</div></div>`;
 }
+
 function modalShell(title, body, footer = "", wide = false, eyebrow = "") {
   return `<div class="modal-backdrop" data-backdrop="1"><section class="modal ${wide ? "wide" : ""}" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1"><header class="modal-head"><div>${eyebrow ? `<div class="eyebrow">${esc(eyebrow)}</div>` : ""}<h2 id="dialog-title">${title}</h2></div>${smallIcon("x", "close-modal", "Fermer la fenêtre")}</header><div class="modal-body">${body}</div>${footer ? `<footer class="modal-footer">${footer}</footer>` : ""}</section></div>`;
 }
@@ -16777,6 +17495,9 @@ function renderModal() {
   const c = activeCharacter(),
     d = c ? derive(c) : null,
     cancel = button("Annuler", "close-modal", "", "ghost");
+  if (ui.modal === "journal-editor") return renderJournalEditor();
+  if (ui.modal === "journal-photo") return renderJournalPhotoViewer();
+  if (ui.modal === "journal-discard") return modalShell("Quitter cette page ?", '<p class="modal-copy">Tes changements ne sont pas encore enregistrés.</p>', button("Continuer à écrire", "journal-keep-editing", "", "primary") + button("Abandonner les changements", "journal-discard-edit", "", "character-delete-button"));
   if (ui.modal === "hp-details") {
     const exhaustion = d.wildShape?.conditionImmunities.includes("exhaustion") ? 0 : c.state.exhaustion;
     return modalShell("Points de vie et repos", `<div class="summary-row"><span>Points de vie</span><strong>${d.currentHp} / ${d.maxHp}</strong></div><div class="summary-row"><span>PV temporaires</span><strong>${c.state.tempHp}</strong></div><div class="summary-row"><span>Dés de vie disponibles</span><strong>${hitDiceLabel(d)}</strong></div><p class="modal-copy section-gap">Les dés de vie se dépensent pendant un repos court. Les repos sont accessibles sous tes ressources.</p>${exhaustion >= 4 ? notice("Le maximum de PV est réduit par l’épuisement.", "warning") : ""}`, button("PV temporaires", "temporary-hp", "", "ghost") + button("Fermer", "close-modal", "", "primary"));
@@ -16811,8 +17532,8 @@ function renderModal() {
       })
       .join("");
     return modalShell(
-      long ? "Un repos bien mérité." : "Reprendre son souffle.",
-      `${field("Début du repos (heure de campagne)", "ui.rest.startHours", ui.rest.startHours, "number", "Compte les heures depuis le début de ta campagne, y compris les jours écoulés.", `min="0" step="0.5" ${c.state.rest?.status === "started" ? "disabled" : ""}`)}${field("Fin du repos (heure de campagne)", "ui.rest.endHours", ui.rest.endHours, "number", "L’heure de ton téléphone ne fait pas avancer la campagne.", 'min="0" step="0.5"')}${restError ? notice(esc(restError), "error") : ""}${d.wildShape && !derive(preview).wildShape ? notice("Tu reprends ta forme normale pendant ce repos. Les soins et les dés de vie concernent ton corps.") : ""}<p class="modal-copy">${long ? "Repos long de 8 heures, au plus une fois par 24 heures, en commençant avec au moins 1 PV." : "Repos court d’au moins 1 heure. Dépense des dés de vie pour récupérer des PV ; chaque dé ajoute ton modificateur de Constitution."}</p>${long && c.state.hp <= 0 ? notice("Un repos long ne rend rien si tu le commences à 0 PV. Stabilise-toi ou reçois des soins d’abord.", "error") : ""}${
+      long ? "Repos long" : "Repos court",
+      `${field("Début du repos (heure de campagne)", "ui.rest.startHours", ui.rest.startHours, "number", "Compte les heures depuis le début de ta campagne, y compris les jours écoulés.", `min="0" step="0.5" ${c.state.rest?.status === "started" ? "disabled" : ""}`)}${field("Fin du repos (heure de campagne)", "ui.rest.endHours", ui.rest.endHours, "number", "Heures de campagne, indépendantes de l’heure réelle.", 'min="0" step="0.5"')}${restError ? notice(esc(restError), "error") : ""}${d.wildShape && !derive(preview).wildShape ? notice("Tu reprends ta forme normale pendant ce repos. Les soins et les dés de vie concernent ton corps.") : ""}<p class="modal-copy">${long ? "Repos long de 8 heures, au plus une fois par 24 heures, en commençant avec au moins 1 PV." : "Repos court d’au moins 1 heure. Dépense des dés de vie pour récupérer des PV ; chaque dé ajoute ton modificateur de Constitution."}</p>${long && c.state.hp <= 0 ? notice("Un repos long ne rend rien si tu le commences à 0 PV. Stabilise-toi ou reçois des soins d’abord.", "error") : ""}${
         !long
           ? `<div class="panel"><h3>Dépenser des dés de vie</h3><p class="small muted" style="margin:8px 0">CON ${signed(restView.mods.con)} par dé${restView.acc.feats.includes("durable") ? ` · ${esc(UI_FR["rest.durableMinimum"].replace("{minimum}", Math.max(2, 2 * restView.mods.con)))}` : ""}</p><div class="actions">${dice}</div>${rolls.length ? `<div class="learn-counts">${rolls.map((r) => `<span class="pill">d${r.die} : ${r.roll} ${signed(restView.mods.con)} ${r.roll + restView.mods.con < hitDieHealing(c, r.roll, restView) ? `→ ${hitDieHealing(c, r.roll, restView)} PV (minimum ${hitDieHealing(c, r.roll, restView)})` : `= ${hitDieHealing(c, r.roll, restView)} PV`}</span>`).join("")}</div>${button("Annuler le dernier dé", "rest-undo-die", "", "small-btn ghost")}` : ""}</div>`
           : checkField("Nourriture et boisson suffisantes", "ui.rest.fed", ui.rest.fed, "Permet de réduire l’épuisement d’un niveau.")
@@ -16821,15 +17542,18 @@ function renderModal() {
           .filter((r) => r.reset !== "none" && (long || r.reset === "short"))
           .map((r) => esc(r.name))
           .join(", ") || "aucune"
-      }.</div>${notice("Les états, maladies et malédictions ne disparaissent pas tout seuls. Les récupérations particulières restent à confirmer selon leur aptitude.")}`,
+      }.</div>${notice("États, maladies et malédictions sont conservés. Confirme séparément les récupérations propres aux aptitudes.")}`,
       cancel + (c.state.rest?.status === "started" ? button("Interrompre le repos", "interrupt-rest", "", "danger ghost") : button("Commencer sans récupérer", "begin-rest", "", "small-btn")) + button("Valider le repos", "confirm-rest", restError ? "disabled" : "", "primary"),
     );
   }
   if (ui.modal === "resource-conversions") {
     const options = resourceConversionOptions(c);
-    return modalShell("Conversion de magie", `<p class="modal-copy">Chaque conversion présente son coût et son résultat avant validation. Les emplacements créés expirent au repos long.</p>${options.map((option) => button(option.kind === "create" ? `${option.cost} points → 1 emplacement niv. ${option.level}` : `1 emplacement ${option.pool === "pact" ? "de pacte " : ""}niv. ${option.level} → ${option.gain} points`, "review-resource-conversion", `data-id="${esc(option.id)}"`, "small-btn")).join(" ") || notice("Aucune conversion n’est actuellement disponible.")}`, cancel);
+    return modalShell("Conversion de magie", `<p class="modal-copy">Les emplacements créés expirent au repos long.</p>${options.map((option) => button(option.kind === "create" ? `${option.cost} points → 1 emplacement niv. ${option.level}` : `1 emplacement ${option.pool === "pact" ? "de pacte " : ""}niv. ${option.level} → ${option.gain} points`, "review-resource-conversion", `data-id="${esc(option.id)}"`, "small-btn")).join(" ") || notice("Aucune conversion n’est actuellement disponible.")}`, cancel);
   }
-  if (ui.modal === "resource-event") return modalShell("Événement de récupération", `<p class="modal-copy">Confirme un événement réellement survenu dans la campagne. Les délais et les déclencheurs propres aux aptitudes restent appliqués.</p>${selectField("Événement", "form.kind", ui.form.kind, { dawn: "Aube", dusk: "Crépuscule", initiative: "Jet d’initiative", spell: "Sort", days: "Jours écoulés" })}${ui.form.kind === "days" ? field("Jours écoulés", "form.days", ui.form.days, "number", "", 'min="1" max="999"') : ""}`, cancel + button("Voir les conséquences", "review-resource-event", "", "primary"));
+  if (ui.modal === "resource-event") {
+    const options = resourceRecoveryOptions(c), selected = options.find((option) => option.kind === ui.form.kind);
+    return modalShell("Événement de récupération", `<p class="modal-copy">Confirme un événement réellement survenu dans la campagne. Les délais et les déclencheurs propres aux aptitudes restent appliqués.</p>${options.length ? selectField("Événement", "form.kind", ui.form.kind, Object.fromEntries(options.map((option) => [option.kind, RESOURCE_EVENT_LABELS[option.kind]]))) : notice("Aucune récupération sur événement n’est utile pour le moment.")}${ui.form.kind === "days" ? field("Jours écoulés", "form.days", ui.form.days, "number", "Le délai et les usages récupérés seront recalculés avant validation.", 'min="1" max="999" step="1" required') : selected ? `<p class="preserve small">${esc(resourceRecoverySummary(selected))}</p>` : ""}`, cancel + button("Voir les conséquences", "review-resource-event", selected ? "" : "disabled", "primary"));
+  }
   if (ui.modal === "replace-spell") {
     const draft = magicDraft(ui.spellReplacementTarget), classId = ui.form.classId, acquisitions = (draft.spells.acquisitions?.length ? draft.spells.acquisitions : spellAcquisitions(draft)).filter((entry) => entry.classId === classId && (ui.form.kind === "secret" ? entry.secret : entry.known && !entry.endedAtLevel));
     const sources = Object.fromEntries(acquisitions.map((entry) => [ui.form.kind === "secret" ? entry.secret.id : entry.spellId, `${spellById(draft, entry.spellId)?.name || entry.spellId}${entry.endedAtLevel ? " (ancienne acquisition)" : ""}`]));
@@ -16919,8 +17643,8 @@ function renderModal() {
   }
   if (ui.modal === "trait")
     return modalShell(
-      ui.form.editing ? "Modifier cette aptitude" : "Une idée de ta table",
-      `${field("Nom", "form.name", ui.form.name, "text", "", 'maxlength="120"')}${field("Description, conditions et source", "form.description", ui.form.description, "textarea", "Explique quand l’effet s’applique. Ces mots ne déclenchent aucun calcul à eux seuls.", 'maxlength="12000"')}<h3 style="margin-bottom:14px">Effets chiffrés automatiques</h3><div class="form-grid">${field("Bonus fixe de PV maximum", "form.hp", ui.form.hp, "number", "Un total fixe, pas un gain par niveau.", 'min="-500" max="500" step="1"')}${field("Bonus de CA", "form.ac", ui.form.ac, "number", "", 'min="-20" max="20" step="1"')}${field("Bonus de vitesse (m)", "form.speed", ui.form.speed, "number", "", 'min="-90" max="90" step="0.5"')}${field("Utilisations maximum (0 = aucune)", "form.maxUses", ui.form.maxUses, "number", "", 'min="0" max="999" step="1"')}${selectField("Récupération du compteur", "form.reset", ui.form.reset, { long: "Repos long", short: "Repos court ou long", none: "Manuelle" })}</div><details class="feature-item"><summary>Bonus de caractéristiques ${icon("down", 14)}</summary><div class="form-grid">${Object.entries(ABILITIES)
+      ui.form.editing ? "Modifier cette aptitude" : "Nouvelle aptitude maison",
+      `${field("Nom", "form.name", ui.form.name, "text", "", 'maxlength="120"')}${field("Description, conditions et source", "form.description", ui.form.description, "textarea", "La description ne déclenche aucun calcul.", 'maxlength="12000"')}<h3 style="margin-bottom:14px">Effets chiffrés automatiques</h3><div class="form-grid">${field("Bonus fixe de PV maximum", "form.hp", ui.form.hp, "number", "Un total fixe, pas un gain par niveau.", 'min="-500" max="500" step="1"')}${field("Bonus de CA", "form.ac", ui.form.ac, "number", "", 'min="-20" max="20" step="1"')}${field("Bonus de vitesse (m)", "form.speed", ui.form.speed, "number", "", 'min="-90" max="90" step="0.5"')}${field("Utilisations maximum (0 = aucune)", "form.maxUses", ui.form.maxUses, "number", "", 'min="0" max="999" step="1"')}${selectField("Récupération du compteur", "form.reset", ui.form.reset, { long: "Repos long", short: "Repos court ou long", none: "Manuelle" })}</div><details class="feature-item"><summary>Bonus de caractéristiques ${icon("down", 14)}</summary><div class="form-grid">${Object.entries(ABILITIES)
         .map(([a, v]) => field(v.name, `form.bonuses.${a}`, ui.form.bonuses[a] || 0, "number", "", 'min="-20" max="20" step="1"'))
         .join("")}</div></details>${checkField("Effet actif", "form.active", ui.form.active)}<div class="section-gap">${impactHtml(c, traitCandidate())}</div>`,
       cancel + button("Vérifier les effets", "review-trait", "", "primary"),
@@ -16938,7 +17662,7 @@ function renderModal() {
   if (ui.modal === "adjustments")
     return modalShell(
       "Ajustements du MJ",
-      `<p class="modal-copy">Ces bonus s’ajoutent aux calculs, restent visibles et modifiables. N’utilise pas un ajustement pour compter deux fois un effet déjà actif.</p><div class="form-grid">${[
+      `<p class="modal-copy">Ces bonus s’ajoutent aux calculs. Ne compte pas deux fois un effet déjà actif.</p><div class="form-grid">${[
         ["hp", "PV maximum"],
         ["ac", "Classe d’armure"],
         ["speed", "Vitesse (m)"],
@@ -17033,7 +17757,7 @@ function printSheet(c) {
     .join("")}<h2>Aptitudes</h2>${featureGroups(c, d)
     .flatMap(([, items]) => items)
     .map((f) => `<p><b>${esc(f.name)}</b> : ${esc(f.description)}</p>`)
-    .join("")}${c.custom.traits.map((t) => `<p><b>${esc(t.name)} (${t.active === false ? "inactif" : "actif"})</b> : ${esc(t.description)}</p>`).join("")}<h2>Notes</h2><p class="print-note">${esc(c.notes)}</p><p>Compagnon ${APP_VERSION}. Résumés de règles originaux ; contenu SRD 5.1 sous CC BY 4.0.</p></section>`;
+    .join("")}${c.custom.traits.map((t) => `<p><b>${esc(t.name)} (${t.active === false ? "inactif" : "actif"})</b> : ${esc(t.description)}</p>`).join("")}${printableJournal(c)}<p>Compagnon ${APP_VERSION}. Résumés de règles originaux ; contenu SRD 5.1 sous CC BY 4.0.</p></section>`;
 }
 // Writes are serialized and revision-checked. A second tab cannot silently overwrite a save.
 function toast(message, action = null) {
@@ -17055,8 +17779,8 @@ function mutateApp(mutator, { redraw = true } = {}) {
   const task = saveQueue.then(async () => {
     ui.saving = true;
     const next = clone(appData);
-    await mutator(next);
     try {
+      await mutator(next);
       appData = await localStore.write(next, appData.revision);
     } catch (error) {
       if (error.message === "CONFLICT") appData = await localStore.read();
@@ -17100,7 +17824,7 @@ async function saveCharacter(character, label = "Modification", mode = "settings
           date: new Date().toISOString(),
           character: clone(previous),
         });
-        next.snapshots = next.snapshots.slice(-30);
+        next.snapshots = retainJournalSnapshots(next.snapshots);
       }
       if (!previous && mode !== "restore") result.state.hp = derive(result).maxHp;
       if (!transaction) reconcileState(result, mode === "settings" && previous ? previous : null);
@@ -17132,6 +17856,17 @@ function openModal(type) {
   });
 }
 function closeModal() {
+  if (ui.modal === "journal-photo") {
+    const back = ui.journalPhotoViewer?.returnTo;
+    ui.journalPhotoViewer = null;
+    if (back && ui.journalDraft) { ui.modal = back; render(); modalRoot.querySelector('[data-action="journal-photo-view"]')?.focus({ preventScroll: true }); return; }
+  }
+  if (ui.journalSaving && ["journal-editor", "journal-discard"].includes(ui.modal)) return;
+  if (ui.modal === "journal-discard") { ui.modal = "journal-editor"; render(); modalRoot.querySelector("textarea")?.focus(); return; }
+  if (ui.modal === "journal-editor") {
+    if (journalDraftDirty()) { ui.modal = "journal-discard"; render(); modalRoot.querySelector('[data-action="journal-keep-editing"]')?.focus(); return; }
+    ui.journalDraft = null; ui.journalPhotoLoading = false;
+  }
   if (ui.modal === "roll") {
     if (ui.roll?.phase === "applying") return;
     const back = ui.roll?.returnModal;
@@ -17195,7 +17930,6 @@ function go(route) {
   ui.spellQuery = "";
   ui.featureQuery = "";
   ui.featureFilter = "all";
-  if (route === "notes") ui.noteDraft = activeCharacter()?.notes || "";
   render();
   window.scrollTo({ top: 0 });
 }
@@ -17312,6 +18046,7 @@ function handleBinding(el, redraw) {
     return;
   }
   setBinding(path, value);
+  if (path === "ui.journalQuery") { if (previous !== value) updateJournalSearch(); return; }
   if (path === "wiz.background.variantId" && previous !== value) { clearPicks(ui.wizard.draft, ["bg|", "feat|bg|"]); queueDraft(); render(); return; }
   const draft = path.startsWith("wiz.") ? ui.wizard?.draft : path.startsWith("lvl.") ? ui.levelFlow?.draft : null;
   if (draft && /\.asi\.featId$/.test(path) && previous !== value) {
@@ -17361,7 +18096,7 @@ function diceRequestFormula(request) {
   const d20 = ["check", "attack", "death"].includes(request.kind),
     count = d20 ? (request.kind !== "death" && ui.rollMode !== "normal" ? 2 : 1) : request.count || 1,
     notation = request.notation || `${count}d${d20 ? 20 : request.sides || 6}`;
-  return `${notation}${request.bonus ? ` ${signed(request.bonus)}` : ""}${request.kind === "hit-dice" ? " par dé" : ""}${request.multiplier && request.multiplier !== 1 ? ` × ${request.multiplier}` : ""}`;
+  return `${notation}${request.bonus ? signed(request.bonus) : ""}${request.kind === "hit-dice" ? " par dé" : ""}${request.multiplier && request.multiplier !== 1 ? ` × ${request.multiplier}` : ""}`;
 }
 function diceDisplayItems(r) {
   const result = r.result || resolveDiceRoll(r.request, ui.rollMode, (sides) => sides);
@@ -17370,17 +18105,17 @@ function diceDisplayItems(r) {
 function renderDiceDialog() {
   const r = ui.roll, ready = r.phase === "ready", rolling = r.phase === "rolling", result = r.phase === "result" ? r.result : null,
     modes = ["check", "attack"].includes(r.request.kind),
-    hint = rolling ? "Les dés roulent…" : ready ? (diceDisplayItems(r).length ? "Touche les dés pour lancer" : "Dégâts fixes, sans dé à lancer") : "Résultat du lancer",
-    title = r.request.kind === "attack" ? "Jet d’attaque" : r.request.kind === "damage" ? "Jet de dégâts" : r.request.kind === "hit-dice" ? "Reprendre son souffle" : r.request.kind === "death" ? "Sauvegarde contre la mort" : "À toi de lancer.";
+    hint = rolling ? "Les dés roulent…" : ready ? (diceDisplayItems(r).length ? "Toucher les dés pour lancer" : "Dégâts fixes, sans dé à lancer") : "Résultat du lancer",
+    title = r.request.kind === "hit-dice" ? "Dés de vie" : r.name || "Jet de dés";
   const modeHtml = modes ? `<div class="segmented dice-roll-modes" role="group" aria-label="Mode du jet">${[["normal", "Normal"], ["advantage", "Avantage"], ["disadvantage", "Désavantage"]].map(([mode, label]) => `<button id="dice-mode-${mode}" class="${ui.rollMode === mode ? "active" : ""}" data-action="roll-mode" data-mode="${mode}" data-value="${mode}" aria-pressed="${ui.rollMode === mode}" ${rolling ? "disabled" : ""}>${label}</button>`).join("")}</div>` : "";
   const quantity = r.maxCount > 1 ? `<label class="dice-quantity" for="dice-count">Dés de vie <select id="dice-count" data-dice-count ${!ready ? "disabled" : ""}>${Array.from({ length: r.maxCount }, (_, i) => `<option value="${i + 1}" ${r.request.count === i + 1 ? "selected" : ""}>${i + 1}d${r.request.sides}</option>`).join("")}</select><span>${r.maxCount} disponibles</span></label>` : "";
   const scoreHtml = result?.groups ? `<div class="dice-score-grid">${result.groups.map((group, index) => `<div><span>Valeur ${index + 1}</span><strong>${group.total}</strong><small>${group.detail}</small></div>`).join("")}</div>` : `<strong class="dice-result-total roll-number">${result ? result.total : ""}</strong><p class="dice-roll-breakdown roll-detail">${result ? esc(result.detail) : ""}</p>`;
-  const body = `<div class="dice-roll-content"><p class="dice-roll-context">${esc(r.name)}</p><p class="dice-roll-formula">${esc(diceRequestFormula(r.request))}</p>${modeHtml}${quantity}<button id="dice-tray" class="dice-tray" data-action="roll-start" aria-label="Lancer les dés" ${!ready ? "disabled" : ""}><canvas class="dice-canvas" aria-hidden="true"></canvas><span class="dice-tray-hint">${hint}</span></button><div class="dice-outcome" role="status" aria-live="polite" aria-atomic="true">${scoreHtml}${result && r.note ? `<p class="dice-roll-note">${esc(r.note)}</p>` : ""}</div>${ready && r.help ? `<p class="dice-roll-help">${esc(r.help)}</p>` : ""}</div>`;
+  const body = `<div class="dice-roll-content">${modeHtml}${quantity}<button id="dice-tray" class="dice-tray" data-action="roll-start" aria-label="Lancer les dés" ${!ready ? "disabled" : ""}><canvas class="dice-canvas" aria-hidden="true"></canvas><span class="dice-tray-hint">${hint}<span class="dice-roll-formula">${esc(diceRequestFormula(r.request))}</span></span></button><div class="dice-outcome" role="status" aria-live="polite" aria-atomic="true">${scoreHtml}${result && r.note ? `<p class="dice-roll-note">${esc(r.note)}</p>` : ""}</div>${ready && r.help ? `<p class="dice-roll-help">${esc(r.help)}</p>` : ""}</div>`;
   const footer = ready || rolling
     ? button("Annuler", "close-modal", "", "ghost") + button(rolling ? "Lancer en cours…" : "Lancer les dés", "roll-start", `id="dice-launch" ${rolling ? "disabled" : ""}`, "primary")
     : r.apply ? button("Annuler", "close-modal", "", "ghost") + button(r.acceptLabel || "Utiliser ce résultat", "roll-accept", 'id="dice-accept"', "primary")
       : button("Terminer", "close-modal", 'id="dice-finish"', "primary") + (r.request.kind !== "death" ? button(`${icon("dice", 16)} Relancer`, "reroll", 'id="dice-reroll"', "ghost") : "");
-  return modalShell(title, body, footer).replace('class="modal ', `data-roll-phase="${r.phase}" class="modal dice-roll-dialog `);
+  return modalShell(esc(title), body, footer).replace('class="modal ', `data-roll-phase="${r.phase}" class="modal dice-roll-dialog `);
 }
 function mountDiceTray() {
   if (ui.modal !== "roll" || !ui.roll) return;
@@ -17389,7 +18124,7 @@ function mountDiceTray() {
     theme: document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"),
     reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
   });
-  diceRenderer.show(diceDisplayItems(ui.roll));
+  diceRenderer.show(diceDisplayItems(ui.roll), { reveal: ui.roll.phase === "result" });
 }
 async function startDiceDialog() {
   const r = ui.roll;
@@ -17557,9 +18292,10 @@ async function makeDemo() {
   c.startKit = { mode: "done", choices: {}, picks: {} };
   c.gold = 27;
   c.notes = "Retrouver l’atlas des routes oubliées.\nPréparer Bouclier avant chaque expédition.";
+  c.journalEntries = upsertJournalEntry(c, { date: journalLocalDate(), title: "Préparatifs", body: c.notes }).journalEntries;
   await saveCharacter(c, "Création de l’exemple", "create");
   go("sheet");
-  toast("Élyra est prête. Cet exemple est ta copie, modifiable et supprimable.");
+  toast("Exemple ajouté à tes personnages.");
 }
 async function perform(action, el) {
   const c = activeCharacter(),
@@ -17711,19 +18447,16 @@ async function perform(action, el) {
     case "wizard-step":
       ui.wizard.step = data.step;
       render();
-      window.scrollTo({ top: 0 });
+      finishWorkflowNavigation();
       break;
     case "wizard-prev": {
       const steps = wizardSteps(ui.wizard).map(([id]) => id),
         i = steps.indexOf(ui.wizard.step);
-      if (i <= 0) {
-        await perform("leave-wizard", el);
-        break;
-      }
+      if (i <= 0) break;
       ui.wizard.step = steps[i - 1];
       queueDraft();
       render();
-      window.scrollTo({ top: 0 });
+      finishWorkflowNavigation();
       break;
     }
     case "wizard-next": {
@@ -17739,7 +18472,7 @@ async function perform(action, el) {
       w.error = "";
       queueDraft();
       render();
-      window.scrollTo({ top: 0 });
+      finishWorkflowNavigation();
       break;
     }
     case "wizard-save": {
@@ -17756,7 +18489,7 @@ async function perform(action, el) {
       await clearDraft();
       ui.wizard = null;
       go("sheet");
-      toast(w.original ? "Tes corrections sont enregistrées." : "Ton personnage est prêt à jouer.");
+      toast(w.original ? "Tes corrections sont enregistrées." : "Personnage enregistré.");
       break;
     }
     case "choose-race": {
@@ -17863,20 +18596,18 @@ async function perform(action, el) {
     case "level-step":
       ui.levelFlow.step = Number(data.step);
       render();
+      finishWorkflowNavigation();
       break;
     case "level-prev":
-      if (ui.levelFlow.step === 0) {
-        await perform("cancel-level", el);
-        break;
-      }
+      if (ui.levelFlow.step === 0) break;
       ui.levelFlow.step--;
       render();
-      window.scrollTo({ top: 0 });
+      finishWorkflowNavigation();
       break;
     case "level-next":
       ui.levelFlow.step++;
       render();
-      window.scrollTo({ top: 0 });
+      finishWorkflowNavigation();
       break;
     case "level-save": {
       const f = ui.levelFlow,
@@ -18060,17 +18791,27 @@ async function perform(action, el) {
       if (!option) throw new Error("Cette conversion n’est plus disponible.");
       openReview(convertSpellResource(c, option.id), "Conversion de magie", option.kind === "create" ? `${option.cost} points de sorcellerie dépensés, 1 emplacement de niveau ${option.level} créé jusqu’au prochain repos long.` : `1 emplacement ${option.pool === "pact" ? "de pacte " : ""}de niveau ${option.level} dépensé, ${option.gain} points de sorcellerie récupérés.`, "session"); break;
     }
-    case "resource-event": ui.form = { kind: "dawn", amount: 0, days: 1 }; openModal("resource-event"); break;
+    case "resource-event": {
+      const options = resourceRecoveryOptions(c), option = options.find((entry) => entry.kind === data.kind) || options[0];
+      if (!option) { toast("Aucune récupération sur événement n’est utile pour le moment."); break; }
+      ui.form = { kind: option.kind, days: 1 }; openModal("resource-event"); break;
+    }
     case "review-resource-event": {
-      const event = { kind: ui.form.kind, days: Number(ui.form.days || 0) };
-      openReview(recoverResourceEvent(c, event), "Récupération de ressources", `Événement de campagne : ${{ dawn: "aube", dusk: "crépuscule", initiative: "initiative", spell: "sort", days: `${event.days} jour(s) écoulé(s)` }[event.kind]}. Seules les réserves liées à ce déclencheur sont concernées.`, "session"); break;
+      const days = Number(ui.form.days);
+      if (ui.form.kind === "days" && (!Number.isInteger(days) || days < 1 || days > 999)) {
+        document.getElementById(formId("form.days"))?.reportValidity();
+        toast("Indique un nombre entier de jours entre 1 et 999."); break;
+      }
+      const option = resourceRecoveryOptions(c, { days: ui.form.kind === "days" ? days : 1 }).find((entry) => entry.kind === ui.form.kind);
+      if (!option) { toast("Cette récupération n’a plus d’effet utile."); render(); break; }
+      openReview(recoverResourceEvent(c, option.event), "Récupération de ressources", `Événement réellement survenu dans la campagne : ${option.kind === "days" ? `${days} jour(s) écoulé(s)` : RESOURCE_EVENT_LABELS[option.kind].toLocaleLowerCase("fr")}.\n${resourceRecoverySummary(option)}`, "session"); break;
     }
     case "resource-info": {
       const r = resources(c).find((r) => r.id === data.key);
       if (r) {
         openInfo(
           r.name,
-          `${r.note || "Compteur de la capacité."}\n\nRécupération : ${r.reset === "short" ? "repos court ou long" : r.reset === "long" ? "repos long" : "manuelle"}. Utilisations : ${r.max === null ? "à volonté" : r.max - r.used + " / " + r.max}.`,
+          `${r.note || "Compteur de la capacité."}\n\nRécupération : ${resourceResetLabel(r.reset).toLocaleLowerCase("fr")}. Utilisations : ${r.max === null ? "à volonté" : r.remaining + " / " + r.max}.${c.state.resourceCooldowns?.[r.id] > 0 ? `\nDélai restant : ${c.state.resourceCooldowns[r.id]} jour(s).` : ""}${r.id === "ki" && classLevel(c, "monk") >= 20 ? "\nÀ l’initiative, si ta réserve est vide, tu récupères 4 ki." : r.id === "inspiration" && classLevel(c, "bard") >= 20 ? "\nÀ l’initiative, si ta réserve est vide, tu récupères une inspiration bardique." : ""}`,
         );
         if (r.id === "wildshape") {
           ui.info.link = { label: "Voir les formes animales", route: "wildshape" };
@@ -18083,7 +18824,7 @@ async function perform(action, el) {
       const level = Number(data.level),
         spent = c.state.slotsUsed[level] || 0;
       await sessionChange((n) => {
-        n.state.slotsUsed[level] = clamp(spent + (Number(data.index) < spent ? -1 : 1), 0, d.slots[level - 1] + (c.state.temporarySlots?.[level] || 0));
+        n.state.slotsUsed[level] = clamp(spent + (Number(data.index) < spent ? -1 : 1), 0, (d.slots[level - 1] || 0) + (c.state.temporarySlots?.[level] || 0));
       }, `Emplacements de niveau ${level}`);
       break;
     }
@@ -18172,7 +18913,7 @@ async function perform(action, el) {
       rollCheck(`Test de ${ABILITIES[data.key].name}`, d.mods[data.key]);
       break;
     case "roll-save":
-      rollCheck(`Sauvegarde de ${ABILITIES[data.key].name}`, d.saves[data.key]);
+      rollCheck(`Jet de sauvegarde de ${ABILITIES[data.key].name}`, d.saves[data.key]);
       break;
     case "roll-skill":
       rollCheck(SKILLS[data.key][0], d.skills[data.key], "check", {
@@ -18182,13 +18923,13 @@ async function perform(action, el) {
     case "roll-attack": {
       const a = d.attacks[Number(data.index) || 0] || d.attacks[0];
       ui.attackIndex = Number(data.index) || 0;
-      rollCheck(`Attaque · ${a.name}`, a.attack, "attack");
+      rollCheck(`Jet d’attaque · ${a.name}`, a.attack, "attack");
       break;
     }
     case "roll-damage": {
       const index = data.index !== undefined ? Number(data.index) : ui.attackIndex || 0, a = d.attacks[index] || d.attacks[0];
       ui.attackIndex = index;
-      prepareDiceDialog(`Dégâts · ${a.name}`, { kind: "damage", notation: a.damageDice, bonus: a.damageBonus }, {
+      prepareDiceDialog(`Jet de dégâts · ${a.name}`, { kind: "damage", notation: a.damageDice, bonus: a.damageBonus }, {
         note: `Dégâts de base (${a.type}). Ajoute séparément les dés de critique${d.sneakAttack ? ", d’attaque sournoise" : ""}, de châtiment ou de rage.`,
       });
       break;
@@ -18216,7 +18957,7 @@ async function perform(action, el) {
       if (c.state.hp > 0 || c.state.deathSuccess >= 3 || c.state.deathFailure >= 3) {
         toast("Pas de nouveau jet : le personnage est conscient, stabilisé ou mort. Corrige les compteurs si nécessaire."); break;
       }
-      prepareDiceDialog("Sauvegarde contre la mort", { kind: "death", bonus: classLevel(c, "monk") >= 14 ? d.prof : 0 }, {
+      prepareDiceDialog("Jet de sauvegarde contre la mort", { kind: "death", bonus: classLevel(c, "monk") >= 14 ? d.prof : 0 }, {
         character: clone(c), help: "Le résultat est enregistré dès le lancer.",
       });
       break;
@@ -18425,12 +19166,72 @@ async function perform(action, el) {
       );
       break;
     }
-    case "save-notes": {
-      const next = clone(c);
-      next.notes = ui.noteDraft;
-      await saveCharacter(next, "Journal", "session", c);
-      render();
-      toast("Journal enregistré sur cet appareil.");
+    case "journal-photo-source":
+    case "journal-photo-replace":
+      if (ui.modal === "journal-editor" && !ui.journalPhotoLoading && !ui.journalSaving) {
+        ui.journalPhotoSourceTrigger = action;
+        setJournalPhotoSource(action === "journal-photo-replace" || !ui.journalPhotoSourceOpen, { restoreFocus: true });
+      }
+      break;
+    case "journal-photo-upload":
+    case "journal-photo-camera":
+      if (ui.modal === "journal-editor" && !ui.journalPhotoLoading && !ui.journalSaving) {
+        setJournalPhotoSource(false, { restoreFocus: true });
+        const input = document.getElementById(action === "journal-photo-camera" ? "journal-camera-file" : "journal-photo-file");
+        if (input) { input.value = ""; input.click(); }
+      }
+      break;
+    case "journal-photo-remove":
+      if (ui.journalDraft && !ui.journalPhotoLoading && !ui.journalSaving) { ui.journalDraft.image = null; ui.journalError = ""; ui.journalPhotoSourceOpen = false; render(); modalRoot.querySelector('[data-action="journal-photo-source"]')?.focus({ preventScroll: true }); }
+      break;
+    case "journal-photo-view": {
+      const entry = data.id ? journalEntriesOf(c).find((item) => item.id === data.id) : ui.journalDraft;
+      if (!entry?.image) break;
+      ui.journalPhotoSourceOpen = false;
+      ui.journalPhotoViewer = { image: entry.image, title: entry.title, returnTo: ui.modal === "journal-editor" ? "journal-editor" : null, zoom: 1 };
+      openModal("journal-photo"); break;
+    }
+    case "journal-photo-zoom": zoomJournalPhoto(data.zoom); break;
+    case "journal-search-clear":
+      ui.journalQuery = "";
+      if (document.getElementById("journal-search")) document.getElementById("journal-search").value = "";
+      updateJournalSearch(); document.getElementById("journal-search")?.focus({ preventScroll: true }); break;
+    case "journal-new": openJournalEditor(); break;
+    case "journal-edit": openJournalEditor(data.id); break;
+    case "journal-open":
+      if (journalEntriesOf(c).some((entry) => entry.id === data.id)) {
+        ui.journalSelectedId = data.id; ui.journalCharacterId = c.id; render();
+        document.getElementById("journal-page-title")?.focus({ preventScroll: true });
+      }
+      break;
+    case "journal-keep-editing": ui.modal = "journal-editor"; render(); modalRoot.querySelector("textarea")?.focus(); break;
+    case "journal-discard-edit": ui.journalPhotoLoading = false; ui.journalDraft = null; ui.modal = "journal-editor"; closeModal(); break;
+    case "journal-save": {
+      const draft = ui.journalDraft;
+      if (!draft || ui.modal !== "journal-editor" || ui.journalPhotoLoading || ui.journalSaving) break;
+      const invalid = [...modalRoot.querySelectorAll(".journal-editor input,.journal-editor textarea")].find((input) => !input.checkValidity());
+      if (invalid) { invalid.reportValidity(); break; }
+      try {
+        const next = upsertJournalEntry(draft.original, { id: draft.id, date: draft.date, title: draft.title, body: draft.body, image: draft.image });
+        ui.journalSaving = true; render();
+        await saveCharacter(next, draft.isNew ? "Nouvelle page du journal" : "Page du journal modifiée", "session", draft.original);
+        ui.journalSaving = false;
+        if (draft.isNew || !searchJournalEntries(next.journalEntries.filter((entry) => entry.id === draft.id), ui.journalQuery).length) ui.journalQuery = "";
+        ui.journalSelectedId = draft.id; ui.journalCharacterId = next.id; ui.journalDraft = null;
+        closeModal(); toast("Page enregistrée sur cet appareil.");
+      } catch (error) {
+        ui.journalSaving = false;
+        ui.journalError = error.message === "CONFLICT" ? "Une autre fenêtre a modifié les données. Ton texte et ta photo restent dans cet éditeur ; la page n’a pas été remplacée." : error.message;
+        render();
+        modalRoot.querySelector("textarea")?.focus();
+      }
+      break;
+    }
+    case "journal-delete": {
+      const entry = journalEntriesOf(c).find((item) => item.id === data.id);
+      if (!entry) break;
+      ui.journalDelete = { original: clone(c), id: entry.id };
+      askConfirm(`Supprimer « ${entry.title || "Notes de session"} » ?`, "Cette page sera retirée du journal. Les autres pages seront conservées.", "journal-delete", entry.id, { label: "Supprimer la page", danger: true });
       break;
     }
     case "commit-review": {
@@ -18479,6 +19280,12 @@ async function perform(action, el) {
       } else if (f.action === "leave-level") {
         ui.levelFlow = null;
         go(f.key || "sheet");
+      } else if (f.action === "journal-delete") {
+        const deletion = ui.journalDelete;
+        if (!deletion || deletion.id !== f.key) break;
+        await saveCharacter(removeJournalEntry(deletion.original, deletion.id), "Page du journal supprimée", "session", deletion.original);
+        ui.journalDelete = null; ui.journalSelectedId = null;
+        render(); toast("Page supprimée du journal.");
       } else if (f.action === "delete-character") {
         await mutateApp(
           (s) => {
@@ -18571,6 +19378,17 @@ async function perform(action, el) {
     case "beast-tab":
       ui.beastTab = data.value;
       render();
+      break;
+    case "beast-discover":
+      ui.beastTab = "discover";
+      ui.beastQuery = "";
+      render();
+      document.getElementById("beast-search")?.focus({ preventScroll: true });
+      break;
+    case "beast-clear-search":
+      ui.beastQuery = "";
+      render();
+      document.getElementById("beast-search")?.focus({ preventScroll: true });
       break;
     case "beast-sort": {
       const current = ui.beastSort || { key: "cr", dir: -1 };
@@ -18795,6 +19613,7 @@ document.addEventListener("change", (event) => {
     return;
   }
   const el = event.target;
+  if (["journal-photo-file", "journal-camera-file"].includes(el.id)) { void receiveJournalPhoto(el.files?.[0]); return; }
   if (el.id === "portrait-file") { void receivePortraitFile(el.files?.[0]); return; }
   if (el.dataset.portraitFilter && portraitSession) {
     portraitSession[el.dataset.portraitFilter] = el.value; render(); return;
@@ -18821,6 +19640,28 @@ document.addEventListener("error", (event) => {
     if (note) note.hidden = false;
   }
 }, true);
+document.addEventListener("toggle", (event) => {
+  if (!event.target.matches?.(".workflow-menu") || !event.target.open || innerWidth > 700) return;
+  measureWorkflowMenu();
+  event.target.querySelector('[aria-current="step"]')?.scrollIntoView({ block: "nearest" });
+}, true);
+document.addEventListener("pointerdown", (event) => {
+  const menu = document.querySelector(".workflow-menu");
+  if (menu?.open && innerWidth <= 700 && !menu.contains(event.target)) {
+    menu.open = false;
+    menu.querySelector("summary")?.focus({ preventScroll: true });
+  }
+});
+document.addEventListener("keydown", (event) => {
+  const menu = document.querySelector(".workflow-menu");
+  if (event.key === "Escape" && !ui.modal && menu?.open && innerWidth <= 700) {
+    event.preventDefault();
+    menu.open = false;
+    menu.querySelector("summary")?.focus({ preventScroll: true });
+  }
+});
+window.addEventListener("resize", () => syncWorkflowLayout({ viewportChanged: true }));
+window.addEventListener("scroll", measureWorkflowMenu, { passive: true });
 let portraitDrag = null;
 document.addEventListener("pointerdown", (event) => {
   if (event.target.id !== "portrait-crop" || !portraitSession?.upload) return;
@@ -18841,6 +19682,9 @@ document.addEventListener("pointermove", (event) => {
 });
 for (const eventName of ["pointerup", "pointercancel"]) document.addEventListener(eventName, () => { portraitDrag = null; });
 let actionBusy = false;
+document.addEventListener("pointerdown", (event) => {
+  if (ui.modal === "journal-editor" && ui.journalPhotoSourceOpen && !event.target.closest(".journal-photo-source,.journal-photo-actions")) setJournalPhotoSource(false, { restoreFocus: true });
+});
 document.addEventListener("click", async (event) => {
   const el = event.target.closest("[data-action]");
   if (!el || el.disabled || actionBusy) return;
@@ -18859,6 +19703,7 @@ document.addEventListener("keydown", (event) => {
   if (!ui.modal) return;
   if (event.key === "Escape") {
     event.preventDefault();
+    if (ui.modal === "journal-editor" && ui.journalPhotoSourceOpen) { setJournalPhotoSource(false, { restoreFocus: true }); return; }
     closeModal();
     return;
   }
@@ -18884,6 +19729,10 @@ window.addEventListener("online", () => {
   ui.online = true;
   render();
 });
+window.addEventListener("beforeunload", (event) => {
+  if (!journalDraftDirty()) return;
+  event.preventDefault(); event.returnValue = "";
+});
 window.addEventListener("offline", () => {
   ui.online = false;
   render();
@@ -18894,7 +19743,7 @@ window.addEventListener("beforeinstallprompt", (event) => {
 });
 window.addEventListener("appinstalled", () => {
   deferredInstall = null;
-  toast("Compagnon est installé. Bonne aventure.");
+  toast("Compagnon est installé.");
 });
 async function setupServiceWorker() {
   if (window.COMPANION_STANDALONE || !("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
@@ -18935,7 +19784,6 @@ async function setupServiceWorker() {
     if (!appData.characters.some((c) => c.id === appData.activeId))
       appData.activeId = appData.characters[0]?.id || null;
     ui.route = activeCharacter() ? "sheet" : "home";
-    ui.noteDraft = activeCharacter()?.notes || "";
     render();
     await setupServiceWorker();
     void ensureContent();
@@ -18966,7 +19814,7 @@ function renderWildShape(c) {
     locked: all.filter((x) => !x.st.eligible),
   };
   const tab = groups[ui.beastTab] ? ui.beastTab : "available";
-  const q = (ui.beastQuery || "").toLocaleLowerCase("fr-FR");
+  const q = (ui.beastQuery || "").trim().toLocaleLowerCase("fr-FR");
   const { key, dir } = ui.beastSort || { key: "cr", dir: -1 };
   const value = (x) => (key === "name" ? x.b.name : key === "cr" ? x.b.cr : key === "ac" ? x.b.ac : x.b.hp);
   const list = groups[tab]
@@ -18981,7 +19829,7 @@ function renderWildShape(c) {
     const active = key === k;
     return `<button type="button" class="beast-sort ${cls} ${active ? "active" : ""}" data-action="beast-sort" data-key="${k}" aria-label="Trier par ${label.toLowerCase()}${active ? (dir > 0 ? ", ordre croissant" : ", ordre décroissant") : ""}">${label}<span aria-hidden="true">${active ? (dir > 0 ? "▲" : "▼") : ""}</span></button>`;
   };
-  const limitText = `Bêtes jusqu’au FP ${formatCR(rules.maxCR)}${rules.swim ? "" : ", sans vitesse de nage"}${rules.fly ? "" : ", sans vitesse de vol"}.`;
+  const limitText = `FP ≤ ${formatCR(rules.maxCR)} · ${rules.swim ? "nage autorisée" : "sans nage"} · ${rules.fly ? "vol autorisé" : "sans vol"}`;
   const rows = list
     .map(({ b, st }) => {
       const action =
@@ -18993,20 +19841,20 @@ function renderWildShape(c) {
       return `<div class="beast-row ${tab === "locked" ? "locked" : ""}"><div class="beast-name"><strong>${b.referenceId ? `<button class="link-btn" data-action="beast-info" data-id="${esc(b.id)}">${esc(b.name)}</button>` : esc(b.name)}</strong><small>${esc(BEAST_SIZES[b.size] || b.size)}, ${esc(beastSpeeds(b))}${b.source === "mm" ? ", Bestiaire" : ""}</small>${tab === "locked" ? `<small class="beast-reason">${esc(st.reasons.join(", "))}</small>` : ""}${tab === "available" ? button(b.elemental ? "Me transformer (2 usages)" : "Me transformer", "enter-wildshape", `data-id="${esc(b.id)}" ${rules.uses !== null && (c.state.resourcesUsed.wildshape || 0) + b.uses > rules.uses ? "disabled" : ""}`, "small-btn ghost") : ""}</div><span class="beast-num">${formatCR(b.cr)}</span><span class="beast-num">${b.ac}</span><span class="beast-num">${b.hp}</span>${tab === "locked" ? "" : `<div class="beast-action">${action}</div>`}</div>`;
     })
     .join("");
-  const emptyText = {
+  const emptyText = q ? `Aucune bête ne correspond à « ${ui.beastQuery.trim()} » dans cet onglet.` : {
     available: "Aucune bête vue ne correspond. Ajoute celles que tu as rencontrées depuis l’onglet « À découvrir ».",
     discover: "Toutes les bêtes compatibles avec ton niveau sont déjà vues.",
-    locked: "Aucune bête hors de portée : toutes te sont accessibles.",
+    locked: "Toutes les bêtes respectent tes limites de forme.",
   }[tab];
-  return `<div class="page-head mobile-stack"><div><div class="eyebrow">${esc(c.name)}, druide ${rules.level}${rules.moon ? ", Cercle de la Lune" : ""}</div><h1>Formes animales</h1><p class="page-subtitle">${limitText} ${rules.uses ? `${rules.uses} utilisations par repos court ou long` : "Utilisations illimitées (Archidruide)"}, ${rules.hours} heure${rules.hours > 1 ? "s" : ""} au plus.</p></div></div>${renderActiveForm(c)}${
+  return `<div class="page-head mobile-stack"><div><div class="eyebrow">${esc(c.name)}, druide ${rules.level}${rules.moon ? ", Cercle de la Lune" : ""}</div><h1>Formes animales</h1></div></div><div class="beast-rules" aria-label="Limites de la forme sauvage"><span class="pill">${limitText}</span><span class="pill">${rules.uses === null ? "Usages illimités" : `${rules.uses} usages / repos court ou long`}</span><span class="pill">${rules.hours} h au plus</span></div>${renderActiveForm(c)}${
     rules.elemental ? notice("Forme élémentaire : en dépensant deux utilisations, tu peux devenir un élémentaire d’air, de terre, de feu ou d’eau.", "purple") : ""
-  }<p class="small muted beast-intro">Les animaux courants comptent comme déjà vus. Les autres bêtes s’ajoutent quand ton druide en a rencontré une.</p><div class="segmented">${[
+  }<details class="beast-help" data-detail="wildshape-help"><summary>Comment choisir une forme ?</summary><p>Les animaux courants comptent comme déjà vus. Ajoute les autres bêtes rencontrées depuis « À découvrir », avec le bouton +.</p><p>FP : facteur de puissance. Tu gardes tes caractéristiques d’Intelligence, de Sagesse et de Charisme ; les PV de la bête remplacent temporairement les tiens. À 0 PV, tu reprends ton corps et subis les dégâts excédentaires. Profils complets dans le Bestiaire ou le SRD.</p></details><div class="segmented">${[
     ["available", "Disponibles"],
     ["discover", "À découvrir"],
     ["locked", "Hors de portée"],
   ]
     .map(([id, label]) => `<button type="button" data-action="beast-tab" data-value="${id}" class="${tab === id ? "active" : ""}">${label} <span class="count">${groups[id].length}</span></button>`)
-    .join("")}</div><div class="search-wrap beast-search">${icon("search", 18)}<input id="beast-search" class="search-input" data-bind="ui.beastQuery" value="${esc(ui.beastQuery || "")}" placeholder="Chercher une bête…" aria-label="Chercher une bête"></div>${tab === "discover" ? '<p class="tiny muted beast-hint">Touche + quand ton druide a vu la bête : elle rejoint tes formes disponibles.</p>' : ""}<div class="beast-table ${tab === "locked" ? "no-action" : ""}" role="table" aria-label="Formes animales"><div class="beast-row beast-head" role="row">${head("name", "Nom", "left")}${head("cr", "FP")}${head("ac", "CA")}${head("hp", "PV")}${tab === "locked" ? "" : "<span></span>"}</div>${rows || `<p class="small muted beast-empty">${emptyText}</p>`}</div><p class="tiny muted section-gap">FP : facteur de puissance. Tu gardes tes caractéristiques d’Intelligence, de Sagesse et de Charisme ; les PV de la bête remplacent temporairement les tiens. À 0 PV, tu reprends ton corps et subis les dégâts excédentaires. Profils complets dans le Bestiaire ou le SRD.</p>`;
+    .join("")}</div><div class="search-wrap beast-search">${icon("search", 18)}<input id="beast-search" class="search-input" data-bind="ui.beastQuery" value="${esc(ui.beastQuery || "")}" placeholder="Chercher une bête…" aria-label="Chercher une bête"></div><div class="beast-table ${tab === "locked" ? "no-action" : ""}" role="table" aria-label="Formes animales"><div class="beast-row beast-head" role="row">${head("name", "Nom", "left")}${head("cr", "FP")}${head("ac", "CA")}${head("hp", "PV")}${tab === "locked" ? "" : "<span></span>"}</div>${rows || `<div class="small muted beast-empty" role="status"><p>${esc(emptyText)}</p>${q ? button("Effacer la recherche", "beast-clear-search", "", "small-btn ghost") : tab === "available" ? button("À découvrir", "beast-discover", "", "small-btn ghost") : ""}</div>`}</div>`;
 }
 
 

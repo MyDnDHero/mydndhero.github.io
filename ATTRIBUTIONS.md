@@ -8,4 +8,6 @@ Code, mise en page, icônes et anciennes descriptions originales : Compagnon. Co
 
 Polices Alegreya et Alegreya Sans : Juan Pablo del Peral (Huerta Tipográfica), SIL Open Font License 1.1. Fichiers de crédits conservés dans `fonts/`.
 
+Police manuscrite Caveat : The Caveat Project Authors, SIL Open Font License 1.1. Police embarquée localement, crédits dans `fonts/caveat-OFL.txt`.
+
 Illustrations du carnet : 136 portraits générés pour Compagnon avec `image_gen`, puis réduits en WebP. Les prompts et la correspondance des fichiers sont conservés dans `assets/portraits/` du dépôt source. Les photos personnelles restent sur l’appareil de leur utilisateur.
