@@ -929,3 +929,54 @@ button.stat-box:hover{background:var(--surface)}
 /* Palette sombre générée par tools/dark.py. Composants communs dans styles.css. */
 @media screen and (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#211f1c;--panel:#282521;--surface:#322e29;--sidebar:#25221e;--ink:#eee8dd;--muted:#bdb3a5;--line:#494138;--line-strong:#766858;--accent:#d9937d;--accent-hover:#e5a48f;--accent-contrast:#281c16;--selection-bg:#453129;--focus:#e3a18a;--success:#9fc39e;--success-bg:#29372b;--warning:#d6b776;--warning-bg:#3c3220;--error:#f0a097;--error-bg:#472b27;--magic:#c7aec6;--magic-bg:#392e3c;--overlay:#100e0b9c;--shadow-color:#00000038;color-scheme:dark}}
 @media screen{:root[data-theme="dark"]{--bg:#211f1c;--panel:#282521;--surface:#322e29;--sidebar:#25221e;--ink:#eee8dd;--muted:#bdb3a5;--line:#494138;--line-strong:#766858;--accent:#d9937d;--accent-hover:#e5a48f;--accent-contrast:#281c16;--selection-bg:#453129;--focus:#e3a18a;--success:#9fc39e;--success-bg:#29372b;--warning:#d6b776;--warning-bg:#3c3220;--error:#f0a097;--error-bg:#472b27;--magic:#c7aec6;--magic-bg:#392e3c;--overlay:#100e0b9c;--shadow-color:#00000038;color-scheme:dark}}
+
+/* Plateau de dés : mêmes couleurs et même papier que le carnet. */
+.dice-roll-dialog{width:min(560px,100%)}
+.dice-roll-dialog .modal-head{padding:20px 24px 16px}
+.dice-roll-dialog .modal-body{padding:18px 24px 14px}
+.dice-roll-dialog .modal-footer{padding:16px 24px 20px}
+.dice-roll-dialog .modal-footer .btn{flex:1;min-height:46px;font-size:14px}
+.dice-roll-content{text-align:center}
+.dice-roll-context{font-size:15px;font-weight:600;overflow-wrap:anywhere}
+.dice-roll-formula{font-size:13px;color:var(--muted);margin:3px 0 16px}
+.dice-roll-modes{margin:0 0 6px;border:1px solid var(--line);border-radius:6px;padding:3px}
+.dice-roll-modes button{font-size:13px;min-height:44px;border-radius:4px}
+.dice-tray{position:relative;display:block;width:100%;height:240px;border:0;border-radius:12px;padding:0;background:radial-gradient(ellipse at 50% 58%,var(--surface),transparent 72%);color:var(--muted);overflow:hidden;isolation:isolate}
+.dice-tray:disabled{opacity:1;cursor:default}
+.dice-tray:not(:disabled):hover{background-color:var(--shadow-color)}
+.dice-tray:focus-visible{outline-color:var(--accent);outline-offset:0}
+.dice-canvas{display:block;width:100%;height:100%;pointer-events:none}
+.dice-tray-hint{position:absolute;bottom:8px;left:8px;right:8px;font-size:12px;line-height:1.35;color:var(--muted);pointer-events:none}
+.dice-outcome{min-height:38px}
+.dice-result-total{display:block;font:700 62px/1 var(--serif);color:var(--accent);letter-spacing:-.04em}
+.dice-result-total:empty{display:none}
+.dice-roll-breakdown{font-size:14px;color:var(--ink);line-height:1.5;margin-top:5px;overflow-wrap:anywhere}
+.dice-roll-note,.dice-roll-help{font-size:12px;line-height:1.5;color:var(--muted);margin:10px auto 0;max-width:45ch}
+.dice-quantity{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0 0;font-size:13px}
+.dice-quantity select{min-height:44px;background:var(--panel);color:var(--ink);border:1px solid var(--line-strong);border-radius:4px;padding:5px 10px}
+.dice-quantity span{font-size:12px;color:var(--muted)}
+.dice-score-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.dice-score-grid>div{border-top:1px solid var(--line);padding-top:6px;display:grid;gap:1px}
+.dice-score-grid span{font-size:11px;color:var(--muted)}
+.dice-score-grid strong{font:700 30px/1.1 var(--serif);color:var(--accent)}
+.dice-score-grid small{font-size:10px;line-height:1.3}
+.dice-roll-dialog[data-roll-phase="rolling"] .dice-tray-hint{color:var(--accent)}
+@media(max-width:680px){
+  .dice-roll-dialog{width:100%;border-radius:14px 14px 0 0;max-height:94dvh}
+  .dice-roll-dialog .modal-head{padding:18px 20px 14px}
+  .dice-roll-dialog .modal-head h2{font-size:28px}
+  .dice-roll-dialog .modal-body{padding:16px 20px 12px}
+  .dice-roll-dialog .modal-footer{padding:14px 20px 20px}
+  .dice-tray{height:220px}
+  .dice-result-total{font-size:60px}
+}
+@media(max-height:710px){
+  .dice-tray{height:170px}
+  .dice-roll-formula{margin-bottom:10px}
+  .dice-roll-dialog .modal-head{padding-top:12px;padding-bottom:10px}
+  .dice-roll-dialog .modal-body{padding-top:12px}
+  .dice-result-total{font-size:48px}
+}
+@media(prefers-reduced-motion:reduce){
+  .modal-backdrop:has(.dice-roll-dialog),.dice-roll-dialog{animation:none}
+}

@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-preview.5";
+const APP_VERSION = "2.0.0-preview.6";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -11999,6 +11999,12 @@ function arcaneWardStatus(c) {
   const created = available && c.state.arcaneWard?.created === true;
   return { available, created, hp: created ? clamp(c.state.arcaneWard.hp, 0, maxHp) : 0, maxHp };
 }
+function weaponProficiency(c, entry, acc = collect(c)) {
+  const id = entry.id, weapon = weaponOf(id);
+  if (!weapon) return { proficient: false, pactWeapon: false };
+  const pactWeapon = !!entry.instanceId && entry.instanceId === c.equipment.pactWeaponId && allChoices(c, "pact")[0] === "blade" && classLevel(c, "warlock") >= 3 && id !== "unarmed" && (!weapon.ranged || weaponIsMagical(entry));
+  return { pactWeapon, proficient: pactWeapon || id === "unarmed" || acc.weapons.has(id) || acc.weapons.has(weapon.group) };
+}
 function _attack(c, entry, ctx) {
   const id = entry.id,
     w = weaponOf(id);
@@ -12007,9 +12013,7 @@ function _attack(c, entry, ctx) {
   const monk = _monkWeapon(c, w, id);
   let ability =
     w.finesse || monk ? (mods.dex > mods.str ? "dex" : "str") : w.ranged ? "dex" : "str";
-  const pactWeapon = !!entry.instanceId && entry.instanceId === c.equipment.pactWeaponId && allChoices(c, "pact")[0] === "blade" && classLevel(c, "warlock") >= 3 && id !== "unarmed" && (!w.ranged || weaponIsMagical(entry));
-  const proficient =
-    pactWeapon || id === "unarmed" || acc.weapons.has(id) || acc.weapons.has(w.group) || (w.group === "simple" && acc.weapons.has("simple"));
+  const { pactWeapon, proficient } = weaponProficiency(c, entry, acc);
   const localEffects = acc.ruleEffects.filter((effect) => (!effect.instanceId || effect.instanceId === entry.instanceId) && (!effect.when?.magical || weaponIsMagical(entry)) && (!effect.when?.pactWeapon || pactWeapon) && (!effect.when?.melee || !w.ranged));
   const substitute = localEffects.filter((effect) => effect.target === "weaponAbility" && Object.hasOwn(ABILITIES, effect.ability)).sort((a, b) => (b.priority || 0) - (a.priority || 0))[0];
   if (substitute && mods[substitute.ability] > mods[ability]) ability = substitute.ability;
@@ -14851,6 +14855,524 @@ function icon(name,size=22){return `<svg width="${size}" height="${size}" viewBo
 const esc = value => String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 
+// Module : dice
+
+// Le tirage appartient aux règles. Le renderer reçoit uniquement des résultats.
+function resolveDiceRoll(request, mode = "normal", random = rollDie) {
+  const kind = request.kind || "sum";
+  if (!["normal", "advantage", "disadvantage"].includes(mode)) throw new Error("Mode de jet inconnu.");
+  if (!["check", "attack", "death", "damage", "hit-dice", "sum", "ability", "abilities"].includes(kind)) throw new Error("Type de jet inconnu.");
+  if (kind === "abilities") {
+    const groups = Array.from({ length: 6 }, () => resolveDiceRoll({ kind: "ability" }, "normal", random));
+    return { groups, dice: groups.flatMap((g) => g.dice), values: groups.flatMap((g) => g.values), total: null, bonus: 0, detail: groups.map((g) => g.total).join(" · ") };
+  }
+  const check = kind === "check" || kind === "attack";
+  let sides = request.sides ?? 20, count = request.count ?? 1, fixed = null;
+  if (check || kind === "death") { sides = 20; count = check && mode !== "normal" ? 2 : 1; }
+  if (kind === "ability") { sides = 6; count = 4; }
+  if (kind === "damage" && request.notation !== undefined) {
+    const match = /^(\d{1,2})d(4|6|8|10|12|20|100)$/.exec(String(request.notation));
+    if (match) { count = Number(match[1]); sides = Number(match[2]); }
+    else if (/^\d+$/.test(String(request.notation))) fixed = Number(request.notation);
+    else throw new Error("Formule de dégâts non reconnue.");
+  }
+  if (fixed === null && (!Number.isInteger(count) || count < 1 || count > 30 || ![4, 6, 8, 10, 12, 20, 100].includes(sides))) throw new Error("Nombre ou forme de dés invalide.");
+  const bonus = request.bonus ?? 0, minimum = request.minimum ?? 0, multiplier = request.multiplier ?? 1;
+  if (![bonus, minimum, multiplier].every(Number.isFinite) || minimum < 0 || multiplier <= 0) throw new Error("Modificateur de jet invalide.");
+  const values = fixed === null ? Array.from({ length: count }, () => {
+    const value = random(sides);
+    if (!Number.isInteger(value) || value < 1 || value > sides) throw new Error("Résultat de dé invalide.");
+    return value;
+  }) : [];
+  const kept = values.map(() => true);
+  let natural = values[0] ?? fixed, adjusted = natural, total;
+  if (check) {
+    natural = mode === "advantage" ? Math.max(...values) : mode === "disadvantage" ? Math.min(...values) : values[0];
+    const index = values.indexOf(natural);
+    values.forEach((_, i) => { kept[i] = i === index; });
+    adjusted = request.reliable ? Math.max(10, natural) : natural;
+    total = adjusted + bonus;
+  } else if (kind === "ability") {
+    kept[values.indexOf(Math.min(...values))] = false;
+    total = values.reduce((sum, value, i) => sum + (kept[i] ? value : 0), 0);
+  } else if (kind === "hit-dice") {
+    total = values.reduce((sum, value) => sum + Math.max(minimum, value + bonus), 0);
+  } else {
+    total = ((fixed ?? values.reduce((sum, value) => sum + value, 0)) + bonus) * multiplier;
+    if (kind === "damage") total = Math.max(0, total);
+  }
+  const modifier = bonus ? ` ${bonus > 0 ? "+" : "−"} ${Math.abs(bonus)}` : "";
+  let detail;
+  if (kind === "hit-dice") detail = values.map((value) => value + bonus < minimum ? `${value}${modifier} → ${minimum} PV (minimum ${minimum})` : `${value}${modifier} = ${value + bonus} PV`).join(" · ");
+  else if (check) detail = `${adjusted}${modifier} = ${total}${values.length > 1 ? ` · ${values.filter((_, i) => !kept[i]).join(", ")} écarté` : ""}`;
+  else {
+    let expression = `${fixed ?? values.filter((_, i) => kept[i]).join(" + ")}${modifier}`;
+    if (multiplier !== 1) expression = `(${expression}) × ${multiplier}`;
+    const clamped = kind === "damage" && (fixed ?? values.reduce((sum, value) => sum + value, 0)) + bonus < 0;
+    detail = `${expression}${clamped ? " → " : " = "}${total}${clamped ? " (minimum 0)" : ""}${kind === "ability" ? ` · ${Math.min(...values)} écarté` : ""}`;
+  }
+  return { dice: values.map((value, i) => ({ sides, value, kept: kept[i] })), values, total, natural, adjusted, bonus, detail };
+}
+
+
+// Module : dice-3d
+/**
+ * Dés locaux : solides convexes, textures créées sur l'appareil et WebGL 1.
+ * Les valeurs viennent exclusivement du moteur. L'animation ne tire aucun dé.
+ * Aucun fichier, shader ou service distant n'est nécessaire.
+ */
+const dice3DInternals = (() => {
+  const supported = [4, 6, 8, 10, 12, 20, 100], geometryCache = new Map();
+  const add = (a, b) => a.map((v, i) => v + b[i]);
+  const sub = (a, b) => a.map((v, i) => v - b[i]);
+  const mul = (a, n) => a.map((v) => v * n);
+  const dot = (a, b) => a.reduce((sum, v, i) => sum + v * b[i], 0);
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const unit = (a) => mul(a, 1 / (Math.hypot(...a) || 1));
+  const average = (points) => mul(points.reduce(add, [0, 0, 0]), 1 / points.length);
+  const freeze = (value) => {
+    if (value && typeof value === "object") { Object.values(value).forEach(freeze); Object.freeze(value); }
+    return value;
+  };
+
+  function hull(vertices) {
+    const faces = [], seen = new Set(), epsilon = 0.00001;
+    for (let a = 0; a < vertices.length - 2; a++) for (let b = a + 1; b < vertices.length - 1; b++) for (let c = b + 1; c < vertices.length; c++) {
+      let normal = cross(sub(vertices[b], vertices[a]), sub(vertices[c], vertices[a]));
+      if (Math.hypot(...normal) < epsilon) continue;
+      normal = unit(normal);
+      const distances = vertices.map((v) => dot(normal, sub(v, vertices[a])));
+      if (distances.some((v) => v > epsilon) && distances.some((v) => v < -epsilon)) continue;
+      if (distances.some((v) => v > epsilon)) normal = mul(normal, -1);
+      const indices = vertices.map((_, i) => i).filter((i) => Math.abs(distances[i]) < epsilon);
+      const key = indices.join(",");
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const center = average(indices.map((i) => vertices[i]));
+      const u = unit(sub(vertices[indices[0]], center)), v = cross(normal, u);
+      indices.sort((i, j) => Math.atan2(dot(sub(vertices[i], center), v), dot(sub(vertices[i], center), u)) - Math.atan2(dot(sub(vertices[j], center), v), dot(sub(vertices[j], center), u)));
+      faces.push({ indices, normal, center, u, v, radius: Math.max(...indices.map((i) => Math.hypot(...sub(vertices[i], center)))), value: 0 });
+    }
+    return faces;
+  }
+
+  function dual(vertices) {
+    return hull(vertices).map((face) => mul(face.normal, 1 / dot(face.normal, vertices[face.indices[0]])));
+  }
+
+  function geometry(sides) {
+    if (!supported.includes(sides)) throw new RangeError("Ce dé n’est pas pris en charge.");
+    if (sides === 100) return geometry(10);
+    if (geometryCache.has(sides)) return geometryCache.get(sides);
+    let vertices = [], phi = (1 + Math.sqrt(5)) / 2;
+    if (sides === 4) vertices = [[1, 1, 1], [-1, -1, 1], [-1, 1, -1], [1, -1, -1]];
+    if (sides === 6) for (const x of [-1, 1]) for (const y of [-1, 1]) for (const z of [-1, 1]) vertices.push([x, y, z]);
+    if (sides === 8) vertices = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
+    if (sides === 20 || sides === 12) {
+      for (const a of [-1, 1]) for (const b of [-phi, phi]) vertices.push([0, a, b], [a, b, 0], [b, 0, a]);
+      if (sides === 12) vertices = dual(vertices);
+    }
+    if (sides === 10) {
+      const antiprism = [];
+      for (let row = 0; row < 2; row++) for (let i = 0; i < 5; i++) {
+        const angle = i * Math.PI * 2 / 5 + row * Math.PI / 5;
+        antiprism.push([Math.cos(angle), row ? -0.5 : 0.5, Math.sin(angle)]);
+      }
+      // Une transformation commune conserve les dix cerfs-volants plans.
+      vertices = dual(antiprism).map(([x, y, z]) => [x, y * 0.75, z]);
+    }
+    const radius = Math.max(...vertices.map((v) => Math.hypot(...v)));
+    vertices = vertices.map((v) => mul(v, 1 / radius));
+    const faces = hull(vertices);
+    if (faces.length !== sides) throw new Error("Géométrie de dé incohérente.");
+    if (sides === 4) {
+      for (const face of faces) face.value = vertices.findIndex((_, i) => !face.indices.includes(i)) + 1;
+    } else {
+      let value = 1;
+      for (const face of faces) {
+        if (face.value) continue;
+        face.value = value;
+        const opposite = faces.find((candidate) => !candidate.value && dot(face.normal, candidate.normal) < -0.99999);
+        if (opposite) opposite.value = sides + 1 - value;
+        value++;
+      }
+    }
+    const result = freeze({ sides, vertices, faces });
+    geometryCache.set(sides, result);
+    return result;
+  }
+
+  function visibleDice(dice) {
+    if (!Array.isArray(dice)) throw new TypeError("Une liste de dés est attendue.");
+    return dice.flatMap((die, index) => {
+      const sides = Number(die.sides), value = die.value == null ? sides : Number(die.value);
+      if (!supported.includes(sides) || !Number.isInteger(value) || value < 1 || value > sides) throw new RangeError("Valeur de dé invalide.");
+      const base = { ...die, sides, value, kept: die.kept !== false, sourceIndex: index, sourceSides: sides, sourceValue: value };
+      if (sides !== 100) return [{ ...base, label: String(value) }];
+      const tens = Math.floor((value % 100) / 10), units = value % 10;
+      return [
+        { ...base, sides: 10, value: tens || 10, percentile: "tens", label: String(tens * 10).padStart(2, "0") },
+        { ...base, sides: 10, value: units || 10, percentile: "units", label: String(units) },
+      ];
+    });
+  }
+
+  const quaternionMultiply = (a, b) => [
+    a[3] * b[0] + a[0] * b[3] + a[1] * b[2] - a[2] * b[1],
+    a[3] * b[1] - a[0] * b[2] + a[1] * b[3] + a[2] * b[0],
+    a[3] * b[2] + a[0] * b[1] - a[1] * b[0] + a[2] * b[3],
+    a[3] * b[3] - a[0] * b[0] - a[1] * b[1] - a[2] * b[2],
+  ];
+  function axisAngle(axis, angle) { const s = Math.sin(angle / 2); return [...mul(unit(axis), s), Math.cos(angle / 2)]; }
+  function quaternionBetween(from, to) {
+    if (dot(from, to) < -0.99999) return axisAngle(Math.abs(from[0]) < 0.9 ? cross(from, [1, 0, 0]) : cross(from, [0, 0, 1]), Math.PI);
+    return unit([...cross(from, to), 1 + dot(from, to)]);
+  }
+  function rotate(point, quaternion) {
+    const xyz = quaternion.slice(0, 3), t = mul(cross(xyz, point), 2);
+    return add(point, add(mul(t, quaternion[3]), cross(xyz, t)));
+  }
+  function orientation(die, mesh) {
+    const face = mesh.faces.find((f) => f.value === die.value);
+    if (mesh.sides === 4) return quaternionMultiply(axisAngle([0, 1, 0], 0.7), quaternionBetween(unit(mesh.vertices[die.value - 1]), [0, 1, 0]));
+    const align = quaternionBetween(face.normal, [0, 1, 0]), up = rotate(face.v, align);
+    return quaternionMultiply(axisAngle([0, 1, 0], Math.atan2(up[0], -up[2])), align);
+  }
+
+  function matrixMultiply(a, b) {
+    const out = new Float32Array(16);
+    for (let column = 0; column < 4; column++) for (let row = 0; row < 4; row++) for (let k = 0; k < 4; k++) out[column * 4 + row] += a[k * 4 + row] * b[column * 4 + k];
+    return out;
+  }
+  function modelMatrix(q, position, scale) {
+    const x = rotate([scale, 0, 0], q), y = rotate([0, scale, 0], q), z = rotate([0, 0, scale], q);
+    return new Float32Array([...x, 0, ...y, 0, ...z, 0, ...position, 1]);
+  }
+  function cameraMatrix(width, height, center) {
+    const eye = add(center, [0, 7.8, 10]), z = unit(sub(eye, center)), x = unit(cross([0, 1, 0], z)), y = cross(z, x);
+    const view = new Float32Array([x[0], y[0], z[0], 0, x[1], y[1], z[1], 0, x[2], y[2], z[2], 0, -dot(x, eye), -dot(y, eye), -dot(z, eye), 1]);
+    const projection = new Float32Array([2 / width, 0, 0, 0, 0, 2 / height, 0, 0, 0, 0, -2 / 50, 0, 0, 0, -1, 1]);
+    return matrixMultiply(projection, view);
+  }
+  const project = (point, matrix, width, height) => {
+    const p = [0, 1, 2].map((row) => matrix[row] * point[0] + matrix[4 + row] * point[1] + matrix[8 + row] * point[2] + matrix[12 + row]);
+    return [(p[0] + 1) * width / 2, (1 - p[1]) * height / 2, p[2]];
+  };
+
+  function palette(die) {
+    if (!die.kept) return { base: [174, 164, 147], ink: "#51483d", edge: [159, 147, 128] };
+    if (die.color === "terracotta" || die.color === "red") return { base: [167, 76, 56], ink: "#fff2d8", edge: [150, 65, 47] };
+    return { base: [240, 221, 189], ink: "#51351f", edge: [222, 199, 165] };
+  }
+  function faceLabel(face, die) {
+    if (die.percentile === "tens") return String((face.value % 10) * 10).padStart(2, "0");
+    if (die.percentile === "units") return String(face.value % 10);
+    return String(face.value);
+  }
+  function faceUV(point, face) {
+    const offset = sub(point, face.center);
+    return [0.5 + dot(offset, face.u) / (face.radius * 2.3), 0.5 + dot(offset, face.v) / (face.radius * 2.3)];
+  }
+  function makeAtlas(mesh, die) {
+    const cell = 256, columns = 4, rows = 2 ** Math.ceil(Math.log2(Math.ceil(mesh.faces.length / columns)));
+    const atlas = document.createElement("canvas"); atlas.width = cell * columns; atlas.height = cell * rows;
+    const ctx = atlas.getContext("2d"), colors = palette(die);
+    ctx.fillStyle = `rgb(${colors.base.join(",")})`; ctx.fillRect(0, 0, atlas.width, atlas.height);
+    // Grain déterministe : aucun hasard, même décor sur toutes les ouvertures.
+    for (let i = 0; i < 7200; i++) {
+      const x = ((i * 97.13) % atlas.width), y = ((i * 71.79) % atlas.height);
+      ctx.fillStyle = i % 2 ? "rgba(255,255,255,.08)" : "rgba(64,37,16,.025)";
+      ctx.fillRect(x, y, 1.2 + i % 3, 1.2);
+    }
+    const write = (label, x, y, size, angle = 0) => {
+      ctx.save(); ctx.translate(x, y); ctx.rotate(angle); ctx.font = `600 ${size}px Georgia, 'Times New Roman', serif`;
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillStyle = die.color === "terracotta" ? "rgba(63,22,12,.45)" : "rgba(255,255,255,.75)";
+      ctx.fillText(label, 0.7, 1.1); ctx.fillStyle = colors.ink; ctx.fillText(label, 0, 0);
+      if (label === "6" || label === "9") { ctx.fillRect(-size * 0.18, size * 0.37, size * 0.36, Math.max(1.4, size * 0.025)); }
+      ctx.restore();
+    };
+    mesh.faces.forEach((face, index) => {
+      const ox = index % columns * cell, oy = Math.floor(index / columns) * cell;
+      const glow = ctx.createRadialGradient(ox + 70, oy + 45, 0, ox + 120, oy + 120, 220);
+      glow.addColorStop(0, "rgba(255,255,255,.11)"); glow.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = glow; ctx.fillRect(ox, oy, cell, cell);
+      if (mesh.sides === 4) {
+        for (const vertex of face.indices) {
+          const uv = faceUV(mesh.vertices[vertex], face), dx = (uv[0] - 0.5) * cell, dy = -(uv[1] - 0.5) * cell;
+          write(String(vertex + 1), ox + cell / 2 + dx * 0.48, oy + cell / 2 + dy * 0.48, 47, Math.atan2(dy, dx) + Math.PI / 2);
+        }
+      } else {
+        const size = mesh.sides === 20 || mesh.sides === 8 ? 72 : mesh.sides === 10 ? 75 : 108;
+        write(faceLabel(face, die), ox + cell / 2, oy + cell / 2 + 2, size);
+      }
+    });
+    return { canvas: atlas, columns, rows };
+  }
+
+  function meshVertices(mesh, atlas) {
+    const data = [], inset = 0.075, corners = mesh.vertices.map(() => []), edges = new Map();
+    const vertex = (point, normal, uv) => data.push(...point, ...normal, ...uv);
+    const triangle = (points, normal, uvs) => points.forEach((p, i) => vertex(p, normal, uvs[i]));
+    const plainUV = [0.012, 0.012];
+    mesh.faces.forEach((face, index) => {
+      const inner = face.indices.map((i) => add(mul(mesh.vertices[i], 1 - inset), mul(face.center, inset)));
+      const uv = (p) => { const local = faceUV(p, face); return [(index % atlas.columns + local[0]) / atlas.columns, (Math.floor(index / atlas.columns) + 1 - local[1]) / atlas.rows]; };
+      for (let i = 1; i < inner.length - 1; i++) triangle([inner[0], inner[i], inner[i + 1]], face.normal, [uv(inner[0]), uv(inner[i]), uv(inner[i + 1])]);
+      face.indices.forEach((id, i) => {
+        corners[id].push(inner[i]);
+        const next = (i + 1) % inner.length, nextId = face.indices[next], key = [id, nextId].sort((a, b) => a - b).join(":");
+        const entry = { ids: [id, nextId], points: [inner[i], inner[next]], normal: face.normal };
+        if (!edges.has(key)) edges.set(key, entry);
+        else {
+          const other = edges.get(key), same = other.ids[0] === id;
+          const p = same ? [other.points[1], other.points[0], ...entry.points] : [...other.points, ...entry.points];
+          const normal = unit(add(face.normal, other.normal));
+          triangle([p[0], p[1], p[2]], normal, [plainUV, plainUV, plainUV]); triangle([p[0], p[2], p[3]], normal, [plainUV, plainUV, plainUV]);
+        }
+      });
+    });
+    corners.forEach((points, index) => {
+      const normal = unit(mesh.vertices[index]), center = average(points), u = unit(sub(points[0], center)), v = cross(normal, u);
+      points.sort((a, b) => Math.atan2(dot(sub(a, center), v), dot(sub(a, center), u)) - Math.atan2(dot(sub(b, center), v), dot(sub(b, center), u)));
+      for (let i = 1; i < points.length - 1; i++) triangle([points[0], points[i], points[i + 1]], normal, [plainUV, plainUV, plainUV]);
+    });
+    return new Float32Array(data);
+  }
+
+  function webGL(canvas) {
+    const gl = canvas.getContext("webgl", { alpha: true, antialias: true, premultipliedAlpha: true, powerPreference: "low-power" });
+    if (!gl) return null;
+    const shader = (type, source) => {
+      const result = gl.createShader(type); gl.shaderSource(result, source); gl.compileShader(result);
+      if (!gl.getShaderParameter(result, gl.COMPILE_STATUS)) { gl.deleteShader(result); throw new Error("Shader de dés indisponible."); }
+      return result;
+    };
+    const vertexShader = shader(gl.VERTEX_SHADER, `
+      attribute vec3 position; attribute vec3 normal; attribute vec2 uv;
+      uniform mat4 camera; uniform mat4 model;
+      varying vec3 worldNormal; varying vec3 worldPosition; varying vec2 textureUV;
+      void main(){ vec4 world=model*vec4(position,1.0); worldPosition=world.xyz;
+        worldNormal=mat3(model)*normal; textureUV=uv; gl_Position=camera*world; }
+    `);
+    const fragmentShader = shader(gl.FRAGMENT_SHADER, `
+      precision mediump float;
+      uniform sampler2D atlas; uniform float shadow; uniform float opacity;
+      varying vec3 worldNormal; varying vec3 worldPosition; varying vec2 textureUV;
+      void main(){
+        if(shadow>0.5){ vec2 p=(textureUV-0.5)*2.0; float d=dot(p,p);
+          gl_FragColor=vec4(0.13,0.09,0.05,exp(-d*3.0)*0.52*opacity*(1.0-smoothstep(0.6,1.0,d))); }
+        else { vec3 n=normalize(worldNormal); vec3 light=normalize(vec3(-3.0,7.0,5.0));
+          float diffuse=max(dot(n,light),0.0); vec3 eye=normalize(vec3(0.0,7.8,10.0)-worldPosition);
+          float shine=pow(max(dot(n,normalize(light+eye)),0.0),38.0)*0.17;
+          vec3 color=texture2D(atlas,textureUV).rgb*(0.57+0.43*diffuse)+vec3(shine);
+          gl_FragColor=vec4(color,1.0); }
+      }
+    `);
+    const program = gl.createProgram(); gl.attachShader(program, vertexShader); gl.attachShader(program, fragmentShader); gl.linkProgram(program);
+    gl.deleteShader(vertexShader); gl.deleteShader(fragmentShader);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) { gl.deleteProgram(program); throw new Error("Rendu des dés indisponible."); }
+    gl.useProgram(program);
+    const locations = Object.fromEntries(["camera", "model", "atlas", "shadow", "opacity"].map((name) => [name, gl.getUniformLocation(program, name)]));
+    const attributes = Object.fromEntries(["position", "normal", "uv"].map((name) => [name, gl.getAttribLocation(program, name)]));
+    gl.uniform1i(locations.atlas, 0); gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND);
+    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    // Les chanfreins ont leur propre normale ; la profondeur gère aussi les faces arrière.
+    const resources = new Map();
+    function buffer(data) { const result = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, result); gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW); return result; }
+    const ground = buffer(new Float32Array([-1, 0, -1, 0, 1, 0, 0, 0, 1, 0, -1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, -1, 0, -1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, -1, 0, 1, 0, 1, 0, 0, 1]));
+    function bind(data) {
+      gl.bindBuffer(gl.ARRAY_BUFFER, data);
+      for (const [name, size, offset] of [["position", 3, 0], ["normal", 3, 12], ["uv", 2, 24]]) {
+        gl.enableVertexAttribArray(attributes[name]); gl.vertexAttribPointer(attributes[name], size, gl.FLOAT, false, 32, offset);
+      }
+    }
+    function resource(item) {
+      const key = [item.die.sides, item.die.color, item.die.kept, item.die.percentile].join(":");
+      if (resources.has(key)) return resources.get(key);
+      const atlas = makeAtlas(item.mesh, item.die), vertices = meshVertices(item.mesh, atlas), texture = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, texture); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, atlas.canvas);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR); gl.generateMipmap(gl.TEXTURE_2D);
+      const result = { buffer: buffer(vertices), texture, count: vertices.length / 8 }; resources.set(key, result); return result;
+    }
+    return {
+      draw(items, camera, width, height) {
+        items.forEach(resource);
+        gl.viewport(0, 0, width, height); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); gl.useProgram(program);
+        gl.uniformMatrix4fv(locations.camera, false, camera); gl.uniform1f(locations.shadow, 1); gl.depthMask(false); bind(ground);
+        for (const item of items) {
+          gl.uniform1f(locations.opacity, 1 / (1 + item.lift * 0.55));
+          gl.uniformMatrix4fv(locations.model, false, modelMatrix([0, 0, 0, 1], [item.position[0], 0.005, item.position[2]], item.scale * (1.38 + item.lift * 0.15)));
+          gl.drawArrays(gl.TRIANGLES, 0, 6);
+        }
+        gl.depthMask(true); gl.uniform1f(locations.shadow, 0); gl.uniform1f(locations.opacity, 1);
+        for (const item of items) {
+          const data = resource(item); bind(data.buffer); gl.bindTexture(gl.TEXTURE_2D, data.texture);
+          gl.uniformMatrix4fv(locations.model, false, modelMatrix(item.rotation, item.position, item.scale)); gl.drawArrays(gl.TRIANGLES, 0, data.count);
+        }
+      },
+      dispose() {
+        for (const data of resources.values()) { gl.deleteBuffer(data.buffer); gl.deleteTexture(data.texture); }
+        resources.clear(); gl.deleteBuffer(ground); gl.deleteProgram(program);
+        gl.getExtension("WEBGL_lose_context")?.loseContext();
+      },
+    };
+  }
+
+  function fallbackDraw(ctx, items, camera, width, height) {
+    ctx.clearRect(0, 0, width, height);
+    const faces = [], light = unit([-3, 7, 5]);
+    for (const item of items) {
+      const ground = project([item.position[0], 0, item.position[2]], camera, width, height);
+      const edge = project([item.position[0] + item.scale * 1.1, 0, item.position[2]], camera, width, height), radius = Math.max(1, Math.abs(edge[0] - ground[0]));
+      ctx.save(); ctx.translate(ground[0], ground[1]); ctx.scale(1, 0.48);
+      const shadow = ctx.createRadialGradient(0, 0, 0, 0, 0, radius); shadow.addColorStop(0, `rgba(40,28,16,${0.28 / (1 + item.lift)})`); shadow.addColorStop(1, "rgba(40,28,16,0)");
+      ctx.fillStyle = shadow; ctx.fillRect(-radius, -radius, radius * 2, radius * 2); ctx.restore();
+      for (const face of item.mesh.faces) {
+        const normal = rotate(face.normal, item.rotation);
+        if (dot(normal, unit([0, 7.8, 10])) < 0) continue;
+        const transform = (v) => add(mul(rotate(v, item.rotation), item.scale), item.position);
+        const points = face.indices.map((i) => project(transform(item.mesh.vertices[i]), camera, width, height));
+        faces.push({ item, face, normal, points, transform, depth: points.reduce((s, p) => s + p[2], 0) / points.length });
+      }
+    }
+    faces.sort((a, b) => b.depth - a.depth);
+    for (const { item, face, normal, points, transform } of faces) {
+      const colors = palette(item.die), shade = 0.57 + 0.43 * Math.max(0, dot(normal, light));
+      ctx.save(); ctx.beginPath(); points.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.closePath();
+      ctx.fillStyle = `rgb(${colors.base.map((v) => Math.round(v * shade)).join(",")})`; ctx.fill();
+      ctx.strokeStyle = `rgba(255,244,218,${item.die.color === "terracotta" ? 0.13 : 0.5})`; ctx.lineWidth = Math.max(1, width / 350); ctx.lineJoin = "round"; ctx.stroke(); ctx.clip();
+      const center = project(transform(face.center), camera, width, height), pu = project(transform(add(face.center, mul(face.u, face.radius))), camera, width, height), pv = project(transform(add(face.center, mul(face.v, face.radius))), camera, width, height);
+      const label = (text, x, y, size, angle = 0) => { ctx.save(); ctx.translate(x, y); ctx.rotate(angle); ctx.font = `600 ${size}px Georgia, serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = colors.ink; ctx.fillText(text, 0, 0); ctx.restore(); };
+      if (item.mesh.sides === 4) {
+        for (const index of face.indices) {
+          const p = project(transform(add(mul(item.mesh.vertices[index], 0.48), mul(face.center, 0.52))), camera, width, height);
+          label(String(index + 1), p[0], p[1], Math.hypot(pu[0] - center[0], pu[1] - center[1]) * 0.43, Math.atan2(p[1] - center[1], p[0] - center[0]) + Math.PI / 2);
+        }
+      } else {
+        ctx.transform((pu[0] - center[0]) / 100, (pu[1] - center[1]) / 100, -(pv[0] - center[0]) / 100, -(pv[1] - center[1]) / 100, center[0], center[1]);
+        label(faceLabel(face, item.die), 0, 2, item.mesh.sides === 20 || item.mesh.sides === 8 ? 65 : item.mesh.sides === 10 ? 68 : 96);
+      }
+      ctx.restore();
+    }
+  }
+
+  function create(canvas, options = {}) {
+    if (!canvas || typeof canvas.getContext !== "function") throw new TypeError("Un canvas est attendu pour les dés.");
+    let gpu = null, context = null, fallbackCanvas = null, disposed = false, frame = 0, finish = null, start = 0, rolling = false, items = [], camera;
+    let mode = "webgl", width = 0, height = 0;
+    const previousVisibility = canvas.style.visibility, parent = canvas.parentNode, previousParentPosition = parent?.style?.position;
+    let changedParentPosition = false;
+    const media = typeof matchMedia === "function" ? matchMedia("(prefers-reduced-motion: reduce)") : null;
+    const reducedMotion = () => options.reducedMotion === true || media?.matches === true;
+    const setState = () => { canvas.dataset.renderer = mode; canvas.dataset.rolling = String(rolling); };
+    function fallback() {
+      if (disposed || context) return;
+      mode = "fallback";
+      try { context = canvas.getContext("2d"); } catch {}
+      if (!context && canvas.parentNode) {
+        fallbackCanvas = document.createElement("canvas"); fallbackCanvas.className = canvas.className;
+        fallbackCanvas.setAttribute("aria-hidden", "true"); fallbackCanvas.dataset.diceFallback = "true";
+        fallbackCanvas.style.cssText = "position:absolute;inset:0;width:100%;height:100%;pointer-events:none";
+        if (getComputedStyle(canvas.parentNode).position === "static") { canvas.parentNode.style.position = "relative"; changedParentPosition = true; }
+        canvas.parentNode.appendChild(fallbackCanvas); canvas.style.visibility = "hidden"; context = fallbackCanvas.getContext("2d");
+      }
+      setState(); options.onUnavailable?.();
+    }
+    try { gpu = options.forceFallback ? null : webGL(canvas); } catch {}
+    if (!gpu) fallback();
+    setState();
+    function settle() {
+      if (frame) cancelAnimationFrame(frame); frame = 0; rolling = false; setState();
+      const resolve = finish; finish = null; resolve?.();
+    }
+    function measure() {
+      const rect = canvas.getBoundingClientRect(), ratio = Math.min(globalThis.devicePixelRatio || 1, 2);
+      width = Math.max(1, Math.round((rect.width || canvas.clientWidth || 360) * ratio));
+      height = Math.max(1, Math.round((rect.height || canvas.clientHeight || 260) * ratio));
+      if (canvas.width !== width) canvas.width = width;
+      if (canvas.height !== height) canvas.height = height;
+      if (fallbackCanvas) { fallbackCanvas.width = width; fallbackCanvas.height = height; }
+      const aspect = width / height, count = items.length || 1;
+      const columns = count < 4 ? count : Math.max(2, Math.ceil(Math.sqrt(count * aspect * 0.8))), rows = Math.ceil(count / columns);
+      const worldWidth = Math.max(columns * 2.6 + 0.65, (rows * 2.05 + 1.6) * aspect), worldHeight = worldWidth / aspect;
+      const center = [0, 0.68, 0]; camera = cameraMatrix(worldWidth, worldHeight, center);
+      items.forEach((item, index) => {
+        const row = Math.floor(index / columns), inRow = Math.min(columns, count - row * columns);
+        item.base = [(index % columns - (inRow - 1) / 2) * 2.6, 0, (row - (rows - 1) / 2) * 3.25];
+      });
+    }
+    function draw(progress = 1) {
+      if (disposed || !camera) return;
+      items.forEach((item, index) => {
+        const rest = 1 - progress, phase = progress * Math.PI * 3;
+        item.rotation = progress === 1 ? item.target : quaternionMultiply(axisAngle(item.axis, rest * rest * (Math.PI * 5.2 + index * 0.53)), item.target);
+        item.lift = progress === 1 ? 0 : Math.abs(Math.sin(phase)) * rest * rest * 1.05;
+        const bottom = Math.min(...item.mesh.vertices.map((v) => rotate(v, item.rotation)[1])) * item.scale;
+        item.position = [item.base[0] + Math.sin(progress * Math.PI * 2 + index) * rest * 0.3, -bottom + item.lift + 0.025, item.base[2] + Math.sin(progress * Math.PI * 2) * rest * 0.24];
+      });
+      try {
+        if (mode === "webgl" && gpu) gpu.draw(items, camera, width, height);
+        else if (context) fallbackDraw(context, items, camera, width, height);
+      } catch {
+        fallback(); if (context) fallbackDraw(context, items, camera, width, height);
+      }
+    }
+    function setDice(dice) {
+      items = visibleDice(dice).map((die, index) => {
+        const mesh = geometry(die.sides);
+        return { die, mesh, target: orientation(die, mesh), rotation: [0, 0, 0, 1], position: [0, 0, 0], scale: die.sides === 6 ? 1.35 : die.sides === 10 ? 1.2 : 1.13, axis: unit([1 + index * 0.17, 0.6, 0.8 + index * 0.11]), lift: 0 };
+      });
+      measure();
+    }
+    function tick(now) {
+      if (disposed) return;
+      const progress = reducedMotion() ? 1 : Math.min(1, (now - start) / 1250);
+      draw(progress);
+      if (progress === 1) settle(); else frame = requestAnimationFrame(tick);
+    }
+    function resize() { if (!disposed) { measure(); draw(rolling ? Math.min(1, (performance.now() - start) / 1250) : 1); } }
+    function contextLost(event) { event.preventDefault(); fallback(); if (!disposed) { measure(); draw(); settle(); } }
+    canvas.addEventListener("webglcontextlost", contextLost);
+    const observer = typeof ResizeObserver === "function" ? new ResizeObserver(resize) : null;
+    observer?.observe(canvas);
+    globalThis.addEventListener?.("resize", resize);
+    return {
+      get mode() { return mode; },
+      get rolling() { return rolling; },
+      show(dice) { if (disposed) return; settle(); setDice(dice); draw(); },
+      roll(dice) {
+        if (disposed) return Promise.resolve();
+        settle(); setDice(dice);
+        if (reducedMotion()) { draw(); return Promise.resolve(); }
+        rolling = true; setState(); start = performance.now(); draw(0);
+        return new Promise((resolve) => { finish = resolve; frame = requestAnimationFrame(tick); });
+      },
+      resize,
+      dispose() {
+        if (disposed) return; disposed = true; settle(); observer?.disconnect(); globalThis.removeEventListener?.("resize", resize);
+        canvas.removeEventListener("webglcontextlost", contextLost); gpu?.dispose(); gpu = null;
+        fallbackCanvas?.remove(); if (fallbackCanvas) canvas.style.visibility = previousVisibility;
+        if (changedParentPosition && parent?.style) parent.style.position = previousParentPosition;
+        items = []; context = null;
+      },
+    };
+  }
+  return { geometry, visibleDice, create };
+})();
+
+/** Géométrie immuable. Pour le d4, value est le numéro du sommet opposé à la face. */
+function dice3DGeometry(sides) { return dice3DInternals.geometry(sides); }
+
+/** Décompose le percentile : 00 + 0 représente 100 ; les autres paires valent 1 à 99. */
+function dice3DVisibleDice(dice) { return dice3DInternals.visibleDice(dice); }
+
+/** show() pose les dés ; roll() anime puis résout sa promesse ; dispose() libère tout. */
+function createDice3D(canvas, options = {}) { return dice3DInternals.create(canvas, options); }
+
+
 // Module : app
 
 const root = document.getElementById("app"),
@@ -14865,6 +15387,7 @@ let appData = emptyState(),
   swRegistration = null,
   lastFocus = null;
 let portraitSession = null;
+let diceRenderer = null;
 const ui = {
   route: "home",
   wizard: null,
@@ -14895,6 +15418,7 @@ const ui = {
   catalogTab: "gear",
   editorClass: null,
   attackIndex: 0,
+  equipmentProficientOnly: false,
   exportText: "",
   importText: "",
   beastTab: "available",
@@ -15118,7 +15642,10 @@ function render() {
         `<button data-action="navigate" data-route="${route}" class="${ui.route === route && !wizardActive ? "active" : ""}" ${ui.route === route && !wizardActive ? 'aria-current="page"' : ""} ${!c && route !== "more" ? "disabled" : ""}>${icon(ico)}${label}</button>`,
     )
     .join("")}</nav>`;
+  diceRenderer?.dispose();
+  diceRenderer = null;
   modalRoot.innerHTML = renderModal();
+  mountDiceTray();
   paintPortraitEditor();
   document.body.classList.toggle("modal-open", !!ui.modal);
   for (const key of openDetails) {
@@ -16205,6 +16732,7 @@ function modalShell(title, body, footer = "", wide = false, eyebrow = "") {
 }
 function renderEquipmentFields(c) {
   const f = ui.form;
+  const weaponCharacter = { ...c, equipment: f }, weaponTraining = collect(c);
   const weaponOptions = { unarmed: "Frappe à mains nues", ...Object.fromEntries(Object.entries(WEAPONS).filter(([id]) => id !== "unarmed").sort((a, b) => a[1].name.localeCompare(b[1].name, "fr")).map(([id, w]) => [id, w.name])) };
   const armorOptions = Object.fromEntries(Object.entries(ARMORS).filter(([, a]) => a.type !== "shield").map(([id, a]) => [id, a.type === "none" ? a.name : `${a.name} · CA ${a.base}${a.type === "light" ? " + DEX" : a.type === "medium" ? " + DEX (max 2)" : ""}`]));
   const instanceOptions = { "": UI_FR["equipment.freeHand"], ...Object.fromEntries(f.weapons.filter((w) => w.id !== "unarmed").map((w, i) => [w.instanceId, `${weaponOf(w.id)?.name || w.id} · ${UI_FR["equipment.instance"].replace("{number}", i + 1)}`])) };
@@ -16212,10 +16740,13 @@ function renderEquipmentFields(c) {
   const rows = f.weapons
     .map((w, i) => {
       const info = weaponOf(w.id);
-      return `<div class="weapon-row"><div class="form-grid">${selectField(i === 0 ? "Arme principale" : `Arme ${i + 1}`, `form.weapons.${i}.id`, w.id, weaponOptions)}${field("Bonus magique", `form.weapons.${i}.magic`, w.magic || 0, "number", "", 'min="-5" max="10" step="1"')}</div>${checkField("Autre propriété magique", `form.weapons.${i}.isMagical`, !!w.isMagical, "Pour une arme magique sans bonus chiffré, notamment lors du lien de pacte.")}${info?.versatile ? checkField(`Tenue à deux mains (${info.versatile})`, `form.weapons.${i}.twoHands`, w.twoHands) : ""}${f.weapons.length > 1 ? button(`${icon("trash", 14)} Retirer`, "equip-remove-weapon", `data-index="${i}"`, "small-btn ghost") : ""}</div>`;
+      const options = Object.fromEntries(Object.entries(weaponOptions).filter(([id]) => !ui.equipmentProficientOnly || weaponProficiency(weaponCharacter, { ...w, id }, weaponTraining).proficient));
+      // Le filtre ne remplace jamais une arme déjà choisie, même non maîtrisée.
+      if (!Object.hasOwn(options, w.id)) options[w.id] = `${info?.name || w.id} (équipée, non maîtrisée)`;
+      return `<div class="weapon-row"><div class="form-grid">${selectField(i === 0 ? "Arme principale" : `Arme ${i + 1}`, `form.weapons.${i}.id`, w.id, options)}${field("Bonus magique", `form.weapons.${i}.magic`, w.magic || 0, "number", "", 'min="-5" max="10" step="1"')}</div>${checkField("Autre propriété magique", `form.weapons.${i}.isMagical`, !!w.isMagical, "Pour une arme magique sans bonus chiffré, notamment lors du lien de pacte.")}${info?.versatile ? checkField(`Tenue à deux mains (${info.versatile})`, `form.weapons.${i}.twoHands`, w.twoHands) : ""}${f.weapons.length > 1 ? button(`${icon("trash", 14)} Retirer`, "equip-remove-weapon", `data-index="${i}"`, "small-btn ghost") : ""}</div>`;
     })
     .join("");
-  return `<div class="form-grid">${selectField("Armure", "form.armor", f.armor, armorOptions)}${field("Bonus magique de CA", "form.armorBonus", f.armorBonus, "number", "Armure, bouclier ou objets magiques.", 'min="-5" max="20" step="1"')}</div>${checkField("Bouclier équipé (+2 CA)", "form.shield", f.shield)}${checkField("Armure de mage active", "form.mageArmor", f.mageArmor, "Sans armure : CA de 13 + DEX. Les formules de défense ne s’additionnent pas.")}<h3 style="margin:14px 0 8px">Armes à portée de main</h3>${rows}${f.weapons.length < 6 ? button(`${icon("plus", 15)} Ajouter une arme`, "equip-add-weapon", "", "small-btn") : ""}<h3 class="section-gap">${esc(UI_FR["equipment.heldWeapons"])}</h3><p class="small muted">${esc(UI_FR["equipment.handsHelp"])}</p><div class="form-grid">${selectField(UI_FR["equipment.mainHand"], "form.hands.main", f.hands?.main || "", instanceOptions)}${selectField(UI_FR["equipment.offHand"], "form.hands.off", f.hands?.off || "", instanceOptions)}</div>${pactAvailable ? selectField("Arme de pacte", "form.pactWeaponId", f.pactWeaponId || "", { ...instanceOptions, "": "Aucune arme liée" }, "Après l’acquisition ou le rituel de lien prévu par le Pacte de la lame.") : ""}`;
+  return `<div class="form-grid">${selectField("Armure", "form.armor", f.armor, armorOptions)}${field("Bonus magique de CA", "form.armorBonus", f.armorBonus, "number", "Armure, bouclier ou objets magiques.", 'min="-5" max="20" step="1"')}</div>${checkField("Bouclier équipé (+2 CA)", "form.shield", f.shield)}${checkField("Armure de mage active", "form.mageArmor", f.mageArmor, "Sans armure : CA de 13 + DEX. Les formules de défense ne s’additionnent pas.")}<h3 style="margin:14px 0 8px">Armes à portée de main</h3>${checkField("Maîtrisées uniquement", "ui.equipmentProficientOnly", ui.equipmentProficientOnly)}${rows}${f.weapons.length < 6 ? button(`${icon("plus", 15)} Ajouter une arme`, "equip-add-weapon", "", "small-btn") : ""}<h3 class="section-gap">${esc(UI_FR["equipment.heldWeapons"])}</h3><p class="small muted">${esc(UI_FR["equipment.handsHelp"])}</p><div class="form-grid">${selectField(UI_FR["equipment.mainHand"], "form.hands.main", f.hands?.main || "", instanceOptions)}${selectField(UI_FR["equipment.offHand"], "form.hands.off", f.hands?.off || "", instanceOptions)}</div>${pactAvailable ? selectField("Arme de pacte", "form.pactWeaponId", f.pactWeaponId || "", { ...instanceOptions, "": "Aucune arme liée" }, "Après l’acquisition ou le rituel de lien prévu par le Pacte de la lame.") : ""}`;
 }
 function candidateEquipment() {
   const c = clone(activeCharacter());
@@ -16283,7 +16814,7 @@ function renderModal() {
       long ? "Un repos bien mérité." : "Reprendre son souffle.",
       `${field("Début du repos (heure de campagne)", "ui.rest.startHours", ui.rest.startHours, "number", "Compte les heures depuis le début de ta campagne, y compris les jours écoulés.", `min="0" step="0.5" ${c.state.rest?.status === "started" ? "disabled" : ""}`)}${field("Fin du repos (heure de campagne)", "ui.rest.endHours", ui.rest.endHours, "number", "L’heure de ton téléphone ne fait pas avancer la campagne.", 'min="0" step="0.5"')}${restError ? notice(esc(restError), "error") : ""}${d.wildShape && !derive(preview).wildShape ? notice("Tu reprends ta forme normale pendant ce repos. Les soins et les dés de vie concernent ton corps.") : ""}<p class="modal-copy">${long ? "Repos long de 8 heures, au plus une fois par 24 heures, en commençant avec au moins 1 PV." : "Repos court d’au moins 1 heure. Dépense des dés de vie pour récupérer des PV ; chaque dé ajoute ton modificateur de Constitution."}</p>${long && c.state.hp <= 0 ? notice("Un repos long ne rend rien si tu le commences à 0 PV. Stabilise-toi ou reçois des soins d’abord.", "error") : ""}${
         !long
-          ? `<div class="panel"><h3>Dépenser des dés de vie</h3><p class="small muted" style="margin:8px 0">CON ${signed(restView.mods.con)} par dé${restView.acc.feats.includes("durable") ? ` · ${esc(UI_FR["rest.durableMinimum"].replace("{minimum}", Math.max(2, 2 * restView.mods.con)))}` : ""}</p><div class="actions">${dice}</div>${rolls.length ? `<div class="learn-counts">${rolls.map((r) => `<span class="pill">d${r.die} : ${r.roll} ${signed(restView.mods.con)} = ${hitDieHealing(c, r.roll, restView)} PV</span>`).join("")}</div>${button("Annuler le dernier dé", "rest-undo-die", "", "small-btn ghost")}` : ""}</div>`
+          ? `<div class="panel"><h3>Dépenser des dés de vie</h3><p class="small muted" style="margin:8px 0">CON ${signed(restView.mods.con)} par dé${restView.acc.feats.includes("durable") ? ` · ${esc(UI_FR["rest.durableMinimum"].replace("{minimum}", Math.max(2, 2 * restView.mods.con)))}` : ""}</p><div class="actions">${dice}</div>${rolls.length ? `<div class="learn-counts">${rolls.map((r) => `<span class="pill">d${r.die} : ${r.roll} ${signed(restView.mods.con)} ${r.roll + restView.mods.con < hitDieHealing(c, r.roll, restView) ? `→ ${hitDieHealing(c, r.roll, restView)} PV (minimum ${hitDieHealing(c, r.roll, restView)})` : `= ${hitDieHealing(c, r.roll, restView)} PV`}</span>`).join("")}</div>${button("Annuler le dernier dé", "rest-undo-die", "", "small-btn ghost")}` : ""}</div>`
           : checkField("Nourriture et boisson suffisantes", "ui.rest.fed", ui.rest.fed, "Permet de réduire l’épuisement d’un niveau.")
       }<div class="summary-row"><span>PV après repos</span><strong>${nextHP} / ${derive(preview).maxHp}</strong></div><div class="summary-row"><span>Dés de vie restants</span><strong>${derive(preview).hitDiceRemaining} / ${derive(preview).hitDice.reduce((sum, die) => sum + die.total, 0)}</strong></div>${long ? '<div class="summary-row"><span>Emplacements de sorts</span><strong>Tous récupérés</strong></div>' : d.pact ? '<div class="summary-row"><span>Magie de pacte</span><strong>Emplacements récupérés</strong></div>' : ""}<div class="small muted section-gap">Ressources récupérées : ${
         resources(c)
@@ -16339,24 +16870,7 @@ function renderModal() {
       cancel + button("Vérifier et appliquer", "review-conditions", "", "primary"),
     );
   }
-  if (ui.modal === "roll") {
-    const r = ui.roll;
-    return modalShell(
-      "Les dés sont jetés.",
-      `<div class="dice-result"><div class="roll-name">${esc(r.name)}</div><div class="roll-number">${r.total}</div><div class="roll-detail">${r.dice.join(" · ")}${r.bonus ? ` ${signed(r.bonus)}` : ""}${r.adjusted ? ` · dé traité comme ${r.adjusted}` : ""}</div>${r.note ? `<div class="critical">${esc(r.note)}</div>` : ""}</div>${
-        r.kind !== "damage" && r.kind !== "death"
-          ? `<div class="segmented">${[
-              ["normal", "Normal"],
-              ["advantage", "Avantage"],
-              ["disadvantage", "Désavantage"],
-            ]
-              .map(([id, text]) => `<button class="${ui.rollMode === id ? "active" : ""}" data-action="roll-mode" data-value="${id}">${text}</button>`)
-              .join("")}</div><p class="tiny muted">Choisir un mode relance les dés.</p>`
-          : ""
-      }`,
-      button("Fermer", "close-modal", "", "green") + (r.kind !== "death" ? button(`${icon("dice", 16)} Relancer`, "reroll", "", "ghost") : ""),
-    );
-  }
+  if (ui.modal === "roll") return renderDiceDialog();
   if (ui.modal === "equipment") {
     const next = candidateEquipment(),
       bad = ui.form.shield && next.equipment.weapons.some((w) => w.twoHands || weaponOf(w.id)?.two) && next.equipment.weapons.length === 1;
@@ -16618,6 +17132,12 @@ function openModal(type) {
   });
 }
 function closeModal() {
+  if (ui.modal === "roll") {
+    if (ui.roll?.phase === "applying") return;
+    const back = ui.roll?.returnModal;
+    ui.roll = null;
+    if (back) { ui.modal = back; render(); modalRoot.querySelector("button")?.focus({ preventScroll: true }); return; }
+  }
   if (ui.modal === "replace-spell") { const target = ui.spellReplacementTarget; ui.spellReplacementTarget = null; ui.modal = target === "modal" ? "magic" : null; render(); return; }
   if (ui.modal === "portrait") disposePortraitEditor();
   ui.modal = null;
@@ -16827,34 +17347,92 @@ function selectSpell(target, id, kind) {
 }
 
 function rollCheck(name, bonus, kind = "check", options = {}) {
-  const dice = [rollDie(20)];
-  if (ui.rollMode !== "normal") dice.push(rollDie(20));
-  const natural =
-    ui.rollMode === "advantage" ? Math.max(...dice) : ui.rollMode === "disadvantage" ? Math.min(...dice) : dice[0];
-  const adjusted = options.reliable && natural < 10 ? 10 : natural;
-  const notes = [
-    options.note || "",
-    adjusted !== natural ? "Savoir-faire : le résultat du dé est traité comme 10." : "",
-  ];
-  if (kind === "attack")
-    notes.push(
-      natural === 1
-        ? "1 naturel : l’attaque rate."
-        : natural >= derive(activeCharacter()).critThreshold
-          ? "Critique potentiel : vérifie les conditions et double les dés de dégâts concernés."
-          : "Le total ne décide pas à lui seul si la cible est touchée.",
-    );
-  ui.roll = {
-    name,
-    total: adjusted + bonus,
-    dice,
-    bonus,
-    adjusted: adjusted !== natural ? adjusted : null,
-    kind,
-    note: notes.filter(Boolean).join(" "),
-    reroll: { name, bonus, kind, options },
-  };
+  prepareDiceDialog(name, { kind, bonus, reliable: !!options.reliable }, {
+    note: options.note || "", critThreshold: kind === "attack" ? derive(activeCharacter()).critThreshold : 20,
+  });
+}
+function prepareDiceDialog(name, request, options = {}) {
+  ui.rollMode = "normal";
+  ui.roll = { name, request, phase: "ready", result: null, ...options, baseNote: options.note || "" };
   openModal("roll");
+}
+function diceRequestFormula(request) {
+  if (request.kind === "abilities") return "6 valeurs · 4d6, les 3 meilleurs de chaque groupe";
+  const d20 = ["check", "attack", "death"].includes(request.kind),
+    count = d20 ? (request.kind !== "death" && ui.rollMode !== "normal" ? 2 : 1) : request.count || 1,
+    notation = request.notation || `${count}d${d20 ? 20 : request.sides || 6}`;
+  return `${notation}${request.bonus ? ` ${signed(request.bonus)}` : ""}${request.kind === "hit-dice" ? " par dé" : ""}${request.multiplier && request.multiplier !== 1 ? ` × ${request.multiplier}` : ""}`;
+}
+function diceDisplayItems(r) {
+  const result = r.result || resolveDiceRoll(r.request, ui.rollMode, (sides) => sides);
+  return result.dice.map((die) => ({ ...die, kept: r.result ? die.kept : true, color: r.request.kind === "damage" ? "terracotta" : "ivory" }));
+}
+function renderDiceDialog() {
+  const r = ui.roll, ready = r.phase === "ready", rolling = r.phase === "rolling", result = r.phase === "result" ? r.result : null,
+    modes = ["check", "attack"].includes(r.request.kind),
+    hint = rolling ? "Les dés roulent…" : ready ? (diceDisplayItems(r).length ? "Touche les dés pour lancer" : "Dégâts fixes, sans dé à lancer") : "Résultat du lancer",
+    title = r.request.kind === "attack" ? "Jet d’attaque" : r.request.kind === "damage" ? "Jet de dégâts" : r.request.kind === "hit-dice" ? "Reprendre son souffle" : r.request.kind === "death" ? "Sauvegarde contre la mort" : "À toi de lancer.";
+  const modeHtml = modes ? `<div class="segmented dice-roll-modes" role="group" aria-label="Mode du jet">${[["normal", "Normal"], ["advantage", "Avantage"], ["disadvantage", "Désavantage"]].map(([mode, label]) => `<button id="dice-mode-${mode}" class="${ui.rollMode === mode ? "active" : ""}" data-action="roll-mode" data-mode="${mode}" data-value="${mode}" aria-pressed="${ui.rollMode === mode}" ${rolling ? "disabled" : ""}>${label}</button>`).join("")}</div>` : "";
+  const quantity = r.maxCount > 1 ? `<label class="dice-quantity" for="dice-count">Dés de vie <select id="dice-count" data-dice-count ${!ready ? "disabled" : ""}>${Array.from({ length: r.maxCount }, (_, i) => `<option value="${i + 1}" ${r.request.count === i + 1 ? "selected" : ""}>${i + 1}d${r.request.sides}</option>`).join("")}</select><span>${r.maxCount} disponibles</span></label>` : "";
+  const scoreHtml = result?.groups ? `<div class="dice-score-grid">${result.groups.map((group, index) => `<div><span>Valeur ${index + 1}</span><strong>${group.total}</strong><small>${group.detail}</small></div>`).join("")}</div>` : `<strong class="dice-result-total roll-number">${result ? result.total : ""}</strong><p class="dice-roll-breakdown roll-detail">${result ? esc(result.detail) : ""}</p>`;
+  const body = `<div class="dice-roll-content"><p class="dice-roll-context">${esc(r.name)}</p><p class="dice-roll-formula">${esc(diceRequestFormula(r.request))}</p>${modeHtml}${quantity}<button id="dice-tray" class="dice-tray" data-action="roll-start" aria-label="Lancer les dés" ${!ready ? "disabled" : ""}><canvas class="dice-canvas" aria-hidden="true"></canvas><span class="dice-tray-hint">${hint}</span></button><div class="dice-outcome" role="status" aria-live="polite" aria-atomic="true">${scoreHtml}${result && r.note ? `<p class="dice-roll-note">${esc(r.note)}</p>` : ""}</div>${ready && r.help ? `<p class="dice-roll-help">${esc(r.help)}</p>` : ""}</div>`;
+  const footer = ready || rolling
+    ? button("Annuler", "close-modal", "", "ghost") + button(rolling ? "Lancer en cours…" : "Lancer les dés", "roll-start", `id="dice-launch" ${rolling ? "disabled" : ""}`, "primary")
+    : r.apply ? button("Annuler", "close-modal", "", "ghost") + button(r.acceptLabel || "Utiliser ce résultat", "roll-accept", 'id="dice-accept"', "primary")
+      : button("Terminer", "close-modal", 'id="dice-finish"', "primary") + (r.request.kind !== "death" ? button(`${icon("dice", 16)} Relancer`, "reroll", 'id="dice-reroll"', "ghost") : "");
+  return modalShell(title, body, footer).replace('class="modal ', `data-roll-phase="${r.phase}" class="modal dice-roll-dialog `);
+}
+function mountDiceTray() {
+  if (ui.modal !== "roll" || !ui.roll) return;
+  const canvas = modalRoot.querySelector(".dice-canvas");
+  diceRenderer = createDice3D(canvas, {
+    theme: document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"),
+    reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
+  });
+  diceRenderer.show(diceDisplayItems(ui.roll));
+}
+async function startDiceDialog() {
+  const r = ui.roll;
+  if (ui.modal !== "roll" || !r || r.phase !== "ready") return;
+  r.result = resolveDiceRoll(r.request, ui.rollMode);
+  r.phase = "rolling";
+  const result = r.result;
+  r.note = r.baseNote;
+  if (r.request.reliable && result.adjusted !== result.natural) r.note = [r.note, "Savoir-faire : le résultat du dé est traité comme 10."].filter(Boolean).join(" ");
+  if (r.request.kind === "attack") r.note = result.natural === 1 ? "1 naturel : l’attaque rate." : result.natural >= r.critThreshold ? "Critique potentiel : vérifie les conditions et double les dés de dégâts concernés." : "Compare ce total à la classe d’armure de la cible.";
+  render();
+  const animation = diceRenderer.roll(diceDisplayItems(r));
+  try {
+    // Un jet contre la mort est engagé au lancer, même si la fenêtre se ferme.
+    if (r.request.kind === "death") await applyDeathDiceResult(r);
+    await animation;
+    if (ui.roll !== r || ui.modal !== "roll") { if (r.request.kind === "death") render(); return; }
+    r.phase = "result";
+    render();
+    modalRoot.querySelector('#dice-accept, #dice-finish')?.focus({ preventScroll: true });
+  } catch (error) {
+    await animation;
+    if (ui.roll === r) { r.phase = "result"; r.note = "Le résultat n’a pas pu être enregistré. Vérifie la fiche avant de continuer."; render(); }
+    reportError(error);
+  }
+}
+async function applyDeathDiceResult(r) {
+  const c = r.character, next = clone(c), die = r.result.natural;
+  if (die === 20) { next.state.hp = 1; next.state.deathSuccess = 0; next.state.deathFailure = 0; r.note = "20 naturel : tu récupères 1 PV."; }
+  else if (die === 1) { next.state.deathFailure = Math.min(3, next.state.deathFailure + 2); r.note = "1 naturel : deux échecs."; }
+  else if (r.result.total >= 10) { next.state.deathSuccess = Math.min(3, next.state.deathSuccess + 1); r.note = "Une réussite."; }
+  else { next.state.deathFailure = Math.min(3, next.state.deathFailure + 1); r.note = "Un échec."; }
+  if (next.state.deathSuccess >= 3) r.note += " Stabilisé : plus de sauvegardes jusqu’à de nouveaux dégâts.";
+  if (next.state.deathFailure >= 3) r.note += " Trois échecs : le personnage meurt.";
+  await saveCharacter(next, "Jet contre la mort", "session", c);
+}
+async function acceptDiceDialog() {
+  const r = ui.roll;
+  if (!r?.apply || r.phase !== "result") return;
+  r.phase = "applying";
+  try { await r.apply(r.result); }
+  catch (error) { r.phase = "result"; throw error; }
+  if (ui.roll === r) { r.phase = "result"; closeModal(); }
 }
 function downloadJson(value, name) {
   const blob = new Blob([JSON.stringify(value, null, 2)], { type: "application/json;charset=utf-8" }),
@@ -17048,9 +17626,12 @@ async function perform(action, el) {
     case "renew-wildshape":
       await saveCharacter(renewWildShape(c), "Prolonger la forme sauvage", "session", c); render(); break;
     case "moon-heal": {
-      const level = Number(data.value), rolls = Array.from({ length: level }, () => rollDie(8));
-      await saveCharacter(healWildShape(c, level, rolls, { pact: data.pact === "true" }), "Soins de la Lune", "session", c);
-      render(); toast(`Soins : ${rolls.join(" + ")} = ${rolls.reduce((sum, roll) => sum + roll, 0)} PV.`); break;
+      const level = Number(data.value), original = clone(c);
+      prepareDiceDialog("Soins du Cercle de la Lune", { kind: "sum", sides: 8, count: level }, {
+        help: `Un emplacement de niveau ${level} sera dépensé à la validation.`, acceptLabel: "Appliquer les soins",
+        apply: (result) => saveCharacter(healWildShape(original, level, result.values, { pact: data.pact === "true" }), "Soins de la Lune", "session", original),
+      });
+      break;
     }
 
     case "download-content":
@@ -17326,11 +17907,11 @@ async function perform(action, el) {
       break;
     }
     case "level-hp-roll": {
-      const draft = levelDraft(data.prefix),
-        l = draft.levels[Number(data.level) - 1];
-      l.hpDie = rollDie(CLASSES[l.classId].die);
-      if (data.prefix === "wiz") queueDraft();
-      render();
+      const draft = levelDraft(data.prefix), l = draft.levels[Number(data.level) - 1];
+      prepareDiceDialog(`Points de vie · niveau ${data.level}`, { kind: "sum", sides: CLASSES[l.classId].die }, {
+        help: "Le modificateur de Constitution sera ajouté par la fiche.",
+        apply: (result) => { l.hpDie = result.values[0]; if (data.prefix === "wiz") queueDraft(); },
+      });
       break;
     }
     case "asi-mode": {
@@ -17521,10 +18102,17 @@ async function perform(action, el) {
       await saveCharacter(interruptCharacterRest(c), "Repos interrompu", "session", c); closeModal(); toast("Repos interrompu sans récupération."); break;
     }
     case "rest-die": {
-      const die = Number(data.die),
-        h = derive(advanceWildShapeTime(c, 60)).hitDice.find((x) => x.die === die);
-      if (h && ui.rest.rolls.filter((r) => r.die === die).length < h.total - h.spent) ui.rest.rolls.push({ die, roll: rollDie(die) });
-      render();
+      const die = Number(data.die), restView = derive(advanceWildShapeTime(c, 60)),
+        h = restView.hitDice.find((x) => x.die === die), rest = ui.rest,
+        left = h ? h.total - h.spent - rest.rolls.filter((r) => r.die === die).length : 0;
+      if (left <= 0) break;
+      prepareDiceDialog(`Repos court · dé de vie d${die}`, { kind: "hit-dice", sides: die, count: 1, bonus: restView.mods.con,
+        minimum: restView.acc.feats.includes("durable") ? Math.max(2, 2 * restView.mods.con) : 0 }, {
+        returnModal: "rest", maxCount: Math.min(30, left), acceptLabel: "Ajouter au repos",
+        help: "Les soins et les dés dépensés seront enregistrés avec le repos.",
+        note: "Soins calculés par dé, limités aux PV manquants lors du repos.",
+        apply: (result) => { if (ui.rest !== rest) throw new Error("Ce repos n’est plus actif."); rest.rolls.push(...result.values.map((roll) => ({ die, roll }))); },
+      });
       break;
     }
     case "rest-undo-die":
@@ -17598,64 +18186,39 @@ async function perform(action, el) {
       break;
     }
     case "roll-damage": {
-      const index = data.index !== undefined ? Number(data.index) : ui.attackIndex || 0,
-        a = d.attacks[index] || d.attacks[0];
+      const index = data.index !== undefined ? Number(data.index) : ui.attackIndex || 0, a = d.attacks[index] || d.attacks[0];
       ui.attackIndex = index;
-      const result = rollDamage(a.damageDice, a.damageBonus);
-      ui.roll = {
-        ...result,
-        name: `Dégâts · ${a.name}`,
-        bonus: a.damageBonus,
-        kind: "damage",
-        note: `Dégâts de base (${a.damageDice} ${signed(a.damageBonus)} ${a.type}). Ajoute séparément les dés de critique${d.sneakAttack ? ", d’attaque sournoise" : ""}, de châtiment ou de rage.`,
-      };
-      openModal("roll");
+      prepareDiceDialog(`Dégâts · ${a.name}`, { kind: "damage", notation: a.damageDice, bonus: a.damageBonus }, {
+        note: `Dégâts de base (${a.type}). Ajoute séparément les dés de critique${d.sneakAttack ? ", d’attaque sournoise" : ""}, de châtiment ou de rage.`,
+      });
       break;
     }
     case "roll-mode":
-      ui.rollMode = data.value;
-      if (ui.roll?.reroll) {
-        const r = ui.roll.reroll;
-        rollCheck(r.name, r.bonus, r.kind, r.options);
+      if (ui.roll && ui.roll.phase !== "rolling" && ["check", "attack"].includes(ui.roll.request.kind)) {
+        const mode = data.mode || data.value;
+        if (!["normal", "advantage", "disadvantage"].includes(mode)) break;
+        ui.rollMode = mode; ui.roll.phase = "ready"; ui.roll.result = null; render();
       }
       break;
+    case "roll-start":
+      void startDiceDialog().catch((error) => { reportError(error); render(); });
+      break;
+    case "roll-accept":
+      await acceptDiceDialog();
+      break;
     case "reroll":
-      if (ui.roll?.kind === "damage") {
-        await perform("roll-damage", el);
-      } else if (ui.roll?.reroll) {
-        const r = ui.roll.reroll;
-        rollCheck(r.name, r.bonus, r.kind, r.options);
+      if (ui.roll?.phase === "result" && !ui.roll.apply && ui.roll.request.kind !== "death") {
+        ui.roll.phase = "ready"; ui.roll.result = null; render();
+        modalRoot.querySelector("#dice-tray")?.focus({ preventScroll: true });
       }
       break;
     case "death-roll": {
       if (c.state.hp > 0 || c.state.deathSuccess >= 3 || c.state.deathFailure >= 3) {
-        toast("Pas de nouveau jet : le personnage est conscient, stabilisé ou mort. Corrige les compteurs si nécessaire.");
-        break;
+        toast("Pas de nouveau jet : le personnage est conscient, stabilisé ou mort. Corrige les compteurs si nécessaire."); break;
       }
-      const die = rollDie(20),
-        bonus = classLevel(c, "monk") >= 14 ? d.prof : 0,
-        next = clone(c);
-      let note;
-      if (die === 20) {
-        next.state.hp = 1;
-        next.state.deathSuccess = 0;
-        next.state.deathFailure = 0;
-        note = "20 naturel : tu récupères 1 PV.";
-      } else if (die === 1) {
-        next.state.deathFailure = Math.min(3, next.state.deathFailure + 2);
-        note = "1 naturel : deux échecs.";
-      } else if (die + bonus >= 10) {
-        next.state.deathSuccess = Math.min(3, next.state.deathSuccess + 1);
-        note = "Une réussite.";
-      } else {
-        next.state.deathFailure = Math.min(3, next.state.deathFailure + 1);
-        note = "Un échec.";
-      }
-      if (next.state.deathSuccess >= 3) note += " Stabilisé : à 0 PV, sans nouveaux jets tant que tu restes stable.";
-      if (next.state.deathFailure >= 3) note += " Trois échecs : le personnage meurt.";
-      await saveCharacter(next, "Jet contre la mort", "session", c);
-      ui.roll = { name: "Sauvegarde contre la mort", total: die + bonus, dice: [die], bonus, kind: "death", note };
-      openModal("roll");
+      prepareDiceDialog("Sauvegarde contre la mort", { kind: "death", bonus: classLevel(c, "monk") >= 14 ? d.prof : 0 }, {
+        character: clone(c), help: "Le résultat est enregistré dès le lancer.",
+      });
       break;
     }
     case "death-mark": {
@@ -18101,15 +18664,16 @@ async function perform(action, el) {
       break;
     }
     case "roll-abilities": {
-      const w = ui.wizard,
-        results = Array.from({ length: 6 }, () => rollAbilityScore());
-      w.rollDetails = results;
-      w.rollPool = results.map((r) => r.total);
-      const order = [...CLASSES[primaryClassId(w.draft)].primary, ...Object.keys(ABILITIES).filter((a) => !CLASSES[primaryClassId(w.draft)].primary.includes(a))];
-      const sorted = [...w.rollPool].sort((a, b) => b - a);
-      w.draft.abilities = Object.fromEntries(order.map((a, i) => [a, sorted[i]]));
-      queueDraft();
-      render();
+      const w = ui.wizard;
+      prepareDiceDialog("Caractéristiques du personnage", { kind: "abilities" }, {
+        acceptLabel: "Utiliser ces valeurs", apply: (result) => {
+          w.rollDetails = result.groups.map((group) => ({ dice: group.values, total: group.total }));
+          w.rollPool = result.groups.map((group) => group.total);
+          const order = [...CLASSES[primaryClassId(w.draft)].primary, ...Object.keys(ABILITIES).filter((a) => !CLASSES[primaryClassId(w.draft)].primary.includes(a))];
+          const sorted = [...w.rollPool].sort((a, b) => b - a);
+          w.draft.abilities = Object.fromEntries(order.map((a, i) => [a, sorted[i]])); queueDraft();
+        },
+      });
       break;
     }
     case "ability-step": {
@@ -18134,14 +18698,11 @@ async function perform(action, el) {
       render();
       break;
     case "roll-gold": {
-      const text = CLASS_EXTRAS[primaryClassId(ui.wizard.draft)]?.startingGold || "",
-        m = /(\d+)d(\d+)(?:\s*[×x*]\s*(\d+))?/.exec(text);
+      const w = ui.wizard, text = CLASS_EXTRAS[primaryClassId(w.draft)]?.startingGold || "", m = /(\d+)d(\d+)(?:\s*[×x*]\s*(\d+))?/.exec(text);
       if (!m) break;
-      const total = Array.from({ length: Number(m[1]) }, () => rollDie(Number(m[2]))).reduce((a, b) => a + b, 0) * (Number(m[3]) || 1);
-      ui.wizard.draft.gold = total;
-      queueDraft();
-      render();
-      toast(`${total} po de départ.`);
+      prepareDiceDialog("Or de départ", { kind: "sum", sides: Number(m[2]), count: Number(m[1]), multiplier: Number(m[3]) || 1 }, {
+        acceptLabel: "Utiliser cet or", apply: (result) => { w.draft.gold = result.total; queueDraft(); },
+      });
       break;
     }
     case "level-class": {
@@ -18228,6 +18789,11 @@ document.addEventListener("input", (event) => {
     }
 });
 document.addEventListener("change", (event) => {
+  if (event.target.matches("[data-dice-count]") && ui.roll?.phase === "ready") {
+    const count = Number(event.target.value);
+    if (Number.isInteger(count) && count >= 1 && count <= ui.roll.maxCount) { ui.roll.request.count = count; render(); }
+    return;
+  }
   const el = event.target;
   if (el.id === "portrait-file") { void receivePortraitFile(el.files?.[0]); return; }
   if (el.dataset.portraitFilter && portraitSession) {
