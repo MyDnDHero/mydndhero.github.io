@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-preview.11";
+const APP_VERSION = "2.0.0-preview.13";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -6375,6 +6375,116 @@ function encodePortraitCrop(picture, crop) {
   context.fillStyle = "#f5f1e9";
   context.fillRect(0, 0, 512, 512);
   return validatePortrait({ kind: "custom", dataUrl: canvas.toDataURL("image/jpeg", 0.8), width: 512, height: 512 });
+}
+
+
+// Module : creation-identity
+
+/** Repères descriptifs arrondis, librement modifiables, sans effet sur les règles.
+ * Inspirations : tables heightAndWeight et descriptions Size de data/en/races.json
+ * (PHB 2014, Volo 2016, EEPC 2015). Les révisions Multivers reprennent seulement
+ * cette inspiration visuelle, pas les anciennes règles ou des limites de taille.
+ * Les variantes Petite et les origines maison ont un repère générique éditorial.
+ * Le portrait choisi ne détermine ni la taille ni le poids du personnage.
+ */
+const CREATION_IDENTITY_SUGGESTIONS = Object.freeze(Object.fromEntries(Object.entries({
+  human: ["1,70 m", "80 kg", "race|phb|human"],
+  humanVariant: ["1,70 m", "80 kg", "race|phb|human"],
+  hillDwarf: ["1,25 m", "75 kg", "subrace|phb|hill|dwarf|phb"],
+  mountainDwarf: ["1,35 m", "85 kg", "subrace|phb|mountain|dwarf|phb"],
+  highElf: ["1,65 m", "60 kg", "subrace|phb|high|elf|phb"],
+  woodElf: ["1,65 m", "65 kg", "subrace|phb|wood|elf|phb"],
+  drow: ["1,50 m", "50 kg", "subrace|phb|drow|elf|phb"],
+  lightfoot: ["0,90 m", "20 kg", "race|phb|halfling"],
+  stout: ["0,90 m", "20 kg", "race|phb|halfling"],
+  dragonborn: ["1,90 m", "120 kg", "race|phb|dragonborn"],
+  forestGnome: ["1,00 m", "20 kg", "race|phb|gnome"],
+  rockGnome: ["1,00 m", "20 kg", "race|phb|gnome"],
+  halfElf: ["1,65 m", "80 kg", "race|phb|half-elf"],
+  halfOrc: ["1,75 m", "110 kg", "race|phb|half-orc"],
+  tiefling: ["1,65 m", "80 kg", "race|phb|tiefling"],
+  goliathVgm: ["2,25 m", "155 kg", "race|vgm|goliath"],
+  goliath: ["2,25 m", "155 kg", "race|vgm|goliath"],
+  kenku: ["1,50 m", "50 kg", "race|vgm|kenku"],
+  aasimar: ["1,70 m", "80 kg", "race|vgm|aasimar"],
+  airGenasi: ["1,70 m", "80 kg", "race|eepc|genasi"],
+  earthGenasi: ["1,70 m", "80 kg", "race|eepc|genasi"],
+  fireGenasi: ["1,70 m", "80 kg", "race|eepc|genasi"],
+  waterGenasi: ["1,70 m", "80 kg", "race|eepc|genasi"],
+}).map(([raceId, [height, weight, inspirationReferenceId]]) => [raceId, Object.freeze({ height, weight, inspirationReferenceId })])));
+
+const creationIdentityFields = ["height", "weight", "portrait"];
+const creationIdentityPortraitIds = new Set(PORTRAITS.map((portrait) => portrait.id));
+const creationIdentitySmall = Object.freeze({ height: "1,00 m", weight: "20 kg", inspirationReferenceId: null });
+const creationIdentityMedium = Object.freeze({ height: "1,70 m", weight: "70 kg", inspirationReferenceId: null });
+
+function creationIdentitySize(character) {
+  const race = RACES[character?.raceId];
+  if (character?.raceId === "custom") return character.customRace?.size === "P" ? "P" : "M";
+  return race?.sizeChoice && ["P", "M"].includes(character.picks?.["race|size"]?.[0]) ? character.picks["race|size"][0] : race?.size || "M";
+}
+
+function creationIdentitySuggestion(character) {
+  const raceId = character?.raceId;
+  if (creationIdentitySize(character) === "P" && (!RACES[raceId] || RACES[raceId].sizeChoice)) return creationIdentitySmall;
+  return Object.hasOwn(CREATION_IDENTITY_SUGGESTIONS, raceId) ? CREATION_IDENTITY_SUGGESTIONS[raceId] : creationIdentityMedium;
+}
+
+function creationIdentityStateValid(state) {
+  return state?.version === 1 && typeof state.originKey === "string" &&
+    creationIdentityFields.every((field) => typeof state.automatic?.[field] === "boolean") &&
+    ["height", "weight"].every((field) => typeof state.values?.[field] === "string" && state.values[field].length < 40) &&
+    (state.values.portrait === null || creationIdentityPortraitIds.has(state.values.portrait)) &&
+    state.portraits && typeof state.portraits === "object" && !Array.isArray(state.portraits) &&
+    Object.values(state.portraits).every((id) => creationIdentityPortraitIds.has(id));
+}
+
+function creationIdentityMatches(character, field, expected) {
+  if (field !== "portrait") return (character.details?.[field] ?? "") === expected;
+  return expected === null ? character.portrait == null : character.portrait?.kind === "preset" && character.portrait.id === expected;
+}
+
+/** Renvoie un nouvel état ; seul initialize:true autorise un brouillon neuf.
+ * Sans métadonnées, une reprise ancienne reste intacte. Une correction de fiche
+ * reste intacte même si ses métadonnées ont été conservées par un appelant.
+ */
+function applyCreationIdentityDefaults(wizard, { random = Math.random, initialize = false } = {}) {
+  if (!wizard?.draft || wizard.original) return wizard;
+  const previous = wizard.identityDefaults, valid = creationIdentityStateValid(previous);
+  if (!valid && (!initialize || previous != null)) return wizard;
+  const character = wizard.draft, suggestion = creationIdentitySuggestion(character);
+  const raceId = character.raceId || "human", originKey = `${raceId}:${creationIdentitySize(character)}`;
+  const automatic = Object.fromEntries(creationIdentityFields.map((field) => [field, valid ?
+    previous.automatic[field] && creationIdentityMatches(character, field, previous.values[field]) :
+    field === "portrait" ? character.portrait == null : !character.details?.[field]]));
+  const portraits = { ...(valid ? previous.portraits : {}) };
+  let portraitId = valid ? previous.values.portrait : null;
+  if (automatic.portrait) {
+    const family = portraitFamilyOf(character).id;
+    const entries = PORTRAITS.filter((portrait) => portrait.family === family);
+    portraitId = Object.hasOwn(portraits, raceId) && entries.some((portrait) => portrait.id === portraits[raceId]) ? portraits[raceId] : null;
+    if (!portraitId) {
+      const sample = Number(random());
+      const index = Number.isFinite(sample) ? Math.max(0, Math.min(entries.length - 1, Math.floor(sample * entries.length))) : 0;
+      portraitId = entries[index].id;
+      portraits[raceId] = portraitId;
+    }
+  }
+  const values = { height: suggestion.height, weight: suggestion.weight, portrait: portraitId };
+  const identityDefaults = { version: 1, originKey, automatic, values, portraits };
+  const details = { ...character.details };
+  for (const field of ["height", "weight"]) if (automatic[field]) details[field] = values[field];
+  const draft = { ...character, details };
+  if (automatic.portrait) draft.portrait = { kind: "preset", id: portraitId };
+  return { ...wizard, draft, identityDefaults };
+}
+
+/** Appeler sur une saisie ou un choix explicite, y compris un champ vidé ou
+ * « sans portrait ». Une valeur identique à la suggestion devient aussi manuelle.
+ */
+function markCreationIdentityManual(wizard, field) {
+  if (wizard?.original || !creationIdentityFields.includes(field) || !creationIdentityStateValid(wizard?.identityDefaults)) return wizard;
+  return { ...wizard, identityDefaults: { ...wizard.identityDefaults, automatic: { ...wizard.identityDefaults.automatic, [field]: false } } };
 }
 
 
@@ -14628,6 +14738,64 @@ function _reconcileBackgroundKit(before, next) {
 }
 
 
+// Module : magic-editor
+
+// Vue des choix : les calculs et les acquisitions restent dans le moteur 2014.
+function magicEditorModel(character, classId, original = null) {
+  const limits = spellLimits(character, classId);
+  const entries = spellAcquisitions(character).filter((entry) => entry.classId === classId);
+  const ordinary = entries.filter((entry) => !entry.always);
+  const known = ordinary.filter((entry) => entry.known);
+  const always = new Set(entries.filter((entry) => entry.always).map((entry) => entry.spellId));
+  const selected = new Set(entries.filter((entry) => entry.known || entry.prepared).map((entry) => entry.spellId));
+  if (classId === "warlock") for (const id of Object.values(character.spells.arcana)) selected.add(id);
+  const rows = catalogue(character).filter((spell) => canReadySpell(character, spell, classId) || selected.has(spell.id))
+    .sort((a, b) => a.level - b.level || a.name.localeCompare(b.name, "fr"));
+  const levels = [...new Set(rows.filter((spell) => character.spells.allowExceptions || spell.level > 0 || limits.cantrips || selected.has(spell.id)).map((spell) => spell.level))].sort((a, b) => a - b);
+  const previous = original ? spellLimits(original, classId) : null;
+  const unlocked = previous ? levels.filter((level) => level > 0 && level > previous.maxLevel && (level <= limits.maxLevel || limits.arcana.includes(level) && !previous.arcana.includes(level))) : [];
+  return {
+    limits, rows, levels, entries, always, selected, unlocked,
+    cantrips: known.filter((entry) => spellById(character, entry.spellId)?.level === 0 && !entry.secret).length,
+    known: known.filter((entry) => (spellById(character, entry.spellId)?.level > 0 || entry.secret) && entry.secret?.countsAgainstKnown !== false).length,
+    prepared: ordinary.filter((entry) => entry.prepared && !always.has(entry.spellId)).length,
+    secrets: new Set(entries.filter((entry) => entry.secret).map((entry) => entry.secret.id)).size,
+  };
+}
+
+function magicEditorInitialLevel(model, { progression = false, query = "" } = {}) {
+  const match = query.trim() && model.rows.find((spell) => magicEditorMatches(spell, query));
+  if (match && model.levels.includes(match.level)) return match.level;
+  if (progression && model.unlocked.length) return model.unlocked.at(-1);
+  if (model.limits.cantrips > model.cantrips && model.levels.includes(0)) return 0;
+  if (progression) return model.levels.filter((level) => level <= model.limits.maxLevel).at(-1) ?? model.levels[0] ?? 0;
+  return model.levels.find((level) => level > 0) ?? model.levels[0] ?? 0;
+}
+
+function magicEditorMatches(spell, query) {
+  const normalize = (text) => String(text || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr-FR");
+  const words = normalize(query).trim().split(/\s+/).filter(Boolean);
+  const names = normalize([spell.name, spell.referenceEnglishName, spell.englishName].filter(Boolean).join(" "));
+  return words.every((word) => names.includes(word));
+}
+
+function magicEditorQuotaFull(character, model, spell, kind) {
+  if (character.spells.allowExceptions) return false;
+  if (kind === "prepared") return model.prepared >= model.limits.prepared;
+  if (kind === "known" && spell.level === 0) return model.cantrips >= model.limits.cantrips;
+  if (kind === "known" && model.limits.mode === "known") return model.known >= model.limits.known;
+  return false;
+}
+
+function magicEditorSecretBlocked(character, model) {
+  const allocated = new Set((character.spells.acquisitions || []).filter((entry) => entry.classId === "bard" && entry.secret).map((entry) => entry.secret.id));
+  const slot = Array.from({ length: model.limits.secrets }, (_, index) => index + 1).find((index) => !allocated.has(`secret:bard:${index}`));
+  if (!slot) return true;
+  const free = hasSubclass(character, "bard", "lore") && classLevel(character, "bard") >= 6 && slot <= 2;
+  return !character.spells.allowExceptions && !free && model.known >= model.limits.known;
+}
+
+
 // Module : carry-summary
 /** Même périmètre pour le sac et la fiche ; aucune pénalité de déplacement. */
 function carriedWeightSummary(character, derived) {
@@ -15757,7 +15925,7 @@ const dice3DInternals = (() => {
     let gpu = null, context = null, fallbackCanvas = null, disposed = false, frame = 0, finish = null, start = 0, rolling = false, items = [], camera;
     let mode = "webgl", width = 0, height = 0, phase = "ready", motionProgress = 1, revealProgress = 0, centerProgress = 0, survivor = null;
     const previousVisibility = canvas.style.visibility, parent = canvas.parentNode, previousParentPosition = parent?.style?.position;
-    let changedParentPosition = false;
+    let changedParentPosition = false, pose = null;
     const media = typeof matchMedia === "function" ? matchMedia("(prefers-reduced-motion: reduce)") : null;
     const reducedMotion = () => options.reducedMotion === true || media?.matches === true;
     const setState = () => { canvas.dataset.renderer = mode; canvas.dataset.rolling = String(rolling); canvas.dataset.dicePhase = phase; };
@@ -15808,6 +15976,7 @@ const dice3DInternals = (() => {
         const rest = 1 - progress, phase = progress * Math.PI * 3;
         item.rotation = progress === 1 ? item.target : quaternionMultiply(axisAngle(item.axis, rest * rest * (Math.PI * 5.2 + index * 0.53)), item.target);
         item.lift = progress === 1 ? 0 : Math.abs(Math.sin(phase)) * rest * rest * 1.05;
+        pose?.(item, index, { axisAngle, quaternionMultiply, orient: (value) => orientation({ ...item.die, value }, item.mesh) });
         const bottom = Math.min(...item.mesh.vertices.map((v) => rotate(v, item.rotation)[1])) * item.scale;
         const spread = item === survivor ? 1 - slide : 1;
         item.position = [item.base[0] * spread + Math.sin(progress * Math.PI * 2 + index) * rest * 0.3, -bottom + item.lift + 0.025, item.base[2] * spread + Math.sin(progress * Math.PI * 2) * rest * 0.24];
@@ -15860,6 +16029,9 @@ const dice3DInternals = (() => {
         return new Promise((resolve) => { finish = resolve; frame = requestAnimationFrame(tick); });
       },
       resize,
+      /** Mise en scène : le décor pilote la pose affichée, jamais la valeur du dé. */
+      setPose(next) { pose = next; },
+      redraw() { draw(); },
       dispose() {
         if (disposed) return; disposed = true; settle(); observer?.disconnect(); globalThis.removeEventListener?.("resize", resize);
         canvas.removeEventListener("webglcontextlost", contextLost); gpu?.dispose(); gpu = null;
@@ -15882,6 +16054,1265 @@ function dice3DVisibleDice(dice) { return dice3DInternals.visibleDice(dice); }
 function createDice3D(canvas, options = {}) { return dice3DInternals.create(canvas, options); }
 
 
+// Module : dice-fx
+/**
+ * Effets des 1 et 20 naturels, joués dans la fenêtre de jet.
+ * Purement visuels : le résultat vient du moteur, et le hasard d'ici ne sert qu'au choix de l'effet et au décor.
+ * Rien ne touche au DOM au chargement du module : tout est créé à chaque jeu, puis retiré.
+ */
+const diceFxInternals = (() => {
+  const ABORT = Symbol("abort");
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const clamp01 = (v) => Math.max(0, Math.min(1, v));
+  const smooth = (v) => v * v * (3 - 2 * v);
+  let playToken = 0, stage = null, backdrop = null, flash = null, renderer = null, job = null, inkRaf = 0, lastChosen = null, effectAbort = null;
+  const effectSignal = () => { effectAbort ||= new AbortController(); return effectAbort.signal; };
+
+  const fire = (() => {
+    let canvas = null;
+    const VS = "attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}";
+    const FS = `precision highp float;
+    uniform vec2 uRes;uniform float uDpr,uT,uStrength,uMode,uLine,uRad;uniform vec4 uRect;
+    float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+    float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+      return mix(mix(hash(i),hash(i+vec2(1.,0.)),f.x),mix(hash(i+vec2(0.,1.)),hash(i+vec2(1.,1.)),f.x),f.y);}
+    float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*noise(p);p=p*2.03+vec2(11.3,7.1);a*=.5;}return v;}
+    float box(vec2 p,vec2 b,float r){vec2 q=abs(p)-b+r;return length(max(q,0.))+min(max(q.x,q.y),0.)-r;}
+    vec3 ramp(float x){vec3 c=mix(vec3(.5,.05,.01),vec3(.95,.26,.02),smoothstep(.05,.36,x));
+      c=mix(c,vec3(1.,.56,.06),smoothstep(.34,.6,x));c=mix(c,vec3(1.,.8,.26),smoothstep(.58,.8,x));return mix(c,vec3(1.,.96,.74),smoothstep(.84,1.,x));}
+    void main(){
+      vec2 p=vec2(gl_FragCoord.x,uRes.y*uDpr-gl_FragCoord.y)/uDpr;
+      float n=fbm(vec2(p.x*.017,p.y*.012+uT*1.2)),m=fbm(vec2(p.x*.05+3.7,p.y*.032+uT*2.3)),f=0.;
+      if(uMode<.5){
+        vec2 c=(uRect.xy+uRect.zw)*.5,b=(uRect.zw-uRect.xy)*.5;
+        float sd=box(p-c,b,uRad),lift=uStrength*(8.+270.*n*n);
+        float up=box(p+vec2((m-.5)*30.,lift)-c,b+vec2(12.*uStrength,0.),uRad);
+        float tongue=1.-smoothstep(-8.,10.+46.*m,up);
+        float heat=1.-clamp(max(sd,0.)/(lift+6.),0.,1.);
+        float inside=smoothstep(-12.-30.*n,-1.,sd);
+        f=tongue*inside*(.2+.62*heat*(.5+.85*m)+.24*m)*uStrength*1.08;
+      }else{
+        float edge=uLine+(n-.5)*80.,above=edge-p.y,height=56.+330.*m*n;
+        float xr=smoothstep(uRect.x-10.,uRect.x+18.,p.x)*(1.-smoothstep(uRect.z-18.,uRect.z+10.,p.x));
+        float tongue=(1.-smoothstep(height*.5,height,above))*smoothstep(-22.,2.,above);
+        float heat=1.-clamp(above/height,0.,1.);
+        f=tongue*xr*(.22+.66*heat*(.48+.9*m)+.2*m)*uStrength*1.1;
+      }
+      f=clamp(f,0.,1.);float a=smoothstep(.07,.36,f);gl_FragColor=vec4(ramp(f)*a,a);
+    }`;
+    let gl = null, loc = {}, raf = 0, dpr = 1, startAt = 0;
+    const state = { strength: 0, target: 0, speed: 1.5, mode: 0, line: 0, rect: () => [0, 0, 0, 0] };
+    function init() {
+      if (gl) return true;
+      gl = canvas?.getContext("webgl", { alpha: true, premultipliedAlpha: true, antialias: false });
+      if (!gl) return false;
+      const compile = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.warn(gl.getShaderInfoLog(s)); return s; };
+      const program = gl.createProgram();
+      gl.attachShader(program, compile(gl.VERTEX_SHADER, VS)); gl.attachShader(program, compile(gl.FRAGMENT_SHADER, FS));
+      gl.linkProgram(program); gl.useProgram(program);
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      const attribute = gl.getAttribLocation(program, "a");
+      gl.enableVertexAttribArray(attribute); gl.vertexAttribPointer(attribute, 2, gl.FLOAT, false, 0, 0);
+      for (const name of ["uRes", "uDpr", "uT", "uStrength", "uMode", "uLine", "uRad", "uRect"]) loc[name] = gl.getUniformLocation(program, name);
+      return true;
+    }
+    function frame(now) {
+      raf = requestAnimationFrame(frame);
+      const dt = 1 / 60;
+      state.strength += (state.target - state.strength) * Math.min(1, dt * state.speed * 4);
+      const w = innerWidth, h = innerHeight;
+      if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) { canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); }
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+      if (state.strength < .004 && state.target === 0) return;
+      const r = state.rect();
+      gl.uniform2f(loc.uRes, w, h); gl.uniform1f(loc.uDpr, dpr); gl.uniform1f(loc.uT, (now - startAt) / 1000);
+      gl.uniform1f(loc.uStrength, state.strength); gl.uniform1f(loc.uMode, state.mode); gl.uniform1f(loc.uLine, state.line);
+      gl.uniform1f(loc.uRad, 8); gl.uniform4f(loc.uRect, r[0], r[1], r[2], r[3]);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+    return {
+      state,
+      bind(node) { canvas = node; },
+      start(options) {
+        if (!init()) return;
+        Object.assign(state, options);
+        dpr = Math.min(devicePixelRatio || 1, 1.25);
+        if (!raf) { startAt = performance.now(); raf = requestAnimationFrame(frame); }
+      },
+      to(target, speed = 1.5) { state.target = target; state.speed = speed; },
+      stop() {
+        if (raf) cancelAnimationFrame(raf); raf = 0; state.strength = 0; state.target = 0;
+        gl?.getExtension("WEBGL_lose_context")?.loseContext();
+        gl = null; loc = {}; canvas = null;
+      },
+    };
+  })();
+
+  const fx = (() => {
+    let canvas = null, ctx = null;
+    let parts = [], emitters = [], heap = null, raf = 0, last = 0, dpr = 1;
+    const glow = new Map();
+    function sprite(rgb) {
+      if (glow.has(rgb)) return glow.get(rgb);
+      const c = document.createElement("canvas"); c.width = c.height = 64;
+      const g = c.getContext("2d"), r = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+      r.addColorStop(0, `rgba(${rgb},1)`); r.addColorStop(.35, `rgba(${rgb},.55)`); r.addColorStop(1, `rgba(${rgb},0)`);
+      g.fillStyle = r; g.fillRect(0, 0, 64, 64); glow.set(rgb, c); return c;
+    }
+    function add(p) { if (parts.length < 1500) parts.push({ x: 0, y: 0, vx: 0, vy: 0, g: 0, drag: 0, life: 0, ttl: 1, size: 4, rot: 0, spin: 0, seed: Math.random() * 9, kind: "ember", ...p }); }
+    function emit(fn, rate, duration = Infinity) { const e = { fn, rate, left: duration, acc: 0 }; emitters.push(e); ensure(); return e; }
+    function ensure() { if (!raf) { last = performance.now(); raf = requestAnimationFrame(tick); } }
+    function draw(p) {
+      const k = p.life / p.ttl;
+      switch (p.kind) {
+        case "ember": {
+          const size = p.size * (1 - k * .7), s = sprite(k < .5 ? "255,190,70" : "255,96,20");
+          ctx.globalAlpha = (1 - k) * .95; ctx.drawImage(s, p.x - size, p.y - size, size * 2, size * 2);
+          ctx.globalAlpha = (1 - k); ctx.fillStyle = "#fff0c0"; ctx.fillRect(p.x - .8, p.y - .8, 1.6, 1.6); break;
+        }
+        case "spark": {
+          ctx.globalAlpha = 1 - k * k; ctx.strokeStyle = k < .4 ? "#ffd777" : "#ff8a1f"; ctx.lineWidth = p.size * (1 - k * .6);
+          ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * .022, p.y - p.vy * .022); ctx.stroke(); break;
+        }
+        case "ash": {
+          ctx.globalAlpha = (1 - k) * .85; ctx.fillStyle = p.color; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+          ctx.scale(1, Math.cos(p.rot * 1.7) * .7 + .35); ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * .7); ctx.restore(); break;
+        }
+        case "leaf": {
+          ctx.globalAlpha = k > .8 ? (1 - k) * 5 : 1; ctx.fillStyle = Math.cos(p.rot * 1.3) > 0 ? "#e8b93c" : "#a97a10"; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot * .4);
+          ctx.scale(1, Math.cos(p.rot * 1.3)); ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size); ctx.restore(); break;
+        }
+        case "confetti": {
+          ctx.globalAlpha = k > .82 ? (1 - k) * 5.5 : 1; ctx.fillStyle = p.color; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot * .5);
+          ctx.scale(1, Math.cos(p.rot * 1.6)); ctx.fillRect(-p.size / 2, -p.size * .35, p.size, p.size * .7); ctx.restore(); break;
+        }
+        case "num": {
+          ctx.globalAlpha = 1 - k * k; ctx.font = `700 ${p.size}px Alegreya,Georgia,serif`; ctx.textAlign = "center"; ctx.lineWidth = 3; ctx.strokeStyle = "rgba(30,15,5,.8)";
+          ctx.strokeText(p.text, p.x, p.y); ctx.fillStyle = "#ffd777"; ctx.fillText(p.text, p.x, p.y); break;
+        }
+        case "wax": { ctx.globalAlpha = 1; ctx.fillStyle = p.color || "#8e211a"; ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (1 - k * .3), 0, 7); ctx.fill(); break; }
+        case "dust": { ctx.globalAlpha = 1; ctx.fillStyle = p.color; ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size); break; }
+        case "drop": { ctx.globalAlpha = 1; ctx.fillStyle = "#120e0a"; ctx.beginPath(); ctx.ellipse(p.x, p.y, p.size, p.size * 1.5, 0, 0, 7); ctx.fill(); break; }
+        case "ring": {
+          const radius = p.size + (p.grow - p.size) * (1 - (1 - k) * (1 - k) * (1 - k));
+          ctx.globalAlpha = (1 - k) * (1 - k); ctx.strokeStyle = p.color; ctx.lineWidth = Math.max(1, p.width * (1 - k));
+          ctx.beginPath(); ctx.arc(p.x, p.y, radius, 0, 7); ctx.stroke(); break;
+        }
+      }
+    }
+    function tick(now) {
+      const dt = Math.min(.04, (now - last) / 1000); last = now;
+      const w = innerWidth, h = innerHeight;
+      dpr = Math.min(devicePixelRatio || 1, 2);
+      if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) { canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
+      emitters = emitters.filter((e) => e.left > 0);
+      for (const e of emitters) {
+        e.left -= dt * 1000; e.acc += e.rate * dt * (w < 700 ? .65 : 1);
+        while (e.acc >= 1) { e.acc -= 1; add(e.fn()); }
+      }
+      const alive = [];
+      for (const p of parts) {
+        if (p.delay > 0) { p.delay -= dt; alive.push(p); continue; }
+        if (!p.settled) {
+          p.life += dt; p.vy += p.g * dt;
+          if (p.drag) { const f = Math.exp(-p.drag * dt); p.vx *= f; p.vy *= f; }
+          if (p.kind === "ember" || p.kind === "ash" || p.kind === "leaf" || p.kind === "confetti") p.vx += Math.sin(p.life * 5 + p.seed) * 40 * dt;
+          p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.spin * dt;
+          if (p.kind === "dust" && heap) {
+            const index = Math.round((p.x - heap.x) / heap.cell) + heap.half;
+            const top = heap.floor - (heap.levels[index] || 0);
+            if (p.y >= top && index >= 0 && index < heap.levels.length) {
+              p.y = top; p.settled = true; heap.levels[index] += p.size * .8;
+              for (const [offset, share] of [[-1, .32], [1, .32], [-2, .1], [2, .1]]) if (heap.levels[index + offset] !== undefined) heap.levels[index + offset] += p.size * share;
+            }
+          }
+        }
+        if (p.settled || p.life < p.ttl) alive.push(p);
+      }
+      parts = alive;
+      for (const p of parts) if (!(p.delay > 0)) draw(p);
+      ctx.globalAlpha = 1;
+      raf = parts.length || emitters.length ? requestAnimationFrame(tick) : 0;
+      if (!raf) ctx.clearRect(0, 0, w, h);
+    }
+    return {
+      bind(node) { canvas = node; ctx = node.getContext("2d"); },
+      add(p) { add(p); ensure(); },
+      emit,
+      burst(count, fn) { for (let i = 0; i < count; i++) add(fn(i)); ensure(); },
+      heap(x, floor, half = 90) { heap = { x, floor, cell: 2.5, half: Math.round(half / 2.5), levels: new Array(Math.round(half / 2.5) * 2 + 1).fill(0) }; },
+      stopEmitters() { emitters = []; },
+      clear() { parts = []; emitters = []; heap = null; if (raf) cancelAnimationFrame(raf); raf = 0; canvas = null; ctx = null; },
+    };
+  })();
+
+  /* Le brasier */
+  function scorch(x) {
+    const node = document.createElement("div"); node.className = "dfx-scorch";
+    x.dialog.prepend(node); void node.offsetWidth; node.classList.add("dfx-on");
+  }
+  async function critBrasier(x) {
+    x.hintOff();
+    await x.wait(240);
+    x.once(x.dialog, "dfx-shudder");
+    scorch(x);
+    await x.wait(420);
+    fire.start({ mode: 0, rect: x.rect, strength: 0, target: 1, speed: 1.6 });
+    const edge = () => { const r = x.rect(), side = Math.random(); return side < .55 ? { x: rand(r[0], r[2]), y: r[1] + rand(-30, 8) } : { x: side < .78 ? r[0] + rand(-8, 8) : r[2] + rand(-8, 8), y: rand(r[1], r[3]) }; };
+    const embers = fx.emit(() => ({ ...edge(), kind: "ember", vx: rand(-26, 26), vy: rand(-200, -80), ttl: rand(.9, 2), size: rand(3, 8) }), 70);
+    x.verdict("Critique !", "dfx-v-flame");
+    x.result();
+    await x.wait(2600);
+    fire.to(.44, .5);
+    embers.rate = 16;
+  }
+  async function fumbleBrasier(x) {
+    x.hintOff();
+    await x.wait(280);
+    x.once(x.dialog, "dfx-shudder");
+    scorch(x);
+    await x.wait(540);
+    const dialog = x.dialog, box = dialog.getBoundingClientRect();
+    const parent = backdrop.getBoundingClientRect();
+    const night = document.createElement("div"); night.className = "dfx-night"; backdrop.insertBefore(night, dialog);
+    const rim = document.createElement("div");
+    rim.className = "dfx-burn-rim";
+    rim.style.cssText = `left:${box.left - parent.left}px;top:${box.top - parent.top}px;width:${box.width}px;height:${box.height}px`;
+    backdrop.insertBefore(rim, dialog);
+    const mask = burnMask(), set = (node, p) => {
+      node.style.webkitMaskImage = node.style.maskImage = `url(${mask}),url(${mask})`;
+      node.style.webkitMaskSize = node.style.maskSize = "100% 200%,170% 300%";
+      node.style.webkitMaskRepeat = node.style.maskRepeat = "no-repeat";
+      node.style.webkitMaskComposite = "source-in"; node.style.maskComposite = "intersect";
+      node.style.webkitMaskPosition = node.style.maskPosition = `0 ${p * 100}%,30% ${Math.min(100, p * 74)}%`;
+    };
+    set(dialog, 0); set(rim, 0);
+    fire.start({ mode: 1, rect: () => [box.left, box.top, box.right, box.bottom], line: box.bottom + 40, strength: 0, target: 1, speed: 2.2 });
+    const ash = fx.emit(() => ({ kind: "ash", color: Math.random() < .5 ? "#1d1712" : "#57504a", x: rand(box.left, box.right), y: fire.state.line + rand(-40, 20), vx: rand(-30, 30), vy: rand(-170, -40), g: 70, spin: rand(-5, 5), ttl: rand(1.6, 3), size: rand(3, 8) }), 60);
+    const embers = fx.emit(() => ({ kind: "ember", x: rand(box.left, box.right), y: fire.state.line + rand(-30, 10), vx: rand(-34, 34), vy: rand(-240, -90), ttl: rand(.7, 1.6), size: rand(3, 8) }), 70);
+    requestAnimationFrame(() => { night.style.opacity = ".84"; });
+    await x.tween(1750, (v) => {
+      set(dialog, Math.min(1, v * 1.06)); set(rim, Math.max(0, v * 1.06 - .022));
+      fire.state.line = box.bottom + 40 - (box.height + 110) * v;
+    }, (v) => v * v * (3 - 2 * v) * .35 + v * .65);
+    dialog.style.display = "none"; rim.remove();
+    fire.to(0, 2);
+    embers.left = 0; ash.left = 700;
+    const aftermath = document.createElement("div");
+    aftermath.className = "dfx-aftermath"; aftermath.setAttribute("role", "status");
+    aftermath.innerHTML = '<strong>Fumble</strong><p></p><div class="dfx-after-actions"><button type="button" class="btn primary" data-action="close-modal">Terminer</button><button type="button" class="btn ghost" data-action="reroll">Relancer</button></div>';
+    aftermath.querySelector("p").textContent = job.detail;
+    backdrop.append(aftermath);
+    x.result();
+    fx.emit(() => ({ kind: "ash", color: Math.random() < .5 ? "#6d645a" : "#3a332d", x: rand(0, innerWidth), y: -10, vx: rand(-12, 12), vy: rand(22, 60), spin: rand(-3, 3), ttl: rand(5, 9), size: rand(2, 6) }), 12, 6000);
+    aftermath.querySelector("button").focus({ preventScroll: true });
+  }
+  function burnMask() {
+    if (burnMask.url) return burnMask.url;
+    const w = 256, h = 512, c = document.createElement("canvas"); c.width = w; c.height = h;
+    const g = c.getContext("2d"), img = g.createImageData(w, h);
+    const grid = Array.from({ length: 4 }, (_, o) => { const n = 6 << o, t = new Float32Array(n * n * 2); for (let i = 0; i < t.length; i++) t[i] = Math.random(); return { n, t }; });
+    const value = ({ n, t }, u, v) => { const X = u * n, Y = v * n * 2, i = Math.floor(X) % n, j = Math.floor(Y) % (n * 2), a = X - Math.floor(X), b = Y - Math.floor(Y); const at = (p, q) => t[(q % (n * 2)) * n + (p % n)]; const s = smooth(a), r = smooth(b); return (at(i, j) * (1 - s) + at(i + 1, j) * s) * (1 - r) + (at(i, j + 1) * (1 - s) + at(i + 1, j + 1) * s) * r; };
+    for (let y = 0; y < h; y++) for (let xx = 0; xx < w; xx++) {
+      let n = 0, a = .5; for (const layer of grid) { n += a * value(layer, xx / w, y / h); a *= .5; }
+      const alpha = clamp01(((.5 - y / h) + (n - .47) * .24) * 26 + .5), i = (y * w + xx) * 4;
+      img.data[i] = img.data[i + 1] = img.data[i + 2] = 0; img.data[i + 3] = alpha * 255;
+    }
+    g.putImageData(img, 0, 0); burnMask.url = c.toDataURL("image/png"); return burnMask.url;
+  }
+
+  /* Le dé */
+  async function critDe(x) {
+    x.hintOff();
+    await x.wait(130);
+    x.canvas.classList.add("dfx-tremble", "dfx-die-gold");
+    const d = x.die();
+    const charge = fx.emit(() => { const angle = rand(0, 7), dist = rand(70, 130); return { kind: "ember", x: d.x + Math.cos(angle) * dist, y: d.y + Math.sin(angle) * dist * .9, vx: -Math.cos(angle) * dist * 1.6, vy: -Math.sin(angle) * dist * 1.5, ttl: .55, size: rand(2, 5) }; }, 80, 780);
+    await x.wait(820);
+    charge.left = 0;
+    x.canvas.classList.remove("dfx-tremble"); x.canvas.classList.add("dfx-ascend");
+    const size = innerWidth < 700 ? 1500 : 1900, behind = rays(size, d, backdrop, x.dialog);
+    const within = rays(size, d, x.dialog, x.dialog.firstChild); within.classList.add("dfx-within");
+    requestAnimationFrame(() => { behind.classList.add("dfx-on"); within.classList.add("dfx-on"); });
+    x.dialog.classList.add("dfx-glowing");
+    x.once(x.dialog, "dfx-bump");
+    flash.style.transition = "none"; flash.style.opacity = ".55"; requestAnimationFrame(() => { flash.style.transition = "opacity .55s ease-out"; flash.style.opacity = "0"; });
+    fx.burst(70, () => { const angle = rand(0, 7), speed = rand(160, 620); return { kind: "spark", x: d.x, y: d.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, g: 300, drag: 1.6, ttl: rand(.5, 1.3), size: rand(1, 2.4) }; });
+    fx.emit(() => ({ kind: "ember", x: d.x + rand(-d.r, d.r), y: d.y + rand(-d.r * .5, d.r * .7), vx: rand(-16, 16), vy: rand(-110, -40), ttl: rand(.9, 1.7), size: rand(2, 5) }), 20);
+    x.verdict("Critique !", "dfx-v-gold");
+    x.result();
+  }
+  function rays(size, center, parent, before) {
+    const node = document.createElement("div"); node.className = "dfx-rays"; node.innerHTML = "<i></i>";
+    node.style.width = node.style.height = size + "px";
+    if (center) { const p = parent.getBoundingClientRect(); node.style.left = center.x - p.left + "px"; node.style.top = center.y - p.top + "px"; }
+    else { node.style.left = "50%"; node.style.top = "45%"; }
+    parent.insertBefore(node, before);
+    return node;
+  }
+  async function fumbleDe(x) {
+    x.hintOff();
+    await x.wait(120);
+    x.canvas.classList.add("dfx-tremble");
+    await x.wait(330);
+    x.canvas.classList.remove("dfx-tremble");
+    const d = x.die();
+    fx.heap(d.x, d.floor, Math.min(150, d.rect.width * .4));
+    const colors = ["#dccfb4", "#c9bb9e", "#a99c82", "#e9dfc9", "#8c8069"];
+    const grain = () => { const angle = rand(0, 7), radius = d.r * Math.sqrt(Math.random()); return { kind: "dust", x: d.x + Math.cos(angle) * radius, y: d.y + Math.sin(angle) * radius, vx: rand(-34, 34), vy: rand(-20, 30), g: 760, ttl: 60, size: rand(1.6, 3.2), color: colors[Math.floor(rand(0, colors.length))] }; };
+    fx.emit(grain, 640, 700);
+    const s = poser();
+    await x.tween(650, (t) => { s.dissolve = t; renderer.redraw(); });
+    await x.wait(110);
+    letters(x, "Fumble");
+    x.result();
+  }
+  function letters(x, word) {
+    x.verdict("", "dfx-v-letters");
+    const spin = [-5, 4, -3, 6, -4, 9];
+    x.verdictNode.innerHTML = [...word].map((letter, index) => `<span class="${index === word.length - 1 ? "last" : ""}" style="--d:${index * 95}ms;--r0:${rand(-40, 40)}deg;--r:${spin[index % spin.length]}deg">${letter}</span>`).join("");
+    x.verdictNode.setAttribute("aria-label", word);
+  }
+
+  /* Le choc */
+  async function critChoc(x) {
+    x.hintOff();
+    await x.wait(170);
+    const d = x.die();
+    navigator.vibrate?.([40, 30, 80]);
+    flash.style.transition = "none"; flash.style.opacity = ".92"; void flash.offsetWidth;
+    flash.style.transition = "opacity .26s ease-out"; flash.style.opacity = "0";
+    x.shake("dfx-bigjolt");
+    const span = Math.max(innerWidth, innerHeight);
+    fx.add({ kind: "ring", x: d.x, y: d.y, size: 30, grow: span * .95, width: 34, ttl: .62, color: "#ffcf66" });
+    fx.add({ kind: "ring", x: d.x, y: d.y, size: 10, grow: span * .6, width: 16, ttl: .78, color: "#ff8a1f" });
+    fx.burst(150, () => { const angle = rand(0, 7), speed = rand(240, 1250); return { kind: "spark", x: d.x, y: d.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, g: 560, drag: 1.5, ttl: rand(.5, 1.5), size: rand(1.2, 3) }; });
+    x.canvas.classList.add("dfx-die-gold");
+    await x.wait(440);
+    x.verdict("Critique", "dfx-v-slam");
+    x.detailNode.textContent = "";
+    await x.wait(170);
+    navigator.vibrate?.(60);
+    x.shake("dfx-jolt");
+    const v = x.verdictNode.getBoundingClientRect();
+    fx.add({ kind: "ring", x: v.left + v.width / 2, y: v.top + v.height / 2, size: 44, grow: Math.min(innerWidth, 620), width: 12, ttl: .5, color: "#e8a53a" });
+    fx.burst(44, () => { const left = Math.random() < .5; return { kind: "spark", x: v.left + v.width / 2 + rand(-120, 120), y: v.bottom - 4, vx: (left ? -1 : 1) * rand(90, 460), vy: rand(-180, 40), g: 700, drag: 1, ttl: rand(.3, .75), size: rand(1, 2) }; });
+    x.detailNode.textContent = job.detail;
+    x.result();
+  }
+  async function fumbleChoc(x) {
+    x.hintOff();
+    await x.wait(380);
+    const svg = cracks(x); const paths = [...svg.querySelectorAll("path")];
+    x.once(x.dialog, "dfx-tick"); paths.slice(0, 2).forEach((p) => p.classList.add("dfx-on"));
+    await x.wait(620);
+    x.once(x.dialog, "dfx-tick"); paths.slice(2, 5).forEach((p) => p.classList.add("dfx-on"));
+    await x.wait(560);
+    paths.slice(5).forEach((p) => p.classList.add("dfx-on"));
+    x.dialog.classList.remove("dfx-tick");
+    const snapshot = copyDie(x);
+    backdrop.classList.add("dfx-lifted");
+    x.dialog.classList.add("dfx-hanging");
+    await x.wait(330);
+    dropDie(x, snapshot);
+    x.verdict("Fumble", "dfx-v-tilt");
+    await x.wait(250);
+    x.result();
+  }
+  function cracks(x) {
+    const w = x.dialog.clientWidth, h = x.dialog.clientHeight;
+    const c = x.canvas.getBoundingClientRect(), o = x.dialog.getBoundingClientRect();
+    const sx = c.left - o.left + c.width * .62, sy = c.top - o.top + c.height * .2;
+    const lines = [
+      [[w - 20, 40], [w * .86, 90], [w * .78, 112], [sx + 26, sy + 4]],
+      [[w * .78, 112], [w * .72, 70], [w * .66, 56]],
+      [[sx + 26, sy + 4], [sx - 6, sy + 42], [sx - 42, sy + 58], [w * .22, h * .62], [w * .1, h * .7]],
+      [[sx - 42, sy + 58], [sx - 30, sy + 110], [sx - 62, sy + 150]],
+      [[w * .22, h * .62], [w * .16, h * .52], [w * .05, h * .48]],
+      [[w * .1, h * .7], [0, h * .78]],
+      [[sx - 62, sy + 150], [sx - 40, h * .86], [sx - 70, h]],
+    ];
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("class", "dfx-cracks"); svg.setAttribute("viewBox", `0 0 ${w} ${h}`); svg.setAttribute("aria-hidden", "true");
+    svg.innerHTML = lines.map((line) => `<path pathLength="1" d="M${line.map((point) => point.map((value) => value.toFixed(1)).join(" ")).join("L")}"/>`).join("");
+    x.dialog.appendChild(svg);
+    return svg;
+  }
+  function copyDie(x) {
+    renderer.resize();
+    const clone = document.createElement("canvas"); clone.width = x.canvas.width; clone.height = x.canvas.height;
+    clone.getContext("2d").drawImage(x.canvas, 0, 0);
+    const r = x.canvas.getBoundingClientRect();
+    return { clone, width: r.width, height: r.height };
+  }
+  function dropDie(x, { clone, width, height }) {
+    const r = x.canvas.getBoundingClientRect(), box = x.canvas, shake = stage.getBoundingClientRect();
+    const m = new DOMMatrixReadOnly(getComputedStyle(x.dialog).transform), angle = Math.atan2(m.b, m.a) * 180 / Math.PI;
+    clone.className = "dfx-fallen-die";
+    clone.style.cssText = `left:${r.left + r.width / 2 - width / 2 - shake.left}px;top:${r.top + r.height / 2 - height / 2 - shake.top}px;width:${width}px;height:${height}px;transform:rotate(${angle}deg)`;
+    stage.appendChild(clone);
+    box.style.visibility = "hidden";
+    clone.animate([
+      { transform: `translate(0,0) rotate(${angle}deg)` },
+      { transform: `translate(${-Math.min(150, innerWidth * .28)}px,${40}px) rotate(${angle - 100}deg)`, offset: .3, easing: "cubic-bezier(.5,0,.8,.6)" },
+      { transform: `translate(${-Math.min(240, innerWidth * .46)}px,${innerHeight + 200}px) rotate(${angle - 420}deg)` },
+    ], { duration: 1150, easing: "cubic-bezier(.45,0,1,.75)", fill: "forwards" });
+  }
+
+  /* L'encre */
+  async function fumbleEncre(x) {
+    x.hintOff();
+    await x.wait(240);
+    const body = x.dialog.querySelector(".modal-body"), inkCanvas = document.createElement("canvas");
+    inkCanvas.className = "dfx-ink"; inkCanvas.width = body.clientWidth * 2; inkCanvas.height = body.scrollHeight * 2; inkCanvas.style.height = body.scrollHeight + "px";
+    body.prepend(inkCanvas);
+    x.dialog.classList.add("dfx-inked");
+    const b = body.getBoundingClientRect(), d = x.die(), cx = d.x - b.left, cy = d.y - b.top, g = inkCanvas.getContext("2d");
+    const blobs = [], drips = [], start = performance.now();
+    const addBlob = (bx, by, radius, delay) => blobs.push({ x: bx, y: by, r: radius, at: delay, a: rand(0, 7), b: rand(0, 7), c: rand(0, 7) });
+    const span = Math.min(b.width, 430), outcome = x.dialog.querySelector(".dice-outcome").getBoundingClientRect();
+    const wordY = outcome.top - b.top + outcome.height / 2 + 2;
+    addBlob(cx - 8, cy + 2, span * .36, 0);
+    addBlob(cx + span * .17, (cy + wordY) / 2 + 6, span * .25, 170);
+    addBlob(cx - span * .19, (cy + wordY) / 2 + 22, span * .23, 280);
+    addBlob(cx, wordY, span * .36, 420);
+    for (let i = 0; i < 26; i++) { const a = rand(0, 7), dist = rand(span * .42, span * .62); addBlob(cx + Math.cos(a) * dist, (cy + wordY) / 2 + Math.sin(a) * dist * .95, rand(2, 11), rand(120, 500)); }
+    for (let i = 0; i < 6; i++) drips.push({ x: cx + rand(-span * .28, span * .28), y: wordY + rand(10, 30), w: rand(4, 9), len: rand(30, b.height - wordY - 24), at: rand(700, 1600), speed: rand(30, 70) });
+    const draw = (now) => {
+      if (x.token !== playToken) return;
+      const t = now - start;
+      g.setTransform(2, 0, 0, 2, 0, 0); g.clearRect(0, 0, inkCanvas.width, inkCanvas.height); g.fillStyle = "#120e0a";
+      for (const blob of blobs) {
+        const k = clamp01((t - blob.at) / 820); if (k <= 0) continue;
+        const grow = 1 - Math.pow(1 - k, 4), R = blob.r * grow;
+        g.beginPath();
+        for (let i = 0; i <= 90; i++) {
+          const a = i / 90 * Math.PI * 2, r = R * (1 + .13 * Math.sin(3 * a + blob.a) + .08 * Math.sin(7 * a + blob.b) + .05 * Math.sin(13 * a + blob.c));
+          const px = blob.x + Math.cos(a) * r, py = blob.y + Math.sin(a) * r * .92; i ? g.lineTo(px, py) : g.moveTo(px, py);
+        }
+        g.fill();
+      }
+      for (const drip of drips) {
+        const elapsed = (t - drip.at) / 1000; if (elapsed <= 0) continue;
+        const length = Math.min(drip.len, elapsed * drip.speed);
+        g.fillRect(drip.x - drip.w / 2, drip.y, drip.w, length); g.beginPath(); g.ellipse(drip.x, drip.y + length, drip.w * .72, drip.w, 0, 0, 7); g.fill();
+      }
+      if (t < 6000) inkRaf = requestAnimationFrame(draw);
+    };
+    fx.add({ kind: "drop", x: d.x - 14, y: -30, vy: 900, g: 2400, ttl: Math.max(.05, solveFall(d.y - 6 + 30, 900, 2400)), size: 9 });
+    await x.wait(Math.round(solveFall(d.y - 6 + 30, 900, 2400) * 1000));
+    x.once(x.dialog, "dfx-jolt");
+    inkRaf = requestAnimationFrame(draw);
+    await x.wait(620);
+    x.verdict("Fumble", "dfx-v-script dfx-v-ink");
+    x.result();
+  }
+  function solveFall(distance, v0, a) { return (-v0 + Math.sqrt(v0 * v0 + 2 * a * distance)) / a; }
+
+
+  const deg = (value) => value * Math.PI / 180;
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const pick = (list) => list[Math.floor(Math.random() * list.length)];
+  const IVORY = (value) => [{ sides: 20, value, kept: true, color: "ivory" }];
+
+  function slerp(a, b, t) {
+    let dot = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3], end = b;
+    if (dot < 0) { dot = -dot; end = b.map((v) => -v); }
+    if (dot > .9995) { const q = a.map((v, i) => v + (end[i] - v) * t), n = Math.hypot(...q); return q.map((v) => v / n); }
+    const angle = Math.acos(dot), s = Math.sin(angle), p = Math.sin((1 - t) * angle) / s, r = Math.sin(t * angle) / s;
+    return a.map((v, i) => v * p + end[i] * r);
+  }
+  function layer(className, html = "") {
+    const node = document.createElement("div");
+    node.className = "fx-layer " + className; node.innerHTML = html;
+    stage.appendChild(node);
+    return node;
+  }
+  function strobe(amount = .9, fade = .26) {
+    flash.style.transition = "none"; flash.style.opacity = String(amount); void flash.offsetWidth;
+    flash.style.transition = `opacity ${fade}s ease-out`; flash.style.opacity = "0";
+  }
+  /* Pilote la pose du dé : base (quaternion), bascule, cap, vrille et hauteur. */
+  function poser() {
+    const s = { q: null, angle: 0, axis: [0, 0, 1], yaw: 0, spin: 0, spinAxis: [1, .6, .8], lift: 0, dissolve: null, tools: null, rotation: null };
+    renderer.setPose((item, index, tools) => {
+      s.tools = tools;
+      let r = s.q || item.target;
+      if (s.angle) r = tools.quaternionMultiply(tools.axisAngle(s.axis, s.angle), r);
+      if (s.yaw) r = tools.quaternionMultiply(tools.axisAngle([0, 1, 0], s.yaw), r);
+      if (s.spin) r = tools.quaternionMultiply(tools.axisAngle(s.spinAxis, s.spin), r);
+      item.rotation = r; item.lift = s.lift; s.rotation = r;
+      if (s.dissolve !== null) item.dissolve = s.dissolve;
+    });
+    renderer.redraw();
+    return s;
+  }
+  function settleDie(value) {
+    renderer.setPose(null);
+    renderer.show(IVORY(value), { reveal: true });
+  }
+
+  /* Le dé en équilibre */
+  const EDGE = deg(20.9);
+  async function rollToEdge(x) {
+    renderer.show(IVORY(20), { reveal: true });
+    const s = poser();
+    await x.tween(1500, (t) => {
+      const rest = 1 - t;
+      s.spin = rest * rest * Math.PI * 5.2;
+      s.lift = Math.abs(Math.sin(t * Math.PI * 3)) * rest * rest * 1.05;
+      s.angle = EDGE * smooth(t);
+      renderer.redraw();
+    });
+    s.spin = 0; s.lift = 0;
+    return s;
+  }
+  async function holdOnEdge(x, s, ms) {
+    x.hintOff();
+    const d = x.die();
+    const veil = layer("dfx-veil"); veil.style.setProperty("--x", d.x + "px"); veil.style.setProperty("--y", d.y + "px");
+    requestAnimationFrame(() => veil.classList.add("dfx-on"));
+    x.canvas.classList.add("dfx-pushin");
+    let nextBeat = 240;
+    await x.tween(ms, (t) => {
+      const time = t * ms;
+      s.angle = EDGE + Math.sin(time / 1000 * Math.PI * 2 * 1.2) * deg(1.1 + 3.4 * t);
+      renderer.redraw();
+      if (time >= nextBeat) { nextBeat += 720; x.once(x.dialog, "dfx-beat"); navigator.vibrate?.([35, 110, 35]); }
+    });
+    return veil;
+  }
+  async function tumbleTo(x, s, value, ms = 760) {
+    const start = s.rotation, end = s.tools.orient(value);
+    s.angle = 0; s.yaw = 0;
+    x.canvas.style.transition = `transform ${ms}ms ease-in-out`;
+    await x.tween(ms, (t) => {
+      s.q = slerp(start, end, smooth(t));
+      s.lift = t > .68 ? Math.abs(Math.sin((t - .68) / .32 * Math.PI * 2)) * (1 - t) * 1.2 : 0;
+      renderer.redraw();
+    });
+    s.lift = 0;
+  }
+  async function unzoom(x) {
+    x.canvas.style.transition = "transform .35s ease,filter .75s ease";
+    x.canvas.classList.remove("dfx-pushin");
+    x.canvas.style.transform = "";
+  }
+  async function tipOntoTwenty(x, s) {
+    await x.tween(250, (v) => { s.angle = EDGE * (1 - v); renderer.redraw(); }, (v) => v * v);
+    settleDie(20);
+  }
+  async function cruelTipOntoOne(x, s, veil) {
+    await x.tween(380, (v) => { s.angle = EDGE * (1 - .8 * v); renderer.redraw(); }, smooth);
+    veil.style.transition = "opacity .5s ease"; veil.style.opacity = ".55";
+    await x.tween(540, (t) => { s.angle = EDGE * .2 + Math.sin(t * Math.PI * 3) * deg(1.1) * (1 - t * .4); renderer.redraw(); });
+    veil.style.opacity = "1";
+    await x.tween(640, (v) => { s.angle = EDGE * (.2 + 1.05 * v); renderer.redraw(); }, (v) => v * v);
+    await tumbleTo(x, s, 1);
+    settleDie(1);
+  }
+  function winRelease(x) {
+    const d = x.die();
+    strobe(.9); x.shake("dfx-bigjolt"); navigator.vibrate?.([40, 30, 90]);
+    const span = Math.max(innerWidth, innerHeight);
+    fx.add({ kind: "ring", x: d.x, y: d.y, size: 40, grow: span * .95, width: 34, ttl: .62, color: "#ffcf66" });
+    fx.burst(150, () => { const angle = rand(0, 7), speed = rand(240, 1200); return { kind: "spark", x: d.x, y: d.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, g: 500, drag: 1.5, ttl: rand(.5, 1.5), size: rand(1.2, 3) }; });
+    x.canvas.classList.add("dfx-die-gold");
+  }
+  async function equilibreCrit(x) {
+    const s = await rollToEdge(x), veil = await holdOnEdge(x, s, 2050);
+    await tipOntoTwenty(x, s);
+    veil.remove(); unzoom(x);
+    winRelease(x);
+    x.verdict("Critique !", "dfx-v-gold");
+    x.result();
+  }
+  async function equilibreFumble(x) {
+    const s = await rollToEdge(x), veil = await holdOnEdge(x, s, 1650);
+    await cruelTipOntoOne(x, s, veil);
+    unzoom(x);
+    x.once(x.dialog, "dfx-tick");
+    await x.wait(330);
+    veil.style.transition = "opacity .7s ease"; veil.style.opacity = "0";
+    x.verdict("Fumble", "dfx-v-dull");
+    x.result();
+    await x.wait(700);
+    veil.remove();
+  }
+  /* Introduction de la surprise : le suspense, puis n'importe quel autre effet. */
+  async function balanceIntro(x, value) {
+    const s = await rollToEdge(x), veil = await holdOnEdge(x, s, 1700);
+    if (value === 20) await tipOntoTwenty(x, s);
+    else await cruelTipOntoOne(x, s, veil);
+    veil.style.transition = "opacity .3s ease"; veil.style.opacity = "0";
+    unzoom(x);
+    await x.wait(340);
+    veil.remove();
+  }
+
+  /* Le dé coupable */
+  async function coupableFumble(x) {
+    x.hintOff();
+    await x.wait(430);
+    x.canvas.classList.add("dfx-tremble");
+    await x.wait(170);
+    x.canvas.classList.remove("dfx-tremble");
+    const s = poser();
+    const one = s.tools.orient(1), twenty = s.tools.orient(20);
+    // Il se retourne d'un coup pour montrer son 20, mine de rien.
+    await x.tween(300, (t) => { s.q = slerp(one, twenty, smooth(t)); s.lift = Math.sin(t * Math.PI) * .9; renderer.redraw(); });
+    s.q = twenty; s.lift = 0;
+    await x.wait(320);
+    // Personne n'a vu ?
+    await x.tween(540, (t) => { s.yaw = Math.sin(t * Math.PI * 2) * deg(26); renderer.redraw(); });
+    s.yaw = 0;
+    await x.wait(180);
+
+    x.dialog.classList.add("dfx-free-die");
+    const d = x.die(), box = x.dialog.getBoundingClientRect();
+    const minX = box.left - d.x + 34, maxX = box.right - d.x - 34, pace = -minX / 2.3;
+    let tx = 0, dash = 0, dashDir = 1, last = performance.now(), elapsed = 0;
+    const dodge = (event) => {
+      if (Math.hypot(event.clientX - (d.x + tx), event.clientY - d.y) > 100) return;
+      dash = .3; dashDir = event.clientX > d.x + tx ? -1 : 1;
+    };
+    document.addEventListener("pointermove", dodge, { signal: effectSignal() });
+    document.addEventListener("pointerdown", dodge, { signal: effectSignal() });
+    await new Promise((resolve, reject) => {
+      const frame = (now) => {
+        if (x.token !== playToken) { reject(ABORT); return; }
+        const dt = Math.min(.05, (now - last) / 1000); last = now; elapsed += dt;
+        if (dash > 0) { dash -= dt; tx += dashDir * 1050 * dt; }
+        else tx -= pace * dt;
+        tx = Math.max(minX, Math.min(maxX, tx));
+        const step = elapsed * Math.PI * 2 * 3.1;
+        s.angle = Math.sin(step) * deg(dash > 0 ? 16 : 8);
+        s.lift = dash > 0 ? .55 : Math.abs(Math.sin(step)) * .12;
+        renderer.redraw();
+        x.canvas.style.transform = `translateX(${tx.toFixed(1)}px)`;
+        if ((tx <= minX && dash <= 0) || elapsed > 8) resolve(); else requestAnimationFrame(frame);
+      };
+      requestAnimationFrame(frame);
+    });
+    effectAbort?.abort();
+    s.angle = 0; s.lift = 0; renderer.redraw();
+
+    // Pris sur le fait.
+    const p = x.dialog.getBoundingClientRect(), cx = d.x + tx - p.left, cy = d.y - p.top;
+    const spot = document.createElement("div"); spot.className = "dfx-spot";
+    spot.style.setProperty("--x", cx + "px"); spot.style.setProperty("--y", cy + "px");
+    x.dialog.appendChild(spot); x.dialog.classList.add("dfx-spotted");
+    x.once(x.dialog, "dfx-tick");
+    const mark = document.createElement("div"); mark.className = "dfx-gotcha"; mark.textContent = "!";
+    mark.style.left = Math.max(30, cx) + "px"; mark.style.top = cy - 62 + "px";
+    x.dialog.appendChild(mark);
+    await x.wait(640);
+    const q = s.q;
+    await x.tween(680, (t) => { s.q = slerp(q, one, smooth(t)); renderer.redraw(); });
+    await x.wait(160);
+    x.verdict("Fumble", "dfx-v-rise");
+    x.result();
+  }
+  /* La fenêtre encaisse : elle part dans le sens du choc et revient comme un ressort. */
+  function springKick(x, node) {
+    let px = 0, py = 0, turn = 0, vx = 0, vy = 0, vt = 0, raf = 0, last = 0;
+    const frame = (now) => {
+      raf = 0;
+      if (x.token !== playToken) return;
+      const dt = Math.min(.033, (now - last) / 1000); last = now;
+      vx += (-620 * px - 15 * vx) * dt; vy += (-620 * py - 15 * vy) * dt; vt += (-620 * turn - 15 * vt) * dt;
+      px += vx * dt; py += vy * dt; turn += vt * dt;
+      if (Math.abs(px) + Math.abs(py) + (Math.abs(vx) + Math.abs(vy)) / 60 < .2) { node.style.transform = ""; px = py = turn = vx = vy = vt = 0; return; }
+      node.style.transform = `translate(${px.toFixed(1)}px,${py.toFixed(1)}px) rotate(${turn.toFixed(2)}deg)`;
+      raf = requestAnimationFrame(frame);
+    };
+    return (nx, ny, force) => {
+      vx += nx * force; vy += ny * force; vt += (Math.abs(nx) + Math.abs(ny)) * force * .03 * (Math.random() < .5 ? -1 : 1);
+      if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); }
+    };
+  }
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  function crackWeb(x) {
+    const svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("class", "dfx-cracks dfx-rage"); svg.setAttribute("viewBox", `0 0 ${x.dialog.clientWidth} ${x.dialog.clientHeight}`); svg.setAttribute("aria-hidden", "true");
+    x.dialog.appendChild(svg);
+    return svg;
+  }
+  function crackStar(svg, cx, cy, size, count) {
+    let html = "";
+    const line = (points) => { const path = "M" + points.map((p) => p.map((v) => v.toFixed(1)).join(" ")).join("L"); html += `<path class="dfx-halo" pathLength="1" d="${path}"/><path pathLength="1" d="${path}"/>`; };
+    for (let i = 0; i < count; i++) {
+      let angle = i / count * Math.PI * 2 + rand(-.2, .2), radius = rand(6, 14);
+      const reach = size * rand(.5, 1), steps = Math.random() < .5 ? 3 : 4, points = [[cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius]];
+      for (let step = 1; step <= steps; step++) {
+        angle += rand(-.32, .32); radius += reach / steps;
+        const point = [cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius];
+        points.push(point);
+        if (step === 2 && Math.random() < .6) { const side = angle + rand(.5, .9) * (Math.random() < .5 ? -1 : 1); line([point, [point[0] + Math.cos(side) * reach * .3, point[1] + Math.sin(side) * reach * .3]]); }
+      }
+      line(points);
+    }
+    const group = document.createElementNS(SVG_NS, "g");
+    group.innerHTML = html; svg.appendChild(group);
+    void svg.getBoundingClientRect();
+    group.querySelectorAll("path").forEach((path) => path.classList.add("dfx-on"));
+  }
+  function knockAside(nodes, reach = 1) {
+    for (const node of nodes) {
+      if (!node) continue;
+      node.classList.add("dfx-knocked");
+      node.style.transform = `translate(${rand(-8, 8) * reach}px,${rand(-6, 9) * reach}px) rotate(${rand(-17, 17) * reach}deg)`;
+    }
+  }
+  function rampageHit(x, box, web, kick, { px, py, nx, ny, force, size, count, sparks, flashing }) {
+    const sx = box.left + px, sy = box.top + py, away = Math.atan2(-ny, -nx);
+    if (flashing) strobe(.78, .2);
+    kick(nx, ny, force);
+    navigator.vibrate?.(30);
+    crackStar(web, px, py, size, count);
+    const crater = document.createElement("div");
+    crater.className = "dfx-crater"; crater.style.cssText = `left:${px}px;top:${py}px;--s:${(size * 1.15).toFixed(0)}px`;
+    x.dialog.appendChild(crater);
+    fx.add({ kind: "ring", x: sx, y: sy, size: 10, grow: size * 2, width: 13, ttl: .34, color: "#ffd777" });
+    fx.burst(sparks, () => { const angle = away + rand(-1.35, 1.35), speed = rand(220, 1050); return { kind: "spark", x: sx, y: sy, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, g: 620, drag: 1.7, ttl: rand(.25, .75), size: rand(1.2, 2.8) }; });
+    fx.burst(10, () => { const angle = away + rand(-1.2, 1.2), speed = rand(60, 320); return { kind: "ember", x: sx, y: sy, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, drag: 2, ttl: rand(.35, .8), size: rand(3, 7) }; });
+  }
+  async function coupableCrit(x) {
+    x.hintOff();
+    await x.wait(150);
+    const s = poser();
+    x.dialog.classList.add("dfx-free-die", "dfx-rampage");
+    x.result();
+    const box = x.dialog.getBoundingClientRect(), d = x.die(), w = box.width, h = box.height, tray = x.tray.getBoundingClientRect();
+    const home = [d.x - box.left, d.y - box.top], kick = springKick(x, x.dialog), web = crackWeb(x);
+    const night = document.createElement("div"); night.className = "dfx-night"; night.style.transition = "opacity .5s ease";
+    backdrop.insertBefore(night, x.dialog);
+    const dim = document.createElement("div"); dim.className = "dfx-rage-dim"; x.dialog.insertBefore(dim, web);
+    const aura = document.createElement("div"); aura.className = "dfx-die-aura"; aura.innerHTML = "<i></i>";
+    aura.style.left = d.x - tray.left + "px"; aura.style.top = d.y - tray.top + "px";
+    x.tray.insertBefore(aura, x.canvas);
+    const place = (tx, ty, scale, glow, squashX = 1, squashY = 1) => {
+      x.canvas.style.transform = `translate(${tx.toFixed(1)}px,${ty.toFixed(1)}px) scale(${(scale * squashX).toFixed(3)},${(scale * squashY).toFixed(3)})`;
+      aura.style.transform = `translate(${tx.toFixed(1)}px,${ty.toFixed(1)}px) scale(${glow.toFixed(3)})`;
+    };
+
+    // Il se charge : tout s'éteint autour de lui, il vire à l'or et la lumière converge.
+    void night.offsetWidth;
+    night.style.opacity = ".84"; dim.classList.add("dfx-on"); aura.style.opacity = "1";
+    x.canvas.classList.add("dfx-die-hot");
+    fx.emit(() => { const angle = rand(0, 7), dist = rand(90, 190); return { kind: "ember", x: d.x + Math.cos(angle) * dist, y: d.y + Math.sin(angle) * dist, vx: -Math.cos(angle) * dist * 2.4, vy: -Math.sin(angle) * dist * 2.4, ttl: .4, size: rand(2, 5) }; }, 150, 660);
+    await x.tween(700, (v) => {
+      const e = v * v, jitter = e * 6;
+      s.spin += .015 + e * .26;
+      place(rand(-jitter, jitter), rand(-jitter, jitter), 1 + e * .16, .25 + e * 1.05);
+      renderer.redraw();
+    });
+
+    // Il ricoche de plus en plus vite. L'éclair plein écran revient une frappe sur deux.
+    const modes = [...x.dialog.querySelectorAll(".dice-roll-modes button")], foot = [...x.dialog.querySelectorAll(".modal-footer .btn")];
+    const close = x.dialog.querySelector(".icon-btn"), title = x.dialog.querySelector("#dialog-title"), reach = d.r * .8, grow = Math.min(w, 560) / 390;
+    const hits = [
+      { at: [w - 58, 56], wall: [.7, -.7], knock: [close], ms: 230 },
+      { at: [50, h * .34], wall: [-1, 0], knock: modes.slice(0, 2), ms: 205 },
+      { at: [w - 50, h * .56], wall: [1, 0], knock: modes.slice(2), ms: 190 },
+      { at: [62, h - 56], wall: [-.7, .7], knock: foot.slice(0, 1), ms: 170 },
+      { at: [w - 66, h - 56], wall: [.7, .7], knock: foot.slice(1), ms: 155 },
+      { at: [64, 58], wall: [-.7, -.7], knock: [title], ms: 185 },
+    ];
+    kick(0, .5, 420);
+    let from = [0, 0], scaleFrom = 1.16;
+    for (const [index, hit] of hits.entries()) {
+      const end = [hit.at[0] - home[0], hit.at[1] - home[1]], start = from, startScale = scaleFrom;
+      const speedX = (end[0] - start[0]) / hit.ms * 1000, speedY = (end[1] - start[1]) / hit.ms * 1000;
+      await x.tween(hit.ms, (v) => {
+        const cx = lerp(start[0], end[0], v), cy = lerp(start[1], end[1], v), wx = d.x + cx, wy = d.y + cy;
+        s.spin += .55;
+        place(cx, cy, lerp(startScale, .8, v), 1);
+        renderer.redraw();
+        fx.add({ kind: "spark", x: wx + rand(-12, 12), y: wy + rand(-12, 12), vx: speedX * .9, vy: speedY * .9, drag: 5, ttl: .16, size: rand(2, 4.5) });
+        fx.add({ kind: "ember", x: wx + rand(-16, 16), y: wy + rand(-16, 16), vx: -speedX * .06, vy: -speedY * .06, ttl: rand(.22, .5), size: rand(3, 7) });
+      }, (v) => v * v * .4 + v * .6);
+      from = end; scaleFrom = .8;
+      const [nx, ny] = hit.wall;
+      place(end[0], end[1], .8, 1.35, 1 - .3 * Math.abs(nx) + .18 * Math.abs(ny), 1 - .3 * Math.abs(ny) + .18 * Math.abs(nx));
+      rampageHit(x, box, web, kick, { px: hit.at[0] + nx * reach, py: hit.at[1] + ny * reach, nx, ny, force: 820 + index * 90, size: (72 + index * 8) * grow, count: 7 + index % 3, sparks: 55 + index * 8, flashing: index % 2 === 0 });
+      knockAside(hit.knock);
+      await x.wait(58);
+      place(end[0], end[1], .8, 1);
+    }
+
+    // Il reprend de la hauteur au centre, enfle, puis s'écrase.
+    const rise = -Math.min(76, Math.max(0, home[1] - 86)), last = from;
+    await x.tween(280, (v) => {
+      const e = smooth(v);
+      s.spin += .6;
+      place(lerp(last[0], 0, e), lerp(last[1], rise, e), lerp(.8, 1.38, e), lerp(1, 2, e));
+      renderer.redraw();
+      fx.add({ kind: "ember", x: d.x + lerp(last[0], 0, e) + rand(-18, 18), y: d.y + lerp(last[1], rise, e) + rand(-18, 18), vx: rand(-40, 40), vy: rand(-40, 40), ttl: rand(.25, .5), size: rand(3, 7) });
+    });
+    await x.tween(140, (v) => { s.spin += .8; place(rand(-3, 3), rise + rand(-3, 3), 1.38 + v * .1, 2 + v * .5); renderer.redraw(); });
+    const spinFrom = s.spin, spinTo = Math.ceil(spinFrom / (Math.PI * 2)) * Math.PI * 2 + Math.PI * 2;
+    await x.tween(105, (v) => { s.spin = lerp(spinFrom, spinTo, v); place(0, rise * (1 - v * v), lerp(1.48, 1.05, v * v), 2.5 - v * .8); renderer.redraw(); });
+    s.spin = 0; settleDie(20);
+
+    strobe(1, .42);
+    kick(0, 1, 1900);
+    navigator.vibrate?.([70, 30, 130]);
+    const span = Math.max(innerWidth, innerHeight);
+    crackStar(web, home[0], home[1], Math.max(w, h) * .62, 13);
+    fx.add({ kind: "ring", x: d.x, y: d.y, size: 34, grow: span, width: 40, ttl: .62, color: "#ffe29a" });
+    fx.add({ kind: "ring", x: d.x, y: d.y, size: 16, grow: span * .66, width: 22, ttl: .74, color: "#ff8a1f" });
+    fx.add({ kind: "ring", x: d.x, y: d.y, size: 8, grow: span * .36, width: 12, ttl: .86, color: "#fff3cf" });
+    fx.burst(190, () => { const angle = rand(0, 7), speed = rand(260, 1500); return { kind: "spark", x: d.x, y: d.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, g: 560, drag: 1.5, ttl: rand(.5, 1.5), size: rand(1.2, 3.2) }; });
+    fx.burst(46, () => { const angle = rand(0, 7), speed = rand(80, 460); return { kind: "ember", x: d.x, y: d.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, drag: 1.6, ttl: rand(.6, 1.4), size: rand(3, 8) }; });
+    const size = innerWidth < 700 ? 1500 : 1900, behind = rays(size, d, backdrop, x.dialog), within = rays(size, d, x.dialog, x.dialog.firstChild);
+    within.classList.add("dfx-within");
+    requestAnimationFrame(() => { behind.classList.add("dfx-on"); within.classList.add("dfx-on"); });
+    x.dialog.classList.add("dfx-glowing");
+    dim.classList.remove("dfx-on"); web.classList.add("dfx-cool"); night.style.opacity = ".55";
+    x.canvas.classList.remove("dfx-die-hot"); x.canvas.classList.add("dfx-die-gold");
+    x.canvas.style.transform = ""; x.canvas.classList.add("dfx-proud");
+    aura.classList.add("dfx-settled"); aura.style.transform = "scale(1.45)";
+    knockAside([close, title, ...modes, ...foot], .6);
+    const r = x.rect();
+    fx.emit(() => ({ kind: "leaf", x: rand(r[0], r[2]), y: r[1] + rand(-90, 20), vx: rand(-14, 14), vy: rand(50, 130), spin: rand(-7, 7), rot: rand(0, 6), ttl: rand(1.6, 3), size: rand(2.5, 6) }), 30, 2400);
+    fx.emit(() => ({ kind: "ember", x: d.x + rand(-d.r, d.r), y: d.y + rand(-d.r * .5, d.r * .7), vx: rand(-16, 16), vy: rand(-120, -40), ttl: rand(.9, 1.7), size: rand(2, 5) }), 22);
+
+    // Le mot retombe juste après le dé : deuxième coup.
+    await x.wait(120);
+    x.verdict("Critique !", "dfx-v-gold dfx-v-gold-slam");
+    await x.wait(170);
+    kick(0, 1, 620);
+    navigator.vibrate?.(50);
+    const word = x.verdictNode.getBoundingClientRect(), wordX = word.left + word.width / 2;
+    fx.add({ kind: "ring", x: wordX, y: word.top + word.height / 2, size: 40, grow: Math.min(innerWidth, 620), width: 12, ttl: .5, color: "#e8a53a" });
+    fx.burst(44, () => ({ kind: "spark", x: wordX + rand(-110, 110), y: word.bottom - 4, vx: (Math.random() < .5 ? -1 : 1) * rand(90, 460), vy: rand(-180, 40), g: 700, drag: 1, ttl: rand(.3, .75), size: rand(1, 2) }));
+  }
+
+  /* Le héros */
+  const HERO_LINES = {
+    crit: {
+      any: ["Les bardes en parleront encore dans cent ans.", "Même le dé n’y croit pas."],
+      str: ["Quelque part, une porte vient de comprendre son erreur.", "{nom} vient de soulever le problème. Et la table avec."],
+      dex: ["{nom} vient d’inventer un nouveau pas de danse. Mortel.", "Quelque part, un maître d’armes pleure de joie."],
+      con: ["Le poison s’excuse et demande la sortie.", "{nom} a digéré le problème. Et l’assiette."],
+      int: ["{nom} vient de corriger le grimoire. À l’encre.", "Les bibliothèques demandent une dédicace."],
+      wis: ["{nom} l’avait vu venir. Depuis mardi.", "Les dieux prennent des notes."],
+      cha: ["{nom} sourit. Deux royaumes capitulent.", "Même le dragon demande une dédicace."],
+    },
+    fumble: {
+      any: ["Le dé présente ses excuses. Pas à toi.", "Tout le monde a vu. Même le dé."],
+      str: ["{nom} a perdu un bras de fer contre une porte.", "La porte n’était même pas fermée."],
+      dex: ["{nom} a perdu contre ses propres pieds.", "Le sol était pourtant bien plat."],
+      con: ["{nom} vient de perdre un duel contre un fromage.", "L’eau était pourtant plate."],
+      int: ["{nom} a trébuché sur une idée.", "{nom} vient d’oublier comment on lit. Le livre aussi est gêné."],
+      wis: ["Tout le monde a vu le piège. {nom} aussi, mais après.", "{nom} a demandé son chemin à un mimique."],
+      cha: ["{nom} a tenté un compliment. Le silence a répondu.", "Le barde demande à ne plus être vu avec {nom}."],
+    },
+  };
+  function heroName() { return job.hero.name || "Ton personnage"; }
+  function heroLine(kind) {
+    const lines = HERO_LINES[kind], own = lines[job.hero.ability] || [];
+    return pick([...own, ...own, ...lines.any]).replace("{nom}", heroName());
+  }
+  /* Un nom long ne doit pas déborder du bandeau : la taille descend jusqu'à ce qu'il tienne. */
+  function fitHeroName(node, band) {
+    let size = parseFloat(getComputedStyle(node).fontSize);
+    while (size > 20 && (node.scrollWidth > node.clientWidth || node.offsetHeight > band.clientHeight * .5)) {
+      size -= 2; node.style.fontSize = size + "px";
+    }
+    // Seul un nom vraiment trop long pour la plus petite taille est coupé.
+    node.style.overflowWrap = "anywhere";
+  }
+  async function herosCrit(x) {
+    x.hintOff();
+    await x.wait(170);
+    const line = heroLine("crit");
+    strobe(.85, .22);
+    navigator.vibrate?.([30, 30, 70]);
+    const cut = layer("dfx-cutin", '<div class="dfx-strip dfx-edge"></div><div class="dfx-strip dfx-main"><div class="dfx-speed"></div><img alt=""><div class="dfx-cut-text"><strong></strong><p></p></div></div><div class="dfx-strip dfx-edge dfx-low"></div>');
+    cut.querySelector("img").src = job.hero.portrait;
+    const name = cut.querySelector("strong");
+    name.textContent = heroName(); cut.querySelector("p").textContent = line;
+    fitHeroName(name, cut.querySelector(".dfx-main"));
+    x.shake("dfx-jolt");
+    await x.wait(2150);
+    cut.classList.add("dfx-out");
+    await x.wait(190);
+    cut.remove();
+    x.canvas.classList.add("dfx-die-gold");
+    x.verdict("Critique !", "dfx-v-gold", line);
+    x.result();
+  }
+  async function herosFumble(x) {
+    x.hintOff();
+    await x.wait(340);
+    const line = heroLine("fumble"), box = x.dialog.getBoundingClientRect();
+    const beside = box.left > 250, width = beside ? 200 : Math.min(150, box.top - 80);
+    const card = layer("dfx-sad-card", '<img alt=""><span></span><i></i>');
+    card.querySelector("img").src = job.hero.portrait;
+    card.querySelector("span").textContent = heroName();
+    card.style.setProperty("--w", Math.max(92, width) + "px");
+    card.style.left = (beside ? box.left - 228 : Math.max(16, innerWidth * .5 - width * .5)) + "px";
+    card.style.top = (beside ? Math.max(40, box.top + 34) : 28) + "px";
+    await x.wait(1050);
+    x.verdict("Fumble", "dfx-v-dull", line);
+    x.result();
+  }
+
+  /* Le public */
+  const CROWN = {
+    plain: "",
+    wizard: '<path d="M50 -6 L79 46 C60 39 40 39 21 46 Z"/><ellipse cx="50" cy="46" rx="37" ry="7"/>',
+    helm: '<path d="M27 56 C11 48 6 30 11 15 C17 31 26 38 37 42 Z"/><path d="M73 56 C89 48 94 30 89 15 C83 31 74 38 63 42 Z"/>',
+    hood: '<path d="M19 104 C14 46 32 28 50 28 C68 28 86 46 81 104 Z"/>',
+    bun: '<circle cx="50" cy="34" r="11"/>',
+    tophat: '<rect x="30" y="4" width="40" height="42" rx="2"/><rect x="18" y="42" width="64" height="7" rx="3"/>',
+    elf: '<path d="M30 60 L3 44 L29 76 Z"/><path d="M70 60 L97 44 L71 76 Z"/>',
+    dwarf: '<path d="M29 72 C30 126 70 126 71 72 Z"/>',
+  };
+  const personSvg = (kind) => `<svg viewBox="0 0 100 190" aria-hidden="true" fill="currentColor"><g class="dfx-arms" fill="none" stroke="currentColor" stroke-width="14" stroke-linecap="round"><path d="M20 128 C6 100 3 78 8 50"/><path d="M80 128 C94 100 97 78 92 50"/></g><path d="M8 190 C8 122 26 96 50 96 C74 96 92 122 92 190 Z"/><g class="dfx-head"><circle cx="50" cy="66" r="25"/>${CROWN[kind]}</g><g class="dfx-hands" style="color:#54463a"><circle class="dfx-hand dfx-l" cx="39" cy="124" r="9"/><circle class="dfx-hand dfx-r" cx="61" cy="124" r="9"/></g></svg>`;
+  function buildCrowd(mood) {
+    const root = layer(`dfx-crowd ${mood}`, '<div class="dfx-crowd-glow"></div>');
+    const narrow = innerWidth < 700, gap = narrow ? 72 : 94, kinds = Object.keys(CROWN), people = [];
+    [{ width: narrow ? 72 : 88, tone: "#2c221b", rest: "12%", shift: .5 }, { width: narrow ? 86 : 108, tone: "#120d0a", rest: "38%", shift: 0 }].forEach((row, r) => {
+      const count = Math.ceil(innerWidth / gap) + 1;
+      for (let i = 0; i < count; i++) {
+        const node = document.createElement("div");
+        node.className = "dfx-person";
+        node.innerHTML = personSvg(pick(kinds));
+        node.style.cssText = `left:${(i + row.shift) * gap - row.width / 2 + rand(-9, 9)}px;--w:${row.width}px;--tone:${row.tone};--rest:${row.rest};--delay:${rand(0, mood === "dfx-grim" ? .55 : .3).toFixed(2)}s;--rise:${mood === "dfx-grim" ? "1.1s" : ".5s"};--hop:${rand(0, .4).toFixed(2)}s;z-index:${r ? 3 : 1}`;
+        root.appendChild(node);
+        people.push({ node, row: r });
+      }
+    });
+    requestAnimationFrame(() => requestAnimationFrame(() => { root.classList.add("dfx-on"); people.forEach(({ node }) => node.classList.add("dfx-up")); }));
+    return { root, people };
+  }
+  function clearCrowdRoom(x) {
+    const box = x.dialog.getBoundingClientRect(), overlap = box.bottom - (innerHeight - 170);
+    if (overlap <= 0) return;
+    x.dialog.style.transition = "transform .55s ease";
+    x.dialog.style.transform = `translateY(${-Math.min(overlap, Math.max(0, box.top - 6))}px)`;
+  }
+  function paddle(root, holder, value, rotation) {
+    const node = document.createElement("div"); node.className = "dfx-paddle"; node.textContent = value;
+    node.style.setProperty("--r", rotation + "deg");
+    holder.appendChild(node);
+    return node;
+  }
+  async function publicCrit(x) {
+    x.hintOff();
+    await x.wait(120);
+    clearCrowdRoom(x);
+    const { root, people } = buildCrowd("dfx-happy");
+    await x.wait(460);
+    people.forEach(({ node }) => node.classList.add("dfx-cheer"));
+    x.verdict("Critique !", "dfx-v-gold");
+    x.result();
+    x.canvas.classList.add("dfx-die-gold");
+    navigator.vibrate?.([30, 40, 30]);
+    const colors = ["#e0442e", "#e8b93c", "#2e8fd0", "#3aa35a", "#d84c9a", "#fff3cf"];
+    const cannon = (fromLeft) => fx.burst(innerWidth < 700 ? 75 : 130, () => {
+      const angle = fromLeft ? rand(-1.35, -.65) : rand(-2.5, -1.8), speed = rand(520, 1320);
+      return { kind: "confetti", x: fromLeft ? 0 : innerWidth, y: innerHeight, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, g: 620, drag: 1.5, spin: rand(-11, 11), rot: rand(0, 6), ttl: rand(2.4, 4.2), size: rand(6, 12), color: pick(colors) };
+    });
+    cannon(true); cannon(false);
+    const holder = document.createElement("div"); holder.className = "dfx-paddles"; root.appendChild(holder);
+    for (const [value, rotation] of [["10", -5], ["10", 3], ["10", -2]]) {
+      await x.wait(260);
+      paddle(root, holder, value, rotation);
+      x.shake("dfx-tick");
+    }
+    await x.wait(900);
+    cannon(true); cannon(false);
+  }
+  async function publicFumble(x) {
+    x.hintOff();
+    await x.wait(300);
+    clearCrowdRoom(x);
+    const { root, people } = buildCrowd("dfx-grim");
+    const back = people.filter((p) => p.row === 0).map((p) => p.node);
+    // Le dernier à partir : le haut-de-forme, assis à gauche pour traverser toute la rangée.
+    const seats = back.filter((node) => { const left = node.getBoundingClientRect().left; return left > innerWidth * .04 && left < innerWidth * .3; });
+    const last = seats[0] || back[1];
+    last.innerHTML = personSvg("tophat");
+    const crowd = people.map((p) => p.node).filter((node) => node !== last);
+    await x.wait(850);
+    x.verdict("Fumble", "dfx-v-dull");
+    x.result();
+    back.filter((node) => node !== last && Math.random() < .5).slice(0, 4).forEach((node, i) => setTimeout(() => node.querySelector(".dfx-head")?.classList.add("dfx-nope"), i * 170));
+    // Tout le public met zéro, de gauche à droite.
+    const wave = crowd.map((node) => ({ node, left: node.getBoundingClientRect().left })).sort((a, b) => a.left - b.left), step = Math.min(60, 800 / wave.length);
+    wave.forEach(({ node }, i) => holdSign(node, i * step));
+    await x.wait(wave.length * step + 420);
+    // Puis il se barre, pancartes à la main.
+    await marchOut(x, crowd);
+    // Il n'en reste qu'un.
+    last.classList.add("dfx-leaver");
+    last.style.setProperty("--delay", "0s"); last.style.setProperty("--rise", ".45s"); last.style.setProperty("--rest", "-34%");
+    await x.wait(460);
+    last.querySelector(".dfx-head").classList.add("dfx-nope");
+    await slowClap(x, root, last, 2);
+    const seat = last.getBoundingClientRect();
+    await throwTomato(x, seat.left + seat.width / 2, seat.top + seat.height * .45);
+    last.classList.remove("dfx-clapper");
+    await walkOff(x, last);
+  }
+  function holdSign(node, delay) {
+    const sign = document.createElement("div");
+    sign.className = "dfx-sign"; sign.textContent = "0";
+    sign.style.setProperty("--r", rand(-7, 7).toFixed(1) + "deg");
+    sign.style.animationDelay = delay + "ms";
+    node.prepend(sign);
+  }
+  async function marchOut(x, crowd) {
+    const order = crowd.map((node) => ({ node, left: node.getBoundingClientRect().left })).sort((a, b) => b.left - a.left);
+    const narrow = innerWidth < 700, speed = narrow ? 380 : 1100, gap = Math.min(70, 950 / order.length), standUp = 180;
+    let end = 0;
+    order.forEach(({ node, left }, index) => {
+      const rest = parseFloat(node.style.getPropertyValue("--rest")), standing = rest - 24, distance = Math.max(60, innerWidth - left + 40);
+      const ms = distance / speed * 1000 + standUp, steps = Math.max(2, Math.round((ms - standUp) / 150)), frames = [{ transform: `translate(0,${rest}%)`, offset: 0 }];
+      for (let i = 0; i <= steps; i++) frames.push({ transform: `translate(${distance * i / steps}px,calc(${standing}% - ${i % 2 ? 10 : 0}px)) rotate(${i % 2 ? 3.5 : -3.5}deg)`, offset: i === steps ? 1 : (standUp + (ms - standUp) * i / steps) / ms });
+      node.animate(frames, { duration: ms, delay: index * gap, easing: "linear", fill: "forwards" });
+      end = Math.max(end, index * gap + ms);
+    });
+    await x.wait(end * .78);
+  }
+  async function slowClap(x, root, person, count) {
+    person.classList.add("dfx-clapper");
+    for (let i = 0; i < count; i++) {
+      await x.wait(360);
+      person.classList.add("dfx-shut");
+      const box = person.getBoundingClientRect(), word = document.createElement("span");
+      word.className = "dfx-clap-word"; word.textContent = "clap";
+      word.style.left = box.right + 2 + "px"; word.style.bottom = innerHeight - box.top - box.height * .42 + i * 10 + "px";
+      root.appendChild(word); setTimeout(() => word.remove(), 860);
+      await x.wait(150);
+      person.classList.remove("dfx-shut");
+    }
+  }
+  async function walkOff(x, person) {
+    const left = person.getBoundingClientRect().left, distance = innerWidth - left + 30, speed = innerWidth < 700 ? 300 : 760, ms = distance / speed * 1000, steps = Math.round(ms / 190), frames = [];
+    for (let i = 0; i <= steps; i++) frames.push({ transform: `translate(${distance * i / steps}px,${i % 2 ? "calc(-34% - 13px)" : "-34%"}) rotate(${i % 2 ? 4 : -4}deg)` });
+    person.animate(frames, { duration: ms, easing: "linear", fill: "forwards" });
+    await x.wait(ms);
+  }
+  async function throwTomato(x, sx, sy) {
+    const r = x.dialog.getBoundingClientRect(), tx = (r.left + r.right) / 2 + rand(-46, 46), ty = r.top + r.height * .36;
+    const tomato = layer("dfx-tomato");
+    await x.tween(470, (v) => {
+      const px = lerp(sx, tx, v), py = lerp(sy, ty, v) - Math.sin(v * Math.PI) * 170;
+      tomato.style.transform = `translate(${px - 22}px,${py - 22}px) scale(${.38 + 1.5 * v * v}) rotate(${v * 620}deg)`;
+    });
+    tomato.remove();
+    navigator.vibrate?.(60);
+    x.shake("dfx-tick");
+    const splat = layer("dfx-splat", `<i></i>${splatSvg()}`);
+    splat.style.left = tx - 105 + "px"; splat.style.top = ty - 105 + "px";
+    fx.burst(28, () => { const angle = rand(0, 7), speed = rand(180, 640); return { kind: "wax", color: "#b5261a", x: tx, y: ty, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, g: 1100, drag: 2.4, ttl: rand(.35, .8), size: rand(1.6, 5) }; });
+  }
+  function splatSvg() {
+    const lobes = Array.from({ length: 11 }, (_, i) => ({ a: i / 11 * Math.PI * 2 + rand(-.2, .2), r: rand(52, 92), w: rand(.1, .27) }));
+    const points = [];
+    for (let i = 0; i < 84; i++) {
+      const a = i / 84 * Math.PI * 2;
+      let radius = 44 + Math.sin(a * 4 + 1) * 3;
+      for (const lobe of lobes) { const delta = Math.atan2(Math.sin(a - lobe.a), Math.cos(a - lobe.a)); radius = Math.max(radius, 42 + (lobe.r - 42) * Math.exp(-(delta * delta) / (2 * lobe.w * lobe.w))); }
+      points.push(`${(100 + Math.cos(a) * radius).toFixed(1)} ${(100 + Math.sin(a) * radius).toFixed(1)}`);
+    }
+    const seeds = Array.from({ length: 10 }, () => { const a = rand(0, 7), r = rand(4, 34); return `<ellipse cx="${100 + Math.cos(a) * r}" cy="${100 + Math.sin(a) * r}" rx="3.4" ry="2.1" transform="rotate(${rand(0, 180)} ${100 + Math.cos(a) * r} ${100 + Math.sin(a) * r})" fill="#f2d98a"/>`; }).join("");
+    return `<svg viewBox="0 0 200 200" aria-hidden="true"><defs><radialGradient id="dfx-tom" cx="42%" cy="38%" r="70%"><stop offset="0" stop-color="#e8452e"/><stop offset=".62" stop-color="#bd2415"/><stop offset="1" stop-color="#7f110a"/></radialGradient></defs><path d="M${points.join("L")}Z" fill="url(#dfx-tom)"/><ellipse cx="82" cy="80" rx="20" ry="11" fill="#ff9b83" opacity=".5" transform="rotate(-28 82 80)"/>${seeds}</svg>`;
+  }
+
+  /* Le faux plantage */
+  async function scramble(x, ms, density = 12) {
+    const bars = layer("dfx-glitch"), start = performance.now();
+    while (performance.now() - start < ms) {
+      bars.innerHTML = Array.from({ length: density }, () => `<i style="top:${rand(0, 100)}%;height:${rand(.5, 7)}%;left:${rand(-20, 40)}%;width:${rand(25, 90)}%;background:${pick(["#ff2d78", "#18e0ff", "#ffffff", "#000000", "#7dff5a"])};opacity:${rand(.2, .85)}"></i>`).join("");
+      backdrop.style.transform = `translate(${rand(-9, 9)}px,${rand(-3, 3)}px) skewX(${rand(-1.8, 1.8)}deg)`;
+      backdrop.style.filter = `hue-rotate(${rand(-40, 40)}deg) contrast(${rand(1, 1.55)})`;
+      await x.wait(rand(40, 105));
+    }
+    bars.remove(); backdrop.style.transform = ""; backdrop.style.filter = "";
+  }
+  async function plantageFumble(x) {
+    // Rien ne bouge : on pense à un vrai blocage.
+    backdrop.classList.add("dfx-stage-wait");
+    await x.wait(760);
+    await scramble(x, 780);
+    const crash = layer("dfx-crash", '<div class="dfx-crash-box"><h2>Erreur 1</h2><p></p><div class="dfx-crash-label">Récupération de la dignité : <b>3 %</b></div><div class="dfx-crash-bar"><i style="width:3%"></i></div><p class="dfx-crash-note"></p></div>');
+    crash.querySelector("p").textContent = `${heroName()} a oublié comment on fait.`;
+    let skip = false;
+    crash.addEventListener("pointerdown", () => { skip = true; }, { signal: effectSignal() });
+    const value = crash.querySelector("b"), bar = crash.querySelector(".dfx-crash-bar i");
+    for (const [percent, ms] of [[3, 520], [8, 240], [12, 220], [5, 460], [33, 240], [31, 320], [64, 230], [97, 380], [96, 430], [97, 270], [2, 620]]) {
+      if (skip) break;
+      value.textContent = percent + " %"; bar.style.width = percent + "%";
+      await x.wait(ms);
+    }
+    if (!skip) { crash.querySelector(".dfx-crash-note").textContent = "Récupération impossible. Tout le monde a vu."; await x.wait(1050); }
+    x.hintOff();
+    x.verdict("Fumble", "dfx-v-dull");
+    x.result();
+    crash.classList.add("dfx-off");
+    backdrop.classList.remove("dfx-stage-wait");
+    await x.wait(240);
+    crash.remove();
+  }
+  async function plantageCrit(x) {
+    x.hintOff();
+    await x.wait(160);
+    x.canvas.classList.add("dfx-die-gold");
+    // Le début du compteur est le vrai total, puis il s'emballe. Le lecteur d'écran attend le mot final.
+    const bonus = job.bonus, base = 20 + bonus, sum = bonus ? `20 ${bonus > 0 ? "+" : "−"} ${Math.abs(bonus)}` : "20";
+    const steps = [base, base + 1, base + 8, base + 24, 99, 180, 420, 999, 2048, 9999, 31337, 65535, 99999, 999999, 9999999];
+    const outcome = x.dialog.querySelector(".dice-outcome");
+    outcome.setAttribute("aria-live", "off");
+    const d = x.die();
+    for (let i = 0; i < steps.length; i++) {
+      x.verdict(steps[i].toLocaleString("fr-FR"), "dfx-v-count", i < 2 ? sum : `${sum} + ?`);
+      x.verdictNode.style.setProperty("--grow", (1 + i * i * .009).toFixed(3));
+      if (i > 3) { x.once(x.dialog, "dfx-tick"); fx.add({ kind: "num", text: "+" + steps[i].toLocaleString("fr-FR"), x: d.x + rand(-120, 120), y: d.y + rand(-30, 60), vx: rand(-40, 40), vy: rand(-200, -90), ttl: .95, size: rand(18, 30) }); }
+      await x.wait(Math.max(52, 165 - i * 9));
+    }
+    await scramble(x, 300, 9);
+    strobe(.9); x.shake("dfx-bigjolt"); navigator.vibrate?.([40, 30, 100]);
+    x.verdictNode.style.removeProperty("--grow");
+    x.verdict("∞", "dfx-v-inf", "Résultat trop élevé pour ce personnage.");
+    outcome.setAttribute("aria-live", "polite");
+    const span = Math.max(innerWidth, innerHeight);
+    fx.add({ kind: "ring", x: d.x, y: d.y, size: 30, grow: span * .9, width: 28, ttl: .6, color: "#ffcf66" });
+    await x.wait(1050);
+    x.verdict("Critique !", "dfx-v-gold", "Résultat trop élevé pour ce personnage.");
+    x.result();
+  }
+
+  function context(token) {
+    const dialog = job.dialog, tray = dialog.querySelector(".dice-tray");
+    const canvas = tray.querySelector("[data-dice-fallback]") || tray.querySelector(".dice-canvas");
+    const x = {
+      token, kind: job.kind, canvas, dialog, tray, verdictNode: dialog.querySelector(".dice-result-total"), detailNode: dialog.querySelector(".dice-roll-breakdown"),
+      alive() { if (token !== playToken) throw ABORT; },
+      async wait(ms) { await new Promise((resolve) => setTimeout(resolve, ms)); x.alive(); },
+      tween(ms, step, ease = (v) => v) {
+        return new Promise((resolve, reject) => {
+          const start = performance.now();
+          const frame = (now) => {
+            if (token !== playToken) { reject(ABORT); return; }
+            const v = clamp01((now - start) / ms); step(ease(v));
+            if (v < 1) requestAnimationFrame(frame); else resolve();
+          };
+          requestAnimationFrame(frame);
+        });
+      },
+      once(node, name) { node.classList.remove(name); void node.offsetWidth; node.classList.add(name); },
+      shake(name) {
+        x.once(backdrop, name);
+        const page = document.getElementById("main-content");
+        if (page) x.once(page, name);
+      },
+      die() { const r = canvas.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height * .45, r: r.height * .27, floor: r.top + r.height * .84, rect: r }; },
+      rect() { const r = dialog.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom]; },
+      verdict(text, className = "", detail) {
+        x.verdictNode.className = "dice-result-total roll-number dfx-verdict " + className;
+        x.verdictNode.textContent = text;
+        x.detailNode.textContent = detail ?? job.detail;
+      },
+      result() { x.alive(); job.onResult(); },
+      hintOff() { dialog.classList.add("dfx-hint-off"); },
+    };
+    return x;
+  }
+
+  const EFFECTS = {
+    brasier: { crit: critBrasier, fumble: fumbleBrasier },
+    de: { crit: critDe, fumble: fumbleDe },
+    choc: { crit: critChoc, fumble: fumbleChoc },
+    encre: { fumble: fumbleEncre },
+    equilibre: { ownRoll: true, crit: equilibreCrit, fumble: equilibreFumble },
+    coupable: { crit: coupableCrit, fumble: coupableFumble },
+    heros: { crit: herosCrit, fumble: herosFumble },
+    public: { crit: publicCrit, fumble: publicFumble },
+    plantage: { crit: plantageCrit, fumble: plantageFumble },
+  };
+
+  function verdictOf(result) {
+    const kind = result.natural === 20 ? "crit" : result.natural === 1 ? "fumble" : null;
+    if (!kind) return null;
+    const discarded = result.dice.filter((die) => !die.kept).map((die) => die.value);
+    return { kind, word: kind === "crit" ? "Critique !" : "Fumble", detail: `${result.natural} naturel${discarded.length ? ` · ${discarded.join(", ")} écarté` : ""}` };
+  }
+
+  /* Deux dés à l'écran : le suspense sur l'arête n'a pas de sens, le dé écarté se dissout d'abord. */
+  function plan(kind, { single = true, portrait = true } = {}) {
+    const names = Object.keys(EFFECTS).filter((name) => EFFECTS[name][kind] && name !== lastChosen && (single || !EFFECTS[name].ownRoll) && (portrait || name !== "heros"));
+    const effect = pick(names), ownRoll = !!EFFECTS[effect].ownRoll, intro = single && !ownRoll && Math.random() < .3;
+    lastChosen = effect;
+    return { effect, intro, ownRoll: ownRoll || intro };
+  }
+
+  function dropFxClasses(node) {
+    if (node) node.className = [...node.classList].filter((name) => !name.startsWith("dfx-")).join(" ");
+  }
+  function teardown() {
+    playToken++;
+    cancelAnimationFrame(inkRaf);
+    fire.stop(); fx.clear();
+    effectAbort?.abort(); effectAbort = null;
+    renderer?.setPose(null); renderer = null;
+    stage?.remove(); stage = null; flash = null;
+    if (backdrop) {
+      backdrop.querySelectorAll(":scope > :not(.dice-roll-dialog)").forEach((node) => node.remove());
+      dropFxClasses(backdrop);
+      backdrop.style.transform = ""; backdrop.style.filter = "";
+      backdrop = null;
+    }
+    dropFxClasses(document.getElementById("main-content"));
+    job = null;
+  }
+  async function play(chosen, nextJob) {
+    teardown();
+    job = nextJob; renderer = job.renderer; backdrop = job.dialog.closest(".modal-backdrop");
+    const token = playToken, onFailure = job.onFailure;
+    stage = document.createElement("div");
+    stage.className = "dfx-stage"; stage.setAttribute("aria-hidden", "true");
+    stage.innerHTML = '<canvas class="dfx-fire"></canvas><canvas class="dfx-particles"></canvas><div class="dfx-flash"></div>';
+    document.body.append(stage);
+    fire.bind(stage.children[0]); fx.bind(stage.children[1]); flash = stage.children[2];
+    backdrop.classList.add("dfx-run"); job.dialog.classList.add("dfx-run"); job.dialog.dataset.diceFx = chosen.effect;
+    const x = context(token);
+    try {
+      // Après un avantage ou un désavantage, seul reste à l'écran le dé conservé.
+      if (!chosen.ownRoll) renderer.show(IVORY(job.value), { reveal: true });
+      if (chosen.intro) await balanceIntro(x, job.value);
+      await EFFECTS[chosen.effect][job.kind](x);
+    } catch (error) {
+      if (error === ABORT || token !== playToken) return;
+      // Un décor en panne ne doit jamais retenir le résultat.
+      teardown();
+      onFailure(error);
+    }
+  }
+  return { verdictOf, plan, play, stop() { if (job) teardown(); } };
+})();
+
+/** Le mot à afficher pour un 1 ou un 20 naturel, ou null pour tout autre résultat. */
+function diceFxVerdict(result) { return diceFxInternals.verdictOf(result); }
+
+/** Choisit l'effet avant le lancer : certains jouent le lancer eux-mêmes (ownRoll). */
+function planDiceFx(kind, options) { return diceFxInternals.plan(kind, options); }
+
+/** job : dialog, renderer, kind, value, bonus, detail, hero, onResult(), onFailure(error). */
+function playDiceFx(plan, job) { return diceFxInternals.play(plan, job); }
+
+/** Arrête l'effet en cours et retire son décor. Sans effet si rien ne joue. */
+function stopDiceFx() { diceFxInternals.stop(); }
+
+
 // Module : app
 
 const root = document.getElementById("app"),
@@ -15894,9 +17325,10 @@ let appData = emptyState(),
   draftTimeout = null,
   deferredInstall = null,
   swRegistration = null,
+  updateRequested = false,
   lastFocus = null;
 let portraitSession = null;
-let diceRenderer = null;
+let diceRenderer = null, diceRendererRoll = null;
 const ui = {
   route: "home",
   wizard: null,
@@ -15907,11 +17339,18 @@ const ui = {
   magic: null,
   spellQuery: "",
   featureQuery: "",
+  raceQuery: "",
+  raceFamily: "all",
   featureFilter: "all",
   spellLevel: "all",
   spellTab: "mine",
   editorQuery: "",
   editorLevel: "all",
+  editorContext: null,
+  creationClassQuery: "",
+  creationBackgroundQuery: "",
+  creationClassInspect: null,
+  creationBackgroundInspect: null,
   rollMode: "normal",
   saving: false,
   online: navigator.onLine,
@@ -16005,11 +17444,11 @@ const LIVERY = {
   wizard: "#1e4b76",
 };
 const liveryOf = (c) => (c ? LIVERY[primaryClassId(c)] || "#22356b" : "#22356b");
-function characterPortrait(c, { editable = false, small = false } = {}) {
+function characterPortrait(c, { editable = false, small = false, id = "" } = {}) {
   const url = portraitUrl(c);
   const portraitStyle = c.portrait?.kind === "custom" ? "portrait-photo" : "portrait-library";
   const content = `${url ? `<img src="${esc(url)}" alt="${editable ? "" : `Portrait de ${esc(c.name || "ton personnage")}`}" width="512" height="512" decoding="async">` : ""}<span class="portrait-fallback" aria-hidden="true">${icon("user", 32)}</span>${editable ? `<span class="portrait-edit-hint">${icon("edit", 12)} Portrait</span>` : ""}`;
-  return editable ? `<button type="button" class="avatar character-portrait ${portraitStyle}${url ? "" : " portrait-unavailable"}${small ? " small-avatar" : ""}" data-action="edit-portrait" aria-label="Choisir le portrait de ${esc(c.name || "ton personnage")}">${content}</button>` : `<div class="avatar character-portrait ${portraitStyle}${url ? "" : " portrait-unavailable"}${small ? " small-avatar" : ""}">${content}</div>`;
+  return editable ? `<button type="button" class="avatar character-portrait ${portraitStyle}${url ? "" : " portrait-unavailable"}${small ? " small-avatar" : ""}" data-action="edit-portrait"${id ? ` id="${esc(id)}"` : ""} aria-label="Choisir le portrait de ${esc(c.name || "ton personnage")}">${content}</button>` : `<div class="avatar character-portrait ${portraitStyle}${url ? "" : " portrait-unavailable"}${small ? " small-avatar" : ""}">${content}</div>`;
 }
 
 function disposePortraitEditor() {
@@ -16029,8 +17468,16 @@ function renderPortraitEditor() {
   const session = portraitSession;
   if (!session) return "";
   const selected = { ...session.character, portrait: session.selected }, entry = portraitEntryOf(selected);
-  const controls = session.upload ? `<div class="portrait-crop-layout"><canvas id="portrait-crop" width="512" height="512" aria-label="Aperçu du cadrage du portrait"></canvas><div class="portrait-crop-controls"><h3>Cadre ton portrait</h3><p class="small muted">Déplace la photo avec le doigt, ou utilise les curseurs.</p>${[["zoom", "Zoom", 1, 3, 0.05], ["x", "Position horizontale", 0, 1, 0.01], ["y", "Position verticale", 0, 1, 0.01]].map(([key, label, min, max, step]) => `<label class="portrait-slider" for="portrait-${key}">${label}<input id="portrait-${key}" data-portrait-crop="${key}" type="range" min="${min}" max="${max}" step="${step}" value="${session.crop[key]}"></label>`).join("")}${button("Recentrer", "portrait-center", 'id="portrait-center"', "small-btn ghost")}${button("Annuler cette photo", "portrait-cancel-upload", 'id="portrait-cancel-upload"', "small-btn ghost")}</div></div>` : `<div class="portrait-current">${characterPortrait(selected)}<div><strong>${session.selected?.kind === "none" ? "Sans portrait" : session.selected?.kind === "custom" ? "Ta photo" : entry.name}</strong>${button("Portrait par défaut", "portrait-default", 'id="portrait-default"', "small-btn ghost")}${button("Sans portrait", "portrait-none", 'id="portrait-none"', "small-btn ghost")}</div></div><div class="portrait-filters"><label class="field" for="portrait-family">Origine<select id="portrait-family" data-portrait-filter="family">${PORTRAIT_FAMILIES.map((family) => `<option value="${family.id}" ${session.family === family.id ? "selected" : ""}>${esc(family.name)}</option>`).join("")}</select></label><label class="field" for="portrait-sex">Portraits<select id="portrait-sex" data-portrait-filter="sex"><option value="female" ${session.sex === "female" ? "selected" : ""}>Féminins</option><option value="male" ${session.sex === "male" ? "selected" : ""}>Masculins</option></select></label></div><p class="portrait-gallery-note notice warning" role="status" hidden>Certaines illustrations ne sont pas disponibles. Retrouve une connexion et rouvre cette galerie. Pour toutes les garder, prépare le Contenu hors ligne.</p><div class="portrait-grid" role="group" aria-label="Choix du portrait">${PORTRAITS.filter((portrait) => portrait.family === session.family && portrait.sex === session.sex).map((portrait) => `<button type="button" class="portrait-option" data-action="portrait-pick" data-id="${portrait.id}" aria-label="${esc(portrait.name)}" aria-pressed="${!["custom", "none"].includes(session.selected?.kind) && entry.id === portrait.id}"><img src="${esc(portraitUrl({ portrait: { kind: "preset", id: portrait.id } }))}" alt="" width="512" height="512" loading="lazy"><span>Portrait ${portrait.variant}${!["custom", "none"].includes(session.selected?.kind) && entry.id === portrait.id ? ` ${icon("check", 14)}` : ""}</span></button>`).join("")}</div>`;
-  return modalShell("Ton portrait", `<div class="portrait-import portrait-import-top"><input id="portrait-file" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Importer une photo" ${session.busy ? "disabled" : ""}>${button(`${icon("upload", 17)} ${session.busy ? "Ouverture de l’image…" : "Choisir une photo"}`, "portrait-upload", session.busy ? "disabled" : "", "ghost")}${renderCompactHelp("JPEG, PNG ou WebP, jusqu’à 25 Mo. Tu peux aussi coller une image ici. Elle reste sur ton appareil et suit les exports de ta fiche.", "Formats et conservation")}</div>${session.error ? `<p class="notice error" role="alert">${esc(session.error)}</p>` : ""}${controls}`, button("Annuler", "close-modal", "", "ghost") + button(session.upload ? "Utiliser ce cadrage" : "Choisir ce portrait", "portrait-save", session.busy ? "disabled" : "", "primary"), true);
+  const selectionName = session.upload ? "Ta photo" : session.selected?.kind === "none" ? "Sans portrait" : session.selected?.kind === "custom" ? "Ta photo" : entry.name;
+  const upload = `<div class="portrait-import portrait-import-top"><input id="portrait-file" type="file" accept="image/jpeg,image/png,image/webp" aria-label="Importer une photo" ${session.busy ? "disabled" : ""}>${button(`${icon("upload", 17)} ${session.busy ? "Ouverture…" : "Importer une photo"}`, "portrait-upload", session.busy ? "disabled" : "", "ghost")}<details class="portrait-format-help" data-detail="portrait-format-help"><summary aria-label="Formats et conservation" title="Formats et conservation">${icon("info", 19)}</summary><p>JPEG, PNG ou WebP, jusqu’à 25 Mo. Tu peux aussi coller une image ici. Elle reste sur ton appareil et suit les exports de ta fiche.</p></details></div>`;
+  const filters = `<div class="portrait-filters"><label class="field" for="portrait-family">Origine<select id="portrait-family" data-portrait-filter="family">${PORTRAIT_FAMILIES.map((family) => `<option value="${family.id}" ${session.family === family.id ? "selected" : ""}>${esc(family.name)}</option>`).join("")}</select></label><label class="field" for="portrait-sex">Portraits<select id="portrait-sex" data-portrait-filter="sex"><option value="female" ${session.sex === "female" ? "selected" : ""}>Féminins</option><option value="male" ${session.sex === "male" ? "selected" : ""}>Masculins</option></select></label></div>`;
+  const gallery = `<p class="portrait-gallery-note notice warning" role="status" hidden>Certaines illustrations ne sont pas disponibles. Retrouve une connexion et rouvre cette galerie. Pour toutes les garder, prépare le Contenu hors ligne.</p><div class="portrait-grid" role="group" aria-label="Choix du portrait">${PORTRAITS.filter((portrait) => portrait.family === session.family && portrait.sex === session.sex).map((portrait) => {
+    const chosen = !["custom", "none"].includes(session.selected?.kind) && entry.id === portrait.id;
+    return `<button type="button" class="portrait-option" data-action="portrait-pick" data-id="${portrait.id}" aria-label="${esc(portrait.name)}" aria-pressed="${chosen}"><img src="${esc(portraitUrl({ portrait: { kind: "preset", id: portrait.id } }))}" alt="" width="512" height="512" loading="lazy">${chosen ? `<span class="portrait-choice-mark" aria-hidden="true">${icon("check", 16)}</span>` : ""}<span class="portrait-option-label">Portrait ${portrait.variant}</span></button>`;
+  }).join("")}</div><div class="portrait-secondary">${button("Portrait par défaut", "portrait-default", `id="portrait-default" aria-pressed="${session.selected == null}"`, "small-btn ghost")}${button("Sans portrait", "portrait-none", `id="portrait-none" aria-pressed="${session.selected?.kind === "none"}"`, "small-btn ghost")}</div>`;
+  const crop = session.upload ? `<div class="portrait-crop-layout"><canvas id="portrait-crop" width="512" height="512" aria-label="Aperçu du cadrage du portrait"></canvas><div class="portrait-crop-controls"><h3>Cadre ton portrait</h3><p class="small muted">Déplace la photo avec le doigt, ou utilise les curseurs.</p>${[["zoom", "Zoom", 1, 3, 0.05], ["x", "Position horizontale", 0, 1, 0.01], ["y", "Position verticale", 0, 1, 0.01]].map(([key, label, min, max, step]) => `<label class="portrait-slider" for="portrait-${key}">${label}<input id="portrait-${key}" data-portrait-crop="${key}" type="range" min="${min}" max="${max}" step="${step}" value="${session.crop[key]}"></label>`).join("")}${button("Recentrer", "portrait-center", 'id="portrait-center"', "small-btn ghost")}${button("Annuler cette photo", "portrait-cancel-upload", 'id="portrait-cancel-upload"', "small-btn ghost")}</div></div>` : "";
+  const selection = `<div class="portrait-selection-status" role="status" aria-live="polite">${!session.upload && session.selected?.kind === "custom" ? characterPortrait(selected, { small: true }) : ""}<span>${esc(selectionName)}</span></div>`;
+  return modalShell("Ton portrait", `<div class="portrait-dialog-toolbar">${session.upload ? "" : filters}${upload}</div>${session.error ? `<p class="notice error" role="alert">${esc(session.error)}</p>` : ""}${session.upload ? crop : gallery}`, selection + button("Annuler", "close-modal", "", "ghost") + button(session.upload ? "Utiliser ce cadrage" : "Choisir ce portrait", "portrait-save", session.busy ? "disabled" : "", "primary"), true, "", "portrait-dialog");
 }
 
 function paintPortraitEditor() {
@@ -16130,10 +17577,10 @@ function impactHtml(before, after) {
     ? `<div class="impact-grid">${rows.map((r) => `<div class="impact-cell">${esc(r.label)}<div class="impact-numbers">${r.before !== undefined ? `<span class="before">${r.before ?? "∅"}</span>${icon("arrow", 15)}` : ""}<strong>${r.after ?? "∅"}</strong></div></div>`).join("")}</div>`
     : notice("Les valeurs calculées ne changent pas. Tes textes, choix ou sélections seront bien enregistrés.");
 }
-function miniPreview(c) {
+function miniPreview(c, { editablePortrait = false } = {}) {
   const d = derive(c);
-  return `<aside class="preview-panel" style="--livery:${liveryOf(c)}"><div class="eyebrow">Aperçu du personnage</div><div class="preview-name">${esc(c.name || "Ton aventurier")}</div><div class="preview-meta">${esc(d.race.name)} · ${esc(classSummary(c))}</div><div class="preview-stats"><div class="preview-stat">${d.maxHp}<span>PV maximum</span></div><div class="preview-stat">${d.ac}<span>Classe d’armure</span></div><div class="preview-stat">${signed(d.initiative)}<span>Initiative</span></div><div class="preview-stat">${d.spellDC ?? signed(d.attack)}<span>${d.spellDC ? "DD des sorts" : "Attaque principale"}</span></div></div><div class="preview-abilities">${Object.entries(ABILITIES)
-    .map(([a, v]) => `<span><small>${v.short}</small>${d.scores[a]}</span>`)
+  return `<aside class="preview-panel" style="--livery:${liveryOf(c)}"><div class="eyebrow">Aperçu du personnage</div><div class="preview-identity">${characterPortrait(c, { editable: editablePortrait, id: "preview-portrait" })}<div class="preview-identity-copy"><div class="preview-name">${esc(c.name || "Ton aventurier")}</div><div class="preview-meta">${esc(d.race.name)} · ${esc(classSummary(c))}</div></div></div><div class="preview-stats"><div class="preview-stat">${d.maxHp}<span>PV maximum</span></div><div class="preview-stat">${d.ac}<span>Classe d’armure</span></div><div class="preview-stat">${signed(d.initiative)}<span>Initiative</span></div><div class="preview-stat">${d.spellDC ?? signed(d.attack)}<span>${d.spellDC ? "DD des sorts" : "Attaque principale"}</span></div></div><div class="preview-abilities">${Object.entries(ABILITIES)
+    .map(([a, v]) => `<span><small>${v.short}</small><strong>${signed(d.mods[a])}</strong><em>${d.scores[a]}</em></span>`)
     .join("")}</div><div class="preview-tip">${icon("eye", 16)} La fiche sera mise à jour après validation.</div></aside>`;
 }
 function render() {
@@ -16143,6 +17590,10 @@ function render() {
       focused && "selectionStart" in focused ? { start: focused.selectionStart, end: focused.selectionEnd } : null;
   const openDetails = [...document.querySelectorAll("details[data-detail][open]")].map((el) => el.dataset.detail),
     modalScroll = modalRoot.querySelector(".modal-body")?.scrollTop || 0;
+  const choiceScroll = document.querySelector(".creation-choice-list");
+  const choicePosition = choiceScroll ? { key: choiceScroll.dataset.scrollKey, top: choiceScroll.scrollTop } : null;
+  const originScroll = document.querySelector(".origin-options");
+  const originPosition = originScroll ? { key: originScroll.dataset.scrollKey, top: originScroll.scrollTop } : null;
   const workflowScroll = document.getElementById("workflow-spell-scroll");
   const workflowPosition = workflowScroll ? { key: workflowScroll.dataset.scrollKey, top: workflowScroll.scrollTop } : null;
   const workflowFocus = focused?.closest(".workflow-spell-scroll") && focused.dataset.action ? { ...focused.dataset } : null;
@@ -16166,10 +17617,19 @@ function render() {
         `<button data-action="navigate" data-route="${route}" class="${ui.route === route && !wizardActive ? "active" : ""}" ${ui.route === route && !wizardActive ? 'aria-current="page"' : ""} ${!c && route !== "more" ? "disabled" : ""}>${icon(ico)}${label}</button>`,
     )
     .join("")}</nav>`;
-  diceRenderer?.dispose();
-  diceRenderer = null;
-  modalRoot.innerHTML = renderModal();
-  mountDiceTray();
+  if (diceRenderer && diceRendererRoll === ui.roll && ui.modal === "roll") {
+    // Un rendu venu d'ailleurs (retour en ligne, par exemple) ne doit pas effacer un effet en cours.
+    if (!ui.roll.critical?.live) updateDiceDialog();
+  } else {
+    const modalWasOpen = !!modalRoot.querySelector(".modal-backdrop");
+    stopDiceFx();
+    diceRenderer?.dispose();
+    diceRenderer = null;
+    modalRoot.innerHTML = renderModal();
+    // La fondue accompagne l’ouverture : la rejouer à chaque rendu ferait clignoter l’écran.
+    if (modalWasOpen) modalRoot.querySelector(".modal-backdrop")?.classList.add("modal-steady");
+    mountDiceTray();
+  }
   paintPortraitEditor();
   document.body.classList.toggle("modal-open", !!ui.modal);
   for (const key of openDetails) {
@@ -16177,6 +17637,10 @@ function render() {
     if (detail) detail.open = true;
   }
   syncWorkflowLayout();
+  const nextChoiceScroll = document.querySelector(".creation-choice-list");
+  if (choicePosition && nextChoiceScroll?.dataset.scrollKey === choicePosition.key) nextChoiceScroll.scrollTop = choicePosition.top;
+  const nextOriginScroll = document.querySelector(".origin-options");
+  if (originPosition && nextOriginScroll?.dataset.scrollKey === originPosition.key) nextOriginScroll.scrollTop = originPosition.top;
   const nextWorkflowScroll = document.getElementById("workflow-spell-scroll");
   if (workflowPosition && nextWorkflowScroll?.dataset.scrollKey === workflowPosition.key) nextWorkflowScroll.scrollTop = workflowPosition.top;
   if (!focusId && workflowFocus && nextWorkflowScroll) {
@@ -16219,12 +17683,9 @@ function renderPage(c) {
 function renderHome() {
   return `${IS_ARTIFACT ? notice("<strong>Version d’essai en ligne.</strong>Tes fiches restent dans ce navigateur, sans garantie de conservation. Pour jouer avec ta table, installe la version hébergée et transfère tes fiches avec « Copier la sauvegarde » puis « Coller une sauvegarde ».", "warning") + '<div class="spacer"></div>' : ""}<div class="page-head"><div><h1>${appData.characters.length ? "Mes personnages" : "Crée ton premier personnage"}</h1></div>${appData.characters.length ? button(`${icon("plus", 18)} Nouveau`, "new-character", "", "primary") : ""}</div>${appData.draft && !ui.wizard ? `<div class="notice section-gap">${icon("note", 19)}<div><strong>Brouillon : ${esc(appData.draft.draft?.name || "personnage sans nom")}</strong>La fiche validée n’a pas été modifiée.<div class="actions">${button("Reprendre", "resume-draft", "", "small-btn")}${button("Oublier le brouillon", "discard-draft", "", "small-btn ghost")}</div></div></div><div class="spacer"></div>` : ""}${
     !appData.characters.length
-      ? `<section class="welcome welcome-compact"><div class="welcome-copy"><p>Choisis une classe ou commence la création.</p><div class="actions">${button(`${icon("plus", 18)} Créer mon personnage`, "new-character", "", "primary")}${button("Voir un exemple", "demo", "", "ghost on-dark")}</div></div><div class="welcome-shields" role="list" aria-label="Commencer avec une classe">${Object.entries(CLASSES)
-          .map(
-            ([id, k]) =>
-              `<button type="button" role="listitem" class="shield-btn" data-action="new-character" data-class="${id}" style="--livery:${LIVERY[id]}" aria-label="Créer un personnage ${esc(k.name.toLowerCase())}"><span class="shield-shape"><svg viewBox="0 0 84 96" aria-hidden="true"><path d="M5 5h74v38c0 27-17 41-37 49C22 84 5 70 5 43z" fill="var(--livery)" stroke="#c9962f" stroke-width="3"/></svg>${icon(k.icon, 22)}</span><span class="shield-name">${k.name}</span></button>`,
-          )
-          .join("")}</div></section>`
+      ? `<section class="welcome creation-welcome"><div class="welcome-copy"><p>Choisis une classe ou commence la création.</p><div class="actions">${button(`${icon("plus", 18)} Créer mon personnage`, "new-character", "", "primary")}${button("Voir un exemple", "demo", "", "ghost")}</div></div><div class="creation-classes"><div class="section-title"><h3>Commencer avec une classe</h3><span class="tiny muted">12 classes</span></div><div class="welcome-shields" aria-label="Commencer avec une classe">${Object.entries(CLASSES)
+          .map(([id, k]) => `<button type="button" class="creation-class" data-action="new-character" data-class="${id}" aria-label="Créer un personnage ${esc(k.name.toLowerCase())}"><span class="creation-class-icon">${icon(k.icon, 26)}</span><span><strong>${k.name}</strong><small>${esc(k.role)}</small></span>${icon("arrow", 16)}</button>`)
+          .join("")}</div></div></section>`
       : `<div class="grid-2">${appData.characters
           .map((c) => {
             const d = derive(c);
@@ -16394,11 +17855,11 @@ function renderSpellDescription(spell) {
   const language = translated || spell.custom || !SPELL_ACCESS[spell.id] ? "fr" : "en";
   return `<p class="preserve" lang="${language}">${esc(referenceEntries(text, language))}</p><p class="tiny muted">${spell.custom ? "Contenu personnalisé de ta table." : translated ? "Description française validée · règles 2014." : SPELL_ACCESS[spell.id] ? "Texte intégral anglais de référence · traduction française à venir." : "Description de ta fiche."}</p>`;
 }
-function spellCard(c, s, { editor = false, target = "", scope = "main", classId = null } = {}) {
+function spellCard(c, s, { editor = false, target = "", scope = "main", classId = null, editorModel = null } = {}) {
   const st = spellStatus(c, s, editor ? classId : null),
     limits = classId ? spellLimits(c, classId) : spellLimits(c, st.owner),
     multi = spellcasters(c).length > 1;
-  const selected = st.knownAny || st.preparedAny || st.always || st.arcanum || !!st.innate;
+  const selected = editor ? st.known || st.prepared || st.always || classId === "warlock" && st.arcanum : st.knownAny || st.preparedAny || st.always || st.arcanum || !!st.innate;
   let controls = "";
   if (editor) {
     const isArcanum = classId === "warlock" && s.level >= 6 && s.classes.includes("warlock") && limits.arcana.includes(s.level);
@@ -16406,19 +17867,20 @@ function spellCard(c, s, { editor = false, target = "", scope = "main", classId 
     else if (isArcanum)
       controls = button(st.arcanum ? `${icon("check", 13)} Arcanum choisi` : "Choisir cet arcanum", "select-spell", `data-id="${esc(s.id)}" data-target="${target}" data-kind="arcana"`, "small-btn " + (st.arcanum ? "active" : ""));
     else if (canReadySpell(c, s, classId)) {
-      if (classId === "bard" && limits.secrets && !st.known) controls += button("Prendre comme Secret magique", "select-spell", `data-id="${esc(s.id)}" data-target="${target}" data-kind="secret"`, "small-btn ghost");
+      const blocked = (kind) => editorModel && magicEditorQuotaFull(c, editorModel, s, kind) ? "disabled" : "";
+      if (classId === "bard" && limits.secrets && !st.known) controls += button("Prendre comme Secret magique", "select-spell", `data-id="${esc(s.id)}" data-target="${target}" data-kind="secret" ${editorModel && magicEditorSecretBlocked(c, editorModel) ? "disabled" : ""}`, "small-btn ghost");
       if (s.level === 0 || ["known", "book"].includes(limits.mode))
         controls += button(
           st.known ? `${icon("check", 13)} ${limits.mode === "book" && s.level > 0 ? "Au grimoire" : "Appris"}` : limits.mode === "book" && s.level > 0 ? "Ajouter au grimoire" : "Apprendre",
           "select-spell",
-          `data-id="${esc(s.id)}" data-target="${target}" data-kind="known"`,
+          `data-id="${esc(s.id)}" data-target="${target}" data-kind="known" ${st.known ? "" : blocked("known")}`,
           "small-btn " + (st.known ? "active" : ""),
         );
       if (s.level > 0 && ["prepared", "book"].includes(limits.mode))
         controls += button(
-          st.prepared ? `${icon("check", 13)} Préparé` : "Préparer",
+          st.prepared ? `${icon("check", 13)} ${limits.mode === "book" ? "Préparé" : "Retirer"}` : "Préparer",
           "select-spell",
-          `data-id="${esc(s.id)}" data-target="${target}" data-kind="prepared" ${limits.mode === "book" && !st.known ? "disabled" : ""}`,
+          `data-id="${esc(s.id)}" data-target="${target}" data-kind="prepared" ${limits.mode === "book" && !st.known ? "disabled" : !st.prepared ? blocked("prepared") : ""}`,
           "small-btn " + (st.prepared ? "active" : ""),
         );
     } else {
@@ -16438,6 +17900,10 @@ function spellCard(c, s, { editor = false, target = "", scope = "main", classId 
     else if (s.ritual && ((st.knownAny && ["wizard", "bard"].includes(st.owner)) || st.innate?.ritualOnly))
       controls = button("Lancer en rituel", "cast", `data-id="${esc(s.id)}" data-ritual="1"`, "small-btn");
     else controls = button(st.knownAny ? "Préparer ce sort" : "Gérer le grimoire", "edit-magic", `data-query="${esc(s.name)}"`, "small-btn ghost");
+  }
+  if (editorModel) {
+    const detailId = `editor-${target}-spell-${s.id}`;
+    return `<article class="spell-card magic-list-entry ${selected ? "selected" : ""} ${limits.mode === "book" ? "magic-book-entry" : ""}"><details data-detail="${esc(detailId)}"><summary id="${esc(detailId)}"><span class="magic-entry-name"><strong>${esc(s.name)}</strong><small>${[st.always ? "Toujours préparé" : st.prepared ? "Préparé" : st.known ? limits.mode === "book" && s.level ? "Au grimoire" : "Appris" : s.school, s.concentration ? "Concentration" : "", s.ritual ? "Rituel" : ""].filter(Boolean).map(esc).join(" · ")}</small></span><span class="magic-entry-casting">${esc(s.casting || "1 action")}</span><span class="magic-entry-range">${esc(s.range)}</span><span class="magic-entry-duration">${esc(s.duration)}</span></summary><div class="spell-copy"><div class="magic-entry-facts"><span><b>Portée</b> ${esc(s.range)}</span><span><b>Durée</b> ${esc(s.duration)}</span><span><b>Composantes</b> ${esc(s.components || "À préciser")}</span></div>${renderSpellDescription(s)}${renderReference(s.referenceId)}</div></details><div class="spell-controls">${controls}</div></article>`;
   }
   const tags = [
     s.concentration ? '<span class="pill purple">Concentration</span>' : "",
@@ -16499,44 +17965,27 @@ function magicDraft(target) {
 function renderMagicEditor(c, target) {
   const casters = spellcasters(c);
   if (!casters.length) return notice("Aucune classe de lanceur de sorts pour l’instant.");
-  if (!casters.some((s) => s.classId === ui.editorClass)) ui.editorClass = casters[0].classId;
-  const classId = ui.editorClass,
-    limits = spellLimits(c, classId),
-    all = catalogue(c),
-    always = domainSpells(c),
-    mine = (ids) => ids.filter((id) => spellAcquisitions(c, id).some((entry) => entry.classId === classId && (entry.known || entry.prepared))),
-    mineKnown = mine(c.spells.known),
-    minePrepared = mine(c.spells.prepared),
-    known = all.filter((s) => mineKnown.includes(s.id)),
-    query = ui.editorQuery.toLocaleLowerCase("fr-FR");
-  let list = all
-    .filter(
-      (s) =>
-        (canReadySpell(c, s, classId) || mineKnown.includes(s.id) || minePrepared.includes(s.id)) &&
-        (ui.editorLevel === "all" || s.level === Number(ui.editorLevel)) &&
-        [s.name, s.referenceEnglishName, s.englishName].filter(Boolean).some((name) => name.toLocaleLowerCase("fr-FR").includes(query)),
-    )
-    .sort((a, b) => a.level - b.level || a.name.localeCompare(b.name, "fr"));
+  if (!casters.some((caster) => caster.classId === ui.editorClass)) {
+    const changedClass = target === "level" ? c.levels[ui.levelFlow.level - 1]?.classId : null;
+    ui.editorClass = casters.find((caster) => caster.classId === changedClass)?.classId || casters[0].classId;
+  }
+  const classId = ui.editorClass, original = target === "level" ? ui.levelFlow.original : target === "wizard" ? ui.wizard.original : ui.magic.original;
+  const model = magicEditorModel(c, classId, original), limits = model.limits;
+  const context = `${target}|${c.id}|${classId}|${classLevel(c, classId)}|${model.levels.join(",")}`;
+  if (ui.editorContext !== context || !model.levels.includes(Number(ui.editorLevel))) {
+    ui.editorLevel = String(magicEditorInitialLevel(model, { progression: target === "level", query: ui.editorQuery }));
+    ui.editorContext = context;
+  }
+  const level = Number(ui.editorLevel), available = model.rows.filter((spell) => spell.level === level);
+  const list = available.filter((spell) => magicEditorMatches(spell, ui.editorQuery));
   const prefix = target === "wizard" ? "wiz" : target === "level" ? "lvl" : "magic";
-  const tabs =
-    casters.length > 1
-      ? `<div class="segmented">${casters.map((s) => `<button type="button" data-action="editor-class" data-value="${s.classId}" class="${s.classId === classId ? "active" : ""}">${esc(s.label)} ${s.level}</button>`).join("")}</div>`
-      : "";
-  const quotaEntries = spellAcquisitions(c).filter((entry) => entry.classId === classId && entry.known && !entry.always);
-  const cantripCount = quotaEntries.filter((entry) => spellById(c, entry.spellId)?.level === 0 && !entry.secret).length;
-  const knownCount = quotaEntries.filter((entry) => (spellById(c, entry.spellId)?.level > 0 || entry.secret) && entry.secret?.countsAgainstKnown !== false).length;
-  const secretSlots = new Set((c.spells.acquisitions || []).filter((entry) => entry.classId === "bard" && entry.secret).map((entry) => entry.secret.id));
-  const secrets = classId === "bard" && limits.secrets ? `<span class="pill sand">Secrets attribués : ${secretSlots.size}/${limits.secrets}</span>` : "";
-  const school = limits.type === "third" ? `<span class="pill sand">Hors ${limits.schools.join("/")} : ${known.filter((s) => s.level > 0 && !limits.schools.includes(s.school)).length}/${limits.offSchool}</span>` : "";
-  const help =
-    limits.mode === "book"
-      ? "Ajoute des sorts à ton grimoire, puis prépare ceux que tu veux lancer aujourd’hui."
-      : limits.mode === "prepared"
-        ? "Toute la liste de ta classe t’est ouverte. Choisis les sorts préparés pour la journée ; les sorts mineurs restent connus."
-        : "Les sorts appris sont toujours disponibles. Tu peux en remplacer un à chaque niveau gagné.";
+  const tabs = casters.length > 1 ? `<div class="segmented magic-class-tabs" aria-label="Classe de lanceur de sorts">${casters.map((caster) => `<button type="button" data-action="editor-class" data-value="${caster.classId}" class="${caster.classId === classId ? "active" : ""}" aria-pressed="${caster.classId === classId}">${esc(caster.label)} ${caster.level}</button>`).join("")}</div>` : "";
+  const count = (label, value, max) => `<span class="${value > max && label !== "Grimoire (minimum)" && !c.spells.allowExceptions ? "magic-count-exceeded" : ""}">${label} <strong>${value}/${max}</strong></span>`;
+  const counters = [limits.cantrips || model.cantrips ? count("Mineurs", model.cantrips, limits.cantrips) : "", ["known", "book"].includes(limits.mode) ? count(limits.mode === "book" ? "Grimoire (minimum)" : "Connus", model.known, limits.known) : "", ["prepared", "book"].includes(limits.mode) ? count("Préparés", model.prepared, limits.prepared) : "", model.always.size ? `<span>${model.always.size} toujours préparés, hors quota</span>` : "", limits.secrets ? count("Secrets", model.secrets, limits.secrets) : "", limits.type === "third" ? count(`Hors ${limits.schools.join("/")}`, model.entries.filter((entry) => entry.known && !entry.always && spellById(c, entry.spellId)?.level > 0 && !limits.schools.includes(spellById(c, entry.spellId)?.school)).length, limits.offSchool) : ""].join("");
   const workflow = target === "wizard" || target === "level";
-  const scrollKey = `${target}|${classId}|${ui.editorQuery}|${ui.editorLevel}`;
-  return `${workflow ? '<div class="workflow-magic-editor"><div class="workflow-magic-tools">' : ""}${tabs}<div class="sticky-tools"><div class="learn-counts"><span class="pill purple">Mineurs : ${cantripCount}/${limits.cantrips}</span>${["known", "book"].includes(limits.mode) ? `<span class="pill purple">${limits.mode === "book" ? "Grimoire" : "Connus"} : ${knownCount}/${limits.known}${limits.mode === "book" ? " min." : ""}</span>` : ""}${["prepared", "book"].includes(limits.mode) ? `<span class="pill purple">Préparés : ${minePrepared.filter((id) => !always.includes(id)).length}/${limits.prepared}</span>` : ""}${always.length ? `<span class="pill">${always.length} toujours préparés</span>` : ""}<span class="pill outline">Jusqu’au niveau ${limits.maxLevel || 0}</span>${secrets}${school}</div><div class="spell-toolbar"><div class="search-wrap">${icon("search", 18)}<input id="editor-search" class="search-input" data-bind="ui.editorQuery" value="${esc(ui.editorQuery)}" placeholder="Nom du sort…" aria-label="Chercher dans les choix de sorts"></div><select id="editor-filter" class="select-plain" data-bind="ui.editorLevel" aria-label="Filtrer les choix par niveau"><option value="all">Tous niveaux</option>${Array.from({ length: 10 }, (_, i) => `<option value="${i}" ${ui.editorLevel === String(i) ? "selected" : ""}>${i === 0 ? "Sorts mineurs" : "Niveau " + i}</option>`).join("")}</select></div></div><div class="small muted" style="margin-bottom:16px">${help}</div>${workflow ? `</div><div class="workflow-spell-scroll" id="workflow-spell-scroll" role="region" tabindex="0" aria-label="Choix de sorts" data-scroll-key="${esc(scrollKey)}">` : ""}${list.length ? `<div class="spell-grid">${list.map((s) => spellCard(c, s, { editor: true, target, scope: "editor-" + target, classId })).join("")}</div>` : notice("Aucun sort dans ce filtre. Change le niveau ou la recherche.")}<div class="section-gap">${limits.mode === "known" || secretSlots.size ? button("Remplacer un sort ou corriger un Secret", "replace-spell", `data-target="${target}"`, "small-btn") : ""}${checkField("Autoriser les exceptions du MJ", `${prefix}.spells.allowExceptions`, c.spells.allowExceptions, "Affiche toutes les listes et tous les niveaux, sans bloquer les quotas.")}</div>${workflow ? "</div></div>" : ""}`;
+  const selectedList = (label, ids) => ids.length ? `<div class="magic-selection-group"><strong>${label}</strong><div>${[...new Set(ids)].map((id) => { const spell = spellById(c, id); return spell ? button(`${esc(spell.name)}<small>${spell.level ? `N${spell.level}` : "Mineur"}</small>`, "editor-reveal", `data-id="${esc(id)}" data-target="${target}"`, "small-btn ghost") : ""; }).join("")}</div></div>` : "";
+  const chosen = `<details class="magic-selected" data-detail="magic-selected-${target}-${classId}"><summary>Sorts sélectionnés <span>${model.selected.size}</span></summary>${selectedList("Mineurs", model.entries.filter((entry) => entry.known && !entry.always && spellById(c, entry.spellId)?.level === 0).map((entry) => entry.spellId))}${selectedList(limits.mode === "book" ? "Grimoire" : "Connus", model.entries.filter((entry) => entry.known && !entry.always && !entry.prepared && spellById(c, entry.spellId)?.level > 0).map((entry) => entry.spellId))}${selectedList("Préparés", model.entries.filter((entry) => entry.prepared && !entry.always).map((entry) => entry.spellId))}${selectedList("Toujours préparés", [...model.always])}${classId === "warlock" ? selectedList("Arcanums", Object.values(c.spells.arcana)) : ""}</details>`;
+  return `<div class="workflow-magic-editor magic-list-editor"><div class="workflow-magic-tools">${tabs}<div class="magic-level-tabs" role="group" aria-label="Niveau des sorts">${model.levels.map((n) => `<button type="button" id="editor-level-${n}" data-action="editor-level" data-value="${n}" class="${level === n ? "active" : ""}" aria-pressed="${level === n}">${n === 0 ? "Mineurs" : limits.arcana.includes(n) ? `Arcanum ${n}` : `Niveau ${n}`}${model.unlocked.includes(n) ? '<small>Nouveau</small>' : ""}</button>`).join("")}</div><div class="magic-counts" role="status">${counters}</div><div class="magic-search-line"><div class="search-wrap">${icon("search", 18)}<input id="editor-search" class="search-input" data-bind="ui.editorQuery" value="${esc(ui.editorQuery)}" placeholder="Rechercher un sort…" aria-label="Rechercher un sort">${ui.editorQuery ? button(icon("x", 16), "clear-editor-search", 'aria-label="Effacer la recherche"', "ghost magic-search-clear") : ""}</div><span role="status">${ui.editorQuery ? `${list.length} / ${available.length}` : available.length} sort${available.length > 1 ? "s" : ""}</span></div><div class="magic-list-columns" aria-hidden="true"><span>Sort</span><span>Incantation</span><span>Portée</span><span>Durée</span><span></span></div></div><div class="${workflow ? "workflow-spell-scroll" : "magic-modal-list"}" ${workflow ? `id="workflow-spell-scroll" role="region" tabindex="0" aria-label="Choix de sorts" data-scroll-key="${esc(`${target}|${classId}|${ui.editorQuery}|${ui.editorLevel}`)}"` : ""}>${list.length ? `<div class="magic-spell-list">${list.map((spell) => spellCard(c, spell, { editor: true, target, scope: "editor-" + target, classId, editorModel: model })).join("")}</div>` : `<p class="magic-empty">Aucun sort trouvé.${ui.editorQuery ? ` ${button("Effacer la recherche", "clear-editor-search", "", "small-btn ghost")}` : ""}</p>`}${chosen}<details class="magic-options" data-detail="magic-options-${target}"><summary>Options</summary>${limits.mode === "known" || model.secrets ? button("Remplacer un sort ou corriger un Secret", "replace-spell", `data-target="${target}"`, "small-btn") : ""}${checkField("Autoriser les exceptions du MJ", `${prefix}.spells.allowExceptions`, c.spells.allowExceptions, "")}</details></div></div>`;
 }
 function renderInventoryRow(c, item) {
   const state = item.instance, slots = inventoryItemSlots(item), adapter = itemRuntimeAdapter(item);
@@ -17104,11 +18553,12 @@ function renderRaceStep(w, c) {
       delete groups[g];
     }
   const order = [...RACE_GROUP_ORDER.filter((g) => groups[g]), ...Object.keys(groups).filter((g) => !RACE_GROUP_ORDER.includes(g))];
-  const card = (id, race) =>
-    `<button type="button" class="choice-card race-card ${c.raceId === id ? "selected" : ""}" data-action="choose-race" data-id="${id}">${c.raceId === id ? `<span class="selected-check">${icon("check", 14)}</span>` : ""}<span class="choice-name">${esc(race.name)}</span><span class="choice-meta">${esc(race.subtitle || "")}</span><span class="choice-bonus">${esc(bonusLine(race.grants))}</span></button>`;
-  const grid = order
-    .map((g) => `<div class="race-group"><div class="race-group-label">${esc(g)}</div><div class="choice-grid compact">${groups[g].map(([id, race]) => card(id, race)).join("")}</div></div>`)
-    .join("");
+  const query = (ui.raceQuery || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr-FR");
+  const card = (id, race, family) =>
+    `<button type="button" class="choice-card race-card ${c.raceId === id ? "selected" : ""}" id="origin-choice-${id}" data-action="choose-race" data-id="${id}" aria-pressed="${c.raceId === id}">${c.raceId === id ? `<span class="selected-check">${icon("check", 14)}</span>` : ""}<span class="race-family">${esc(family)}</span><span class="choice-name">${esc(race.name)}</span><span class="choice-meta">${esc(race.subtitle || "")}</span><span class="choice-bonus">${esc(bonusLine(race.grants))}</span></button>`;
+  const entries = order.flatMap((family) => groups[family].map(([id, race]) => ({ id, race, family }))).concat([{ id: "custom", family: "Maison", race: { name: "Origine maison", subtitle: "Les traits de ton choix", grants: c.customRace ? { abilities: c.customRace.bonuses } : {} } }]);
+  const visible = entries.filter(({ race, family }) => (ui.raceFamily === "all" || ui.raceFamily === family) && (!query || `${race.name} ${race.subtitle || ""} ${family}`.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr-FR").includes(query)));
+  const grid = `<div class="origin-directory"><div class="origin-tools"><div class="search-wrap">${icon("search", 18)}<input id="origin-search" class="search-input" data-bind="ui.raceQuery" value="${esc(ui.raceQuery || "")}" placeholder="Chercher une origine…" aria-label="Chercher une origine"></div><select id="origin-family" class="select-plain" data-bind="ui.raceFamily" aria-label="Filtrer les origines par famille"><option value="all">Toutes les familles</option>${[...order, "Maison"].map((family) => `<option value="${esc(family)}" ${ui.raceFamily === family ? "selected" : ""}>${esc(family)}</option>`).join("")}</select></div><div class="origin-count" role="status">${visible.length} origine${visible.length > 1 ? "s" : ""}</div><div class="origin-options" data-scroll-key="${esc(`${ui.raceFamily}:${ui.raceQuery}`)}" tabindex="0" aria-label="Origines disponibles">${visible.map(({ id, race, family }) => card(id, race, family)).join("") || '<p class="muted small">Aucune origine ne correspond à ta recherche.</p>'}</div></div>`;
   const g = r.grants || {},
     langs = (g.languages || []).map((l) => LANGUAGES[l]?.name || l);
   if (g.languageChoice) langs.push(`${g.languageChoice.count} au choix`);
@@ -17129,102 +18579,121 @@ function renderRaceStep(w, c) {
           .map(([a, v]) => field(`${v.short}`, `wiz.customRace.bonuses.${a}`, c.customRace.bonuses?.[a] || 0, "number", "", 'min="-5" max="10" step="1"'))
           .join("")}</div>${field("Traits de cette origine", "wiz.customRace.description", c.customRace.description || "", "textarea", "Effets descriptifs. Les effets chiffrés s’ajoutent ensuite dans Maison.", 'maxlength="6000"')}`
       : "";
-  return `<h2>Origine</h2>${renderCompactHelp("L’origine apporte des bonus, des sens et des aptitudes. Les sources indiquent la version utilisée.")}${grid}<div class="race-group"><div class="race-group-label">Maison</div><div class="choice-grid compact">${card("custom", { name: "Origine maison", grants: c.customRace ? { abilities: c.customRace.bonuses } : {} })}</div></div><div class="selected-description race-detail"><div class="detail-head"><strong>${esc(r.name)}</strong>${sourcePill(r.source)}</div>${esc(r.desc || "")}<div class="fact-row">${facts.map(([k, v]) => `<span><small>${esc(k)}</small>${esc(v)}</span>`).join("")}</div><div class="feature-list">${(r.traits || [])
+  return `<div class="origin-heading"><h2>Choisis ton origine</h2></div><div class="origin-workspace">${grid}<div class="origin-selection"><div class="eyebrow">Ton choix</div><div class="selected-description race-detail"><div class="detail-head"><strong>${esc(r.name)}</strong>${sourcePill(r.source)}</div>${esc(r.desc || "")}<div class="fact-row">${facts.map(([k, v]) => `<span><small>${esc(k)}</small>${esc(v)}</span>`).join("")}</div><div class="feature-list">${(r.traits || [])
     .map(
       ([name, desc], i) =>
         `<details class="feature-item" data-detail="wizard-race-${i}"><summary><span>${esc(name)}</span><span class="feature-arrow">${icon("chevron", 14)}</span></summary><div class="detail-copy">${esc(desc)}</div></details>`,
     )
-    .join("")}</div></div>${custom}${c.raceId !== "custom" ? checkField("Personnaliser l’origine (Tasha, 2014)", "wiz.rulesContext.originCustomization", !!c.rulesContext?.originCustomization, "Option de table : permute uniquement les bonus, langues et maîtrises autorisés. Les traits d’origine restent inchangés.") : ""}${renderPickSpecs(c, raceSpecs, "wiz")}${
+    .join("")}</div></div></div></div><div class="origin-complements">${custom}${c.raceId !== "custom" ? checkField("Personnaliser l’origine (Tasha, 2014)", "wiz.rulesContext.originCustomization", !!c.rulesContext?.originCustomization, "Option de table : permute uniquement les bonus, langues et maîtrises autorisés. Les traits d’origine restent inchangés.") : ""}${renderPickSpecs(c, raceSpecs, "wiz")}${
     g.feat
       ? `<section class="choice-spec"><h3>Don de départ</h3><p class="help">L’humain variant commence avec un don de son choix.</p>${renderFeatPicker(c, "wiz.raceFeat", c.raceFeat, "race")}${renderPickSpecs(c, featSpecs, "wiz")}</section>`
       : ""
-  }${later.length ? notice(`${later.map((s) => esc(s.title)).join(" · ")} : à choisir à l’étape Compétences.`) : ""}`;
+  }${later.length ? notice(`${later.map((s) => esc(s.title)).join(" · ")} : à choisir à l’étape Compétences.`) : ""}</div>`;
+}
+function creationChoiceNormalize(value) {
+  return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr-FR");
+}
+function creationChoiceDirectory(kind, items, current, inspected) {
+  const classList = kind === "class",
+    queryKey = classList ? "creationClassQuery" : "creationBackgroundQuery",
+    query = ui[queryKey] || "",
+    visible = items.filter(([, item]) => creationChoiceNormalize(`${item.name} ${item.role || ""} ${(item.skills || []).map((skill) => SKILLS[skill]?.[0] || skill).join(" ")} ${(item.aliases || []).join(" ")}`).includes(creationChoiceNormalize(query))),
+    title = classList ? "Classes" : "Historiques";
+  return `<aside class="creation-choice-directory" aria-label="Liste des ${title.toLocaleLowerCase("fr-FR")}"><div class="creation-choice-search"><h2>${title}</h2><div class="search-wrap">${icon("search", 17)}<input id="creation-${kind}-search" type="search" class="search-input" data-bind="ui.${queryKey}" value="${esc(query)}" placeholder="${classList ? "Nom, rôle…" : "Nom, compétence…"}" aria-label="Rechercher ${classList ? "une classe" : "un historique"}">${query ? `<button type="button" class="creation-choice-clear" data-action="creation-choice-clear" data-kind="${kind}" aria-label="Effacer la recherche">${icon("x", 15)}</button>` : ""}</div><span class="creation-choice-count" role="status">${visible.length} ${classList ? `classe${visible.length > 1 ? "s" : ""}` : `historique${visible.length > 1 ? "s" : ""}`}</span></div><div class="creation-choice-list" data-scroll-key="${esc(`${kind}:${query}`)}">${visible.map(([id, item]) => `<button type="button" id="creation-${kind}-${id}" class="creation-choice-row ${id === inspected ? "inspected" : ""}" data-action="creation-choice-inspect" data-kind="${kind}" data-id="${id}" aria-pressed="${id === inspected}" aria-controls="creation-${kind}-detail">${classList ? `<span class="creation-choice-icon" aria-hidden="true">${icon(item.icon, 21)}</span>` : ""}<span class="creation-choice-name"><strong>${esc(item.name)}</strong><small>${esc(classList ? item.role : (item.skills || []).map((skill) => SKILLS[skill]?.[0] || skill).join(" · ") || "Avec l’accord du MJ")}</small></span>${id === current ? `<span class="creation-choice-adopted" aria-label="Choix adopté">${icon("check", 16)}</span>` : ""}</button>`).join("") || '<p class="creation-choice-empty" role="status">Aucun résultat.</p>'}</div></aside>`;
+}
+function creationChoiceFacts(facts) {
+  return `<dl class="creation-choice-facts">${facts.filter(Boolean).map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}</dl>`;
+}
+function creationChoicePickFields(c, specs) {
+  const compact = specs.filter((spec) => ["language", "tool", "toolOrLanguage"].includes(spec.type)),
+    others = specs.filter((spec) => !compact.includes(spec));
+  return compact.map((spec) => {
+    const selected = spec.selected.filter((value) => Object.hasOwn(spec.options, value)),
+      owned = new Set(spec.owned || []),
+      label = { language: "Langue", tool: "Outil", toolOrLanguage: "Langue ou outil" }[spec.type];
+    return `<section class="choice-spec creation-choice-picks"><h3>${esc(spec.title)} <span class="pill outline">${selected.length}/${spec.count}</span></h3><div class="form-grid">${Array.from({ length: spec.count }, (_, index) => `<label class="field" for="creation-pick-${esc(spec.path)}-${index}"><span>${label}${spec.count > 1 ? ` ${index + 1}` : ""}</span><select id="creation-pick-${esc(spec.path)}-${index}" data-creation-choice-pick="${esc(spec.path)}" data-index="${index}"><option value="">Choisir</option>${Object.entries(spec.options).map(([id, [name, hint]]) => `<option value="${esc(id)}" ${selected[index] === id ? "selected" : ""} ${selected[index] !== id && (selected.includes(id) || owned.has(id)) ? "disabled" : ""}>${esc(name)}${hint ? ` · ${esc(hint)}` : ""}</option>`).join("")}</select></label>`).join("")}</div></section>`;
+  }).join("") + renderPickSpecs(c, others, "wiz");
+}
+function creationChoiceSetPick(el) {
+  const c = ui.wizard?.draft;
+  if (!c) return;
+  const spec = pickSpecs(c).find((entry) => entry.source.key === "bg" && entry.path === el.dataset.creationChoicePick),
+    index = Number(el.dataset.index), value = el.value;
+  if (!spec || !["language", "tool", "toolOrLanguage"].includes(spec.type) || !Number.isInteger(index) || index < 0 || index >= spec.count) return;
+  const selected = spec.selected.filter((id) => Object.hasOwn(spec.options, id));
+  if (value && (!Object.hasOwn(spec.options, value) || (spec.owned || []).includes(value) || selected.some((id, slot) => id === value && slot !== index))) return;
+  selected[index] = value;
+  c.picks ||= {};
+  c.picks[spec.path] = selected.filter(Boolean).slice(0, spec.count);
+  queueDraft();
+  render();
 }
 function renderClassStep(w, c) {
-  const d = derive(c),
-    id = primaryClassId(c),
+  const current = primaryClassId(c),
+    id = Object.hasOwn(CLASSES, ui.creationClassInspect || "") ? ui.creationClassInspect : current,
     cls = CLASSES[id],
-    locked = !!w.original && d.multiclass,
-    extra = CLASS_EXTRAS[id] || {};
-  const cards = Object.entries(CLASSES)
-    .map(
-      ([cid, k]) =>
-        `<button type="button" class="choice-card ${id === cid ? "selected" : ""}" data-action="choose-class" data-id="${cid}" ${locked && id !== cid ? "disabled" : ""}>${id === cid ? `<span class="selected-check">${icon("check", 14)}</span>` : ""}<div class="choice-icon">${icon(k.icon, 25)}</div><span class="choice-name">${k.name}</span><span class="choice-meta">${k.role}</span></button>`,
-    )
-    .join("");
-  const casting = cls.caster === "none" ? "Aucune magie de classe" : `${{ full: "Lanceur complet", half: "Demi-lanceur (dès le niveau 2)", pact: "Magie de pacte" }[cls.caster]} · ${ABILITIES[cls.ability].name}`;
-  const armorNames = { light: "légères", medium: "intermédiaires", heavy: "lourdes", shield: "boucliers" };
-  const weaponText = cls.weapons.map((x) => (x === "simple" ? "armes courantes" : x === "martial" ? "armes de guerre" : WEAPONS[x]?.name.toLowerCase() || x)).join(", ");
-  const startLevel = levelOf(c);
-  const choices = choicesFor(c, 1).filter((s) => s.key !== "expertise");
-  return `<h2>Classe</h2>${renderCompactHelp("Le multiclassage permet de choisir une autre classe lors d’une montée de niveau.")}${locked ? notice("Ce personnage est multiclassé : sa classe de départ se corrige depuis Évolution, niveau par niveau.", "warning") : ""}<div class="choice-grid">${cards}</div><div class="selected-description"><div class="detail-head"><strong>${cls.name}</strong><span class="pill">d${cls.die} de vie</span></div>${esc(cls.desc)}<div class="fact-row"><span><small>Sauvegardes</small>${cls.saves.map((a) => ABILITIES[a].name).join(", ")}</span><span><small>Armures</small>${cls.armors.map((a) => armorNames[a]).join(", ") || "aucune"}</span><span><small>Armes</small>${esc(weaponText)}</span><span><small>Magie</small>${casting}</span><span><small>${esc(cls.subLabel)}</small>niveau ${cls.subLevel}</span>${extra.multiclass?.prereq ? `<span><small>Multiclasse</small>${esc(prereqText(extra.multiclass.prereq))}</span>` : ""}</div></div>${
-    w.original
-      ? ""
-      : `<section class="choice-spec"><h3>Niveau de départ</h3><p class="help">Les niveaux supplémentaires se règlent à l’étape Niveaux.</p>${selectField("Niveau", "ui.wizard.startLevel", startLevel, Object.fromEntries(Array.from({ length: 20 }, (_, i) => [i + 1, `Niveau ${i + 1}`])), "", 'data-number="1"')}</section>`
-  }${cls.subLevel === 1 ? renderSubclassPicker(c, id, "wiz") : ""}${renderPickSpecs(c, pickSpecs(c, (src) => src.key === `sub|${id}|1`).filter((s) => !PICK_CHIP_TYPES.includes(s.type)), "wiz")}${choices.length ? renderChoiceSpecs(c, 1, "wiz", (s) => s.key !== "expertise") : ""}`;
+    chosen = current === id,
+    locked = !!w.original && derive(c).multiclass,
+    extra = CLASS_EXTRAS[id] || {},
+    armorNames = { light: "Armures légères", medium: "Armures intermédiaires", heavy: "Armures lourdes", shield: "Boucliers" },
+    casting = cls.caster === "none" ? "Aucune magie de classe" : `${{ full: "Lanceur complet", half: "Dès le niveau 2", pact: "Magie de pacte" }[cls.caster] || cls.caster} · ${ABILITIES[cls.ability]?.name || ""}`,
+    weaponText = cls.weapons.map((key) => key === "simple" ? "Armes courantes" : key === "martial" ? "Armes de guerre" : WEAPONS[key]?.name || key).join(", "),
+    tools = [...(extra.tools || []).map((key) => TOOLS[key]?.name || key), ...(extra.toolChoice ? [`${extra.toolChoice.count} au choix`] : [])],
+    facts = [
+      ["Armes maîtrisées", weaponText || "Aucune"],
+      ["Armures maîtrisées", cls.armors.map((key) => armorNames[key] || key).join(", ") || "Aucune"],
+      ["Jets de sauvegarde maîtrisés", cls.saves.map((key) => ABILITIES[key].name).join(" et ")],
+      ["Compétences", `${cls.pick} au choix parmi ${cls.skills.map((key) => SKILLS[key]?.[0] || key).join(", ")}`],
+      tools.length ? ["Outils maîtrisés", tools.join(", ")] : null,
+      ["Magie", casting],
+    ];
+  const choices = chosen ? choicesFor(c, 1).filter((spec) => spec.key !== "expertise") : [];
+  const settings = chosen ? `${w.original ? "" : `<section class="choice-spec creation-choice-start-level">${selectField("Niveau de départ", "ui.wizard.startLevel", levelOf(c), Object.fromEntries(Array.from({ length: 20 }, (_, index) => [index + 1, `Niveau ${index + 1}`])), "", 'data-number="1"')}</section>`}${cls.subLevel === 1 ? renderSubclassPicker(c, id, "wiz") : ""}${renderPickSpecs(c, pickSpecs(c, (source) => source.key === `sub|${id}|1`).filter((spec) => spec.source.key === `sub|${id}|1` && !PICK_CHIP_TYPES.includes(spec.type)), "wiz")}${choices.length ? renderChoiceSpecs(c, 1, "wiz", (spec) => spec.key !== "expertise") : ""}` : "";
+  return `<div class="creation-choice-workspace">${creationChoiceDirectory("class", Object.entries(CLASSES), current, id)}<section id="creation-class-detail" class="creation-choice-detail" aria-label="Détail de la classe" tabindex="-1"><div class="creation-choice-heading"><div><h2>${esc(cls.name)}</h2><span class="creation-choice-role">${esc(cls.role)}</span></div><span class="creation-choice-emblem" aria-hidden="true">${icon(cls.icon, 36)}</span></div><p class="creation-choice-lead">${esc(cls.desc)}</p><div class="creation-choice-summary"><div><span>Dé de vie</span><strong>d${cls.die}</strong></div><div><span>Caractéristique clé</span><strong>${esc(ABILITIES[cls.primary[0]]?.name || "")}</strong></div><div><span>${esc(cls.subLabel)}</span><strong>Niveau ${cls.subLevel}</strong></div></div><h3 class="creation-choice-section-title">Maîtrises</h3>${creationChoiceFacts(facts)}${extra.multiclass?.prereq ? renderCompactHelp(`Multiclassage : ${prereqText(extra.multiclass.prereq)}.`) : ""}${locked ? notice("Ce personnage est multiclassé : sa classe de départ se corrige depuis Évolution, niveau par niveau.", "warning") : ""}<div class="creation-choice-apply">${button(chosen ? `${icon("check", 16)} Classe choisie` : "Choisir cette classe", "choose-class", `data-id="${id}" ${chosen || locked ? "disabled" : ""}`, chosen ? "ghost" : "primary")}</div>${settings}</section></div>`;
 }
 function renderBackgroundStep(w, c) {
-  const bg = backgroundOf(c),
-    current = c.background.id || "custom";
-  const cards = Object.entries(BACKGROUNDS)
-    .map(
-      ([id, b]) =>
-        `<button type="button" class="choice-card ${current === id ? "selected" : ""}" data-action="choose-background" data-id="${id}">${current === id ? `<span class="selected-check">${icon("check", 14)}</span>` : ""}<span class="choice-name">${esc(b.name)}</span><span class="choice-meta">${(b.skills || []).map((s) => SKILLS[s]?.[0]).join(" · ")}</span></button>`,
-    )
-    .join("");
-  const g = bg.grants || {},
-    tools = [...(g.tools || []).map((t) => TOOLS[t]?.name || t)];
-  if (g.toolChoice) tools.push(`${g.toolChoice.count} au choix`);
-  const facts = [
-    ["Compétences", bg.skills.map((s) => SKILLS[s]?.[0]).join(", ") || "à choisir"],
-    tools.length ? ["Outils", tools.join(", ")] : null,
-    g.languages?.length || g.languageChoice ? ["Langues", [...(g.languages || []).map((id) => LANGUAGES[id]?.name || id), ...(g.languageChoice ? [`${g.languageChoice.count} au choix`] : [])].join(", ")] : null,
-    bg.gold ? ["Bourse", `${bg.gold} po`] : null,
-  ].filter(Boolean);
-  const custom =
-    current === "custom"
-      ? `<div class="form-grid">${field("Nom de l’historique", "wiz.background.name", c.background.name, "text", "", 'maxlength="80"')}${field("Nom de l’aptitude", "wiz.background.featureName", c.background.featureName || "", "text", "", 'maxlength="120"')}</div><h3 style="margin:6px 0 10px">Deux compétences</h3>${skillChips(c, "wiz.background.skills", c.background.skills, Object.keys(SKILLS), 2)}<div class="spacer"></div>${field("Aptitude d’historique", "wiz.background.feature", c.background.feature || "", "textarea", "Avantage narratif à valider avec le MJ.", 'maxlength="4000"')}${field("Équipement", "wiz.background.equipment", c.background.equipment || "", "text", "", 'maxlength="600"')}`
-      : "";
-  return `<h2>Historique</h2>${renderCompactHelp("L’historique apporte des compétences, des outils ou langues, et une aptitude.")}<div class="choice-grid">${cards}<button type="button" class="choice-card ${current === "custom" ? "selected" : ""}" data-action="choose-background" data-id="custom">${current === "custom" ? `<span class="selected-check">${icon("check", 14)}</span>` : ""}<span class="choice-name">Personnalisé</span><span class="choice-meta">Avec l’accord du MJ</span></button></div><div class="selected-description"><div class="detail-head"><strong>${esc(bg.name)}</strong>${sourcePill(bg.source)}</div>${esc(bg.desc || "")}<div class="fact-row">${facts.map(([k, v]) => `<span><small>${esc(k)}</small>${esc(v)}</span>`).join("")}</div>${
-    bg.feature?.[0] ? `<details class="feature-item" open data-detail="bg-feature"><summary><span>Aptitude : ${esc(bg.feature[0])}</span><span class="feature-arrow">${icon("chevron", 14)}</span></summary><div class="detail-copy">${esc(bg.feature[1] || "")}</div></details>` : ""
-  }${bg.equipment && current !== "custom" ? `<p class="tiny muted" style="margin-top:8px">Équipement : ${esc(bg.equipment)}</p>` : ""}${BACKGROUNDS[current]?.variants?.length ? selectField(UI_FR["background.variant"], "wiz.background.variantId", c.background.variantId || "", { "": UI_FR["background.base"], ...Object.fromEntries(BACKGROUNDS[current].variants.map((variant) => [variant.id, variant.name])) }) : ""}</div>${custom}${(g.feats || []).map((id) => FEATS[id] ? `<p class="small section-gap">${esc(FEATS[id].summary)}</p>` : "").join("")}${renderPickSpecs(c, pickSpecs(c, (src) => src.key.startsWith("feat|bg|")), "wiz")}${notice("Les choix de compétences, langues et outils se règlent à l’étape Compétences.")}`;
+  const current = c.background.id || "custom",
+    id = ui.creationBackgroundInspect === "custom" || Object.hasOwn(BACKGROUNDS, ui.creationBackgroundInspect || "") ? ui.creationBackgroundInspect : current,
+    chosen = id === current,
+    candidate = chosen ? c : { ...c, background: { ...c.background, id, variantId: null } },
+    bg = backgroundOf(candidate),
+    g = bg.grants || {},
+    tools = [...(g.tools || []).map((key) => TOOLS[key]?.name || key), ...(g.toolChoice ? [`${g.toolChoice.count} au choix`] : [])],
+    languages = [...(g.languages || []).map((key) => LANGUAGES[key]?.name || key), ...(g.languageChoice ? [`${g.languageChoice.count} au choix`] : [])],
+    facts = [
+      ["Compétences maîtrisées", (bg.skills || []).map((key) => SKILLS[key]?.[0] || key).join(" et ") || "Deux au choix"],
+      tools.length ? ["Outils maîtrisés", tools.join(", ")] : null,
+      languages.length ? ["Langues", languages.join(", ")] : null,
+      g.toolOrLanguageChoice ? ["Langues ou outils", `${g.toolOrLanguageChoice.count} au choix`] : null,
+      bg.equipment ? ["Équipement", bg.equipment] : null,
+      bg.gold != null ? ["Bourse", `${bg.gold} po`] : null,
+    ],
+    items = [...Object.entries(BACKGROUNDS), ["custom", { name: "Personnalisé", skills: [] }]],
+    picks = chosen ? pickSpecs(c).filter((spec) => spec.source.key === "bg") : [],
+    custom = chosen && id === "custom" ? `<div class="creation-choice-custom"><div class="form-grid">${field("Nom de l’historique", "wiz.background.name", c.background.name, "text", "", 'maxlength="80"')}${field("Nom de l’aptitude", "wiz.background.featureName", c.background.featureName || "", "text", "", 'maxlength="120"')}</div><h3>Deux compétences</h3>${skillChips(c, "wiz.background.skills", c.background.skills, Object.keys(SKILLS), 2)}<div class="spacer"></div>${field("Aptitude d’historique", "wiz.background.feature", c.background.feature || "", "textarea", "Avantage narratif à valider avec le MJ.", 'maxlength="4000"')}${field("Équipement", "wiz.background.equipment", c.background.equipment || "", "text", "", 'maxlength="600"')}</div>` : "";
+  return `<div class="creation-choice-workspace">${creationChoiceDirectory("background", items, current, id)}<section id="creation-background-detail" class="creation-choice-detail" aria-label="Détail de l’historique" tabindex="-1"><div class="creation-choice-heading"><h2>${esc(bg.name)}</h2>${sourcePill(bg.source)}</div><p class="creation-choice-lead">${esc(bg.desc || "")}</p>${creationChoiceFacts(facts)}${bg.feature?.[0] ? `<section class="creation-choice-feature"><h3>${esc(bg.feature[0])}</h3><p>${esc(bg.feature[1] || "")}</p></section>` : ""}<div class="creation-choice-apply">${button(chosen ? `${icon("check", 16)} Historique choisi` : "Choisir cet historique", "choose-background", `data-id="${id}" ${chosen ? "disabled" : ""}`, chosen ? "ghost" : "primary")}</div>${chosen && BACKGROUNDS[id]?.variants?.length ? selectField(UI_FR["background.variant"], "wiz.background.variantId", c.background.variantId || "", { "": UI_FR["background.base"], ...Object.fromEntries(BACKGROUNDS[id].variants.map((variant) => [variant.id, variant.name])) }) : ""}${custom}${chosen ? creationChoicePickFields(c, picks) : ""}${(g.feats || []).map((featId) => FEATS[featId] ? `<section class="creation-choice-feature"><h3>${esc(FEATS[featId].name)}</h3><p>${esc(FEATS[featId].summary || "")}</p></section>` : "").join("")}${chosen ? renderPickSpecs(c, pickSpecs(c).filter((spec) => spec.source.key.startsWith("feat|bg|")), "wiz") : ""}</section></div>`;
 }
 function renderAbilitiesStep(w, c) {
-  const d = derive(c),
-    acc = d.acc,
+  const d = derive(wizardPreview(w)),
     method = c.abilityMethod,
-    pool = method === "rolled" ? w.rollPool || [] : [15, 14, 13, 12, 10, 8];
-  const methodNotice =
-    method === "points"
-      ? notice(`<strong>${27 - pointBuyCost(c.abilities)} points restants sur 27</strong>Valeurs de base de 8 à 15. Monter à 14 ou 15 coûte deux points par palier.`, pointBuyCost(c.abilities) > 27 ? "error" : "")
-      : method === "manual"
-        ? notice("Saisis les valeurs autorisées par ton MJ. Les bonus raciaux s’ajoutent automatiquement : ne les compte pas deux fois.")
-        : method === "rolled"
-          ? `${notice("4d6 par caractéristique, on garde les trois meilleurs dés. Lance une série, puis répartis les six résultats.")}<div class="actions">${button(`${icon("dice", 16)} ${pool.length ? "Relancer les six valeurs" : "Lancer les six valeurs"}`, "roll-abilities", "", "small-btn")}</div>${pool.length ? `<div class="learn-counts">${(w.rollDetails || []).map((r) => `<span class="pill outline" title="${r.dice.join(", ")}">${r.total}</span>`).join("")}</div>` : ""}`
-          : notice("Répartis 15, 14, 13, 12, 10 et 8. Choisir une valeur déjà utilisée échange les deux caractéristiques.");
-  const asiBonus = (a) => c.levels.reduce((s, l) => s + (l.asi?.mode === "ability" ? (l.asi.a === a) + (l.asi.b === a) : 0), 0);
-  const rows = Object.entries(ABILITIES)
-    .map(([a, v]) => {
-      const racial = acc.abilities[a],
-        other = d.scores[a] - c.abilities[a] - racial;
-      const breakdown = [`base ${c.abilities[a]}`, racial ? `origine ${signed(racial)}` : "", asiBonus(a) ? `niveaux ${signed(asiBonus(a))}` : "", other - asiBonus(a) ? `autres ${signed(other - asiBonus(a))}` : ""]
-        .filter(Boolean)
-        .join(" · ");
-      const input =
-        method === "standard" || method === "rolled"
-          ? `<select id="score-${a}" data-bind="wiz.abilities.${a}" data-number="1" aria-label="Valeur de base de ${v.name}" ${method === "rolled" && !pool.length ? "disabled" : ""}>${(pool.length ? pool : [c.abilities[a]]).map((n, i) => `<option ${c.abilities[a] === n ? "selected" : ""} value="${n}">${n}</option>`).join("")}</select>`
-          : `<div class="stepper"><button type="button" class="icon-btn" data-action="ability-step" data-key="${a}" data-delta="-1" aria-label="Diminuer ${v.name}">${icon("minus", 16)}</button><input id="score-${a}" type="number" inputmode="numeric" data-bind="wiz.abilities.${a}" min="${method === "points" ? 8 : 1}" max="${method === "points" ? 15 : 20}" value="${c.abilities[a]}" aria-label="Valeur de base de ${v.name}"><button type="button" class="icon-btn" data-action="ability-step" data-key="${a}" data-delta="1" aria-label="Augmenter ${v.name}">${icon("plus", 16)}</button></div>`;
-      return `<div class="score-editor ${CLASSES[primaryClassId(c)].primary[0] === a ? "key-ability" : ""}"><div><div class="ability-name">${v.name}${CLASSES[primaryClassId(c)].primary[0] === a ? ' <span class="pill sand">clé</span>' : ""}</div><div class="ability-help">${breakdown}</div></div>${input}<div class="final-score">${d.scores[a]}<small>${signed(d.mods[a])}</small></div></div>`;
-    })
-    .join("");
-  return `<h2>Caractéristiques</h2><p class="wizard-intro">Valeur de base → score final (modificateur).</p><div class="segmented four">${[
-    ["standard", "Série standard"],
-    ["points", "27 points"],
-    ["rolled", "4d6"],
-    ["manual", "Libre"],
-  ]
-    .map(([id, label]) => `<button type="button" data-action="ability-method" data-value="${id}" class="${method === id ? "active" : ""}">${label}</button>`)
-    .join("")}</div>${methodNotice}<div class="spacer"></div>${rows}<div class="actions">${method === "standard" || method === "points" ? button(`${icon("sparkles", 16)} Répartition conseillée pour ${CLASSES[primaryClassId(c)].name.toLowerCase()}`, "recommend-abilities", "", "small-btn ghost") : ""}</div>${pickSpecs(c, (src) => src.key === "race").some((s) => s.type === "ability") ? notice("Les bonus +1 au choix de ton origine se règlent à l’étape Origine.") : ""}`;
+    cls = CLASSES[primaryClassId(c)],
+    pool = method === "rolled" ? w.rollPool || [] : [15, 14, 13, 12, 10, 8],
+    used = pointBuyCost(c.abilities);
+  const methods = [["standard", "Série standard", "15 · 14 · 13 · 12 · 10 · 8"], ["points", "27 points", "Base de 8 à 15"], ["rolled", "4d6", "Trois meilleurs dés"], ["manual", "Libre", "Valeurs du MJ"]];
+  const cards = Object.entries(ABILITIES).map(([a, v]) => {
+    const racial = d.acc.abilities[a],
+      other = d.scores[a] - c.abilities[a] - racial,
+      bonus = [racial ? `${signed(racial)} origine` : "", other ? `${signed(other)} autres` : ""].filter(Boolean).join(" · "),
+      key = cls.primary[0] === a;
+    let input;
+    if (["standard", "rolled", "points"].includes(method)) {
+      const values = method === "points" ? Array.from({ length: 8 }, (_, i) => i + 8) : [...new Set(pool.length ? pool : [c.abilities[a]])];
+      input = `<select id="score-${a}" data-bind="wiz.abilities.${a}" data-number="1" aria-label="Valeur de base de ${v.name}" ${method === "rolled" && !pool.length ? "disabled" : ""}>${values.map((value) => `<option value="${value}" ${c.abilities[a] === value ? "selected" : ""} ${method === "points" && value !== c.abilities[a] && pointBuyCost({ ...c.abilities, [a]: value }) > 27 ? "disabled" : ""}>${value}</option>`).join("")}</select>`;
+    } else input = `<input id="score-${a}" type="number" inputmode="numeric" data-bind="wiz.abilities.${a}" min="1" max="20" step="1" value="${c.abilities[a]}" aria-label="Valeur de base de ${v.name}">`;
+    return `<article class="creation-stat-card ${key ? "key-ability" : ""}"><h3 title="${v.name}" aria-label="${v.name}">${v.short}</h3>${key ? `<span class="creation-stat-key" title="Caractéristique clé : ${esc(cls.name)}">${icon("sparkles", 11)}</span>` : ""}<strong class="creation-stat-mod">${signed(d.mods[a])}</strong><span class="creation-stat-score">Score ${d.scores[a]}</span><span class="creation-stat-bonus" title="Base ${c.abilities[a]}${bonus ? ` · ${esc(bonus)}` : ""}">${esc(bonus) || "&nbsp;"}</span><div class="creation-stat-edit"><label for="score-${a}">Base</label>${input}</div></article>`;
+  }).join("");
+  const impacts = [["Points de vie", d.maxHp], ["Initiative", signed(d.initiative)], d.spellDC !== null ? ["DD des sorts", d.spellDC] : ["Attaque principale", signed(d.attack)]];
+  return `<div class="creation-stat-layout"><nav class="creation-methods" aria-label="Méthode de caractéristiques">${methods.map(([id, label, detail]) => `<button type="button" data-action="ability-method" data-value="${id}" class="creation-method ${method === id ? "selected" : ""}" aria-pressed="${method === id}"><strong>${label}</strong><small>${detail}</small></button>`).join("")}</nav><section class="creation-stat-main"><h2>Caractéristiques</h2>${method === "points" ? `<div class="creation-stat-budget ${used > 27 ? "over-budget" : ""}" role="status"><strong>${27 - used} / 27 points restants</strong></div>` : ""}${method === "rolled" ? `<div class="creation-stat-roll">${button(`${icon("dice", 16)} ${pool.length ? "Relancer" : "Lancer"} les six valeurs`, "roll-abilities", "", "small-btn")}${pool.length ? `<div class="learn-counts">${(w.rollDetails || []).map((r) => `<span class="pill outline" title="${r.dice.join(", ")}">${r.total}</span>`).join("")}</div>` : ""}</div>` : ""}<div class="creation-stat-grid">${cards}</div><section class="creation-stat-impacts" aria-label="Valeurs calculées">${impacts.map(([label, value]) => `<div><strong>${value}</strong><span>${label}</span></div>`).join("")}</section>${["standard", "points"].includes(method) ? `<div class="actions">${button(`${icon("sparkles", 16)} Répartition conseillée`, "recommend-abilities", "", "small-btn ghost")}</div>` : ""}</section></div>`;
 }
 function renderSkillsStep(w, c) {
   const d = derive(c),
@@ -17247,42 +18716,97 @@ function renderSkillsStep(w, c) {
       : ""
   }<section class="choice-spec"><h3>${cls.pick} compétences de ${cls.name.toLowerCase()} <span class="pill ${c.skills.length === cls.pick ? "" : "outline"}">${c.skills.length}/${cls.pick}</span></h3>${skillChips(c, "wiz.skills", c.skills, cls.skills, cls.pick, pickedElsewhere)}</section>${renderPickSpecs(c, otherPicks, "wiz")}${renderChoiceSpecs(c, 1, "wiz", (s) => s.key === "expertise")}<div class="panel soft section-gap"><div class="summary-row"><span>Langues</span><strong>${esc(languageText)}</strong></div><div class="summary-row"><span>Outils</span><strong>${esc(d.tools.map((t) => t.name).join(", ") || "Aucun")}</strong></div></div>`;
 }
+function creationEquipmentOptionAllowed(c, option, acc = collect(c)) {
+  if (!option.label.includes("si tu")) return true;
+  return option.items.every(([id]) => {
+    if (WEAPONS[id]) return weaponProficiency(c, { id }, acc).proficient;
+    if (ARMORS[id]) return acc.armor.has(ARMORS[id].type);
+    return true;
+  });
+}
+function creationEquipmentPresets(c) {
+  const groups = CLASS_EXTRAS[primaryClassId(c)]?.startingEquipment || [], acc = collect(c);
+  return ["A", "B"].map((id, presetIndex) => {
+    const kit = { mode: "kit", choices: {}, picks: {} };
+    groups.forEach((group, g) => {
+      const options = group.options.map((option, index) => ({ option, index })).filter(({ option }) => creationEquipmentOptionAllowed(c, option, acc));
+      const selected = options[Math.min(presetIndex, options.length - 1)];
+      if (!selected) return;
+      kit.choices[g] = selected.index;
+      selected.option.items.forEach(([item, qty = 1], i) => {
+        if (!item.startsWith("@")) return;
+        const choices = wildcardOptions(item);
+        for (let n = 0; n < qty; n++) {
+          const preferred = presetIndex && item === "@simple" && primaryClassId(c) === "cleric" ? choices.find(([key]) => key === "spear") : choices[Math.min(presetIndex + n, choices.length - 1)];
+          if (preferred) kit.picks[`${g}-${selected.index}-${i}-${n}`] = preferred[0];
+        }
+      });
+    });
+    const candidate = { ...c, gold: 0, startKit: kit }, items = startingItems(candidate);
+    return { id, name: id === "A" ? "Prêt pour l’aventure" : primaryClassId(c) === "cleric" ? "Voyage léger" : "Autre départ", kit, items, ac: derive(applyStartingKit(candidate)).ac };
+  });
+}
+function creationEquipmentSignature(items) {
+  const quantities = new Map();
+  for (const item of items) quantities.set(item.id, (quantities.get(item.id) || 0) + item.qty);
+  return [...quantities].sort(([a], [b]) => a.localeCompare(b)).map(([id, qty]) => `${id}:${qty}`).join("|");
+}
+function creationEquipmentSelected(c, presets) {
+  if (c.startKit?.mode === "gold") return null;
+  const signature = creationEquipmentSignature(startingItems(c));
+  return presets.find((preset) => creationEquipmentSignature(preset.items) === signature)?.id || null;
+}
+function creationEquipmentSelect(w, data) {
+  if (!w?.draft || w.original || w.draft.startKit?.mode === "done") return false;
+  const c = w.draft, target = data.action === "creation-equipment-preset" ? "suggestions" : data.value;
+  if (!["suggestions", "custom", "gold"].includes(target)) return false;
+  const preset = data.action === "creation-equipment-preset" ? creationEquipmentPresets(c).find((entry) => entry.id === data.value) : null;
+  if (data.action === "creation-equipment-preset" && !preset) return false;
+  c.startKit ||= { mode: "kit", choices: {}, picks: {} };
+  if (c.startKit.mode === "gold" && target !== "gold") {
+    w.creationEquipmentGold = c.gold;
+    c.gold = 0;
+  } else if (c.startKit.mode !== "gold" && target === "gold") c.gold = w.creationEquipmentGold ?? c.gold;
+  c.startKit.mode = target === "gold" ? "gold" : "kit";
+  w.creationEquipmentView = target;
+  if (preset) c.startKit = clone(preset.kit);
+  return true;
+}
 function renderGearStep(w, c) {
-  const id = primaryClassId(c),
-    extra = CLASS_EXTRAS[id] || {},
-    kit = c.startKit || { mode: "kit", choices: {}, picks: {} },
-    bg = backgroundOf(c);
-  const groups = (extra.startingEquipment || [])
-    .map((group, g) => {
+  const id = primaryClassId(c), extra = CLASS_EXTRAS[id] || {},
+    kit = c.startKit || { mode: "kit", choices: {}, picks: {} }, bg = backgroundOf(c),
+    presets = creationEquipmentPresets(c), selected = creationEquipmentSelected(c, presets),
+    view = kit.mode === "gold" ? "gold" : w.creationEquipmentView === "custom" || !selected && !w.creationEquipmentView ? "custom" : "suggestions",
+    acc = collect(c), fixedItems = (extra.startingEquipment || []).filter((group) => group.options.length === 1).flatMap((group) => group.options[0].items).filter(([item]) => !item.startsWith("@"));
+  const itemList = (items, omitFixed = false) => {
+    const counts = new Map();
+    for (const item of items) counts.set(item.id, { ...item, qty: (counts.get(item.id)?.qty || 0) + item.qty });
+    if (omitFixed) for (const [item, qty = 1] of fixedItems) if (counts.has(item)) counts.get(item).qty -= qty;
+    return [...counts.values()].filter((item) => item.qty > 0).map((item) => `<li><strong>${esc(item.info.name)}${item.qty > 1 ? ` ×${item.qty}` : ""}</strong>${item.info.stealth ? '<span>Désavantage en Discrétion</span>' : ""}</li>`).join("");
+  };
+  let body;
+  if (view === "gold") {
+    body = `<div class="creation-gold"><div class="creation-gold-formula">${esc(extra.startingGold || "Montant fixé par le MJ")}</div>${field("Pièces d’or de départ", "wiz.gold", c.gold, "number", "", 'min="0" max="100000" step="1"')}${extra.startingGold ? button(`${icon("dice", 16)} Lancer l’or de départ`, "roll-gold", "", "primary") : ""}<p class="small muted">Remplace l’équipement de classe.</p></div>`;
+  } else if (view === "custom") {
+    body = (extra.startingEquipment || []).map((group, g) => {
+      if (group.options.length === 1 && !group.options[0].items.some(([item]) => item.startsWith("@"))) return "";
       const chosen = clamp(kit.choices?.[g] ?? 0, 0, group.options.length - 1);
-      const options = group.options
-        .map((opt, o) => {
-          const on = o === chosen;
-          const wild = on
-            ? opt.items
-                .map(([item, qty = 1], i) =>
-                  item.startsWith("@")
-                    ? Array.from({ length: qty }, (_, n) => {
-                        const key = `${g}-${o}-${i}-${n}`,
-                          opts = wildcardOptions(item);
-                        return selectField(`Choix ${qty > 1 ? n + 1 : ""}`.trim(), `wiz.startKit.picks.${key}`, kit.picks?.[key] || opts[0]?.[0], Object.fromEntries(opts));
-                      }).join("")
-                    : "",
-                )
-                .join("")
-            : "";
-          return `<label class="option-row ${on ? "selected" : ""}"><input type="radio" name="kit-${g}" data-bind="wiz.startKit.choices.${g}" data-number="1" value="${o}" ${on ? "checked" : ""}><span><strong>${esc(opt.label)}</strong>${wild ? `<div class="form-grid kit-picks">${wild}</div>` : ""}</span></label>`;
-        })
-        .join("");
-      return `<section class="choice-spec kit-group">${group.title ? `<h3>${esc(group.title)}</h3>` : ""}${options}</section>`;
-    })
-    .join("");
-  const preview = startingItems(c);
-  return `<h2>Équipement</h2><p class="wizard-intro">Choisis l’équipement de départ ou l’or prévu par ta classe.</p><div class="segmented"><button type="button" data-action="kit-mode" data-value="kit" class="${kit.mode !== "gold" ? "active" : ""}">Équipement de départ</button><button type="button" data-action="kit-mode" data-value="gold" class="${kit.mode === "gold" ? "active" : ""}">Or (${esc(extra.startingGold || "selon la classe")})</button></div>${
-    kit.mode === "gold"
-      ? `${field("Pièces d’or de départ", "wiz.gold", c.gold, "number", `Lance ${esc(extra.startingGold || "les dés indiqués par ta classe")} ou utilise le montant fixé par le MJ.`, 'min="0" max="100000" step="1"')}${extra.startingGold ? button(`${icon("dice", 15)} Lancer ${esc(extra.startingGold)}`, "roll-gold", "", "small-btn") : ""}`
-      : `${groups || notice("Aucun équipement de départ n’est défini pour cette classe.")}<div class="panel soft section-gap"><h3>Dans ton sac au départ</h3><p class="small">${esc(preview.map((x) => `${x.info.name}${x.qty > 1 ? ` ×${x.qty}` : ""}`).join(", ") || "Rien")}</p>${bg.equipment ? `<p class="small muted">Historique : ${esc(bg.equipment)}${bg.gold ? `, ${bg.gold} po` : ""}.</p>` : ""}</div>`
-  }`;
+      return `<fieldset class="creation-gear-group"><legend>${esc(group.title || `Choix ${g + 1}`)}</legend>${group.options.map((option, o) => {
+        const on = o === chosen, allowed = creationEquipmentOptionAllowed(c, option, acc);
+        const picks = on ? option.items.map(([item, qty = 1], i) => item.startsWith("@") ? Array.from({ length: qty }, (_, n) => {
+          const key = `${g}-${o}-${i}-${n}`, options = wildcardOptions(item);
+          return selectField(`Choix${qty > 1 ? ` ${n + 1}` : ""}`, `wiz.startKit.picks.${key}`, kit.picks?.[key] || options[0]?.[0], Object.fromEntries(options));
+        }).join("") : "").join("") : "";
+        return `<div class="creation-gear-option ${on ? "selected" : ""}"><label><input type="radio" name="kit-${g}" data-bind="wiz.startKit.choices.${g}" data-number="1" value="${o}" ${on ? "checked" : ""} ${!allowed ? "disabled" : ""}><span>${esc(option.label)}${!allowed ? '<small>Maîtrise requise</small>' : ""}</span></label>${picks ? `<div class="creation-gear-picks">${picks}</div>` : ""}</div>`;
+      }).join("")}</fieldset>`;
+    }).join("") || '<p class="small muted">Aucun choix supplémentaire.</p>';
+    body += `<details class="creation-gear-preview"><summary>Dans ton sac au départ</summary><ul>${itemList(startingItems(c))}</ul></details>`;
+  } else {
+    body = `<div class="creation-kit-grid">${presets.map((preset) => `<article class="creation-kit ${preset.id === selected ? "selected" : ""}"><div class="eyebrow">Suggestion ${preset.id} · Compagnon</div><h3>${preset.name}</h3><ul>${itemList(preset.items, true)}</ul><div class="creation-kit-ac"><strong>CA ${preset.ac}</strong></div>${button(`${preset.id === selected ? `${icon("check", 16)} Choisie` : "Choisir cette suggestion"}`, "creation-equipment-preset", `data-value="${preset.id}" aria-pressed="${preset.id === selected}"`, preset.id === selected ? "primary" : "")}</article>`).join("")}</div>${button("Personnaliser les choix", "creation-equipment-mode", 'data-value="custom"', "creation-gear-customize")}`;
+  }
+  const fixed = view !== "gold" && fixedItems.length ? `<div class="creation-gear-included"><strong>Inclus</strong><span>${esc(fixedItems.map(([item, qty = 1]) => `${itemInfo(item)?.name || item}${qty > 1 ? ` ×${qty}` : ""}`).join(", "))}</span></div>` : "";
+  const background = bg.equipment || bg.gold ? `<div class="creation-gear-background"><h3>${esc(bg.name)}</h3>${bg.equipment ? `<p>${esc(bg.equipment)}</p>` : ""}${bg.gold ? `<strong>${bg.gold} po</strong>` : ""}</div>` : "";
+  return `<div class="creation-gear-layout"><nav class="creation-methods" aria-label="Mode d’équipement">${[["suggestions", "Suggestions Compagnon", "Équipement de classe"], ["custom", "Personnaliser", "Chaque choix de départ"], ["gold", "Or de départ", extra.startingGold || "Montant du MJ"]].map(([mode, label, detail]) => `<button type="button" class="creation-method ${view === mode ? "selected" : ""}" data-action="creation-equipment-mode" data-value="${mode}" aria-pressed="${view === mode}"><strong>${label}</strong><small>${esc(detail)}</small></button>`).join("")}</nav><section class="creation-gear-main"><h2>Équipement</h2>${body}${fixed}${background}</section></div>`;
 }
 function renderMagicStep(w, c) {
   const casters = spellcasters(c),
@@ -17318,8 +18842,8 @@ function renderWorkflowHeader({ context, steps, index, stepAction, leaveAction, 
   const leaveLabel = leaveAction === "cancel-level" ? "Annuler les changements de ce niveau" : "Quitter et conserver le brouillon";
   return `<div class="workflow-header"><div class="wizard-top"><span class="eyebrow">${esc(context)}</span>${button(icon("x", 18), leaveAction, `id="workflow-close" aria-label="${esc(leaveLabel)}" title="${esc(leaveLabel)}"`, "ghost workflow-close")}</div><div class="workflow-row">${button(`${icon("back", 16)}<span class="workflow-action-label">Précédent</span>`, previousAction, `id="workflow-previous" aria-label="Étape précédente" ${index ? "" : "disabled"}`, "ghost")}<details class="workflow-menu ${steps.length > 3 ? "workflow-many" : ""}" ${window.matchMedia("(min-width:701px)").matches ? "open" : ""}><summary id="workflow-step-summary" aria-label="${esc(`Choisir une étape, étape actuelle ${steps[index][1]}`)}"><span class="workflow-step-title">${esc(steps[index][1])}</span><span class="workflow-step-count"><strong>${index + 1}</strong>/${steps.length}${icon("down", 12)}</span><span class="workflow-segments" aria-hidden="true">${steps.map((entry, i) => `<i class="${i < index ? "done" : i === index ? "current" : ""}"></i>`).join("")}</span></summary><div class="wizard-progress" style="--steps:${steps.length}">${steps.map(([id, label, disabled], i) => `<button type="button" id="workflow-step-${esc(String(id))}" class="wizard-step ${i === index ? "active" : i < index ? "done" : ""}" data-action="${stepAction}" data-step="${esc(String(id))}" aria-label="${esc(`Étape ${i + 1} sur ${steps.length} : ${label}`)}" ${i === index ? 'aria-current="step"' : ""} ${disabled ? "disabled" : ""}><span class="step-number">${i < index ? icon("check", 13) : i + 1}</span><span class="step-label">${esc(label)}</span></button>`).join("")}</div></details>${button(`<span class="workflow-action-label">${final ? "Valider" : "Suivant"}</span>${icon(final ? "check" : "arrow", 16)}`, nextAction, `id="workflow-next" aria-label="${esc(nextLabel)}" ${nextDisabled ? "disabled" : ""}`, `primary ${final ? "workflow-validate" : ""}`)}</div></div>`;
 }
-function renderWorkflowPreview(c, reader) {
-  return reader ? `<details class="workflow-preview" data-detail="workflow-preview"><summary>Aperçu du personnage</summary>${miniPreview(c)}</details>` : miniPreview(c);
+function renderWorkflowPreview(c, reader, editablePortrait = false) {
+  return reader ? `<details class="workflow-preview" data-detail="workflow-preview"><summary>Aperçu du personnage</summary>${miniPreview(c, { editablePortrait })}</details>` : miniPreview(c, { editablePortrait });
 }
 let workflowReaderMode = null;
 function measureWorkflowMenu() {
@@ -17366,7 +18890,7 @@ function renderWizard() {
     preview = wizardPreview(w),
     reader = w.step === "magic" && spellcasters(c).length > 0;
   const context = w.original ? `Corriger ${c.name || "le personnage"}` : `Créer un personnage${levelOf(c) > 1 ? ` · Niveau ${levelOf(c)}` : ""}`;
-  return `<div class="wizard-wrap ${reader ? "workflow-reader" : ""}">${renderWorkflowHeader({ context, steps: steps.map(([id, label], i) => [id, label, i > index && !w.visited?.includes(id)]), index, stepAction: "wizard-step", leaveAction: "leave-wizard", previousAction: "wizard-prev", nextAction: last ? "wizard-save" : "wizard-next", nextLabel: last ? w.original ? "Valider les corrections" : "Créer la fiche" : `Étape suivante : ${steps[index + 1][1]}` })}<div class="wizard-layout"><div class="wizard-main">${renderWizardStep(w, c)}${w.error ? `<div class="wizard-error">${notice(esc(w.error), "error")}</div>` : ""}</div>${renderWorkflowPreview(preview, reader)}</div></div>`;
+  return `<div class="wizard-wrap creation-wizard ${reader ? "workflow-reader" : ""}">${renderWorkflowHeader({ context, steps: steps.map(([id, label], i) => [id, label, i > index && !w.visited?.includes(id)]), index, stepAction: "wizard-step", leaveAction: "leave-wizard", previousAction: "wizard-prev", nextAction: last ? "wizard-save" : "wizard-next", nextLabel: last ? w.original ? "Valider les corrections" : "Créer la fiche" : `Étape suivante : ${steps[index + 1][1]}` })}<div class="wizard-layout"><div class="wizard-main">${renderWizardStep(w, c)}${w.error ? `<div class="wizard-error">${notice(esc(w.error), "error")}</div>` : ""}</div>${renderWorkflowPreview(preview, reader, true)}</div></div>`;
 }
 
 const RACE_GROUP_ORDER = ["Humain", "Nain", "Elfe", "Halfelin", "Gnome", "Demi-elfe", "Demi-orc", "Drakéide", "Tieffelin"];
@@ -17437,16 +18961,16 @@ function renderLevelFlow() {
     }
     content = `<h2>${f.isNew ? "Choix du niveau" : "Corriger le niveau"}</h2><p class="wizard-intro">${f.isNew ? `Prépare le niveau ${level}. Rien n’est appliqué avant validation.` : `Tu corriges le niveau ${level}. Les niveaux suivants sont conservés et recalculés ; les choix devenus invalides seront signalés.`}</p>${classPicker}${renderLevelEditor(c, level, "lvl")}${classLevel(c, "warlock") > 2 && allChoices(c, "invocations").length ? button("Remplacer une manifestation occulte", "replace-choice", "", "small-btn") : ""}`;
   } else if (f.step === 1)
-    content = `<h2>Sorts</h2><p class="wizard-intro">Choisis tes sorts ou complète ce choix plus tard dans le grimoire.</p>${spellcasters(c).length ? renderMagicEditor(c, "level") : notice("Aucune classe de lanceur de sorts à ce niveau. Passe à la vérification.")}`;
+    content = `<h2>Sorts</h2>${spellcasters(c).length ? renderMagicEditor(c, "level") : notice("Aucune classe de lanceur de sorts à ce niveau. Passe à la vérification.")}`;
   else
     content = `<h2>Vérification</h2>${impactHtml(f.original, c)}${renderRepairConsequences(previewCharacterRepair(beginCharacterRepair(f.original), c))}<div class="section-gap"><h3>Choix du niveau ${level}</h3>${summarizeChoice(c, l)}</div><div class="section-gap">${issueList(issues.errors, "error")}${issueList(issues.warnings)}</div><div class="notice section-gap">${icon("heart", 18)}<div><strong>Les blessures sont conservées.</strong>Les PV actuels suivent le maximum. Un personnage à 0 PV n’est pas relevé par la montée de niveau, et les ressources dépensées ne reviennent pas.</div></div>`;
   const reader = f.step === 1 && spellcasters(c).length > 0;
   const steps = ["Classe & choix", "Magie", "Vérification"].map((label, i) => [i, label, i > f.step]);
-  return `<div class="wizard-wrap ${reader ? "workflow-reader" : ""}">${renderWorkflowHeader({ context: `${c.name} · ${f.isNew ? "Niveau " + level : "Correction du niveau " + level}`, steps, index: f.step, stepAction: "level-step", leaveAction: "cancel-level", previousAction: "level-prev", nextAction: f.step < 2 ? "level-next" : "level-save", nextLabel: f.step < 2 ? `Étape suivante : ${steps[f.step + 1][1]}` : f.isNew ? `Valider le niveau ${level}` : "Valider la correction", nextDisabled: f.step === 2 && issues.errors.length > 0 })}<nav class="actions section-gap workflow-levels" aria-label="${esc(UI_FR["repair.levels"])}">${c.levels.map((entry, index) => button(`${UI_FR["repair.level"]} ${index + 1}`, "repair-level", `data-level="${index + 1}" aria-current="${index + 1 === f.level ? "step" : "false"}"`, "small-btn ghost")).join("")}${button(UI_FR["repair.identity"], "repair-identity", "", "small-btn ghost")}</nav><div class="wizard-layout"><div class="wizard-main">${content}${f.error ? `<div class="wizard-error">${notice(esc(f.error), "error")}</div>` : ""}</div>${renderWorkflowPreview(c, reader)}</div></div>`;
+  return `<div class="wizard-wrap creation-wizard ${reader ? "workflow-reader" : ""}">${renderWorkflowHeader({ context: `${c.name} · ${f.isNew ? "Niveau " + level : "Correction du niveau " + level}`, steps, index: f.step, stepAction: "level-step", leaveAction: "cancel-level", previousAction: "level-prev", nextAction: f.step < 2 ? "level-next" : "level-save", nextLabel: f.step < 2 ? `Étape suivante : ${steps[f.step + 1][1]}` : f.isNew ? `Valider le niveau ${level}` : "Valider la correction", nextDisabled: f.step === 2 && issues.errors.length > 0 })}<nav class="actions section-gap workflow-levels" aria-label="${esc(UI_FR["repair.levels"])}">${c.levels.map((entry, index) => button(`${UI_FR["repair.level"]} ${index + 1}`, "repair-level", `data-level="${index + 1}" aria-current="${index + 1 === f.level ? "step" : "false"}"`, "small-btn ghost")).join("")}${button(UI_FR["repair.identity"], "repair-identity", "", "small-btn ghost")}</nav><div class="wizard-layout"><div class="wizard-main">${content}${f.error ? `<div class="wizard-error">${notice(esc(f.error), "error")}</div>` : ""}</div>${renderWorkflowPreview(c, reader)}</div></div>`;
 }
 
-function modalShell(title, body, footer = "", wide = false, eyebrow = "") {
-  return `<div class="modal-backdrop" data-backdrop="1"><section class="modal ${wide ? "wide" : ""}" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1"><header class="modal-head"><div>${eyebrow ? `<div class="eyebrow">${esc(eyebrow)}</div>` : ""}<h2 id="dialog-title">${title}</h2></div>${smallIcon("x", "close-modal", "Fermer la fenêtre")}</header><div class="modal-body">${body}</div>${footer ? `<footer class="modal-footer">${footer}</footer>` : ""}</section></div>`;
+function modalShell(title, body, footer = "", wide = false, eyebrow = "", className = "") {
+  return `<div class="modal-backdrop" data-backdrop="1"><section class="modal ${wide ? "wide" : ""}${className ? ` ${esc(className)}` : ""}" role="dialog" aria-modal="true" aria-labelledby="dialog-title" tabindex="-1"><header class="modal-head"><div>${eyebrow ? `<div class="eyebrow">${esc(eyebrow)}</div>` : ""}<h2 id="dialog-title">${title}</h2></div>${smallIcon("x", "close-modal", "Fermer la fenêtre")}</header><div class="modal-body">${body}</div>${footer ? `<footer class="modal-footer">${footer}</footer>` : ""}</section></div>`;
 }
 function renderEquipmentFields(c) {
   const f = ui.form;
@@ -17922,6 +19446,8 @@ async function clearDraft() {
 function resetEditorFilters() {
   ui.editorQuery = "";
   ui.editorLevel = "all";
+  ui.editorClass = null;
+  ui.editorContext = null;
 }
 function go(route) {
   ui.route = route;
@@ -17945,7 +19471,12 @@ function startWizard(character = null, classId = null) {
     rollPool: [],
     rollDetails: [],
   };
+  if (!character) ui.wizard = applyCreationIdentityDefaults(ui.wizard, { initialize: true });
   ui.featQuery = "";
+  ui.raceQuery = "";
+  ui.raceFamily = "all";
+  ui.creationClassQuery = ui.creationBackgroundQuery = "";
+  ui.creationClassInspect = ui.creationBackgroundInspect = null;
   resetEditorFilters();
   queueDraft();
   render();
@@ -18019,6 +19550,7 @@ function handleBinding(el, redraw) {
       if (i >= 0) list.splice(i, 1);
     }
     setBinding(path, list);
+    if (path === "wiz.picks.race|size") ui.wizard = applyCreationIdentityDefaults(ui.wizard);
     if (path.startsWith("wiz.")) queueDraft();
     render();
     return;
@@ -18046,6 +19578,9 @@ function handleBinding(el, redraw) {
     return;
   }
   setBinding(path, value);
+  if (path === "wiz.customRace.size" && previous !== value) ui.wizard = applyCreationIdentityDefaults(ui.wizard);
+  if (["wiz.details.height", "wiz.details.weight"].includes(path))
+    ui.wizard = markCreationIdentityManual(ui.wizard, path.split(".").at(-1));
   if (path === "ui.journalQuery") { if (previous !== value) updateJournalSearch(); return; }
   if (path === "wiz.background.variantId" && previous !== value) { clearPicks(ui.wizard.draft, ["bg|", "feat|bg|"]); queueDraft(); render(); return; }
   const draft = path.startsWith("wiz.") ? ui.wizard?.draft : path.startsWith("lvl.") ? ui.levelFlow?.draft : null;
@@ -18057,33 +19592,34 @@ function handleBinding(el, redraw) {
   if (path.startsWith("wiz.startKit.choices.")) ui.wizard.draft.startKit.picks = {};
   if (path.startsWith("wiz.")) queueDraft();
   if (["ui.libraryQuery", "ui.libraryType"].includes(path)) ui.libraryPage = 0;
-  const live = ["ui.libraryQuery", "ui.spellQuery", "ui.editorQuery", "ui.featQuery", "ui.catalogQuery", "ui.beastQuery", "ui.featureQuery"].includes(path);
-  if (live || (redraw && (path.startsWith("ui.rest.") || ["replace-choice", "replace-spell"].includes(ui.modal))) || (redraw && el.matches("select,[type=radio],[type=checkbox]"))) render();
+  const live = ["ui.creationClassQuery", "ui.creationBackgroundQuery", "ui.raceQuery", "ui.libraryQuery", "ui.spellQuery", "ui.editorQuery", "ui.featQuery", "ui.catalogQuery", "ui.beastQuery", "ui.featureQuery"].includes(path);
+  if (live || (redraw && path.startsWith("wiz.abilities.")) || (redraw && (path.startsWith("ui.rest.") || ["replace-choice", "replace-spell"].includes(ui.modal))) || (redraw && el.matches("select,[type=radio],[type=checkbox]"))) render();
 }
 function selectSpell(target, id, kind) {
   const c = magicDraft(target), spell = spellById(c, id), classId = ui.editorClass || spellcasters(c)[0]?.classId, limits = spellLimits(c, classId);
   if (!spell) return;
-  if (kind === "secret") {
-    Object.assign(c, setSpellAcquisition(c, id, classId, { known: true, prepared: false, secret: true }));
-  } else if (kind === "arcana") {
+  if (kind === "arcana") {
     if (c.spells.arcana[spell.level] === id) delete c.spells.arcana[spell.level]; else c.spells.arcana[spell.level] = id;
   } else {
     const previous = spellAcquisitions(c, id).find((entry) => entry.classId === classId && !entry.always);
-    const enabled = !previous?.[kind], known = kind === "known" ? enabled : previous?.known || limits.mode === "prepared", prepared = kind === "prepared" ? enabled : enabled && !!previous?.prepared;
+    const enabled = kind === "secret" || !previous?.[kind];
+    const known = kind === "secret" ? true : kind === "known" ? enabled : previous?.known || limits.mode === "prepared";
+    const prepared = kind === "secret" ? false : kind === "prepared" ? enabled : enabled && !!previous?.prepared;
+    const candidate = setSpellAcquisition(c, id, classId, { known, prepared, acquiredLevel: previous?.acquiredLevel || levelOf(c), secret: kind === "secret" });
     if (enabled && !c.spells.allowExceptions) {
-      const entries = spellAcquisitions(c).filter((entry) => entry.classId === classId && !entry.always && entry[kind]);
-      const max = kind === "prepared" ? limits.prepared : spell.level === 0 ? limits.cantrips : limits.mode === "known" ? limits.known : Infinity;
-      const count = entries.filter((entry) => kind === "prepared" || (spell.level === 0 ? spellById(c, entry.spellId)?.level === 0 && !entry.secret : (spellById(c, entry.spellId)?.level > 0 || entry.secret) && entry.secret?.countsAgainstKnown !== false)).length;
-      if (count >= max) { toast(UI_FR["spells.quota"].replace("{max}", max)); return; }
+      const before = magicEditorModel(c, classId), after = magicEditorModel(candidate, classId);
+      const exceeded = [["cantrips", limits.cantrips], ["prepared", limits.prepared], ["known", limits.mode === "known" ? limits.known : Infinity]]
+        .find(([key, max]) => after[key] > max && after[key] > before[key]);
+      if (exceeded) { toast(UI_FR["spells.quota"].replace("{max}", exceeded[1])); return; }
     }
-    Object.assign(c, setSpellAcquisition(c, id, classId, { known, prepared, acquiredLevel: previous?.acquiredLevel || levelOf(c) }));
+    Object.assign(c, candidate);
   }
   queueDraft(); render();
 }
 
 function rollCheck(name, bonus, kind = "check", options = {}) {
   prepareDiceDialog(name, { kind, bonus, reliable: !!options.reliable }, {
-    note: options.note || "", critThreshold: kind === "attack" ? derive(activeCharacter()).critThreshold : 20,
+    note: options.note || "", critThreshold: kind === "attack" ? derive(activeCharacter()).critThreshold : 20, fxAbility: options.fxAbility || null,
   });
 }
 function prepareDiceDialog(name, request, options = {}) {
@@ -18104,13 +19640,13 @@ function diceDisplayItems(r) {
 }
 function renderDiceDialog() {
   const r = ui.roll, ready = r.phase === "ready", rolling = r.phase === "rolling", result = r.phase === "result" ? r.result : null,
-    modes = ["check", "attack"].includes(r.request.kind),
+    modes = ["check", "attack"].includes(r.request.kind), critical = result && r.critical,
     hint = rolling ? "Les dés roulent…" : ready ? (diceDisplayItems(r).length ? "Toucher les dés pour lancer" : "Dégâts fixes, sans dé à lancer") : "Résultat du lancer",
     title = r.request.kind === "hit-dice" ? "Dés de vie" : r.name || "Jet de dés";
   const modeHtml = modes ? `<div class="segmented dice-roll-modes" role="group" aria-label="Mode du jet">${[["normal", "Normal"], ["advantage", "Avantage"], ["disadvantage", "Désavantage"]].map(([mode, label]) => `<button id="dice-mode-${mode}" class="${ui.rollMode === mode ? "active" : ""}" data-action="roll-mode" data-mode="${mode}" data-value="${mode}" aria-pressed="${ui.rollMode === mode}" ${rolling ? "disabled" : ""}>${label}</button>`).join("")}</div>` : "";
   const quantity = r.maxCount > 1 ? `<label class="dice-quantity" for="dice-count">Dés de vie <select id="dice-count" data-dice-count ${!ready ? "disabled" : ""}>${Array.from({ length: r.maxCount }, (_, i) => `<option value="${i + 1}" ${r.request.count === i + 1 ? "selected" : ""}>${i + 1}d${r.request.sides}</option>`).join("")}</select><span>${r.maxCount} disponibles</span></label>` : "";
-  const scoreHtml = result?.groups ? `<div class="dice-score-grid">${result.groups.map((group, index) => `<div><span>Valeur ${index + 1}</span><strong>${group.total}</strong><small>${group.detail}</small></div>`).join("")}</div>` : `<strong class="dice-result-total roll-number">${result ? result.total : ""}</strong><p class="dice-roll-breakdown roll-detail">${result ? esc(result.detail) : ""}</p>`;
-  const body = `<div class="dice-roll-content">${modeHtml}${quantity}<button id="dice-tray" class="dice-tray" data-action="roll-start" aria-label="Lancer les dés" ${!ready ? "disabled" : ""}><canvas class="dice-canvas" aria-hidden="true"></canvas><span class="dice-tray-hint">${hint}<span class="dice-roll-formula">${esc(diceRequestFormula(r.request))}</span></span></button><div class="dice-outcome" role="status" aria-live="polite" aria-atomic="true">${scoreHtml}${result && r.note ? `<p class="dice-roll-note">${esc(r.note)}</p>` : ""}</div>${ready && r.help ? `<p class="dice-roll-help">${esc(r.help)}</p>` : ""}</div>`;
+  const scoreHtml = result?.groups ? `<div class="dice-score-grid">${result.groups.map((group, index) => `<div><span>Valeur ${index + 1}</span><strong>${group.total}</strong><small>${group.detail}</small></div>`).join("")}</div>` : `<strong class="dice-result-total roll-number">${critical ? esc(critical.word) : result ? result.total : ""}</strong><p class="dice-roll-breakdown roll-detail">${critical ? esc(critical.detail) : result ? esc(result.detail) : ""}</p>`;
+  const body = `<div class="dice-roll-content">${modeHtml}${quantity}<button id="dice-tray" class="dice-tray" data-action="roll-start" aria-label="Lancer les dés" ${!ready ? "disabled" : ""}><canvas class="dice-canvas" aria-hidden="true"></canvas><span class="dice-tray-hint">${hint}<span class="dice-roll-formula">${esc(diceRequestFormula(r.request))}</span></span></button><div class="dice-outcome" role="status" aria-live="polite" aria-atomic="true">${scoreHtml}${result && r.note ? `<p class="dice-roll-note">${esc(r.note)}</p>` : ""}</div><div class="dice-roll-extra">${ready && r.help ? `<p class="dice-roll-help">${esc(r.help)}</p>` : ""}</div></div>`;
   const footer = ready || rolling
     ? button("Annuler", "close-modal", "", "ghost") + button(rolling ? "Lancer en cours…" : "Lancer les dés", "roll-start", `id="dice-launch" ${rolling ? "disabled" : ""}`, "primary")
     : r.apply ? button("Annuler", "close-modal", "", "ghost") + button(r.acceptLabel || "Utiliser ce résultat", "roll-accept", 'id="dice-accept"', "primary")
@@ -18124,7 +19660,57 @@ function mountDiceTray() {
     theme: document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"),
     reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
   });
+  diceRendererRoll = ui.roll;
   diceRenderer.show(diceDisplayItems(ui.roll), { reveal: ui.roll.phase === "result" });
+}
+// Met à jour la fenêtre de jet sur place : le fond, la page derrière et le plateau 3D restent intacts.
+function updateDiceDialog() {
+  const dialog = modalRoot.querySelector(".dice-roll-dialog"), focusId = document.activeElement?.id;
+  const next = document.createElement("template");
+  next.innerHTML = renderDiceDialog();
+  const fresh = next.content.querySelector(".dice-roll-dialog");
+  dialog.dataset.rollPhase = fresh.dataset.rollPhase;
+  dialog.querySelector(".dice-tray").disabled = fresh.querySelector(".dice-tray").disabled;
+  for (const part of [".dice-roll-modes", ".dice-quantity", ".dice-tray-hint", ".dice-outcome", ".dice-roll-extra", ".modal-footer"]) {
+    // Pendant un effet, le mot et son style appartiennent à l'effet.
+    if (part === ".dice-outcome" && ui.roll.critical?.live) continue;
+    const target = dialog.querySelector(part), source = fresh.querySelector(part);
+    if (target && source && target.innerHTML !== source.innerHTML) target.innerHTML = source.innerHTML;
+  }
+  document.getElementById(focusId)?.focus({ preventScroll: true });
+  // Un bouton désactivé garde le focus et peut retenir les touches, dont Échap.
+  if (document.activeElement?.disabled) dialog.focus({ preventScroll: true });
+}
+function rebuildDiceDialog() {
+  const focusId = document.activeElement?.id, next = document.createElement("template");
+  next.innerHTML = renderDiceDialog();
+  const fresh = next.content.querySelector(".dice-roll-dialog");
+  fresh.style.animation = "none";
+  diceRenderer.dispose();
+  modalRoot.querySelector(".dice-roll-dialog").replaceWith(fresh);
+  mountDiceTray();
+  document.getElementById(focusId)?.focus({ preventScroll: true });
+}
+function showPreparedDice() {
+  const afterEffect = ui.roll.critical?.live;
+  ui.roll.critical = null;
+  // Un effet a pu fissurer, incliner ou masquer la fenêtre : on repart d'une fenêtre neuve.
+  if (afterEffect) { stopDiceFx(); rebuildDiceDialog(); return; }
+  updateDiceDialog();
+  diceRenderer.show(diceDisplayItems(ui.roll), { reveal: false });
+}
+function playCriticalFx(r, plan) {
+  const c = activeCharacter(), focusFinish = () => modalRoot.querySelector("#dice-accept, #dice-finish")?.focus({ preventScroll: true });
+  return playDiceFx(plan, {
+    dialog: modalRoot.querySelector(".dice-roll-dialog"), renderer: diceRenderer, kind: r.critical.kind, value: r.result.natural, bonus: r.result.bonus, detail: r.critical.detail,
+    hero: { name: c?.name, portrait: portraitUrl(c), ability: r.fxAbility },
+    onResult() { r.phase = "result"; updateDiceDialog(); focusFinish(); },
+    onFailure(error) {
+      console.error(error);
+      if (ui.roll !== r) return;
+      r.critical.live = false; r.phase = "result"; rebuildDiceDialog(); focusFinish();
+    },
+  });
 }
 async function startDiceDialog() {
   const r = ui.roll;
@@ -18135,15 +19721,22 @@ async function startDiceDialog() {
   r.note = r.baseNote;
   if (r.request.reliable && result.adjusted !== result.natural) r.note = [r.note, "Savoir-faire : le résultat du dé est traité comme 10."].filter(Boolean).join(" ");
   if (r.request.kind === "attack") r.note = result.natural === 1 ? "1 naturel : l’attaque rate." : result.natural >= r.critThreshold ? "Critique potentiel : vérifie les conditions et double les dés de dégâts concernés." : "Compare ce total à la classe d’armure de la cible.";
-  render();
-  const animation = diceRenderer.roll(diceDisplayItems(r));
+  // 1 ou 20 naturel sur un test de caractéristique ou une sauvegarde : le mot remplace le total.
+  r.critical = r.fxAbility ? diceFxVerdict(result) : null;
+  const plan = r.critical && !matchMedia("(prefers-reduced-motion: reduce)").matches
+    ? planDiceFx(r.critical.kind, { single: result.dice.length === 1, portrait: !!portraitUrl(activeCharacter()) }) : null;
+  if (plan) r.critical.live = true;
+  updateDiceDialog();
+  const animation = plan?.ownRoll ? null : diceRenderer.roll(diceDisplayItems(r));
   try {
     // Un jet contre la mort est engagé au lancer, même si la fenêtre se ferme.
     if (r.request.kind === "death") await applyDeathDiceResult(r);
     await animation;
     if (ui.roll !== r || ui.modal !== "roll") { if (r.request.kind === "death") render(); return; }
+    if (plan) { await playCriticalFx(r, plan); return; }
     r.phase = "result";
-    render();
+    // Seule la sauvegarde contre la mort change la fiche pendant le jet.
+    if (r.request.kind === "death") render(); else updateDiceDialog();
     modalRoot.querySelector('#dice-accept, #dice-finish')?.focus({ preventScroll: true });
   } catch (error) {
     await animation;
@@ -18333,7 +19926,9 @@ async function perform(action, el) {
         const portrait = session.upload ? encodePortraitCrop(session.upload.picture, session.crop) : session.selected;
         if (session.wizard) {
           if (session.wizard !== ui.wizard) throw new Error("Le brouillon a changé. Rouvre le choix du portrait.");
-          ui.wizard.draft.portrait = clone(portrait); queueDraft();
+          ui.wizard.draft.portrait = clone(portrait);
+          ui.wizard = markCreationIdentityManual(ui.wizard, "portrait");
+          queueDraft();
         } else {
           await saveCharacter({ ...session.character, portrait }, "Changement de portrait", "session", session.character);
         }
@@ -18500,6 +20095,7 @@ async function perform(action, el) {
       clearPicks(draft, ["race|", "feat|race|"]);
       refreshClassSkills(draft);
       if (RACES[data.id]?.dragonChoice) draft.picks["race|dragon"] = ["red"];
+      ui.wizard = applyCreationIdentityDefaults(ui.wizard);
       queueDraft();
       render();
       break;
@@ -18910,10 +20506,10 @@ async function perform(action, el) {
       break;
     }
     case "roll-ability":
-      rollCheck(`Test de ${ABILITIES[data.key].name}`, d.mods[data.key]);
+      rollCheck(`Test de ${ABILITIES[data.key].name}`, d.mods[data.key], "check", { fxAbility: data.key });
       break;
     case "roll-save":
-      rollCheck(`Jet de sauvegarde de ${ABILITIES[data.key].name}`, d.saves[data.key]);
+      rollCheck(`Jet de sauvegarde de ${ABILITIES[data.key].name}`, d.saves[data.key], "check", { fxAbility: data.key });
       break;
     case "roll-skill":
       rollCheck(SKILLS[data.key][0], d.skills[data.key], "check", {
@@ -18938,7 +20534,7 @@ async function perform(action, el) {
       if (ui.roll && ui.roll.phase !== "rolling" && ["check", "attack"].includes(ui.roll.request.kind)) {
         const mode = data.mode || data.value;
         if (!["normal", "advantage", "disadvantage"].includes(mode)) break;
-        ui.rollMode = mode; ui.roll.phase = "ready"; ui.roll.result = null; render();
+        ui.rollMode = mode; ui.roll.phase = "ready"; ui.roll.result = null; showPreparedDice();
       }
       break;
     case "roll-start":
@@ -18949,7 +20545,7 @@ async function perform(action, el) {
       break;
     case "reroll":
       if (ui.roll?.phase === "result" && !ui.roll.apply && ui.roll.request.kind !== "death") {
-        ui.roll.phase = "ready"; ui.roll.result = null; render();
+        ui.roll.phase = "ready"; ui.roll.result = null; showPreparedDice();
         modalRoot.querySelector("#dice-tray")?.focus({ preventScroll: true });
       }
       break;
@@ -19365,6 +20961,7 @@ async function perform(action, el) {
       }
       if (swRegistration?.waiting) {
         await saveQueue;
+        updateRequested = true;
         swRegistration.waiting.postMessage({ type: "SKIP_WAITING" });
       } else location.reload();
       break;
@@ -19537,6 +21134,43 @@ async function perform(action, el) {
       render();
       break;
     }
+    case "creation-choice-inspect": {
+      const isClass = data.kind === "class";
+      if (!ui.wizard || !["class", "background"].includes(data.kind) || !(isClass ? CLASSES[data.id] : BACKGROUNDS[data.id] || data.id === "custom")) break;
+      ui[isClass ? "creationClassInspect" : "creationBackgroundInspect"] = data.id;
+      render();
+      if (window.matchMedia("(max-width:700px)").matches) document.getElementById(`creation-${data.kind}-detail`)?.scrollIntoView({ block: "start" });
+      break;
+    }
+    case "creation-choice-clear":
+      if (!["class", "background"].includes(data.kind)) break;
+      ui[data.kind === "class" ? "creationClassQuery" : "creationBackgroundQuery"] = "";
+      render();
+      document.getElementById(`creation-${data.kind}-search`)?.focus({ preventScroll: true });
+      break;
+    case "creation-equipment-mode":
+    case "creation-equipment-preset":
+      if (creationEquipmentSelect(ui.wizard, data)) { queueDraft(); render(); }
+      break;
+    case "editor-level":
+      ui.editorLevel = data.value;
+      render();
+      break;
+    case "clear-editor-search":
+      ui.editorQuery = "";
+      render();
+      document.getElementById("editor-search")?.focus({ preventScroll: true });
+      break;
+    case "editor-reveal": {
+      const spell = spellById(magicDraft(data.target), data.id);
+      if (!spell) break;
+      ui.editorLevel = String(spell.level);
+      ui.editorQuery = "";
+      render();
+      const summary = document.getElementById(`editor-${data.target}-spell-${spell.id}`);
+      if (summary) { summary.parentElement.open = true; summary.scrollIntoView({ block: "nearest" }); summary.focus({ preventScroll: true }); }
+      break;
+    }
     case "editor-class":
       ui.editorClass = data.value;
       render();
@@ -19609,10 +21243,11 @@ document.addEventListener("input", (event) => {
 document.addEventListener("change", (event) => {
   if (event.target.matches("[data-dice-count]") && ui.roll?.phase === "ready") {
     const count = Number(event.target.value);
-    if (Number.isInteger(count) && count >= 1 && count <= ui.roll.maxCount) { ui.roll.request.count = count; render(); }
+    if (Number.isInteger(count) && count >= 1 && count <= ui.roll.maxCount) { ui.roll.request.count = count; showPreparedDice(); }
     return;
   }
   const el = event.target;
+  if (el.matches("[data-creation-choice-pick]")) { creationChoiceSetPick(el); return; }
   if (["journal-photo-file", "journal-camera-file"].includes(el.id)) { void receiveJournalPhoto(el.files?.[0]); return; }
   if (el.id === "portrait-file") { void receivePortraitFile(el.files?.[0]); return; }
   if (el.dataset.portraitFilter && portraitSession) {
@@ -19763,6 +21398,8 @@ async function setupServiceWorker() {
       });
     });
     navigator.serviceWorker.addEventListener("controllerchange", () => {
+      // La fenêtre qui a demandé la mise à jour bascule dès que le nouveau worker a pris la main.
+      if (updateRequested) { location.reload(); return; }
       if (ui.update) {
         // Les autres fenêtres conservent leurs saisies ; seul un rechargement volontaire bascule leur interface.
         toast("La mise à jour est installée. Recharge quand tes modifications sont enregistrées.");
