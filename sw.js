@@ -1,6 +1,6 @@
 /* Compagnon : coquille hors ligne versionnée, aucune requête de données distante. */
-const CACHE='compagnon-cache-ad60c7d9c06f';
-const BUILD='ad60c7d9c06fab7d33ce0306e0aa5963fad4b06f4220fa2c4f1f259323e72f0c';
+const CACHE='compagnon-cache-b72fb3c5473d';
+const BUILD='b72fb3c5473d5d3b5e5ab48479e113a9b682c5af4b523adecc7d655bbd38edcf';
 async function contentShell(request){
  const state=await caches.open('compagnon-content-state');
  for(const name of ['_content/active.json','_content/candidate-'+BUILD+'.json']){
@@ -26,7 +26,20 @@ async function rememberPortrait(request,response,cache){
  if(digest!==expected)throw new Error('Portrait incomplet');
  try{await cache.put(request,response.clone());}catch{}return response;
 }
-self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS.map(asset=>new Request(new URL(asset,self.location),{cache:'reload'}))))));
+async function installShell(){
+ const cache=await caches.open(CACHE),requests=ASSETS.map(asset=>new Request(new URL(asset,self.location),{cache:'reload'}));
+ try{await cache.addAll(requests);}catch{
+  // Certains profils Chromium refusent la mise en cache du flux réseau natif.
+  // Lire puis stocker un seul fichier à la fois borne la mémoire du repli.
+  for(const request of requests){
+   const response=await fetch(request);
+   if(!response.ok)throw new Error('Téléchargement de la coquille refusé : '+response.status);
+   const bytes=await response.arrayBuffer();
+   await cache.put(request,new Response(bytes,{headers:response.headers,status:response.status,statusText:response.statusText}));
+  }
+ }
+}
+self.addEventListener('install',event=>event.waitUntil(installShell()));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{await self.clients.claim();})()));
 self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting();});
 self.addEventListener('fetch',event=>{const url=new URL(event.request.url);if(event.request.method!=='GET'||url.origin!==self.location.origin)return;event.respondWith((async()=>{const cache=await caches.open(CACHE);if(event.request.cache==='no-store')return fetch(event.request);if(url.pathname.endsWith('/content-manifest.json'))return fetch(event.request);if(/\/content\/[a-f0-9]{64}\.json$/.test(url.pathname)){for(const key of await caches.keys())if(key.startsWith('compagnon-content-')){const found=await (await caches.open(key)).match(event.request);if(found)return found;}return fetch(event.request);}const prepared=await contentShell(event.request);if(prepared)return prepared;const cached=await cache.match(event.request,{ignoreSearch:true});if(cached)return cached;try{const response=await fetch(event.request);return url.pathname.includes("/portraits/")?await rememberPortrait(event.request,response,cache):response;}catch(error){if(event.request.mode==='navigate')return await cache.match(new URL('./index.html',self.location).href);throw error;}})());});
