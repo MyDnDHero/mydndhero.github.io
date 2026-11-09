@@ -1,6 +1,6 @@
 /* Compagnon : coquille hors ligne versionnée, aucune requête de données distante. */
-const CACHE='compagnon-cache-3af89dc1f34c';
-const BUILD='3af89dc1f34c1e41912fc43f56a1825d3fff9e297d480d137c36cb89be374c4f';
+const CACHE='compagnon-cache-ad60c7d9c06f';
+const BUILD='ad60c7d9c06fab7d33ce0306e0aa5963fad4b06f4220fa2c4f1f259323e72f0c';
 async function contentShell(request){
  const state=await caches.open('compagnon-content-state');
  for(const name of ['_content/active.json','_content/candidate-'+BUILD+'.json']){

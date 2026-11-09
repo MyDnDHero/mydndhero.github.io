@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-preview.14";
+const APP_VERSION = "2.0.0-preview.15";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -4132,7 +4132,78 @@ const UI_FR = Object.freeze({
   "{hours} h au plus (prolongée)": "{hours} h au plus (prolongée)",
   "Runes du chevalier": "Runes du chevalier",
   "1 réaction, lorsque vous êtes touché par une attaque ou ciblé par le sort Projectile magique": "1 réaction, lorsque vous êtes touché par une attaque ou ciblé par le sort Projectile magique",
-  "1 réaction, quand une attaque te touche ou que projectile magique te vise": "1 réaction, quand une attaque te touche ou que projectile magique te vise"
+  "1 réaction, quand une attaque te touche ou que projectile magique te vise": "1 réaction, quand une attaque te touche ou que projectile magique te vise",
+  "aidedd.finishBeforeUpdate": "Termine ou annule l’import avant la mise à jour.",
+  "aidedd.quantityInvalid": "Quantité d’équipement invalide.",
+  "aidedd.sameClass": "Utiliser {p0} pour tous les niveaux",
+  "aidedd.levelClass": "Classe acquise au niveau {p0}",
+  "aidedd.levelChoices": "Choix du niveau {p0}",
+  "aidedd.spending": "Vérifier et corriger les dépenses",
+  "aidedd.carried": "Port : {p0}",
+  "aidedd.slot.bag": "Dans le sac",
+  "aidedd.slot.main": "Main principale",
+  "aidedd.slot.off": "Autre main",
+  "aidedd.slot.shield": "Bouclier",
+  "aidedd.slot.armor": "Armure portée",
+  "aidedd.slot.ready": "Prêt à utiliser",
+  "aidedd.slot.worn": "Porté",
+  "aidedd.slot.focus": "Focaliseur",
+  "aidedd.provenanceInvalid": "Provenance d’import AideDD invalide ou trop volumineuse.",
+  "aidedd.spendingInvalid": "Une dépense dépasse la réserve disponible. Corrige les compteurs.",
+  "aidedd.gold": "Solde actuel en PO",
+  "aidedd.levelHp": "PV bruts, niveau {p0}",
+  "aidedd.player": "Confirmation du joueur",
+  "aidedd.choose": "Choisir…",
+  "aidedd.resolveHelp": "Choisis les références et les points de vie bruts manquants pour continuer. Sources : XML AideDD ou ta confirmation.",
+  "aidedd.resolve": "Vérifier ces choix",
+  "aidedd.reader.structure": "L’export est incomplet ou contient des champs principaux répétés.",
+  "aidedd.open": "Importer AideDD 2014",
+  "aidedd.preview": "Vérifier l’import AideDD",
+  "aidedd.refused": "Import AideDD refusé",
+  "aidedd.unknown": "Non renseigné",
+  "aidedd.unnamed": "Personnage sans nom",
+  "aidedd.hpMax": "PV maximum",
+  "aidedd.ac": "Classe d’armure",
+  "aidedd.levels": "Niveaux",
+  "aidedd.completeHelp": "Les choix proposés restent à vérifier. Confirme les références, les gains de chaque niveau et tes dépenses actuelles avant de créer la fiche. Les valeurs non interprétées restent dans le rapport et le XML.",
+  "aidedd.references": "Références à confirmer dans le guide",
+  "aidedd.fields": "Valeurs et sources XML",
+  "aidedd.missing": "Choix à vérifier",
+  "aidedd.missingHelp": "À confirmer dans le guide, ou conservé comme donnée non interprétée.",
+  "aidedd.source": "XML d’origine",
+  "aidedd.adjust": "Compléter et corriger les choix",
+  "aidedd.reviewed": "Choix vérifiés",
+  "aidedd.pending": "Vérification requise",
+  "aidedd.currentState": "PV et dépenses actuels",
+  "aidedd.stateHelp": "L’export ne renseigne pas ces compteurs. Saisis tes PV et corrige les dépenses proposées à zéro. Confirme seulement après vérification.",
+  "aidedd.hp": "PV actuels",
+  "aidedd.tempHp": "PV temporaires",
+  "aidedd.slots": "Emplacements dépensés, niveau {p0} (maximum {p1})",
+  "aidedd.pact": "Emplacements de pacte dépensés (maximum {p0})",
+  "aidedd.dice": "Dés de vie d{p0} dépensés (maximum {p1})",
+  "aidedd.resource": "{p0}, dépensés (maximum {p1})",
+  "aidedd.stateConfirmed": "J’ai vérifié les PV et dépenses actuels ci-dessus.",
+  "aidedd.reportOnly": "Conserver le rapport seul",
+  "aidedd.export": "Exporter les données préparées",
+  "aidedd.create": "Créer une nouvelle fiche",
+  "aidedd.returnPreview": "Revenir à l’aperçu",
+  "aidedd.confirmRequired": "Vérifie les choix et confirme les dépenses avant de créer la fiche.",
+  "aidedd.hpInvalid": "Les PV actuels dépassent le maximum calculé.",
+  "aidedd.writeError": "Création impossible : {p0}. Ton aperçu est conservé.",
+  "aidedd.status.converted": "Repris",
+  "aidedd.status.unknown": "À confirmer",
+  "aidedd.status.ambiguous": "Référence à confirmer",
+  "aidedd.status.not_applicable": "Niveau non acquis",
+  "aidedd.status.missing": "Absent",
+  "aidedd.reader.file": "Choisis un fichier à lire.",
+  "aidedd.reader.size": "Le fichier dépasse la limite de 1 Mo.",
+  "aidedd.reader.read": "Impossible de lire ce fichier.",
+  "aidedd.reader.external": "Le XML contient une déclaration ou une référence externe non autorisée.",
+  "aidedd.reader.malformed": "Le fichier XML est mal formé.",
+  "aidedd.reader.edition": "Cet export utilise les règles 2024. Choisis un export AideDD 2014.",
+  "aidedd.reader.format": "Ce fichier ne correspond pas au format AideDD 2014 reconnu.",
+  "aidedd.reader.duplicate": "Le fichier contient des champs répétés incompatibles.",
+  "aidedd.reader.required": "Des champs requis sont absents ou invalides."
 });
 
 
@@ -7902,7 +7973,78 @@ const UI_EN = Object.freeze({
   "{hours} h au plus (prolongée)": "at most {hours} h (extended)",
   "Runes du chevalier": "Rune Knight Runes",
   "1 réaction, lorsque vous êtes touché par une attaque ou ciblé par le sort Projectile magique": "1 reaction (which you take when you are hit by an attack or targeted by the Magic Missile spell)",
-  "1 réaction, quand une attaque te touche ou que projectile magique te vise": "1 reaction (which you take when you are hit by an attack or targeted by the Magic Missile spell)"
+  "1 réaction, quand une attaque te touche ou que projectile magique te vise": "1 reaction (which you take when you are hit by an attack or targeted by the Magic Missile spell)",
+  "aidedd.finishBeforeUpdate": "Finish or cancel the import before updating.",
+  "aidedd.quantityInvalid": "Invalid equipment quantity.",
+  "aidedd.sameClass": "Use {p0} for every level",
+  "aidedd.levelClass": "Class acquired at level {p0}",
+  "aidedd.levelChoices": "Level {p0} choices",
+  "aidedd.spending": "Review and adjust spending",
+  "aidedd.carried": "Equipped: {p0}",
+  "aidedd.slot.bag": "In the bag",
+  "aidedd.slot.main": "Main hand",
+  "aidedd.slot.off": "Off hand",
+  "aidedd.slot.shield": "Shield",
+  "aidedd.slot.armor": "Worn armor",
+  "aidedd.slot.ready": "Ready to use",
+  "aidedd.slot.worn": "Worn",
+  "aidedd.slot.focus": "Focus",
+  "aidedd.provenanceInvalid": "Invalid or oversized AideDD import provenance.",
+  "aidedd.spendingInvalid": "A spent amount exceeds its capacity. Adjust the counters.",
+  "aidedd.gold": "Current balance in gp",
+  "aidedd.levelHp": "Raw HP, level {p0}",
+  "aidedd.player": "Player confirmation",
+  "aidedd.choose": "Choose…",
+  "aidedd.resolveHelp": "Choose references and missing raw hit points to continue. Sources: AideDD XML or your confirmation.",
+  "aidedd.resolve": "Check these choices",
+  "aidedd.reader.structure": "The export is incomplete or contains duplicate main fields.",
+  "aidedd.open": "Import AideDD 2014",
+  "aidedd.preview": "Review AideDD import",
+  "aidedd.refused": "AideDD import rejected",
+  "aidedd.unknown": "Not provided",
+  "aidedd.unnamed": "Unnamed character",
+  "aidedd.hpMax": "Maximum HP",
+  "aidedd.ac": "Armor Class",
+  "aidedd.levels": "Levels",
+  "aidedd.completeHelp": "Review the proposed choices. Confirm references, gains at each level and current spending before creating the character. Uninterpreted values remain in the report and XML.",
+  "aidedd.references": "References to confirm in the guide",
+  "aidedd.fields": "XML values and sources",
+  "aidedd.missing": "Choices to review",
+  "aidedd.missingHelp": "Confirm in the guide, or retain as uninterpreted data.",
+  "aidedd.source": "Original XML",
+  "aidedd.adjust": "Complete and adjust choices",
+  "aidedd.reviewed": "Choices reviewed",
+  "aidedd.pending": "Review required",
+  "aidedd.currentState": "Current HP and spending",
+  "aidedd.stateHelp": "The export does not provide these counters. Enter your HP and adjust spending proposed as zero. Confirm after reviewing.",
+  "aidedd.hp": "Current HP",
+  "aidedd.tempHp": "Temporary HP",
+  "aidedd.slots": "Spent slots, level {p0} (maximum {p1})",
+  "aidedd.pact": "Spent pact slots (maximum {p0})",
+  "aidedd.dice": "Spent d{p0} Hit Dice (maximum {p1})",
+  "aidedd.resource": "{p0}, spent (maximum {p1})",
+  "aidedd.stateConfirmed": "I reviewed the current HP and spending above.",
+  "aidedd.reportOnly": "Save report only",
+  "aidedd.export": "Export prepared data",
+  "aidedd.create": "Create a new character",
+  "aidedd.returnPreview": "Return to preview",
+  "aidedd.confirmRequired": "Review choices and confirm spending before creating the character.",
+  "aidedd.hpInvalid": "Current HP exceeds the calculated maximum.",
+  "aidedd.writeError": "Cannot create character: {p0}. Your preview is preserved.",
+  "aidedd.status.converted": "Mapped",
+  "aidedd.status.unknown": "Needs confirmation",
+  "aidedd.status.ambiguous": "Reference needs confirmation",
+  "aidedd.status.not_applicable": "Level not acquired",
+  "aidedd.status.missing": "Missing",
+  "aidedd.reader.file": "Choose a file to read.",
+  "aidedd.reader.size": "The file exceeds the 1 MB limit.",
+  "aidedd.reader.read": "Cannot read this file.",
+  "aidedd.reader.external": "The XML contains an unsupported external declaration or reference.",
+  "aidedd.reader.malformed": "The XML file is malformed.",
+  "aidedd.reader.edition": "This export uses 2024 rules. Choose an AideDD 2014 export.",
+  "aidedd.reader.format": "This file does not match the supported AideDD 2014 format.",
+  "aidedd.reader.duplicate": "The file contains incompatible duplicate fields.",
+  "aidedd.reader.required": "Required fields are missing or invalid."
 });
 
 
@@ -32849,6 +32991,13 @@ function ruleTableAt(data, path) {
 }
 
 
+// Module : aidedd-provenance
+function validateAideddProvenance(value) {
+  if (value === undefined) return;
+  if (!value || typeof value !== "object" || Array.isArray(value) || value.schemaVersion !== 1 || value.format !== "aidedd-builder-2014-xml" || typeof value.original !== "string" || value.original.length > 1024 * 1024 || !value.report || typeof value.report !== "object" || Array.isArray(value.report) || !Array.isArray(value.confirmations) || value.confirmations.some((row) => typeof row !== "string" || row.length > 2000) || JSON.stringify(value).length > 3 * 1024 * 1024) throw new Error(uiText("aidedd.provenanceInvalid"));
+}
+
+
 // Module : engine
 /** Moteur de règles D&D 5e (2014) : calculs purs, sans accès au DOM ni au stockage.
  * Modèle de personnage version 2 : multiclassage, sous-races, sous-classes, dons, choix génériques (picks).
@@ -37662,7 +37811,7 @@ function validateImport(input) {
     const isJournalPhotoData = typeof v === "string" && v.length > 50000 && path.length === 4 && path[0] === "journalEntries" &&
       Number.isInteger(path[1]) && Array.isArray(input.journalEntries) && path[2] === "image" && path[3] === "dataUrl" &&
       validateJournalPhoto(input.journalEntries[path[1]]?.image)?.dataUrl === v;
-    if (typeof v === "string" && v.length > 50000 && !isPortraitData && !isJournalPhotoData) throw new Error(uiText("Texte trop long."));
+    if (typeof v === "string" && v.length > 50000 && !isPortraitData && !isJournalPhotoData && !(path[0] === "aideddImport" && path[1] === "original" && v.length <= 1024 * 1024)) throw new Error(uiText("Texte trop long."));
     if (Array.isArray(v)) {
       if (v.length > 1500) throw new Error(uiText("Tableau trop grand."));
       v.forEach((x, i) => safeTree(x, depth + 1, [...path, i]));
@@ -37673,6 +37822,7 @@ function validateImport(input) {
       }
     } else if (typeof v === "number" && !Number.isFinite(v)) throw new Error(uiText("Nombre invalide."));
   }
+  validateAideddProvenance(input?.aideddImport);
   safeTree(input);
   if (!plain(input) || ![1, SCHEMA_VERSION].includes(input.schemaVersion))
     throw new Error(uiText("Version de personnage incompatible (versions 1 et {version} acceptées).", { version: SCHEMA_VERSION }));
@@ -39637,6 +39787,499 @@ class LocalStore {
     } else this.memory = payload;
     return payload;
   }
+}
+
+
+// Module : aidedd-reader
+// Lecture locale du seul format AideDD observé, sans écriture dans le stockage.
+const AIDEDD_MAX_BYTES = 1024 * 1024;
+
+function aideddReadError(code, message) {
+  return { ok: false, code, message };
+}
+
+async function readAideddFile(file) {
+  if (!file || typeof file.text !== "function" || !Number.isFinite(file.size)) {
+    return aideddReadError("file", "Choisis un fichier à lire.");
+  }
+  if (file.size > AIDEDD_MAX_BYTES) {
+    return aideddReadError("size", "Le fichier dépasse la limite de 1 Mo.");
+  }
+  let text;
+  try {
+    text = await file.text();
+  } catch {
+    return aideddReadError("read", "Impossible de lire ce fichier.");
+  }
+  // Refuser les déclarations avant analyse : aucune entité ou feuille externe ne sera chargée.
+  if (/<!DOCTYPE\b|<!ENTITY\b|<\?xml-stylesheet\b/i.test(text)) {
+    return aideddReadError("external", "Le fichier contient une déclaration de ressource externe ou d’entité.");
+  }
+  const doc = new DOMParser().parseFromString(text, "application/xml");
+  if (doc.querySelector("parsererror")) {
+    return aideddReadError("malformed", "Le fichier XML est mal formé.");
+  }
+  if (Array.from(doc.querySelectorAll("*")).some((element) =>
+    Array.from(element.attributes).some((attribute) => /^(?:href|src|xlink:href)$/i.test(attribute.name)))) {
+    return aideddReadError("external", "Le fichier contient une référence à une ressource externe.");
+  }
+  const root = doc.documentElement;
+  const children = Array.from(root.children);
+  // Le créateur 2024 observé utilise une racine et des champs distincts.
+  if (root.tagName === "creator" && !root.namespaceURI &&
+      ["version", "confLang", "class1", "level1", "species"].every((name) =>
+        children.filter((element) => element.tagName === name && !element.children.length && element.textContent.trim()).length === 1)) {
+    return aideddReadError("edition", "Cet export AideDD utilise les règles 2024. Choisis un export du Character Builder 2014.");
+  }
+  const characters = children.filter((element) => element.tagName === "character");
+  const languages = children.filter((element) => element.tagName === "confLang");
+  if (root.tagName !== "builder" || root.namespaceURI || characters.length !== 1 || languages.length !== 1 ||
+      !["0", "1"].includes(languages[0].textContent.trim())) {
+    return aideddReadError("format", "Ce fichier ne correspond pas à un export AideDD 2014 reconnu.");
+  }
+  const character = characters[0];
+  const fields = Array.from(character.children);
+  if (["race", "class", "level", "background", "str", "dex", "con", "int", "wis", "cha"].some((name) => {
+    const matches = fields.filter((element) => element.tagName === name);
+    return matches.length !== 1 || !matches[0].textContent.trim() || matches[0].children.length;
+  })) {
+    return aideddReadError("structure", "L’export AideDD est incomplet ou contient des champs principaux répétés.");
+  }
+  return { ok: true, format: "aidedd-builder-2014-xml", document: doc, character, original: text };
+}
+
+
+// Module : aidedd-tables
+// Libellés du formulaire public AideDD 2014, étape équipement.
+const AIDEDD_EQUIPMENT_TABLES = {
+  "source": "https://www.aidedd.org/dnd-builder/ajax_main.php",
+  "date": "2026-11-09",
+  "sha256": "de0006ed00acc5d7442d6a70f6a546efe01f51aadea29af18ff892a2565ba028",
+  "tables": {
+    "armure": {
+      "0": "Sans armure, CA 10 (-)",
+      "1": "Armure matelassée, CA 11 (5 po)",
+      "2": "Armure de cuir, CA 11 (10 po)",
+      "3": "Armure de cuir clouté, CA 12 (45 po)",
+      "4": "Armure de peaux, CA 12 (10 po)",
+      "5": "Chemise de mailles, CA 13 (50 po)",
+      "6": "Armure d'écailles, CA 14 (50 po)",
+      "7": "Cuirasse, CA 14 (400 po)",
+      "8": "Demi-plate, CA 15 (750 po)",
+      "9": "Broigne, CA 14 (30 po)",
+      "10": "Cotte de mailles, CA 16 (75 po)",
+      "11": "Clibanion, CA 17 (200 po)",
+      "12": "Harnois, CA 18 (1 500 po)"
+    },
+    "bouclier": {
+      "0": "Sans bouclier, CA +0 (-)",
+      "1": "Bouclier, CA +2 (10 po)"
+    },
+    "arme": {
+      "0": "-- Arme DG (prix)",
+      "2": "Bâton 1d6 (2 pa)",
+      "3": "Dague 1d4 (2 po)",
+      "4": "Gourdin 1d4 (1 pa)",
+      "5": "Hachette 1d6 (5 po)",
+      "6": "Javeline 1d6 (5 pa)",
+      "7": "Lance 1d6 (1 po)",
+      "8": "Marteau léger 1d4 (2 po)",
+      "9": "Masse d'armes 1d6 (5 po)",
+      "10": "Massue 1d8 (2 pa)",
+      "11": "Serpe 1d4 (1 po)",
+      "12": "Arbalète légère 1d8 (25 po)",
+      "13": "Arc court 1d6 (25 po)",
+      "14": "Fléchette 1d4 (5 pc)",
+      "15": "Fronde 1d4 (1 pa)",
+      "16": "Cimeterre 1d6 (25 po)",
+      "17": "Coutille 1d10 (10 po)",
+      "18": "Épée à deux mains 2d6 (50 po)",
+      "19": "Épée courte 1d6 (10 po)",
+      "20": "Épée longue 1d8 (15 po)",
+      "21": "Fléau d'armes 1d8 (10 po)",
+      "22": "Fouet 1d4 (2 po)",
+      "23": "Hache à deux mains 1d12 (30 po)",
+      "24": "Hache d'armes 1d8 (10 po)",
+      "25": "Hallebarde 1d10 (20 po)",
+      "26": "Lance d'arçon 1d12 (10 po)",
+      "27": "Maillet 2d6 (10 po)",
+      "28": "Marteau de guerre 1d8 (15 po)",
+      "29": "Morgenstern 1d8 (15 po)",
+      "30": "Pic de guerre 1d8 (5 po)",
+      "31": "Pique 1d10 (5 po)",
+      "32": "Rapière 1d8 (25 po)",
+      "33": "Trident 1d6 (5 po)",
+      "34": "Arbalète de poing 1d6 (75 po)",
+      "35": "Arbalète lourde 1d10 (50 po)",
+      "36": "Arc long 1d8 (50 po)",
+      "37": "Filet - (1 po)",
+      "38": "Sarbacane 1 (10 po)"
+    },
+    "outil": {
+      "0": "-- Outils (prix)",
+      "1": "Kit d'empoisonneur (50 po)",
+      "2": "Kit d'herboriste (5 po)",
+      "3": "Kit de contrefaçon (15 po)",
+      "4": "Kit de déguisement (25 po)",
+      "5": "Outils de navigateur (25 po)",
+      "6": "Outils de voleur (25 po)",
+      "38": "Véhicules (terrestres) (-)",
+      "39": "Véhicules (aquatiques) (-)",
+      "7": "Chalemie (2 po)",
+      "8": "Cor (3 po)",
+      "9": "Cornemuse (30 po)",
+      "10": "Flûte (2 po)",
+      "11": "Flûte de pan (12 po)",
+      "12": "Luth (35 po)",
+      "13": "Lyre (30 po)",
+      "14": "Tambour (6 po)",
+      "15": "Tympanon (25 po)",
+      "16": "Viole (30 po)",
+      "17": "Dés (1 pa)",
+      "18": "Jeu d'échecs draconiques (1 po)",
+      "19": "Jeu de cartes (5 pa)",
+      "20": "Jeu des Dragons (1 po)",
+      "21": "Matériel d'alchimiste (50 po)",
+      "22": "Matériel de brasseur (20 po)",
+      "23": "Matériel de calligraphe (10 po)",
+      "24": "Matériel de peintre (10 po)",
+      "25": "Outils de bijoutier (25 po)",
+      "26": "Outils de bricoleur (50 po)",
+      "27": "Outils de cartographe (15 po)",
+      "28": "Outils de charpentier (8 po)",
+      "29": "Outils de cordonnier (5 po)",
+      "30": "Outils de forgeron (20 po)",
+      "31": "Outils de maçon (10 po)",
+      "32": "Outils de menuisier (1 po)",
+      "33": "Outils de potier (10 po)",
+      "34": "Outils de souffleur de verre (30 po)",
+      "35": "Outils de tanneur (5 po)",
+      "36": "Outils de tisserand (1 po)",
+      "37": "Ustensiles de cuisinier (1 po)"
+    },
+    "objet": {
+      "0": "-- Objet (prix)",
+      "1": "Acide/fiole (25 po)",
+      "2": "Antidote/fiole (50 po)",
+      "52": "Balance de marchand (5 po)",
+      "3": "Bélier portable (4 po)",
+      "4": "Billes/1000 (1 po)",
+      "5": "Boite d'allume-feu (5 pa)",
+      "6": "Bougie (1 pc)",
+      "7": "Boulier (2 po)",
+      "99": "Bouteille (2 po)",
+      "9": "Cadenas (10 po)",
+      "10": "Carquois (1 po)",
+      "11": "Chaîne de 3 m (5 po)",
+      "12": "Chevalière (5 po)",
+      "13": "Chausse-trappes/20 (1 po)",
+      "14": "Cire à cacheter (5 pa)",
+      "15": "Cloche (1 po)",
+      "16": "Coffre (5 po)",
+      "17": "Corde en chanvre de 15 m (1 po)",
+      "18": "Corde en soie de 15 m (10 po)",
+      "19": "Couverture (5 pa)",
+      "20": "Craie (1 pc)",
+      "98": "Cruche (2 pc)",
+      "21": "Eau bénite/flasque (25 po)",
+      "22": "Échelle de 3 m (1 pa)",
+      "23": "Encre/bouteille (10 po)",
+      "24": "Étui à carreaux (1 po)",
+      "25": "Étui à cartes ou parchemins (1 po)",
+      "26": "Feu grégeois/flasque (50 po)",
+      "27": "Fiole (1 po)",
+      "28": "Flasque (2 pc)",
+      "29": "Focaliseur arcanique/baguette (10 po)",
+      "30": "Focaliseur arcanique/bâton (5 po)",
+      "31": "Focaliseur arcanique/boule de cristal (10 po)",
+      "32": "Focaliseur arcanique/orbe (20 po)",
+      "33": "Focaliseur arcanique/sceptre (10 po)",
+      "34": "Focaliseur druidique/baguette d'if (10 po)",
+      "35": "Focaliseur druidique/bâton (5 po)",
+      "36": "Focaliseur druidique/branche de gui (1 po)",
+      "37": "Focaliseur druidique/totem (1 po)",
+      "38": "Gamelle (2 pa)",
+      "39": "Gourde (2 pa)",
+      "40": "Grappin (2 po)",
+      "41": "Grimoire (50 po)",
+      "42": "Huile/flasque (1 pa)",
+      "51": "Kit d'escalade (25 po)",
+      "43": "Lampe (5 pa)",
+      "44": "Lanterne sourde (10 po)",
+      "45": "Lanterne à capote (5 po)",
+      "46": "Livre (25 po)",
+      "47": "Longue-vue (1000 po)",
+      "48": "Loupe (100 po)",
+      "49": "Marteau (1 po)",
+      "50": "Marteau de forgeron (2 po)",
+      "53": "Matériel de pêche (1 po)",
+      "54": "Menottes (2 po)",
+      "65": "Miroir en acier (5 po)",
+      "58": "50 aiguilles de sarbacane (1 po)",
+      "55": "20 billes de fronde (4 pc)",
+      "56": "20 carreaux (1 po)",
+      "57": "20 flèches (1 po)",
+      "59": "Palan (1 po)",
+      "97": "Panier (4 pa)",
+      "60": "Papier (2 pa)",
+      "61": "Parchemin (1 pa)",
+      "62": "Parfum/fiole (5 po)",
+      "63": "Pelle (2 po)",
+      "64": "Perche de 3 m (5 pc)",
+      "66": "Pied-de-biche (2 po)",
+      "67": "Piège à mâchoires (5 po)",
+      "68": "Pierre à aiguiser (1 pc)",
+      "69": "Pioche de mineur (2 po)",
+      "70": "Piton (5 pc)",
+      "71": "Plume d'écriture (2 pc)",
+      "72": "Pointes en fer/10 (1 po)",
+      "73": "Poison/fiole (100 po)",
+      "74": "Pot en fer (2 po)",
+      "75": "potion de guérison",
+      "76": "Rations/1 jour (5 pa)",
+      "77": "Robes (1 po)",
+      "78": "Sablier (25 po)",
+      "79": "Sac (1 pc)",
+      "80": "Sac à dos (2 po)",
+      "81": "Sac de couchage (1 po)",
+      "8": "Sacoche (5 pa)",
+      "82": "Sacoche à composantes (25 po)",
+      "83": "Savon (2 pc)",
+      "84": "Seau (5 pc)",
+      "85": "Sifflet (5 pc)",
+      "86": "Symbole sacré/amulette (5 po)",
+      "87": "Symbole sacré/emblème (5 po)",
+      "88": "Symbole sacré/reliquaire (5 po)",
+      "89": "Tente (2 po)",
+      "96": "Tonneau (2 po)",
+      "90": "Torche (1 pc)",
+      "91": "Trousse de soins (5 po)",
+      "92": "Vêtements communs (5 pa)",
+      "93": "Vêtements/costume (5 po)",
+      "94": "Vêtements fins (15 po)",
+      "95": "Vêtements de voyage (2 po)"
+    }
+  }
+};
+
+
+// Module : aidedd-mapping
+
+// Le résultat est un brouillon partiel : les inconnues doivent être résolues avant création.
+const aideddKey = (value) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[’']/g, " ").trim();
+const aideddClassEnglish = { barbarian: "Barbarian", bard: "Bard", cleric: "Cleric", druid: "Druid", fighter: "Fighter", monk: "Monk", paladin: "Paladin", ranger: "Ranger", rogue: "Rogue", sorcerer: "Sorcerer", warlock: "Warlock", wizard: "Wizard", artificer: "Artificer" };
+
+function mapAideddCharacter(readResult, options = {}) {
+  if (!readResult?.ok || readResult.format !== "aidedd-builder-2014-xml") throw new Error("Export AideDD non reconnu.");
+  const root = readResult.document.documentElement;
+  const source = readResult.character;
+  const character = { abilities: {}, details: {} };
+  const report = { fields: [], ambiguities: [], missingChoices: [], warnings: [], invalidResolutions: [], maximum: null };
+  const resolutions = options.resolutions || {};
+  const add = (path, value, status, reason) => report.fields.push({ path, value, status, reason });
+  const fields = Array.from(source.children);
+  const get = (name) => fields.find((element) => element.tagName === name)?.textContent ?? "";
+  const mark = new Map(), nodeMarks = new Map();
+  const convert = (name, reason) => mark.set(name, ["converted", reason]);
+  const unknown = (id, reason, value = null, extra = {}) => report.missingChoices.push({ id, value, reason, blocking: false, ...extra });
+  const allRaces = Object.entries(RACES).filter(([, race]) => race.referenceId).map(([id, race]) => ({ id, name: race.name, source: race.referenceId.split("|")[1].toUpperCase(), referenceId: race.referenceId }));
+  const allClasses = Object.entries(CLASSES).map(([id, item]) => ({ id, name: item.name, source: id === "artificer" ? "TCE" : "PHB", version: "2014" }));
+  const allBackgrounds = Object.entries(BACKGROUNDS).map(([id, item]) => ({ id, name: item.name, source: (item.source || "").toUpperCase(), version: item.version || "2014" }));
+  const match = (id, input, candidates, fallback, apply) => {
+    const choices = candidates.length ? candidates : fallback;
+    const supplied = Object.hasOwn(resolutions, id);
+    const selected = supplied ? choices.find((item) => item.id === resolutions[id]) : null;
+    if (supplied && !selected) report.invalidResolutions.push({ id, value: resolutions[id], reason: "Choix absent des références proposées." });
+    if (selected || (!supplied && candidates.length === 1)) {
+      apply((selected || candidates[0]).id);
+      convert(id, selected ? "Référence choisie explicitement." : "Référence reconnue avec sa source.");
+      return;
+    }
+    const reason = candidates.length ? "Choisir la version correspondant à la fiche." : "Référence non reconnue : choisir une référence ou conserver le texte d’origine.";
+    report.ambiguities.push({ id, value: input, candidates: choices });
+    unknown(id, reason, input, { blocking: true });
+  };
+  const raceName = aideddKey(get("race"));
+  const races = allRaces.filter((candidate) => [candidate.name, candidate.referenceId.split("|").at(-1)].some((name) => name && aideddKey(name) === raceName));
+  match("race", get("race"), races, allRaces, (id) => { character.raceId = id; });
+  const className = aideddKey(get("class"));
+  const classes = allClasses.filter((candidate) => [candidate.name, aideddClassEnglish[candidate.id]].some((name) => name && aideddKey(name) === className));
+  match("class", get("class"), classes, allClasses, (id) => { character.classId = id; });
+  const backgroundName = aideddKey(get("background"));
+  const backgrounds = allBackgrounds.filter((candidate) => [candidate.name, ...(BACKGROUNDS[candidate.id].aliases || []), ...Object.values(BACKGROUND_REFERENCE_DATA).filter((entry) => entry.id === candidate.id).map((entry) => entry.englishName)].some((name) => name && aideddKey(name) === backgroundName));
+  match("background", get("background"), backgrounds, allBackgrounds, (id) => { character.background = { id }; });
+  for (const name of ["str", "dex", "con", "int", "wis", "cha"]) {
+    const value = Number(get(name));
+    if (Number.isInteger(value) && value >= 1 && value <= 30) { character.abilities[name] = value; convert(name, "Caractéristique brute conservée."); }
+    else unknown(name, "Valeur de caractéristique invalide.", get(name));
+  }
+  const level = Number(get("level"));
+  if (Number.isInteger(level) && level >= 1 && level <= 20) { character.importedLevel = level; convert("level", "Niveau total conservé, historique à compléter."); }
+  else unknown("level", "Niveau invalide.", get("level"));
+  for (const name of ["name", "xp"]) {
+    if (name === "name") character.name = get(name);
+    else if (/^\d+$/.test(get(name))) character.xp = Number(get(name));
+    else continue;
+    convert(name, "Valeur conservée.");
+  }
+  for (const name of ["age", "height", "weight", "eyes", "skin", "hair", "traits", "ideals", "bonds", "flaws"]) { character.details[name] = get(name); convert(name, "Texte conservé."); }
+  character.biography = get("backstory"); convert("backstory", "Texte conservé dans la biographie.");
+  const coinRates = { pp: 1000, gp: 100, ep: 50, sp: 10, cp: 1 };
+  if (Object.keys(coinRates).every((name) => /^\d+$/.test(get(name)) && Number.isSafeInteger(Number(get(name))))) {
+    const coins = Object.fromEntries(Object.keys(coinRates).map((name) => [name, Number(get(name))]));
+    const copper = Object.entries(coinRates).reduce((sum, [name, rate]) => sum + coins[name] * rate, 0);
+    if (Number.isSafeInteger(copper)) {
+      character.gold = copper / 100;
+      report.currency = { coins, goldEquivalent: character.gold, source: "AideDD : pp, gp, ep, sp, cp" };
+      for (const name of Object.keys(coinRates)) convert(name, "Monnaie conservée et convertie en équivalent PO.");
+    }
+  }
+  // Indices vérifiés dans le formulaire public AideDD 2014, étape équipement.
+  const tableMatch = (source, catalog) => Object.fromEntries(Object.entries(AIDEDD_EQUIPMENT_TABLES.tables[source]).flatMap(([index, label]) => {
+    const clean = aideddKey(label.replace(/, CA.*$/, "").replace(/\s+\d+d\d+.*$/, "").replace(/\s*\([^)]*\)$/, ""));
+    const matches = Object.entries(catalog).filter(([, item]) => aideddKey(item.name) === clean);
+    return matches.length === 1 ? [[index, matches[0][0]]] : [];
+  }));
+  const armor = { ...tableMatch("armure", ARMORS), "10": "chain" }, weapons = { ...tableMatch("arme", WEAPONS), "12": "light-crossbow", "20": "longsword" };
+  const items = { ...tableMatch("objet", GEAR), "56": "crossbow-bolts", "80": "backpack", "66": "crowbar", "49": "hammer", "70": "piton", "90": "torch", "5": "tinderbox", "76": "rations", "39": "waterskin", "17": "hempen-rope", "63": "shovel", "74": "iron-pot", "92": "clothes-common" };
+  character.importedEquipment = { armor: armor[get("armor")] || null, shield: get("shield") === "1" ? true : get("shield") === "0" ? false : null, weapons: [], items: [] };
+  if (character.importedEquipment.armor) convert("armor", "Indice vérifié dans le formulaire AideDD.");
+  if (character.importedEquipment.shield !== null) convert("shield", "Indice vérifié dans le formulaire AideDD.");
+  const indexed = (field, quantityField, table, target) => {
+    const ids = get(field).split(","), quantities = get(quantityField).split(",");
+    if (!get(field)) return;
+    if (ids.length !== quantities.length || ids.some((id, i) => !table[id] || !/^[1-9]\d*$/.test(quantities[i]))) return;
+    target.push(...ids.map((id, i) => ({ catalogId: table[id], quantity: Number(quantities[i]) })));
+    convert(field, "Indices vérifiés dans le formulaire AideDD."); convert(quantityField, "Quantités associées aux indices conservées.");
+  };
+  indexed("weapon", "weaponQ", weapons, character.importedEquipment.weapons);
+  indexed("item", "itemQ", items, character.importedEquipment.items);
+  const toolTable = tableMatch("outil", TOOLS);
+  const toolIds = get("tools").split(",").filter((id) => id && id !== "0");
+  if (toolIds.length && toolIds.every((id) => toolTable[id])) {
+    character.importedEquipment.tools = toolIds.map((id) => ({ catalogId: toolTable[id], quantity: 1 }));
+    convert("tools", "Indices vérifiés et libellés concordants avec le catalogue.");
+  }
+  const languageNodes = fields.filter((node) => node.tagName === "languages");
+  if (languageNodes.length) { character.languages = languageNodes.map((node) => node.textContent.trim()).filter(Boolean).join(", "); convert("languages", "Langues exprimées en texte conservées."); }
+  character.notes = [["Apparence", "appearance"], ["Alliés", "allies"], ["Capacités supplémentaires", "features"], ["Trésor", "treasure"], ["Équipement libre", "itemX"]].filter(([, name]) => get(name)).map(([label, name]) => `${label} : ${get(name)}`).join("\n\n");
+  for (const name of ["appearance", "allies", "features", "treasure", "itemX"]) convert(name, "Texte conservé dans les notes.");
+  const skillNode = fields.find((node) => node.tagName === "skillsProf" && node.getAttribute("id") === "2");
+  const skillIds = { "4": "animal", "16": "survival" };
+  if (skillNode && skillNode.textContent && skillNode.textContent.split(",").every((id) => skillIds[id])) {
+    character.importedSkills = skillNode.textContent.split(",").map((id) => skillIds[id]);
+    nodeMarks.set(skillNode, ["converted", "Compétences de l’historique vérifiées dans le formulaire AideDD."]);
+  }
+  character.levels = [];
+  if (Number.isInteger(level) && level >= 1 && level <= 20) {
+    for (let n = 1; n <= level; n++) {
+      const nodes = fields.filter((node) => node.tagName === "lvl" && Number(node.getAttribute("lvl")) === n);
+      const hpText = nodes.length === 1 ? Array.from(nodes[0].children).find((child) => child.tagName === "hp_brut")?.textContent : null;
+      let hpDie = /^\d+$/.test(hpText || "") && Number(hpText) > 0 ? Number(hpText) : null;
+      const id = `level:${n}:class`;
+      let classId = n === 1 ? character.classId : null;
+      if (n > 1 && Object.hasOwn(resolutions, id)) {
+        if (allClasses.some((candidate) => candidate.id === resolutions[id])) classId = resolutions[id];
+        else report.invalidResolutions.push({ id, value: resolutions[id], reason: "Classe inconnue." });
+      }
+      if (!classId) {
+        if (n > 1) report.ambiguities.push({ id, value: null, candidates: allClasses });
+        unknown(id, "Choisir la classe acquise à ce niveau.", null, { blocking: true });
+      }
+      const hpId = `level:${n}:hp`;
+      if (Object.hasOwn(resolutions, hpId)) {
+        if (Number.isInteger(resolutions[hpId]) && resolutions[hpId] >= 1 && classId && resolutions[hpId] <= CLASSES[classId].die && (n > 1 || resolutions[hpId] === CLASSES[classId].die)) hpDie = resolutions[hpId];
+        else report.invalidResolutions.push({ id: hpId, value: resolutions[hpId], reason: "Points de vie bruts incompatibles avec la classe." });
+      }
+      if (hpDie !== null && classId && (hpDie > CLASSES[classId].die || (n === 1 && hpDie !== CLASSES[classId].die))) hpDie = null;
+      if (hpDie === null) unknown(hpId, "Renseigner les points de vie bruts de ce niveau selon la classe.", hpText, { blocking: true });
+      character.levels.push({ level: n, classId: classId || null, hpDie, choices: {}, asi: null });
+    }
+  }
+  report.importedValues = { hp: null, hpMaximum: null, armorClass: null, levels: character.levels.map((entry) => {
+    const node = fields.find((item) => item.tagName === "lvl" && Number(item.getAttribute("lvl")) === entry.level);
+    const raw = node && Array.from(node.children).find((item) => item.tagName === "hp_brut")?.textContent;
+    return { level: entry.level, hpDie: /^\d+$/.test(raw || "") ? Number(raw) : null, source: raw == null ? null : "hp_brut" };
+  }) };
+  for (const node of fields) {
+    if (node.tagName === "lvl") {
+      const n = Number(node.getAttribute("lvl"));
+      add(`character/lvl[@lvl="${node.getAttribute("lvl")}"]/@lvl`, node.getAttribute("lvl"), "converted", "Numéro de niveau conservé.");
+      for (const child of Array.from(node.children)) add(`character/lvl[@lvl="${node.getAttribute("lvl")}"]/${child.tagName}`, child.textContent, n > level ? "not_applicable" : child.tagName === "hp_brut" && character.levels[n - 1]?.hpDie != null && Number(child.textContent) === character.levels[n - 1].hpDie ? "converted" : "unknown", n > level ? "Niveau futur, non acquis." : child.tagName === "hp_brut" && character.levels[n - 1]?.hpDie != null && Number(child.textContent) === character.levels[n - 1].hpDie ? "Points de vie bruts de ce niveau conservés." : "Valeur conservée ; son interprétation et son acquisition restent à confirmer.");
+      if (n <= level) {
+        const id = `level:${n}`;
+        const acknowledged = resolutions[id] === "unknown";
+        if (Object.hasOwn(resolutions, id) && !acknowledged) report.invalidResolutions.push({ id, value: resolutions[id], reason: "Seule la conservation explicite comme inconnu est acceptée." });
+        unknown(id, "Les gains et choix de ce niveau restent à compléter ; aucune acquisition n’est inventée.", null, { blocking: false, acknowledged });
+      }
+      continue;
+    }
+    const id = node.getAttribute("id");
+    const path = `character/${node.tagName}${id === null ? "" : `[@id="${id}"]`}`;
+    const mapped = nodeMarks.get(node) || mark.get(node.tagName);
+    add(path, node.textContent, mapped?.[0] || "unknown", mapped?.[1] || "Valeur d’origine conservée, interprétation à confirmer.");
+    for (const attr of Array.from(node.attributes)) add(`${path}/@${attr.name}`, attr.value, "unknown", "Attribut d’origine conservé.");
+    const describeChildren = (parent, parentPath) => {
+      for (const child of Array.from(parent.children)) {
+        const childPath = `${parentPath}/${child.tagName}`;
+        add(childPath, child.textContent, "unknown", "Champ imbriqué conservé dans le XML d’origine.");
+        for (const attr of Array.from(child.attributes)) add(`${childPath}/@${attr.name}`, attr.value, "unknown", "Attribut d’origine conservé.");
+        describeChildren(child, childPath);
+      }
+    };
+    describeChildren(node, path);
+    if (node.tagName === "skillsProf" && node.getAttribute("id") === "1" && node.textContent.trim() && node.textContent.split(",").some((value) => value === "0")) unknown(path, "Choix de compétences de classe incomplets à compléter.", node.textContent, { blocking: false, acknowledged: resolutions[path] === "unknown" });
+  }
+  for (const node of Array.from(root.children).filter((node) => node !== source)) add(`builder/${node.tagName}`, node.textContent, node.tagName === "confLang" ? "converted" : "unknown", node.tagName === "confLang" ? "Langue de l’export conservée." : "Champ d’origine conservé.");
+  report.warnings.push("Le maximum et les dépenses actuelles non présents dans l’export restent inconnus.");
+  const original = readResult.original;
+  return { character, report, original };
+}
+
+
+// Module : aidedd-preview
+
+// Le brouillon reste en mémoire : aucune écriture avant la confirmation finale.
+function prepareAideddPreview(mapped) {
+  const patch = clone(mapped.character), base = createCharacter(patch.classId || "fighter");
+  const equipment = patch.importedEquipment;
+  if (!patch.levels?.length || patch.levels.some((entry) => !entry.classId || !Number.isInteger(entry.hpDie))) throw new Error("aidedd.resolveHelp");
+  delete patch.importedEquipment; delete patch.importedLevel; delete patch.importedSkills;
+  const character = { ...base, ...patch, abilityMethod: "manual",
+    abilities: { ...base.abilities, ...patch.abilities }, background: { ...base.background, ...patch.background }, details: { ...base.details, ...patch.details },
+    equipment: { ...base.equipment, armor: "none", shield: false, weapons: [], hands: { main: null, off: null } }, inventory: [],
+    state: { ...base.state, ...(patch.state || {}), hp: patch.state?.hp ?? mapped.report.importedValues?.hp ?? 0 }, startKit: { mode: "gold", choices: {}, picks: {} } };
+  // Les valeurs de création absentes sont seulement des propositions à confirmer dans le guide.
+  if (equipment) {
+    for (const entry of [...equipment.weapons, ...equipment.items, ...(equipment.tools || []), ...(equipment.armor ? [{ catalogId: equipment.armor, quantity: 1 }] : []), ...(equipment.shield ? [{ catalogId: "shield", quantity: 1 }] : [])]) {
+      const item = createRuntimeItem(entry.catalogId, character.id);
+      if (!Number.isSafeInteger(entry.quantity) || entry.quantity < 1) throw new Error("aidedd.quantityInvalid");
+      item.qty = entry.quantity * (entry.quantityUnit === "unit" ? 1 : item.instance?.ammunition ? item.qty : 1);
+      character.inventory.push(item);
+      if (entry.catalogId === equipment.armor) Object.assign(character, equipInventoryItem(character, item.id, "armor"));
+      if (entry.catalogId === "shield") Object.assign(character, equipInventoryItem(character, item.id, "shield"));
+    }
+  }
+  return { character, report: clone(mapped.report), original: mapped.original, reviewed: false, stateConfirmed: false, confirmations: [], error: "" };
+}
+
+
+function confirmAideddPreview(preview) {
+  if (preview.report.invalidResolutions?.length || preview.report.missingChoices?.some((entry) => entry.blocking)) throw new Error("aidedd.resolveHelp");
+  if (!preview.reviewed || !preview.stateConfirmed) throw new Error("aidedd.confirmRequired");
+  const candidate = clone(preview.character), oldId = candidate.id;
+  candidate.id = uid();
+  for (const item of candidate.inventory) if (item.instance?.ownerId === oldId) item.instance.ownerId = candidate.id;
+  const report = clone(preview.report);
+  report.preparedValues = { source: "player confirmation", raceId: candidate.raceId, background: clone(candidate.background), levels: clone(candidate.levels), abilities: clone(candidate.abilities) };
+  candidate.aideddImport = { schemaVersion: 1, format: "aidedd-builder-2014-xml", original: preview.original, report, confirmations: [...preview.confirmations, "character choices and current spending confirmed by player"] };
+  const checked = validateImport(candidate), issues = characterIssues(checked);
+  if (issues.errors.length) throw new Error(issues.errors.join(" "));
+  const computed = derive(checked);
+  const overflow = Object.entries(checked.state.slotsUsed).some(([level, spent]) => spent > (computed.slots[Number(level) - 1] || 0)) || computed.hitDice.some((die) => (checked.state.hitDiceSpent[die.die] || 0) > die.total) || checked.state.pactUsed > (computed.pact?.count || 0) || resources(checked).some((entry) => Number.isFinite(entry.max) && entry.spent > entry.max);
+  if (overflow) throw new Error("aidedd.spendingInvalid");
+  if (checked.state.hp > computed.maxHp) throw new Error("aidedd.hpInvalid");
+  return checked;
 }
 
 
@@ -42653,7 +43296,7 @@ function renderHome() {
             return `<article class="char-card" style="--livery:${liveryOf(c)}"><div class="char-card-head">${characterPortrait(c, { small: true })}<div><h3>${esc(c.name)}</h3><div class="meta">${esc(d.race.name)} · ${esc(classSummary(c))}</div></div></div><div class="card-footer"><div class="card-stats"><span><strong>${d.currentHp}/${d.maxHp}</strong>${uiText(" PV")}</span><span><strong>${d.ac}</strong>${uiText(" CA")}</span><span><strong>${d.level}</strong>${uiText(" niv.")}</span></div>${button(uiText("Ouvrir {p0}", { p0: icon("arrow", 16) }), "open-character", `data-id="${esc(c.id)}"`, "small-btn green")}</div></article>`;
           })
           .join("")}</div>`
-  }<div class="actions section-gap">${button(uiText("{p0} Importer une sauvegarde", { p0: icon("upload", 17) }), "import", "", "ghost")}${appData.characters.length ? button(uiText("{p0} Sauvegarder toutes mes fiches", { p0: icon("download", 17) }), "export-all", "", "ghost") : ""}</div><div class="footnote">${uiText("Règles de 2014 : 12 classes, {p7} sous-classes, {p8} origines, {p9} historiques, {p10} dons et {p11} sorts.", { p7: Object.values(uiSubclasses).reduce((n, x) => n + Object.keys(x).length, 0), p8: Object.keys(uiRaces).length, p9: Object.keys(uiBackgrounds).length, p10: Object.keys(uiFeats).length, p11: SPELLS.length })}</div>`;
+  }<div class="actions section-gap">${button(uiText("{p0} Importer une sauvegarde", { p0: icon("upload", 17) }), "import", "", "ghost")}${button(uiText("aidedd.open"), "aidedd-open", "", "ghost")}${appData.characters.length ? button(uiText("{p0} Sauvegarder toutes mes fiches", { p0: icon("download", 17) }), "export-all", "", "ghost") : ""}</div><div class="footnote">${uiText("Règles de 2014 : 12 classes, {p7} sous-classes, {p8} origines, {p9} historiques, {p10} dons et {p11} sorts.", { p7: Object.values(uiSubclasses).reduce((n, x) => n + Object.keys(x).length, 0), p8: Object.keys(uiRaces).length, p9: Object.keys(uiBackgrounds).length, p10: Object.keys(uiFeats).length, p11: SPELLS.length })}</div>`;
 }
 function uiMeters(value) { return formatGameMeasure(value, "m", { language: uiLanguage() }); }
 function formatCarriedWeight(value) { return formatGameMeasure(value, "kg", { language: uiLanguage() }); }
@@ -44266,6 +44909,7 @@ function creationEquipmentSelect(w, data) {
   return true;
 }
 function renderGearStep(w, c) {
+  if (w.aidedd) return `<h2>${uiText("Équipement")}</h2>${field(uiText("aidedd.gold"), "wiz.gold", c.gold, "number", "", 'min="0" step="0.01"')}<div class="section-gap">${c.inventory.map((item, index) => field(item.name, `wiz.inventory.${index}.qty`, item.qty, "number", "", 'min="1" step="1"') + (item.qty === 1 && inventoryItemSlots(item).length ? selectField(uiText("aidedd.carried", { p0: item.name }), `ui.aideddEquipment.${item.id}`, item.instance?.equippedSlot || "", { "": uiText("aidedd.slot.bag"), ...Object.fromEntries(inventoryItemSlots(item).map((slot) => [slot, uiText(`aidedd.slot.${slot}`)])) }) : "")).join("")}</div>`;
   const id = primaryClassId(c), extra = CLASS_EXTRAS[id] || {},
     kit = c.startKit || { mode: "kit", choices: {}, picks: {} }, bg = uiBackgroundOf(c),
     presets = creationEquipmentPresets(c), selected = creationEquipmentSelected(c, presets),
@@ -44401,7 +45045,7 @@ function renderWizard() {
     preview = wizardPreview(w),
     reader = w.step === "magic" && spellcasters(c).length > 0;
   const context = w.original ? uiText("Corriger {p0}", { p0: c.name || uiText("le personnage") }) : uiText("Créer un personnage{p0}", { p0: levelOf(c) > 1 ? uiText(" · Niveau {p0}", { p0: levelOf(c) }) : "" });
-  return `<div class="wizard-wrap creation-wizard ${reader ? "workflow-reader" : ""}">${renderWorkflowHeader({ context, steps: steps.map(([id, label], i) => [id, label, i > index && !w.visited?.includes(id)]), index, stepAction: "wizard-step", leaveAction: "leave-wizard", previousAction: "wizard-prev", nextAction: last ? "wizard-save" : "wizard-next", nextLabel: last ? w.original ? uiText("Valider les corrections") : uiText("Créer la fiche") : uiText("Étape suivante : {p0}", { p0: steps[index + 1][1] }) })}<div class="wizard-layout"><div class="wizard-main">${renderRepairConflict()}${renderWizardStep(w, c)}${w.error ? `<div class="wizard-error">${notice(esc(uiSystemText(w.error)), "error")}</div>` : ""}</div>${renderWorkflowPreview(preview, reader, true)}</div></div>`;
+  return `<div class="wizard-wrap creation-wizard ${reader ? "workflow-reader" : ""}">${renderWorkflowHeader({ context, steps: steps.map(([id, label], i) => [id, label, i > index && !w.visited?.includes(id)]), index, stepAction: "wizard-step", leaveAction: "leave-wizard", previousAction: "wizard-prev", nextAction: last ? "wizard-save" : "wizard-next", nextLabel: last ? w.aidedd ? uiText("aidedd.returnPreview") : w.original ? uiText("Valider les corrections") : uiText("Créer la fiche") : uiText("Étape suivante : {p0}", { p0: steps[index + 1][1] }) })}<div class="wizard-layout"><div class="wizard-main">${renderRepairConflict()}${renderWizardStep(w, c)}${w.error ? `<div class="wizard-error">${notice(esc(uiSystemText(w.error)), "error")}</div>` : ""}</div>${renderWorkflowPreview(preview, reader, true)}</div></div>`;
 }
 
 const RACE_GROUP_ORDER = ["Humain", "Nain", "Elfe", "Halfelin", "Gnome", "Demi-elfe", "Demi-orc", "Drakéide", "Tieffelin"];
@@ -45080,6 +45724,7 @@ function renderModal() {
   }
   if (ui.modal === "confirm")
     return modalShell(esc(ui.confirm.title), `${["discard-repair-conflict", "leave-level"].includes(ui.confirm.action) ? renderRepairConflict() : ""}<p class="modal-copy preserve">${esc(ui.confirm.description)}</p>`, cancel + button(ui.confirm.label || uiText("Confirmer"), "confirm-action", "", ui.confirm.danger ? "danger" : "primary"));
+  if (ui.modal === "aidedd") return renderAideddPreview();
   if (ui.modal === "import")
     return modalShell(
       uiText("Ajouter ces personnages ?"),
@@ -45374,7 +46019,7 @@ function askConfirm(title, description, action, key = null, { label = "Confirmer
   openModal("confirm");
 }
 function queueDraft() {
-  if (!ui.wizard) return;
+  if (!ui.wizard || ui.wizard.aidedd) return;
   clearTimeout(draftTimeout);
   const copy = clone(ui.wizard);
   draftTimeout = setTimeout(
@@ -45517,6 +46162,9 @@ function handleBinding(el, redraw) {
   }
   let value = el.type === "checkbox" ? el.checked : el.type === "number" || el.dataset.number === "1" ? Number(el.value) : el.value;
   if (typeof value === "number" && !Number.isFinite(value)) return;
+  if (path.startsWith("ui.aideddEquipment.") && ui.wizard?.aidedd) {
+    ui.wizard.draft = equipInventoryItem(ui.wizard.draft, path.split(".").at(-1), value || null); render(); return;
+  }
   const previous = boundValue(path);
   // Le remplacement du champ déclenche aussi change : sa valeur est déjà enregistrée.
   if (ui.modal === "received-effect" && redraw && previous === value) return;
@@ -45902,6 +46550,74 @@ async function openCatalogueReference(id, pin = {}) {
   if (previous) render(); else openModal("library-detail");
   modalRoot.querySelector(".modal-body").scrollTop = 0;
 }
+function requestAideddImport() {
+  const input = document.createElement("input");
+  input.type = "file"; input.accept = ".xml,text/xml,application/xml";
+  input.setAttribute("aria-label", uiText("aidedd.open"));
+  input.hidden = true; document.body.append(input);
+  input.addEventListener("change", async () => {
+    try {
+      if (!input.files[0]) return;
+      const result = await readAideddFile(input.files[0]);
+      if (!result.ok) throw new Error(uiText(`aidedd.reader.${result.code}`));
+      ui.aideddRead = result; ui.aideddResolutions = {}; ui.aideddResume = null;
+      refreshAideddPreview();
+      openModal("aidedd");
+    } catch (error) { openInfo(uiText("aidedd.refused"), error.message); }
+    finally { input.remove(); }
+  });
+  input.click();
+}
+function aideddChoiceLabel(id) {
+  if (id === "level") return uiText("Niveau");
+  if (id === "race") return uiText("Origine");
+  if (id === "class") return uiText("Classe");
+  if (id === "background") return uiText("Historique");
+  const level = /^level:(\d+)(?::(class|hp))?$/.exec(id);
+  if (level) return uiText(level[2] === "hp" ? "aidedd.levelHp" : level[2] === "class" ? "aidedd.levelClass" : "aidedd.levelChoices", { p0: level[1] });
+  return uiText("aidedd.missing");
+}
+function refreshAideddPreview() {
+  if (ui.aideddResume && JSON.stringify(ui.aideddResolutions) === ui.aideddResume.resolutions) { ui.aidedd = ui.aideddResume.preview; ui.aideddResume = null; return; }
+  const mapped = mapAideddCharacter(ui.aideddRead, { resolutions: ui.aideddResolutions });
+  const blocked = !mapped.character.levels?.length || mapped.report.ambiguities.length || mapped.report.missingChoices.some((entry) => entry.blocking) || mapped.report.invalidResolutions?.length;
+  ui.aidedd = blocked ? { ...mapped, character: null, patch: mapped.character, error: "" } : prepareAideddPreview(mapped);
+}
+function renderAideddPreview() {
+  const p = ui.aidedd;
+  if (!p.character) {
+    const ambiguities = p.report.ambiguities.map((entry) => selectField(`${aideddChoiceLabel(entry.id)} : ${entry.value || uiText("aidedd.unknown")}`, `ui.aideddResolutions.${entry.id}`, ui.aideddResolutions[entry.id] || "", { "": uiText("aidedd.choose"), ...Object.fromEntries(entry.candidates.map((candidate) => [candidate.id, `${(entry.id === "race" ? uiRaces[candidate.id]?.name : entry.id === "background" ? uiBackgrounds[candidate.id]?.name : uiClasses[candidate.id]?.name) || candidate.name} (${candidate.source || candidate.id})`])) })).join("");
+    const hp = p.report.missingChoices.filter((entry) => entry.blocking && (entry.id === "level" || /^level:\d+:hp$/.test(entry.id))).map((entry) => field(aideddChoiceLabel(entry.id), `ui.aideddResolutions.${entry.id}`, ui.aideddResolutions[entry.id] || "", "number", "", `min="1" max="${entry.id === 'level' ? 20 : 12}" step="1"`)).join("");
+    return modalShell(uiText("aidedd.preview"), `${notice(uiText("aidedd.resolveHelp"), "warning")}<div class="actions section-gap">${button(uiText("aidedd.reportOnly"), "aidedd-report", "", "small-btn ghost")}</div>${p.patch?.classId && p.report.ambiguities.some((entry) => /^level:\d+:class$/.test(entry.id)) ? button(uiText("aidedd.sameClass", { p0: uiClasses[p.patch.classId].name }), "aidedd-same-class", "", "small-btn") : ""}<div class="form-grid">${ambiguities}${hp}</div><details><summary>${uiText("aidedd.source")}</summary><textarea class="json-box" rows="6" readonly aria-label="AideDD XML">${esc(p.original)}</textarea></details>${p.error ? notice(esc(p.error), "error") : ""}`, button(uiText("Annuler"), "close-modal", "", "ghost") + button(uiText("aidedd.resolve"), "aidedd-resolve", "", "primary"));
+  }
+  const c = p.character, d = uiDerive(c);
+  const number = (label, path, value) => field(label, `ui.aidedd.character.state.${path}`, value || 0, "number", "", 'min="0" step="1"');
+  const unknown = uiText("aidedd.unknown");
+  const row = (label, imported, calculated, source) => `<div class="summary-row"><span>${esc(label)}<br><small class="muted">${esc(source)}</small></span><strong>${esc(imported ?? unknown)} → ${esc(calculated)}</strong></div>`;
+  const values = p.report.importedValues || {};
+  const body = `${p.error ? notice(esc(p.error), "error") : ""}<h3>${esc(c.name || uiText("aidedd.unnamed"))}</h3>
+    ${notice(uiText("aidedd.completeHelp"), "warning")}
+    <div class="actions section-gap">${button(uiText("Précédent"), "aidedd-back", "", "small-btn ghost")}${button(uiText("aidedd.reportOnly"), "aidedd-report", "", "small-btn ghost")}${button(uiText("aidedd.export"), "aidedd-export", "", "small-btn ghost")}</div>
+    ${Object.entries(uiAbilities).map(([id, ability]) => row(ability.name, p.report.fields.find((entry) => entry.path === `character/${id}`)?.value, d.scores[id], "AideDD XML → Compagnon")).join("")}
+    ${row(uiText("aidedd.hpMax"), values.hpMaximum, d.maxHp, "AideDD XML → Compagnon")}
+    ${row(uiText("aidedd.ac"), values.armorClass, d.ac, "AideDD XML → Compagnon")}
+    ${row(uiText("aidedd.levels"), p.report.fields.find((x) => x.path === "character/level")?.value, c.levels.length, "AideDD XML → Compagnon")}
+    ${(values.levels || []).map((entry) => row(uiText("aidedd.levelHp", { p0: entry.level }), entry.hpDie, c.levels[entry.level - 1]?.hpDie ?? unknown, `AideDD XML → ${uiText("aidedd.player")}`)).join("")}
+    ${p.report.ambiguities.length ? `<h4>${uiText("aidedd.references")}</h4>${p.report.ambiguities.map((entry) => `<p><b>${esc(entry.value)}</b> : ${entry.candidates.map((candidate) => `${esc(candidate.name)} (${esc(candidate.source || candidate.id)})`).join(", ")}</p>`).join("")}` : ""}
+    <details><summary>${uiText("aidedd.fields")} (${p.report.fields.length})</summary>${p.report.fields.map((entry) => `<div class="section-gap"><small>${esc(entry.path)} · ${uiText(`aidedd.status.${entry.status}`)}</small><div class="preserve">${esc(entry.value)}</div></div>`).join("")}</details>
+    <details><summary>${uiText("aidedd.missing")} (${p.report.missingChoices.length})</summary>${p.report.missingChoices.map((entry) => `<p><strong>${esc(aideddChoiceLabel(entry.id))}</strong> ${esc(entry.value || "")}<br>${uiText("aidedd.missingHelp")}</p>`).join("")}</details>
+    <details><summary>${uiText("aidedd.source")}</summary><textarea class="json-box" rows="6" readonly aria-label="AideDD XML">${esc(p.original)}</textarea></details>
+    <div class="section-gap">${button(uiText("aidedd.adjust"), "aidedd-edit", "", "primary")} ${p.reviewed ? uiText("aidedd.reviewed") : uiText("aidedd.pending")}</div>
+    <h4>${uiText("aidedd.currentState")}</h4><p>${uiText("aidedd.stateHelp")}</p>
+    <div class="form-grid">${number(uiText("aidedd.hp"), "hp", c.state.hp)}${number(uiText("aidedd.tempHp"), "tempHp", c.state.tempHp)}</div>
+    <details class="section-gap"><summary>${uiText("aidedd.spending")}</summary><div class="form-grid">${d.slots.map((max, i) => max ? number(uiText("aidedd.slots", { p0: i + 1, p1: max }), `slotsUsed.${i + 1}`, c.state.slotsUsed[i + 1]) : "").join("")}
+    ${d.pact ? number(uiText("aidedd.pact", { p0: d.pact.count }), "pactUsed", c.state.pactUsed) : ""}
+    ${d.hitDice.map((die) => number(uiText("aidedd.dice", { p0: die.die, p1: die.total }), `hitDiceSpent.${die.die}`, c.state.hitDiceSpent[die.die])).join("")}
+    ${resources(c).map((resource) => number(uiText("aidedd.resource", { p0: resource.name, p1: resource.max }), `resourcesUsed.${resource.id}`, c.state.resourcesUsed[resource.id])).join("")}</div></details>
+    ${checkField(uiText("aidedd.stateConfirmed"), "ui.aidedd.stateConfirmed", p.stateConfirmed)}`;
+  return modalShell(uiText("aidedd.preview"), body, button(uiText("Annuler"), "close-modal", "", "ghost") + button(uiText("aidedd.create"), "aidedd-confirm", !p.reviewed || !p.stateConfirmed ? "disabled" : "", "primary"));
+}
+
 function requestImport() {
   const input = document.createElement("input");
   input.type = "file";
@@ -46315,6 +47031,7 @@ async function perform(action, el) {
       });
       break;
     case "leave-wizard":
+      if (ui.wizard?.aidedd) { ui.aidedd.character = clone(ui.wizard.draft); ui.aidedd.reviewed = false; ui.wizard = null; ui.route = "home"; openModal("aidedd"); break; }
       queueDraft();
       ui.wizard = null;
       go(activeCharacter() ? "sheet" : "home");
@@ -46385,12 +47102,17 @@ async function perform(action, el) {
     case "wizard-save": {
       const w = ui.wizard;
       let candidate = clone(w.draft);
-      if (!w.original) candidate = applyStartingKit(candidate);
+      if (!w.original && !w.aidedd) candidate = applyStartingKit(candidate);
       const issues = characterIssues(candidate);
       if (issues.errors.length) {
         w.error = issues.errors.join(" ");
         render();
         break;
+      }
+      if (w.aidedd) {
+        ui.aidedd.character = validateImport(candidate); ui.aidedd.reviewed = true;
+        ui.aidedd.confirmations.push("Guided choices reviewed by player");
+        ui.wizard = null; ui.route = "home"; openModal("aidedd"); break;
       }
       await saveCharacter(candidate, w.original ? "Correction du personnage" : "Création du personnage", w.original ? "settings" : "create", w.original);
       await clearDraft();
@@ -47680,6 +48402,40 @@ async function perform(action, el) {
     case "export-all":
       await exportCharacters(true);
       break;
+    case "aidedd-same-class":
+      for (const entry of ui.aidedd.report.ambiguities) if (/^level:\d+:class$/.test(entry.id)) ui.aideddResolutions[entry.id] = ui.aidedd.patch.classId;
+      render(); break;
+    case "aidedd-resolve":
+      refreshAideddPreview();
+      if (!ui.aidedd.character) ui.aidedd.error = uiText("aidedd.resolveHelp");
+      render(); break;
+    case "aidedd-open": requestAideddImport(); break;
+    case "aidedd-back": {
+      ui.aideddResume = { preview: ui.aidedd, resolutions: JSON.stringify(ui.aideddResolutions) };
+      const mapped = mapAideddCharacter(ui.aideddRead);
+      ui.aidedd = { ...mapped, character: null, patch: mapped.character, error: "" };
+      openModal("aidedd"); break;
+    }
+    case "aidedd-export":
+      downloadJson({ format: "compagnon-aidedd-preview", schemaVersion: 1, ...clone(ui.aidedd) }, "aidedd-rapport.json"); break;
+    case "aidedd-report":
+      downloadJson({ format: "compagnon-aidedd-report", schemaVersion: 1, report: clone(ui.aidedd.report), original: ui.aidedd.original }, "aidedd-rapport-seul.json"); break;
+    case "aidedd-edit": {
+      clearTimeout(draftTimeout);
+      ui.wizard = { draft: clone(ui.aidedd.character), original: null, aidedd: true, step: "race", visited: ["race", "class", "background", "abilities", "skills", "magic", "review"], error: "", rollPool: [], rollDetails: [] };
+      ui.modal = null; ui.route = "home"; resetEditorFilters(); render(); break;
+    }
+    case "aidedd-confirm": {
+      try {
+        const character = confirmAideddPreview(ui.aidedd);
+        await mutateApp((state) => { state.characters.push(character); state.activeId = character.id; }, { redraw: false });
+        ui.aidedd = null; closeModal(); go("sheet");
+      } catch (error) {
+        ui.aidedd.error = ["aidedd.confirmRequired", "aidedd.hpInvalid", "aidedd.spendingInvalid", "aidedd.resolveHelp", "aidedd.quantityInvalid"].includes(error.message) ? uiText(error.message) : uiText("aidedd.writeError", { p0: error.message });
+        render();
+      }
+      break;
+    }
     case "import":
       requestImport();
       break;
@@ -47724,6 +48480,10 @@ async function perform(action, el) {
       } else openModal("install");
       break;
     case "update-app":
+      if (ui.wizard?.aidedd || ui.modal === "aidedd") {
+        toast(uiText("aidedd.finishBeforeUpdate"));
+        break;
+      }
       if (ui.levelFlow) {
         toast(uiText("Valide ou annule d’abord la progression en cours."));
         break;
