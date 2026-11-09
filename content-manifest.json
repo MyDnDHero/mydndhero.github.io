@@ -1,13 +1,13 @@
 {
-  "id": "4fc1c892eac881f7eab0885c6de1390608aa18221e32698d459ca1c7acd6d3f3",
+  "id": "8b4ff99b85f55a5a7e33ad4a04f659653694752109f855f7f3e284e417342fc6",
   "schemaVersion": 1,
   "edition": "2014",
-  "appBuild": "b72fb3c5473d5d3b5e5ab48479e113a9b682c5af4b523adecc7d655bbd38edcf",
+  "appBuild": "856bda35c8259263c03829b4ce1567d4cbaa6defe9eb0d9fb76ac2d55a051ae5",
   "sourceVersion": "874dd65a9321be74f393534661c70ca80b896e95",
   "count": 18546,
   "sourceCount": 13386,
   "compositionCount": 1926,
-  "indexUrl": "./content/c0511f2667b25201173c57b10e726acf42b4c4a48111d5e3f6762c539e6ae734.json",
+  "indexUrl": "./content/d8ead27e7eedb677411025dd0a0e362d6615985c84cd35b16e1c26f4076eec86.json",
   "rulesUrl": "./content/c9801d8504b131925d233101fa9bef4463030cf5443be485b9c17a2da4c30b84.json",
   "engineSchemaVersion": 1,
   "files": [
@@ -4440,9 +4440,9 @@
       "kind": "catalogue"
     },
     {
-      "url": "./content/c0511f2667b25201173c57b10e726acf42b4c4a48111d5e3f6762c539e6ae734.json",
-      "sha256": "c0511f2667b25201173c57b10e726acf42b4c4a48111d5e3f6762c539e6ae734",
-      "bytes": 7864416,
+      "url": "./content/d8ead27e7eedb677411025dd0a0e362d6615985c84cd35b16e1c26f4076eec86.json",
+      "sha256": "d8ead27e7eedb677411025dd0a0e362d6615985c84cd35b16e1c26f4076eec86",
+      "bytes": 7865140,
       "kind": "index"
     },
     {
@@ -4454,19 +4454,19 @@
     {
       "url": "./index.html",
       "bytes": 1618,
-      "sha256": "5be2ef7d6ea75bc1db5d2e9632263c5521dc5e2ba648169f6288375c4d30e0df",
+      "sha256": "59c9896b2c3b314cf6eb77f4fb2a2eb505c42a6dbf0de98aee226a3e47b2e5a6",
       "kind": "application"
     },
     {
       "url": "./app.js",
-      "bytes": 16155866,
-      "sha256": "cea0fe73913313417ef12961f2dbe7795d796812b5e70a4728f14618069c2e78",
+      "bytes": 16246899,
+      "sha256": "d9dd4ef5156389a905dedc85c5f79b9711cba51a24490a410a957e2c94375a1a",
       "kind": "application"
     },
     {
       "url": "./styles.css",
-      "bytes": 187822,
-      "sha256": "df6acd3f322f52eef9b2a295a2771af12436d12d732d122ff685180c5bfbb1ae",
+      "bytes": 235918,
+      "sha256": "7451a0674278c7c0b6eb0652a66a90b21c397073ad5592e783ecca5002c5680b",
       "kind": "application"
     },
     {
@@ -4536,9 +4536,87 @@
       "kind": "application"
     },
     {
+      "url": "./class-illustrations/artificier-v1.webp",
+      "bytes": 251790,
+      "sha256": "0fcfd54d8e432040c752b0bc9661c30c053add7d0ad25eea6b4525408417ce84",
+      "kind": "application"
+    },
+    {
+      "url": "./class-illustrations/barbare-v1.webp",
+      "bytes": 200964,
+      "sha256": "6861ecb5bdeb719644d09d2bbbbbd7e0e728b6303d28de3cc1785b7706c77a9a",
+      "kind": "application"
+    },
+    {
+      "url": "./class-illustrations/barde-v1.webp",
+      "bytes": 229266,
+      "sha256": "36cd7a63a59ddcf094dbb2df577514816e9f4878e94f6b12beb7e6661c92616d",
+      "kind": "application"
+    },
+    {
+      "url": "./class-illustrations/clerc-v1.webp",
+      "bytes": 216708,
+      "sha256": "b2088cd2f4ce10db8817778c8876b47f68c5d0cd0a9b46683acf47e1a315d10a",
+      "kind": "application"
+    },
+    {
+      "url": "./class-illustrations/druide-v1.webp",
+      "bytes": 188556,
+      "sha256": "fc81368cbf4665123f2762ae3ff217b3275db0fca09af336ec50699ee534f00c",
+      "kind": "application"
+    },
+    {
+      "url": "./class-illustrations/ensorceleur-v1.webp",
+      "bytes": 191066,
+      "sha256": "ab6dd6e606c68136f28b72cc87f74352f38e2fec2687a625abeb4bdd84b80404",
+      "kind": "application"
+    },
+    {
+      "url": "./class-illustrations/guerrier-v1.webp",
+      "bytes": 232448,
+      "sha256": "f92fc9531b42a1103c161dbf902e5f3f0c849c0deb5e6ecc2065d35b2c9a82ef",
+      "kind": "application"
+    },
+    {
+      "url": "./class-illustrations/magicien-v1.webp",
+      "bytes": 244146,
+      "sha256": "f4aff6f30068fd85cd41231670814e060cceb69e324850434490e2acb96e88f8",
+      "kind": "application"
+    },
+    {
+      "url": "./class-illustrations/moine-v1.webp",
+      "bytes": 189422,
+      "sha256": "30dadb25cca1d5272902ad654958b96139f4d6516e81752ebfdc0aeec046e87f",
+      "kind": "application"
+    },
+    {
+      "url": "./class-illustrations/occultiste-v1.webp",
+      "bytes": 231694,
+      "sha256": "362ba3cb4028436a0a9669e72769caa7913e593661958d0e41728c3cae2a178a",
+      "kind": "application"
+    },
+    {
+      "url": "./class-illustrations/paladin-v1.webp",
+      "bytes": 201904,
+      "sha256": "f015c6f9861785c171eadf0c11e019cb27823572d2afd74059a8e32de6420155",
+      "kind": "application"
+    },
+    {
+      "url": "./class-illustrations/rodeur-v1.webp",
+      "bytes": 201016,
+      "sha256": "23376f1979f4e5c127ba2caf3ee58c8d13b5461fb173ffbaa08acf5bdb172805",
+      "kind": "application"
+    },
+    {
+      "url": "./class-illustrations/roublard-v1.webp",
+      "bytes": 240240,
+      "sha256": "6a1a0743cfe827f0b875a2353382e82e0276572f5cc0d6dc8dcf4105edf075f2",
+      "kind": "application"
+    },
+    {
       "url": "./sw.js",
-      "bytes": 60053,
-      "sha256": "49ffcbf40c670299e9e5b8612d60db874b44f30f81f1aea086f943110d95c626",
+      "bytes": 60578,
+      "sha256": "3296847270e74561cc0bad16547d59a72ec12925e893d3358608b03d5bd453c6",
       "kind": "application"
     },
     {
