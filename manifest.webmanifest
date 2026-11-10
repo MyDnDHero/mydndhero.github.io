@@ -29,5 +29,33 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "share_target": {
+    "action": "./partage",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "files": [
+        {
+          "name": "sauvegarde",
+          "accept": [
+            "application/json",
+            "text/json",
+            ".json",
+            "application/octet-stream"
+          ]
+        }
+      ]
+    }
+  },
+  "file_handlers": [
+    {
+      "action": "./",
+      "accept": {
+        "application/json": [
+          ".json"
+        ]
+      }
+    }
   ]
 }

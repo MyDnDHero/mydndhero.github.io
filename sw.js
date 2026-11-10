@@ -1,6 +1,6 @@
 /* Compagnon : coquille hors ligne versionnée, aucune requête de données distante. */
-const CACHE='compagnon-cache-99b7fe3344e8';
-const BUILD='99b7fe3344e813ab0427aa89aa370918948a80b1c42347d639023af5b9a400cd';
+const CACHE='compagnon-cache-90c8bb5ea42d';
+const BUILD='90c8bb5ea42d7748b46cc409f51b12ba5f95f960a275a730ef3f3a231d952d68';
 async function contentShell(request){
  const state=await caches.open('compagnon-content-state');
  for(const name of ['_content/active.json','_content/candidate-'+BUILD+'.json']){
@@ -42,4 +42,12 @@ async function installShell(){
 self.addEventListener('install',event=>event.waitUntil(installShell()));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{await self.clients.claim();})()));
 self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting();});
-self.addEventListener('fetch',event=>{const url=new URL(event.request.url);if(event.request.method!=='GET'||url.origin!==self.location.origin)return;event.respondWith((async()=>{const cache=await caches.open(CACHE);if(event.request.cache==='no-store')return fetch(event.request);if(url.pathname.endsWith('/content-manifest.json'))return fetch(event.request);if(/\/content\/[a-f0-9]{64}\.json$/.test(url.pathname)){for(const key of await caches.keys())if(key.startsWith('compagnon-content-')){const found=await (await caches.open(key)).match(event.request);if(found)return found;}return fetch(event.request);}const prepared=await contentShell(event.request);if(prepared)return prepared;const cached=await cache.match(event.request,{ignoreSearch:true});if(cached)return cached;try{const response=await fetch(event.request);return url.pathname.includes("/portraits/")?await rememberPortrait(event.request,response,cache):response;}catch(error){if(event.request.mode==='navigate')return await cache.match(new URL('./index.html',self.location).href);throw error;}})());});
+// Fichier reçu par « Partager » : mis de côté pour l'application, qui l'importe à son ouverture.
+async function receiveShare(request){
+ try{
+  const data=await request.formData(),file=data.getAll('sauvegarde').find(item=>item&&typeof item.text==='function');
+  if(file)await (await caches.open('compagnon-partage')).put(new URL('./_partage/sauvegarde',self.location).href,new Response(file,{headers:{'content-type':'application/json'}}));
+ }catch{}
+ return Response.redirect(new URL('./?partage=1',self.location).href,303);
+}
+self.addEventListener('fetch',event=>{const url=new URL(event.request.url);if(event.request.method==='POST'&&url.origin===self.location.origin&&url.pathname.endsWith('/partage')){event.respondWith(receiveShare(event.request));return;}if(event.request.method!=='GET'||url.origin!==self.location.origin)return;event.respondWith((async()=>{const cache=await caches.open(CACHE);if(event.request.cache==='no-store')return fetch(event.request);if(url.pathname.endsWith('/content-manifest.json'))return fetch(event.request);if(/\/content\/[a-f0-9]{64}\.json$/.test(url.pathname)){for(const key of await caches.keys())if(key.startsWith('compagnon-content-')){const found=await (await caches.open(key)).match(event.request);if(found)return found;}return fetch(event.request);}const prepared=await contentShell(event.request);if(prepared)return prepared;const cached=await cache.match(event.request,{ignoreSearch:true});if(cached)return cached;try{const response=await fetch(event.request);return url.pathname.includes("/portraits/")?await rememberPortrait(event.request,response,cache):response;}catch(error){if(event.request.mode==='navigate')return await cache.match(new URL('./index.html',self.location).href);throw error;}})());});

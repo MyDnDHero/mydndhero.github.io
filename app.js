@@ -4410,6 +4410,13 @@ const UI_FR = Object.freeze({
   "creation.searchPlaceholder": "Rechercher…",
   "creation.noOption": "Aucune option trouvée.",
   "creation.exoticLanguages": "Langues exotiques",
+  "attack.giantStrike.cloud": "Frappe des nuages",
+  "attack.giantStrike.fire": "Frappe du feu",
+  "attack.giantStrike.frost": "Frappe du givre",
+  "attack.giantStrike.hill": "Frappe des collines",
+  "attack.giantStrike.stone": "Frappe des pierres",
+  "attack.giantStrike.storm": "Frappe des tempêtes",
+  "share.empty": "Aucun fichier de sauvegarde n’a été reçu.",
   "creation.draft.step": "Création en cours, étape {step}.",
   "creation.draft.restartTitle": "Recommencer une création ?",
   "creation.draft.restartText": "Le brouillon en cours ({name}) sera remplacé.",
@@ -8518,6 +8525,13 @@ const UI_EN = Object.freeze({
   "creation.searchPlaceholder": "Search…",
   "creation.noOption": "No option found.",
   "creation.exoticLanguages": "Exotic languages",
+  "attack.giantStrike.cloud": "Cloud Strike",
+  "attack.giantStrike.fire": "Fire Strike",
+  "attack.giantStrike.frost": "Frost Strike",
+  "attack.giantStrike.hill": "Hill Strike",
+  "attack.giantStrike.stone": "Stone Strike",
+  "attack.giantStrike.storm": "Storm Strike",
+  "share.empty": "No backup file was received.",
   "creation.draft.step": "Creation in progress, {step} step.",
   "creation.draft.restartTitle": "Start a new creation?",
   "creation.draft.restartText": "The current draft ({name}) will be replaced.",
@@ -42679,6 +42693,15 @@ function weaponAttackProfile(c, d, index) {
 // Domaines dont la Frappe divine ajoute des dégâts ; null : type de l'arme.
 const DIVINE_STRIKE_TYPES = { life: ["radiant"], nature: ["cold", "fire", "lightning"], tempest: ["thunder"], trickery: ["poison"], war: null, forge: ["fire"], order: ["psychic"], twilight: ["radiant"], death: ["necrotic"] };
 // Taille du dé d'une ressource, écrite dans son nom ou sa note (« d8 », « (d10) »).
+// Frappe des géants (don) : dé et type de dégâts du bénéfice choisi ; sans type, celui de l'arme.
+const GIANT_STRIKES = {
+  cloud: { label: "attack.giantStrike.cloud", notation: "1d4", types: ["thunder"] },
+  fire: { label: "attack.giantStrike.fire", notation: "1d10", types: ["fire"] },
+  frost: { label: "attack.giantStrike.frost", notation: "1d6", types: ["cold"] },
+  hill: { label: "attack.giantStrike.hill", notation: "1d6", types: null },
+  stone: { label: "attack.giantStrike.stone", notation: "1d6", types: ["force"] },
+  storm: { label: "attack.giantStrike.storm", notation: "1d6", types: ["lightning"] },
+};
 function resourceDie(resource) {
   return Number(/\bd(4|6|8|10|12)\b/.exec(`${resource?.name || ""} ${resource?.note || ""}`)?.[1]) || null;
 }
@@ -42716,6 +42739,9 @@ function attackOptions(c, d, { weapon = null, spell = null } = {}) {
     }
     const psi = resource("fighter-psi-dice");
     if (psi && hasSubclass(c, "fighter", "psiWarrior")) options.push({ id: "psionic-strike", label: uiText("Frappe psionique"), note: `${uiText("Une fois par tour")} · ${left(psi)}`, damage: { notation: `1d${resourceDie(psi) || 6}`, bonus: Math.max(1, d.mods.int), type: damageTypeLabel(["force"]) }, cost: { resource: "fighter-psi-dice" } });
+    // Frappe des géants : attaque d'arme au corps à corps ou arme de lancer. La sauvegarde et l'effet secondaire se résolvent à la table.
+    const strike = resource("strike-of-the-giants"), giant = strike && GIANT_STRIKES[picksOf(c, strike.sourceKey, "giantStrike")[0]];
+    if (giant && (melee || weapon.weapon?.thrown)) options.push({ id: "giant-strike", label: uiText(giant.label), note: `${uiText("Une fois par tour")} · ${left(strike)}`, damage: { notation: giant.notation, type: giant.types ? damageTypeLabel(giant.types) : type }, cost: { resource: "strike-of-the-giants" } });
     const blades = resource("rogue-psi-dice");
     if (blades && String(weapon.id || "").startsWith("rogue-psychic")) options.push({ id: "homing-strikes", label: uiText("Frappes guidées"), note: left(blades), attack: { notation: `1d${resourceDie(blades) || 6}` }, cost: { resource: "rogue-psi-dice" } });
     if (concentrating("hunters-mark")) options.push({ id: "hunters-mark", label: uiText("Marque du chasseur"), damage: { notation: "1d6", type }, on: true });
@@ -51146,6 +51172,8 @@ function sequenceVerdict(r, value) {
     stopDiceFx(); r.critical = null;
     seq.locked = true;
     r.history.push({ ...r.result, reason: uiText("Attaque"), mode: ui.rollMode });
+    // Toucher obtenu avec l’avantage : la condition de l’Attaque sournoise est remplie. L’option est cochée d’office et reste décochable.
+    if (ui.rollMode === "advantage" && r.optionList.some((option) => option.id === "sneak-attack")) r.optionState.on["sneak-attack"] = true;
     Object.assign(seq, { step: "damage", verdict: value });
     Object.assign(r, { result: null, phase: "ready", name: sequenceTitle(seq), note: "", baseNote: "", panel: null });
     r.request = sequenceRequest(r);
@@ -51562,6 +51590,23 @@ function renderAideddPreview() {
   return modalShell(uiText("aidedd.preview"), body, button(uiText("Annuler"), "close-modal", "", "ghost") + button(uiText("aidedd.create"), "aidedd-confirm", !p.reviewed || !p.stateConfirmed ? "disabled" : "", "primary"));
 }
 
+/** Importe une sauvegarde depuis un fichier choisi, partagé ou ouvert avec l’application : même contrôle, même confirmation. */
+async function importSaveFile(file) {
+  try {
+    if (file.size > 40 * 1024 * 1024) throw new Error(uiText("Le fichier dépasse 40 Mo."));
+    let raw;
+    try { raw = JSON.parse(await file.text()); } catch { throw new Error(uiText("Ce fichier n’est pas une sauvegarde Compagnon.")); }
+    let list;
+    if (raw?.format === "compagnon-srd51" && [1, SCHEMA_VERSION].includes(raw.schemaVersion) && Array.isArray(raw.characters)) list = raw.characters;
+    else if (raw && [1, SCHEMA_VERSION].includes(raw.schemaVersion) && (raw.classId || raw.levels)) list = [raw];
+    else throw new Error(uiText("Ce fichier n’est pas une sauvegarde Compagnon."));
+    if (list.length < 1 || list.length > 100) throw new Error(uiText("Importe entre 1 et 100 personnages à la fois."));
+    ui.imported = await checkImportedCharacters(list);
+    openModal("import");
+  } catch (error) {
+    openInfo("Import refusé", uiText("{p0} Aucune fiche existante n’a été modifiée.", { p0: error.message }));
+  }
+}
 function requestImport() {
   const input = document.createElement("input");
   input.type = "file";
@@ -51570,25 +51615,22 @@ function requestImport() {
   input.style.display = "none";
   document.body.append(input);
   input.addEventListener("change", async () => {
-    try {
-      const file = input.files[0];
-      if (!file) return;
-      if (file.size > 40 * 1024 * 1024) throw new Error(uiText("Le fichier dépasse 40 Mo."));
-      const raw = JSON.parse(await file.text());
-      let list;
-      if (raw.format === "compagnon-srd51" && [1, SCHEMA_VERSION].includes(raw.schemaVersion) && Array.isArray(raw.characters)) list = raw.characters;
-      else if ([1, SCHEMA_VERSION].includes(raw.schemaVersion) && (raw.classId || raw.levels)) list = [raw];
-      else throw new Error(uiText("Ce fichier n’est pas une sauvegarde Compagnon."));
-      if (list.length < 1 || list.length > 100) throw new Error(uiText("Importe entre 1 et 100 personnages à la fois."));
-      ui.imported = await checkImportedCharacters(list);
-      openModal("import");
-    } catch (error) {
-      openInfo("Import refusé", uiText("{p0} Aucune fiche existante n’a été modifiée.", { p0: error.message }));
-    } finally {
-      input.remove();
-    }
+    try { if (input.files[0]) await importSaveFile(input.files[0]); }
+    finally { input.remove(); }
   });
   input.click();
+}
+/** Sauvegarde reçue par « Partager » (mise de côté par le service worker) ou par « Ouvrir avec » sur ordinateur. */
+async function importSharedSave() {
+  if ("launchQueue" in window) window.launchQueue.setConsumer(async (launch) => { const handle = launch.files?.[0]; if (handle) await importSaveFile(await handle.getFile()); });
+  const url = new URL(location.href), shared = url.searchParams.has("partage");
+  if (shared) { url.searchParams.delete("partage"); history.replaceState(null, "", url); }
+  if (!("caches" in window)) return;
+  try {
+    const cache = await caches.open("compagnon-partage"), key = new URL("./_partage/sauvegarde", location.href).href, stored = await cache.match(key);
+    if (stored) { await cache.delete(key); await importSaveFile(await stored.blob()); }
+    else if (shared) openInfo("Import refusé", uiText("{p0} Aucune fiche existante n’a été modifiée.", { p0: uiText("share.empty") }));
+  } catch (error) { reportError(error); }
 }
 async function makeDemo() {
   const c = createCharacter("wizard");
@@ -54149,6 +54191,7 @@ async function setupServiceWorker() {
     render();
     await setupServiceWorker();
     void ensureContent();
+    void importSharedSave();
   } catch (error) {
     ui.fatal = error.message;
     render();
