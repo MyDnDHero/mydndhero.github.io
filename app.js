@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-preview.16";
+const APP_VERSION = "2.0.0-preview.17";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -1790,6 +1790,7 @@ const UI_FR = Object.freeze({
   "Moyenne fixe : {p0}. Constitution {p1} ajoutée automatiquement.": "Moyenne fixe : {p0}. Constitution {p1} ajoutée automatiquement.",
   "{p0} au choix": "{p0} au choix",
   "{p0} : à choisir à l’étape Compétences.": "{p0} : à choisir à l’étape Compétences.",
+  "{p0} : sorts à choisir à l’étape Magie.": "{p0} : sorts à choisir à l’étape Magie.",
   "{p0} au choix parmi {p1}": "{p0} au choix parmi {p1}",
   "{p0} Répartition conseillée": "{p0} Répartition conseillée",
   " ×{p0}": " ×{p0}",
@@ -4316,7 +4317,160 @@ const UI_FR = Object.freeze({
   "dashboard.organizeSheet": "Organiser la fiche",
   "Coup critique : les dés de dégâts seront doublés.": "Coup critique : les dés de dégâts seront doublés.",
   "Coup critique : dés de dégâts doublés.": "Coup critique : dés de dégâts doublés.",
-  "Lancer les dégâts du critique": "Lancer les dégâts du critique"
+  "Lancer les dégâts du critique": "Lancer les dégâts du critique",
+  "creation.firstCharacter": "Créer mon premier personnage",
+  "creation.chooseFamily": "Choisis une famille",
+  "creation.returnList": "Retour à la liste",
+  "creation.continueChoice": "Continuer",
+  "creation.chooseOrigin": "Choisir cette origine",
+  "Jet : {p0}": "Jet : {p0}",
+  "critique {p0}-20": "critique {p0}-20",
+  "Dépensé pour ce jet": "Dépensé pour ce jet",
+  "{p0} restant(s)": "{p0} restant(s)",
+  "Châtiment divin": "Châtiment divin",
+  "Emplacement de pacte niveau {p0} · {p1} restant(s)": "Emplacement de pacte niveau {p0} · {p1} restant(s)",
+  "Emplacement niveau {p0} · {p1} restant(s)": "Emplacement niveau {p0} · {p1} restant(s)",
+  "Cible mort-vivant ou fiélon": "Cible mort-vivant ou fiélon",
+  "Frappe divine": "Frappe divine",
+  "Une fois par tour": "Une fois par tour",
+  "Attaque précise": "Attaque précise",
+  "Manœuvre : dé de supériorité": "Manœuvre : dé de supériorité",
+  "Frappe psionique": "Frappe psionique",
+  "Frappes guidées": "Frappes guidées",
+  "Marque du chasseur": "Marque du chasseur",
+  "Tueur de colosses": "Tueur de colosses",
+  "Une fois par tour, cible déjà blessée": "Une fois par tour, cible déjà blessée",
+  "Fureur divine": "Fureur divine",
+  "Maître des armes à deux mains": "Maître des armes à deux mains",
+  "Tireur d’élite": "Tireur d’élite",
+  "Critique brutal": "Critique brutal",
+  "Attaques sauvages": "Attaques sauvages",
+  "Maléfice": "Maléfice",
+  "Malédiction du Magelame": "Malédiction du Magelame",
+  "Cible maudite : critique sur 19-20": "Cible maudite : critique sur 19-20",
+  "Cible déjà marquée": "Cible déjà marquée",
+  "Marquer la cible · {p0} restant(s)": "Marquer la cible · {p0} restant(s)",
+  "Décharge déchirante": "Décharge déchirante",
+  "Évocation renforcée": "Évocation renforcée",
+  "Inspiration bardique": "Inspiration bardique",
+  "Dé reçu": "Dé reçu",
+  "Aussi aux dégâts (collège de la Vaillance)": "Aussi aux dégâts (collège de la Vaillance)",
+  "Dé d’effet reçu invalide.": "Dé d’effet reçu invalide.",
+  "Une seule fois : retiré de la fiche après le jet": "Une seule fois : retiré de la fiche après le jet",
+  "Effet reçu actif": "Effet reçu actif",
+  "+1d4 aux jets d’attaque et de sauvegarde · Concentration du lanceur": "+1d4 aux jets d’attaque et de sauvegarde · Concentration du lanceur",
+  "+1d4 à un test de caractéristique, une fois": "+1d4 à un test de caractéristique, une fois",
+  "+1d4 à un jet de sauvegarde, une fois": "+1d4 à un jet de sauvegarde, une fois",
+  "Un dé à ajouter à un test, une attaque ou une sauvegarde, une fois": "Un dé à ajouter à un test, une attaque ou une sauvegarde, une fois",
+  "Soins · {p0}": "Soins · {p0}",
+  "Fin d’un sort actif": "Fin d’un sort actif",
+  "creation.race": "Race",
+  "creation.searchRace": "Recherche de race",
+  "creation.abandon": "Abandonner",
+  "creation.choices": "Choix",
+  "creation.variants": "Variantes",
+  "creation.raceDetail": "Détail de la race",
+  "creation.emptyRace": "Choisis une race dans la liste.",
+  "creation.emptyClass": "Choisis une classe dans la liste.",
+  "creation.emptyBackground": "Choisis un historique dans la liste.",
+  "creation.todo": "À choisir ensuite",
+  "creation.todoStep": "étape {step}",
+  "creation.todoClassSpells": "Sorts de classe",
+  "creation.sizeChoice": "Petite ou moyenne",
+  "creation.line.toChoose": "À choisir",
+  "creation.line.optional": "Facultatif",
+  "creation.line.skills": "{count} compétence{s}",
+  "creation.line.languages": "{count} langue{s}",
+  "creation.line.tools": "{count} outil{s}",
+  "creation.line.weapons": "{count} arme{s}",
+  "creation.line.skillsOrTools": "{count} compétences ou outils",
+  "creation.line.languagesOrTools": "{count} langues ou outils",
+  "creation.line.weaponsOrTools": "{count} armes ou outils",
+  "creation.line.replacementSkills": "{count} compétence{s} de remplacement",
+  "creation.line.replacementTools": "{count} outil{s} de remplacement",
+  "creation.line.replacementHelp": "Ton historique donne une maîtrise que tu as déjà : choisis celle qui la remplace.",
+  "creation.line.abilityBonus": "{count} bonus de +{amount}",
+  "creation.line.among": "parmi {count}",
+  "creation.line.free": "au choix",
+  "creation.line.withExpertise": "avec expertise",
+  "creation.reason.ownedBy": "déjà acquise : {source}",
+  "creation.reason.ownedByM": "déjà acquis : {source}",
+  "creation.reason.owned": "déjà acquise",
+  "creation.reason.ownedM": "déjà acquis",
+  "creation.reason.takenBy": "prise par {source}",
+  "creation.reason.takenByM": "pris par {source}",
+  "creation.reason.prereq": "Prérequis non rempli : {reasons}",
+  "creation.shortage": "Encore {need} à choisir, {free} disponible{s}.",
+  "creation.shortage.release": "Libère une option prise ailleurs :",
+  "creation.shortage.none": "Aucune option à libérer ici.",
+  "creation.remaining": "Il reste {count} ligne{s} à compléter :",
+  "creation.complete": "Tous les choix sont faits.",
+  "creation.blocked": "Termine cette étape avant d’aller plus loin.",
+  "creation.searchOption": "Rechercher une option",
+  "creation.searchPlaceholder": "Rechercher…",
+  "creation.noOption": "Aucune option trouvée.",
+  "creation.exoticLanguages": "Langues exotiques",
+  "creation.draft.step": "Création en cours, étape {step}.",
+  "creation.draft.restartTitle": "Recommencer une création ?",
+  "creation.draft.restartText": "Le brouillon en cours ({name}) sera remplacé.",
+  "creation.draft.restart": "Recommencer",
+  "creation.gear.proficientOnly": "Armes maîtrisées seulement",
+  "creation.gear.notProficient": "{name} · non maîtrisée",
+  "home.deleteCharacter": "Supprimer {name}",
+  "creation.acquired": "Déjà acquises : {list}",
+  "creation.acquiredM": "Déjà acquis : {list}",
+  "creation.group.tools": "Outils et armes",
+  "creation.group.options": "Options",
+  "creation.group.spells": "Sorts à choisir",
+  "creation.levelNote": "L’étape « Niveaux » s’ajoute au parcours pour les niveaux 2 à {level}.",
+  "creation.removed": "{count} choix incompatible{s} retiré{s}. Choisis leur remplacement.",
+  "creation.originToChoose": "Origine à choisir",
+  "creation.classToChoose": "Classe à choisir",
+  "creation.backgroundToChoose": "Historique à choisir",
+  "creation.familyPreview": "{family} (aperçu)",
+  "creation.familyCount": "{count} variante{s}",
+  "creation.familySingle": "1 origine",
+  "creation.homebrewOrigin": "Origine maison",
+  "creation.bonus": "Bonus",
+  "creation.multiclass": "Multiclassage",
+  "creation.source": "Source ({labels})",
+  "creation.sourceRead": "Lire la référence de {name}",
+  "Aasimar déchu": "Aasimar déchu",
+  "Aasimar protecteur": "Aasimar protecteur",
+  "Aasimar fléau": "Aasimar fléau",
+  "Demi-elfe drow": "Demi-elfe drow",
+  "Demi-elfe aquatique": "Demi-elfe aquatique",
+  "Drakéide chromatique": "Drakéide chromatique",
+  "Drakéide métallique": "Drakéide métallique",
+  "Drakéide de gemme": "Drakéide de gemme",
+  "Tieffelin ailé": "Tieffelin ailé",
+  "Hybride simic grimpeur": "Hybride simic grimpeur",
+  "Hybride simic planeur": "Hybride simic planeur",
+  "Hybride simic aquatique": "Hybride simic aquatique",
+  "Humains, marque de la sentinelle": "Humains, marque de la sentinelle",
+  "Humains, marque de la Découverte": "Humains, marque de la Découverte",
+  "Féral peau de bête": "Féral peau de bête",
+  "Féral longues dents": "Féral longues dents",
+  "Féral longues foulées": "Féral longues foulées",
+  "Féral traque sauvage": "Féral traque sauvage",
+  "Githyanki": "Githyanki",
+  "Githzerai": "Githzerai",
+  "Elfe pâle": "Elfe pâle",
+  "Kalashtar": "Kalashtar",
+  "Hybride simic agrippeur": "Hybride simic agrippeur",
+  "Hybride simic carapace": "Hybride simic carapace",
+  "Hybride simic acide": "Hybride simic acide",
+  "Nains, marque de la Protection": "Nains, marque de la Protection",
+  "Elfes, marque de l’Ombre": "Elfes, marque de l’Ombre",
+  "Gnomes, marque de l’Écriture": "Gnomes, marque de l’Écriture",
+  "Demi-elfes, marque de la Détection": "Demi-elfes, marque de la Détection",
+  "Demi-elfes, marque de la Tempête": "Demi-elfes, marque de la Tempête",
+  "Demi-orcs, marque de la Découverte": "Demi-orcs, marque de la Découverte",
+  "Halfelins, marque de la Guérison": "Halfelins, marque de la Guérison",
+  "Halfelins, marque de l’Hospitalité": "Halfelins, marque de l’Hospitalité",
+  "Humains, marque du dressage": "Humains, marque du dressage",
+  "Humains, marque de la fabrication": "Humains, marque de la fabrication",
+  "Humains, marque du passage": "Humains, marque du passage"
 });
 
 
@@ -5744,6 +5898,7 @@ const UI_EN = Object.freeze({
   "Moyenne fixe : {p0}. Constitution {p1} ajoutée automatiquement.": "Fixed average: {p0}. Constitution {p1} added automatically.",
   "{p0} au choix": "{p0} of your choice",
   "{p0} : à choisir à l’étape Compétences.": "{p0}: choose at the Skills step.",
+  "{p0} : sorts à choisir à l’étape Magie.": "{p0}: choose its spells at the Magic step.",
   "{p0} au choix parmi {p1}": "Choose {p0} from {p1}",
   "{p0} Répartition conseillée": "{p0} Recommended allocation",
   " ×{p0}": " ×{p0}",
@@ -8270,7 +8425,160 @@ const UI_EN = Object.freeze({
   "dashboard.organizeSheet": "Arrange character sheet",
   "Coup critique : les dés de dégâts seront doublés.": "Critical hit: the damage dice will be doubled.",
   "Coup critique : dés de dégâts doublés.": "Critical hit: damage dice doubled.",
-  "Lancer les dégâts du critique": "Roll critical damage"
+  "Lancer les dégâts du critique": "Roll critical damage",
+  "creation.firstCharacter": "Create my first character",
+  "creation.chooseFamily": "Choose a family",
+  "creation.returnList": "Back to the list",
+  "creation.continueChoice": "Continue",
+  "creation.chooseOrigin": "Choose this origin",
+  "Jet : {p0}": "Roll: {p0}",
+  "critique {p0}-20": "critical {p0}-20",
+  "Dépensé pour ce jet": "Spent for this roll",
+  "{p0} restant(s)": "{p0} left",
+  "Châtiment divin": "Divine Smite",
+  "Emplacement de pacte niveau {p0} · {p1} restant(s)": "Pact slot level {p0} · {p1} left",
+  "Emplacement niveau {p0} · {p1} restant(s)": "Spell slot level {p0} · {p1} left",
+  "Cible mort-vivant ou fiélon": "Undead or fiend target",
+  "Frappe divine": "Divine Strike",
+  "Une fois par tour": "Once per turn",
+  "Attaque précise": "Precision Attack",
+  "Manœuvre : dé de supériorité": "Maneuver: superiority die",
+  "Frappe psionique": "Psionic Strike",
+  "Frappes guidées": "Homing Strikes",
+  "Marque du chasseur": "Hunter's Mark",
+  "Tueur de colosses": "Colossus Slayer",
+  "Une fois par tour, cible déjà blessée": "Once per turn, target already wounded",
+  "Fureur divine": "Divine Fury",
+  "Maître des armes à deux mains": "Great Weapon Master",
+  "Tireur d’élite": "Sharpshooter",
+  "Critique brutal": "Brutal Critical",
+  "Attaques sauvages": "Savage Attacks",
+  "Maléfice": "Hex",
+  "Malédiction du Magelame": "Hexblade's Curse",
+  "Cible maudite : critique sur 19-20": "Cursed target: critical on 19-20",
+  "Cible déjà marquée": "Target already marked",
+  "Marquer la cible · {p0} restant(s)": "Mark the target · {p0} left",
+  "Décharge déchirante": "Agonizing Blast",
+  "Évocation renforcée": "Empowered Evocation",
+  "Inspiration bardique": "Bardic Inspiration",
+  "Dé reçu": "Die received",
+  "Aussi aux dégâts (collège de la Vaillance)": "Also to damage (College of Valor)",
+  "Dé d’effet reçu invalide.": "Invalid received effect die.",
+  "Une seule fois : retiré de la fiche après le jet": "Once: removed from the sheet after the roll",
+  "Effet reçu actif": "Active received effect",
+  "+1d4 aux jets d’attaque et de sauvegarde · Concentration du lanceur": "+1d4 to attack rolls and saving throws · Caster's concentration",
+  "+1d4 à un test de caractéristique, une fois": "+1d4 to one ability check, once",
+  "+1d4 à un jet de sauvegarde, une fois": "+1d4 to one saving throw, once",
+  "Un dé à ajouter à un test, une attaque ou une sauvegarde, une fois": "One die to add to a check, an attack or a saving throw, once",
+  "Soins · {p0}": "Healing · {p0}",
+  "Fin d’un sort actif": "End of an active spell",
+  "creation.race": "Race",
+  "creation.searchRace": "Search races",
+  "creation.abandon": "Leave",
+  "creation.choices": "Choices",
+  "creation.variants": "Variants",
+  "creation.raceDetail": "Race details",
+  "creation.emptyRace": "Choose a race from the list.",
+  "creation.emptyClass": "Choose a class from the list.",
+  "creation.emptyBackground": "Choose a background from the list.",
+  "creation.todo": "To choose next",
+  "creation.todoStep": "{step} step",
+  "creation.todoClassSpells": "Class spells",
+  "creation.sizeChoice": "Small or Medium",
+  "creation.line.toChoose": "To choose",
+  "creation.line.optional": "Optional",
+  "creation.line.skills": "{count} skill{s}",
+  "creation.line.languages": "{count} language{s}",
+  "creation.line.tools": "{count} tool{s}",
+  "creation.line.weapons": "{count} weapon{s}",
+  "creation.line.skillsOrTools": "{count} skills or tools",
+  "creation.line.languagesOrTools": "{count} languages or tools",
+  "creation.line.weaponsOrTools": "{count} weapons or tools",
+  "creation.line.replacementSkills": "{count} replacement skill{s}",
+  "creation.line.replacementTools": "{count} replacement tool{s}",
+  "creation.line.replacementHelp": "Your background grants a proficiency you already have: choose its replacement.",
+  "creation.line.abilityBonus": "+{amount} to {count} abilities",
+  "creation.line.among": "from {count}",
+  "creation.line.free": "of your choice",
+  "creation.line.withExpertise": "with expertise",
+  "creation.reason.ownedBy": "already granted: {source}",
+  "creation.reason.ownedByM": "already granted: {source}",
+  "creation.reason.owned": "already granted",
+  "creation.reason.ownedM": "already granted",
+  "creation.reason.takenBy": "taken by {source}",
+  "creation.reason.takenByM": "taken by {source}",
+  "creation.reason.prereq": "Prerequisite not met: {reasons}",
+  "creation.shortage": "{need} more to choose, {free} available.",
+  "creation.shortage.release": "Free an option taken elsewhere:",
+  "creation.shortage.none": "No option to free here.",
+  "creation.remaining": "{count} line{s} left to complete:",
+  "creation.complete": "All choices are made.",
+  "creation.blocked": "Finish this step before going further.",
+  "creation.searchOption": "Search options",
+  "creation.searchPlaceholder": "Search…",
+  "creation.noOption": "No option found.",
+  "creation.exoticLanguages": "Exotic languages",
+  "creation.draft.step": "Creation in progress, {step} step.",
+  "creation.draft.restartTitle": "Start a new creation?",
+  "creation.draft.restartText": "The current draft ({name}) will be replaced.",
+  "creation.draft.restart": "Start over",
+  "creation.gear.proficientOnly": "Proficient weapons only",
+  "creation.gear.notProficient": "{name} · not proficient",
+  "home.deleteCharacter": "Delete {name}",
+  "creation.acquired": "Already granted: {list}",
+  "creation.acquiredM": "Already granted: {list}",
+  "creation.group.tools": "Tools and weapons",
+  "creation.group.options": "Options",
+  "creation.group.spells": "Spells to choose",
+  "creation.levelNote": "The “Levels” step is added for levels 2 to {level}.",
+  "creation.removed": "{count} incompatible choice{s} removed. Choose a replacement.",
+  "creation.originToChoose": "Race to choose",
+  "creation.classToChoose": "Class to choose",
+  "creation.backgroundToChoose": "Background to choose",
+  "creation.familyPreview": "{family} (preview)",
+  "creation.familyCount": "{count} variant{s}",
+  "creation.familySingle": "1 race",
+  "creation.homebrewOrigin": "Homebrew race",
+  "creation.bonus": "Bonuses",
+  "creation.multiclass": "Multiclassing",
+  "creation.source": "Source ({labels})",
+  "creation.sourceRead": "Read the reference for {name}",
+  "Aasimar déchu": "Fallen aasimar",
+  "Aasimar protecteur": "Protector aasimar",
+  "Aasimar fléau": "Scourge aasimar",
+  "Demi-elfe drow": "Drow half-elf",
+  "Demi-elfe aquatique": "Aquatic half-elf",
+  "Drakéide chromatique": "Chromatic dragonborn",
+  "Drakéide métallique": "Metallic dragonborn",
+  "Drakéide de gemme": "Gem dragonborn",
+  "Tieffelin ailé": "Winged tiefling",
+  "Hybride simic grimpeur": "Simic hybrid, climber",
+  "Hybride simic planeur": "Simic hybrid, glider",
+  "Hybride simic aquatique": "Simic hybrid, aquatic",
+  "Humains, marque de la sentinelle": "Humans, Mark of Sentinel",
+  "Humains, marque de la Découverte": "Humans, Mark of Finding",
+  "Féral peau de bête": "Beasthide shifter",
+  "Féral longues dents": "Longtooth shifter",
+  "Féral longues foulées": "Swiftstride shifter",
+  "Féral traque sauvage": "Wildhunt shifter",
+  "Githyanki": "Githyanki",
+  "Githzerai": "Githzerai",
+  "Elfe pâle": "Pallid elf",
+  "Kalashtar": "Kalashtar",
+  "Hybride simic agrippeur": "Simic hybrid, grappling appendages",
+  "Hybride simic carapace": "Simic hybrid, carapace",
+  "Hybride simic acide": "Simic hybrid, acid spit",
+  "Nains, marque de la Protection": "Dwarves, Mark of Warding",
+  "Elfes, marque de l’Ombre": "Elves, Mark of Shadow",
+  "Gnomes, marque de l’Écriture": "Gnomes, Mark of Scribing",
+  "Demi-elfes, marque de la Détection": "Half-elves, Mark of Detection",
+  "Demi-elfes, marque de la Tempête": "Half-elves, Mark of Storm",
+  "Demi-orcs, marque de la Découverte": "Half-orcs, Mark of Finding",
+  "Halfelins, marque de la Guérison": "Halflings, Mark of Healing",
+  "Halfelins, marque de l’Hospitalité": "Halflings, Mark of Hospitality",
+  "Humains, marque du dressage": "Humans, Mark of Handling",
+  "Humains, marque de la fabrication": "Humans, Mark of Making",
+  "Humains, marque du passage": "Humans, Mark of Passage"
 });
 
 
@@ -14657,7 +14965,7 @@ const SPELL_SCHOOLS = ["Abjuration", "Divination", "Enchantement", "Évocation",
 
 // Module : generated/spell-dice-data
 /** Dés de dégâts des sorts, extraits des balises 5etools au commit 874dd65a9321be74f393534661c70ca80b896e95. Généré par tools/catalogue/spell-dice.mjs. */
-const SPELL_DICE = {"abi-dalzims-horrid-wilting":{"save":["con"],"half":true,"rolls":[{"count":12,"sides":8,"bonus":0,"types":["necrotic"]}]},"absorb-elements":{"rolls":[{"count":1,"sides":6,"bonus":0,"types":[],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"acid-splash":{"save":["dex"],"rolls":[{"levels":{"1":"1d6","5":"2d6","11":"3d6","17":"4d6"},"types":["acid"]}]},"aganazzars-scorcher":{"save":["dex"],"half":true,"rolls":[{"count":3,"sides":8,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"alter-self":{"rolls":[{"count":1,"sides":6,"bonus":0,"types":["bludgeoning","piercing","slashing"]}]},"animate-objects":{"rolls":[{"count":1,"sides":4,"bonus":4,"types":[]},{"count":1,"sides":8,"bonus":2,"types":[]},{"count":2,"sides":6,"bonus":1,"types":[]},{"count":2,"sides":10,"bonus":2,"types":[]},{"count":2,"sides":12,"bonus":4,"types":[]}]},"antagonize":{"save":["wis"],"half":true,"rolls":[{"count":4,"sides":4,"bonus":0,"types":["psychic"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"arms-of-hadar":{"save":["str"],"rolls":[{"count":2,"sides":6,"bonus":0,"types":["necrotic"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"ashardalons-stride":{"rolls":[{"count":1,"sides":6,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"banishing-smite":{"rolls":[{"count":5,"sides":10,"bonus":0,"types":["force"]}]},"bestow-curse":{"save":["wis"],"rolls":[{"count":1,"sides":8,"bonus":0,"types":["necrotic"]}]},"bigbys-hand":{"attack":"M","rolls":[{"count":4,"sides":8,"bonus":0,"types":["force"],"upcast":{"step":2,"levels":[6,7,8,9]}},{"count":2,"sides":6,"bonus":0,"modifier":true,"types":["bludgeoning"],"upcast":{"step":2,"levels":[6,7,8,9]}}]},"blade-barrier":{"save":["dex"],"half":true,"rolls":[{"count":6,"sides":10,"bonus":0,"types":["slashing"]}]},"blade-of-disaster":{"attack":"M","rolls":[{"count":4,"sides":12,"bonus":0,"types":["force"]},{"count":8,"sides":12,"bonus":0,"types":["force"]},{"count":12,"sides":12,"bonus":0,"types":["force"]}]},"blight":{"save":["con"],"half":true,"rolls":[{"count":8,"sides":8,"bonus":0,"types":["necrotic"],"upcast":{"step":1,"levels":[5,6,7,8,9]}}]},"blinding-smite":{"save":["con"],"rolls":[{"count":3,"sides":8,"bonus":0,"types":["radiant"]}]},"bones-of-the-earth":{"save":["dex"],"rolls":[{"count":6,"sides":6,"bonus":0,"types":["bludgeoning"]}]},"booming-blade":{"attack":"M","rolls":[{"levels":{"1":"1d8","5":"2d8","11":"3d8","17":"4d8"},"types":["thunder"]},{"levels":{"5":"1d8","11":"2d8","17":"3d8"},"types":["thunder"]}]},"branding-smite":{"rolls":[{"count":2,"sides":6,"bonus":0,"types":["radiant"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"burning-hands":{"save":["dex"],"half":true,"rolls":[{"count":3,"sides":6,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"call-lightning":{"save":["dex"],"half":true,"rolls":[{"count":3,"sides":10,"bonus":0,"types":["lightning"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}},{"count":1,"sides":10,"bonus":0,"types":[]}]},"catapult":{"save":["dex"],"rolls":[{"count":3,"sides":8,"bonus":0,"types":["bludgeoning"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"chain-lightning":{"save":["dex"],"half":true,"rolls":[{"count":10,"sides":8,"bonus":0,"types":["lightning"]}]},"chill-touch":{"attack":"R","rolls":[{"levels":{"1":"1d8","5":"2d8","11":"3d8","17":"4d8"},"types":["necrotic"]}]},"chromatic-orb":{"attack":"R","rolls":[{"count":3,"sides":8,"bonus":0,"types":[],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"circle-of-death":{"save":["con"],"half":true,"rolls":[{"count":8,"sides":6,"bonus":0,"types":["necrotic"],"upcast":{"step":2,"levels":[7,8,9]}}]},"cloud-of-daggers":{"rolls":[{"count":4,"sides":4,"bonus":0,"types":["slashing"],"upcast":{"step":2,"levels":[3,4,5,6,7,8,9]}}]},"cloudkill":{"save":["con"],"half":true,"rolls":[{"count":5,"sides":8,"bonus":0,"types":["poison"],"upcast":{"step":1,"levels":[6,7,8,9]}}]},"cone-of-cold":{"save":["con"],"half":true,"rolls":[{"count":8,"sides":8,"bonus":0,"types":["cold"],"upcast":{"step":1,"levels":[6,7,8,9]}}]},"conjure-barrage":{"save":["dex"],"half":true,"rolls":[{"count":3,"sides":8,"bonus":0,"types":[]}]},"conjure-volley":{"save":["dex"],"half":true,"rolls":[{"count":8,"sides":8,"bonus":0,"types":[]}]},"contact-other-plane":{"save":["int"],"rolls":[{"count":6,"sides":6,"bonus":0,"types":["psychic"]}]},"control-water":{"save":["str"],"rolls":[{"count":2,"sides":8,"bonus":0,"types":["bludgeoning"]},{"count":2,"sides":8,"bonus":0,"types":["bludgeoning"]}]},"cordon-of-arrows":{"save":["dex"],"rolls":[{"count":1,"sides":6,"bonus":0,"types":["piercing"]}]},"create-bonfire":{"save":["dex"],"rolls":[{"levels":{"1":"1d8","5":"2d8","11":"3d8","17":"4d8"},"types":["fire"]}]},"create-homunculus":{"rolls":[{"count":2,"sides":4,"bonus":0,"types":["piercing"]}]},"crown-of-stars":{"attack":"R","rolls":[{"count":4,"sides":12,"bonus":0,"types":["radiant"]}]},"crusaders-mantle":{"rolls":[{"count":1,"sides":4,"bonus":0,"types":["radiant"]}]},"dark-star":{"save":["con"],"half":true,"rolls":[{"count":8,"sides":10,"bonus":0,"types":["force"]}]},"dawn":{"save":["con"],"half":true,"rolls":[{"count":4,"sides":10,"bonus":0,"types":["radiant"]}]},"delayed-blast-fireball":{"save":["dex"],"half":true,"rolls":[{"count":12,"sides":6,"bonus":0,"types":[],"upcast":{"step":1,"levels":[8,9]}},{"count":1,"sides":6,"bonus":0,"types":[]}]},"destructive-wave":{"save":["con"],"half":true,"rolls":[{"count":5,"sides":6,"bonus":0,"types":["thunder"]},{"count":5,"sides":6,"bonus":0,"join":true,"types":["radiant","necrotic"]}]},"dimension-door":{"rolls":[{"count":4,"sides":6,"bonus":0,"types":["force"]}]},"disintegrate":{"save":["dex"],"rolls":[{"count":10,"sides":6,"bonus":40,"types":["force"],"upcast":{"step":3,"levels":[7,8,9]}}]},"dissonant-whispers":{"save":["wis"],"half":true,"rolls":[{"count":3,"sides":6,"bonus":0,"types":["psychic"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"divine-favor":{"rolls":[{"count":1,"sides":4,"bonus":0,"types":["radiant"]}]},"draconic-transformation":{"save":["dex"],"half":true,"rolls":[{"count":6,"sides":8,"bonus":0,"types":["force"]}]},"dragons-breath":{"save":["dex"],"half":true,"rolls":[{"count":3,"sides":6,"bonus":0,"types":[],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"dream":{"save":["wis"],"rolls":[{"count":3,"sides":6,"bonus":0,"types":["psychic"]}]},"dust-devil":{"save":["str"],"half":true,"rolls":[{"count":1,"sides":8,"bonus":0,"types":["bludgeoning"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"earth-tremor":{"save":["dex"],"rolls":[{"count":1,"sides":6,"bonus":0,"types":["bludgeoning"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"earthquake":{"save":["con","dex"],"half":true,"rolls":[{"count":5,"sides":6,"bonus":0,"types":["bludgeoning"]}]},"eldritch-blast":{"attack":"R","count":{"unit":"beam","tiers":{"1":1,"5":2,"11":3,"17":4}},"rolls":[{"count":1,"sides":10,"bonus":0,"types":["force"]}]},"elemental-bane":{"save":["con"],"rolls":[{"count":2,"sides":6,"bonus":0,"types":[]}]},"elemental-weapon":{"rolls":[{"count":1,"sides":4,"bonus":0,"types":[],"upcast":{"step":3,"levels":[4,5,6,7,8,9]}}]},"enervation":{"save":["dex"],"rolls":[{"count":2,"sides":8,"bonus":0,"types":["necrotic"]},{"count":4,"sides":8,"bonus":0,"types":["necrotic"]},{"count":4,"sides":8,"bonus":0,"types":["necrotic"]}]},"enlarge-reduce":{"save":["con"],"rolls":[{"count":1,"sides":4,"bonus":0,"types":[]},{"count":1,"sides":4,"bonus":0,"types":[]}]},"ensnaring-strike":{"save":["str"],"rolls":[{"count":1,"sides":6,"bonus":0,"types":["piercing"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"erupting-earth":{"save":["dex"],"half":true,"rolls":[{"count":3,"sides":12,"bonus":0,"types":["bludgeoning"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"evards-black-tentacles":{"save":["dex"],"rolls":[{"count":3,"sides":6,"bonus":0,"types":["bludgeoning"]},{"count":3,"sides":6,"bonus":0,"types":["bludgeoning"]}]},"feeblemind":{"save":["int"],"rolls":[{"count":4,"sides":6,"bonus":0,"types":["psychic"]}]},"finger-of-death":{"save":["con"],"half":true,"rolls":[{"count":7,"sides":8,"bonus":30,"types":["necrotic"]}]},"fire-bolt":{"attack":"R","rolls":[{"levels":{"1":"1d10","5":"2d10","11":"3d10","17":"4d10"},"types":["fire"]}]},"fire-shield":{"rolls":[{"count":2,"sides":8,"bonus":0,"types":["fire"]},{"count":2,"sides":8,"bonus":0,"types":["cold"]}]},"fire-storm":{"save":["dex"],"half":true,"rolls":[{"count":7,"sides":10,"bonus":0,"types":["fire"]}]},"fireball":{"save":["dex"],"half":true,"rolls":[{"count":8,"sides":6,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"flame-arrows":{"rolls":[{"count":1,"sides":6,"bonus":0,"types":["fire"]}]},"flame-blade":{"attack":"M","rolls":[{"count":3,"sides":6,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[4,6,8]}}]},"flame-strike":{"save":["dex"],"half":true,"rolls":[{"count":4,"sides":6,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[6,7,8,9]}},{"count":4,"sides":6,"bonus":0,"join":true,"types":["radiant"]}]},"flaming-sphere":{"save":["dex"],"half":true,"rolls":[{"count":2,"sides":6,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"forbiddance":{"rolls":[{"count":5,"sides":10,"bonus":0,"types":["radiant","necrotic"]}]},"frost-fingers":{"save":["con"],"half":true,"rolls":[{"count":2,"sides":8,"bonus":0,"types":["cold"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"frostbite":{"save":["con"],"rolls":[{"levels":{"1":"1d6","5":"2d6","11":"3d6","17":"4d6"},"types":["cold"]}]},"geas":{"save":["wis"],"rolls":[{"count":5,"sides":10,"bonus":0,"types":["psychic"]}]},"glyph-of-warding":{"save":["dex"],"half":true,"rolls":[{"count":5,"sides":8,"bonus":0,"types":["acid","cold","fire","lightning","thunder"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"gravity-fissure":{"save":["con"],"half":true,"rolls":[{"count":8,"sides":8,"bonus":0,"types":["force"],"upcast":{"step":1,"levels":[7,8,9]}},{"count":8,"sides":8,"bonus":0,"types":["force"],"upcast":{"step":1,"levels":[7,8,9]}}]},"gravity-sinkhole":{"save":["con"],"half":true,"rolls":[{"count":5,"sides":10,"bonus":0,"types":["force"],"upcast":{"step":1,"levels":[5,6,7,8,9]}}]},"green-flame-blade":{"attack":"M","rolls":[{"levels":{"1":"","5":"1d8","11":"2d8","17":"3d8"},"modifier":true,"types":["fire"]},{"levels":{"5":"1d8","11":"2d8","17":"3d8"},"types":["fire"]}]},"guardian-of-nature":{"rolls":[{"count":1,"sides":6,"bonus":0,"types":["force"]}]},"guiding-bolt":{"attack":"R","rolls":[{"count":4,"sides":6,"bonus":0,"types":["radiant"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"hail-of-thorns":{"save":["dex"],"half":true,"rolls":[{"count":1,"sides":10,"bonus":0,"types":["piercing"],"upcast":{"step":1,"levels":[2,3,4,5,6]}}]},"harm":{"save":["con"],"half":true,"rolls":[{"count":14,"sides":6,"bonus":0,"types":["necrotic"]}]},"heat-metal":{"save":["con"],"rolls":[{"count":2,"sides":8,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"hellish-rebuke":{"save":["dex"],"half":true,"rolls":[{"count":2,"sides":10,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"hex":{"rolls":[{"count":1,"sides":6,"bonus":0,"types":["necrotic"]}]},"holy-weapon":{"save":["con"],"half":true,"rolls":[{"count":2,"sides":8,"bonus":0,"types":["radiant"]},{"count":4,"sides":8,"bonus":0,"types":["radiant"]}]},"hunger-of-hadar":{"save":["dex"],"rolls":[{"count":2,"sides":6,"bonus":0,"types":["cold"]},{"count":2,"sides":6,"bonus":0,"types":["acid"]}]},"hunters-mark":{"rolls":[{"count":1,"sides":6,"bonus":0,"types":[]}]},"ice-knife":{"attack":"R","save":["dex"],"rolls":[{"count":1,"sides":10,"bonus":0,"types":["piercing"]},{"count":2,"sides":6,"bonus":0,"types":["cold"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"ice-storm":{"save":["dex"],"half":true,"rolls":[{"count":2,"sides":8,"bonus":0,"types":["bludgeoning"],"upcast":{"step":1,"levels":[5,6,7,8,9]}},{"count":4,"sides":6,"bonus":0,"join":true,"types":["cold"]}]},"illusory-dragon":{"save":["wis","int"],"half":true,"rolls":[{"count":7,"sides":6,"bonus":0,"types":[]}]},"immolation":{"save":["dex"],"half":true,"rolls":[{"count":8,"sides":6,"bonus":0,"types":["fire"]},{"count":4,"sides":6,"bonus":0,"types":["fire"]}]},"incendiary-cloud":{"save":["dex"],"half":true,"rolls":[{"count":10,"sides":8,"bonus":0,"types":["fire"]}]},"infestation":{"save":["con"],"rolls":[{"levels":{"1":"1d6","5":"2d6","11":"3d6","17":"4d6"},"types":["poison"]}]},"inflict-wounds":{"attack":"M","rolls":[{"count":3,"sides":10,"bonus":0,"types":["necrotic"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"insect-plague":{"save":["con"],"half":true,"rolls":[{"count":4,"sides":10,"bonus":0,"types":["piercing"],"upcast":{"step":1,"levels":[6,7,8,9]}}]},"investiture-of-flame":{"save":["dex"],"half":true,"rolls":[{"count":1,"sides":10,"bonus":0,"types":["fire"]},{"count":4,"sides":8,"bonus":0,"types":["fire"]}]},"investiture-of-ice":{"save":["con"],"half":true,"rolls":[{"count":4,"sides":6,"bonus":0,"types":["cold"]}]},"investiture-of-wind":{"save":["con"],"half":true,"rolls":[{"count":2,"sides":10,"bonus":0,"types":["bludgeoning"]}]},"jims-magic-missile":{"attack":"R","rolls":[{"count":2,"sides":4,"bonus":0,"types":["force"]},{"count":5,"sides":4,"bonus":0,"types":["force"]}]},"kinetic-jaunt":{"rolls":[{"count":1,"sides":8,"bonus":0,"types":["force"]}]},"life-transference":{"rolls":[{"count":4,"sides":8,"bonus":0,"types":["necrotic"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"lightning-arrow":{"save":["dex"],"half":true,"rolls":[{"count":4,"sides":8,"bonus":0,"types":["lightning"]},{"count":2,"sides":8,"bonus":0,"types":["lightning"]}]},"lightning-bolt":{"save":["dex"],"half":true,"rolls":[{"count":8,"sides":6,"bonus":0,"types":["lightning"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"lightning-lure":{"save":["str"],"rolls":[{"levels":{"1":"1d8","5":"2d8","11":"3d8","17":"4d8"},"types":["lightning"]}]},"maddening-darkness":{"save":["wis"],"half":true,"rolls":[{"count":8,"sides":8,"bonus":0,"types":["psychic"]}]},"maelstrom":{"save":["str"],"rolls":[{"count":6,"sides":6,"bonus":0,"types":["bludgeoning"]}]},"magic-missile":{"count":{"unit":"dart","base":3,"from":1,"combine":true},"rolls":[{"count":1,"sides":4,"bonus":1,"types":["force"]}]},"magic-stone":{"attack":"R","rolls":[{"count":1,"sides":6,"bonus":0,"modifier":true,"types":["bludgeoning"]}]},"magnify-gravity":{"save":["con"],"half":true,"rolls":[{"count":2,"sides":8,"bonus":0,"types":["force"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"maximilians-earthen-grasp":{"save":["str"],"half":true,"rolls":[{"count":2,"sides":6,"bonus":0,"types":["bludgeoning"]},{"count":2,"sides":6,"bonus":0,"types":["bludgeoning"]}]},"meld-into-stone":{"rolls":[{"count":6,"sides":6,"bonus":0,"types":["bludgeoning"]}]},"melfs-acid-arrow":{"attack":"R","rolls":[{"count":4,"sides":4,"bonus":0,"types":["acid"]},{"count":2,"sides":4,"bonus":0,"types":["acid"]}]},"melfs-minute-meteors":{"save":["dex"],"half":true,"rolls":[{"count":2,"sides":6,"bonus":0,"types":["fire"]}]},"mental-prison":{"save":["int"],"rolls":[{"count":5,"sides":10,"bonus":0,"types":["psychic"]},{"count":5,"sides":10,"bonus":0,"types":["psychic"]},{"count":10,"sides":10,"bonus":0,"types":["psychic"]}]},"meteor-swarm":{"save":["dex"],"half":true,"rolls":[{"count":20,"sides":6,"bonus":0,"types":["fire"]},{"count":20,"sides":6,"bonus":0,"join":true,"types":["bludgeoning"]}]},"mind-sliver":{"save":["int"],"rolls":[{"levels":{"1":"1d6","5":"2d6","11":"3d6","17":"4d6"},"types":["psychic"]}]},"mind-spike":{"save":["wis"],"half":true,"rolls":[{"count":3,"sides":8,"bonus":0,"types":["psychic"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"moonbeam":{"save":["con"],"half":true,"rolls":[{"count":2,"sides":10,"bonus":0,"types":["radiant"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"mordenkainens-faithful-hound":{"rolls":[{"count":4,"sides":8,"bonus":0,"types":["piercing"]}]},"mordenkainens-sword":{"attack":"M","rolls":[{"count":3,"sides":10,"bonus":0,"types":["force"]}]},"negative-energy-flood":{"save":["con"],"half":true,"rolls":[{"count":5,"sides":12,"bonus":0,"types":["necrotic"]}]},"otilukes-freezing-sphere":{"save":["con"],"half":true,"rolls":[{"count":10,"sides":6,"bonus":0,"types":["cold"],"upcast":{"step":1,"levels":[7,8,9]}}]},"phantasmal-force":{"save":["int"],"rolls":[{"count":1,"sides":6,"bonus":0,"types":["psychic"]}]},"phantasmal-killer":{"save":["wis"],"rolls":[{"count":4,"sides":10,"bonus":0,"types":["psychic"],"upcast":{"step":1,"levels":[5,6,7,8,9]}}]},"poison-spray":{"save":["con"],"rolls":[{"levels":{"1":"1d12","5":"2d12","11":"3d12","17":"4d12"},"types":["poison"]}]},"primal-savagery":{"attack":"M","rolls":[{"levels":{"1":"1d10","5":"2d10","11":"3d10","17":"4d10"},"types":["acid"]}]},"prismatic-spray":{"save":["dex","con","wis"],"half":true,"rolls":[{"count":10,"sides":6,"bonus":0,"types":["fire"]},{"count":10,"sides":6,"bonus":0,"types":["acid"]},{"count":10,"sides":6,"bonus":0,"types":["lightning"]},{"count":10,"sides":6,"bonus":0,"types":["poison"]},{"count":10,"sides":6,"bonus":0,"types":["cold"]}]},"prismatic-wall":{"save":["con","dex","wis"],"half":true,"rolls":[{"count":10,"sides":6,"bonus":0,"types":["fire"]},{"count":10,"sides":6,"bonus":0,"types":["acid"]},{"count":10,"sides":6,"bonus":0,"types":["lightning"]},{"count":10,"sides":6,"bonus":0,"types":["poison"]},{"count":10,"sides":6,"bonus":0,"types":["cold"]}]},"produce-flame":{"attack":"R","rolls":[{"levels":{"1":"1d8","5":"2d8","11":"3d8","17":"4d8"},"types":["fire"]}]},"psychic-scream":{"save":["int"],"half":true,"rolls":[{"count":14,"sides":6,"bonus":0,"types":["psychic"]}]},"pulse-wave":{"save":["con"],"half":true,"rolls":[{"count":6,"sides":6,"bonus":0,"types":["force"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"raulothims-psychic-lance":{"save":["int"],"half":true,"rolls":[{"count":7,"sides":6,"bonus":0,"types":["psychic"],"upcast":{"step":1,"levels":[5,6,7,8,9]}}]},"ravenous-void":{"save":["str"],"rolls":[{"count":5,"sides":10,"bonus":0,"types":["force"]}]},"ray-of-frost":{"attack":"R","rolls":[{"levels":{"1":"1d8","5":"2d8","11":"3d8","17":"4d8"},"types":["cold"]}]},"ray-of-sickness":{"attack":"R","save":["con"],"rolls":[{"count":2,"sides":8,"bonus":0,"types":["poison"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"reality-break":{"save":["wis","dex"],"half":true,"rolls":[{"count":6,"sides":12,"bonus":0,"types":["psychic"]},{"count":8,"sides":12,"bonus":0,"types":["force"]},{"count":10,"sides":12,"bonus":0,"types":["force"]},{"count":10,"sides":12,"bonus":0,"types":["cold"]}]},"rimes-binding-ice":{"save":["con"],"half":true,"rolls":[{"count":3,"sides":8,"bonus":0,"types":["cold"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"sacred-flame":{"save":["dex"],"rolls":[{"levels":{"1":"1d8","5":"2d8","11":"3d8","17":"4d8"},"types":["radiant"]}]},"sapping-sting":{"save":["con"],"rolls":[{"levels":{"1":"1d4","5":"2d4","11":"3d4","17":"4d4"},"types":["necrotic"]}]},"scorching-ray":{"attack":"R","count":{"unit":"ray","base":3,"from":2},"rolls":[{"count":2,"sides":6,"bonus":0,"types":["fire"]}]},"searing-smite":{"save":["con"],"rolls":[{"count":1,"sides":6,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}},{"count":1,"sides":6,"bonus":0,"types":["fire"]}]},"shadow-blade":{"rolls":[{"count":2,"sides":8,"bonus":0,"types":["psychic"]}]},"shadow-of-moil":{"rolls":[{"count":2,"sides":8,"bonus":0,"types":["necrotic"]}]},"shatter":{"save":["con"],"half":true,"rolls":[{"count":3,"sides":8,"bonus":0,"types":["thunder"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"shocking-grasp":{"attack":"M","rolls":[{"levels":{"1":"1d8","5":"2d8","11":"3d8","17":"4d8"},"types":["lightning"]}]},"sickening-radiance":{"save":["con"],"rolls":[{"count":4,"sides":10,"bonus":0,"types":["radiant"]}]},"snillocs-snowball-swarm":{"save":["dex"],"half":true,"rolls":[{"count":3,"sides":6,"bonus":0,"types":["cold"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"spike-growth":{"rolls":[{"count":2,"sides":4,"bonus":0,"types":["piercing"]}]},"spirit-guardians":{"save":["wis"],"half":true,"rolls":[{"count":3,"sides":8,"bonus":0,"types":["radiant"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}},{"count":3,"sides":8,"bonus":0,"types":["necrotic"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"spirit-shroud":{"rolls":[{"count":1,"sides":8,"bonus":0,"types":[],"upcast":{"step":1,"levels":[5,7,9]}}]},"spiritual-weapon":{"attack":"M","rolls":[{"count":1,"sides":8,"bonus":0,"modifier":true,"types":["force"],"upcast":{"step":1,"levels":[4,6,8]}}]},"spray-of-cards":{"save":["dex"],"half":true,"rolls":[{"count":2,"sides":10,"bonus":0,"types":["force"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"staggering-smite":{"save":["wis"],"rolls":[{"count":4,"sides":6,"bonus":0,"types":["psychic"]}]},"steel-wind-strike":{"attack":"M","rolls":[{"count":6,"sides":10,"bonus":0,"types":["force"]}]},"storm-of-vengeance":{"save":["con","dex"],"half":true,"rolls":[{"count":2,"sides":6,"bonus":0,"types":["thunder"]},{"count":1,"sides":6,"bonus":0,"types":["acid"]},{"count":10,"sides":6,"bonus":0,"types":["lightning"]},{"count":2,"sides":6,"bonus":0,"types":["bludgeoning"]},{"count":1,"sides":6,"bonus":0,"types":["cold"]}]},"storm-sphere":{"attack":"R","save":["str"],"rolls":[{"count":2,"sides":6,"bonus":0,"types":["bludgeoning"]},{"count":4,"sides":6,"bonus":0,"types":["lightning"]}]},"sunbeam":{"save":["con"],"half":true,"rolls":[{"count":6,"sides":8,"bonus":0,"types":["radiant"]}]},"sunburst":{"save":["con"],"half":true,"rolls":[{"count":12,"sides":6,"bonus":0,"types":["radiant"]}]},"sword-burst":{"save":["dex"],"rolls":[{"levels":{"1":"1d6","5":"2d6","11":"3d6","17":"4d6"},"types":["force"]}]},"symbol":{"save":["con","wis","cha","int"],"half":true,"rolls":[{"count":10,"sides":10,"bonus":0,"types":["necrotic"]}]},"synaptic-static":{"save":["int","con"],"half":true,"rolls":[{"count":8,"sides":6,"bonus":0,"types":["psychic"]}]},"tashas-caustic-brew":{"save":["dex"],"rolls":[{"count":2,"sides":4,"bonus":0,"types":["acid"],"upcast":{"step":2,"levels":[2,3,4,5,6,7,8,9]}}]},"tashas-mind-whip":{"save":["int"],"half":true,"rolls":[{"count":3,"sides":6,"bonus":0,"types":["psychic"]}]},"teleport":{"rolls":[{"count":3,"sides":10,"bonus":0,"types":["force"]}]},"tensers-transformation":{"save":["con"],"rolls":[{"count":2,"sides":12,"bonus":0,"types":["force"]}]},"thorn-whip":{"attack":"M","rolls":[{"levels":{"1":"1d6","5":"2d6","11":"3d6","17":"4d6"},"types":["piercing"]}]},"thunder-step":{"save":["con"],"half":true,"rolls":[{"count":3,"sides":10,"bonus":0,"types":["thunder"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"thunderclap":{"save":["con"],"rolls":[{"levels":{"1":"1d6","5":"2d6","11":"3d6","17":"4d6"},"types":["thunder"]}]},"thunderous-smite":{"save":["str"],"rolls":[{"count":2,"sides":6,"bonus":0,"types":["thunder"]}]},"thunderwave":{"save":["con"],"half":true,"rolls":[{"count":2,"sides":8,"bonus":0,"types":["thunder"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"tidal-wave":{"save":["dex"],"half":true,"rolls":[{"count":4,"sides":8,"bonus":0,"types":["bludgeoning"]}]},"time-ravage":{"save":["con"],"half":true,"rolls":[{"count":10,"sides":12,"bonus":0,"types":["necrotic"]}]},"toll-the-dead":{"save":["wis"],"rolls":[{"levels":{"1":"1d8","5":"2d8","11":"3d8","17":"4d8"},"types":["necrotic"]},{"levels":{"1":"1d12","5":"2d12","11":"3d12","17":"4d12"},"types":["necrotic"]}]},"transmute-rock":{"save":["str","dex"],"half":true,"rolls":[{"count":4,"sides":8,"bonus":0,"types":["bludgeoning"]}]},"tsunami":{"save":["str"],"half":true,"rolls":[{"count":6,"sides":10,"bonus":0,"types":["bludgeoning"]},{"count":5,"sides":10,"bonus":0,"types":["bludgeoning"]}]},"vampiric-touch":{"attack":"M","rolls":[{"count":3,"sides":6,"bonus":0,"types":["necrotic"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"vicious-mockery":{"save":["wis"],"rolls":[{"levels":{"1":"1d4","5":"2d4","11":"3d4","17":"4d4"},"types":["psychic"]}]},"vitriolic-sphere":{"save":["dex"],"rolls":[{"count":10,"sides":4,"bonus":0,"types":["acid"],"upcast":{"step":2,"levels":[5,6,7,8,9]}},{"count":5,"sides":4,"bonus":0,"types":["acid"]}]},"wall-of-fire":{"save":["dex"],"half":true,"rolls":[{"count":5,"sides":8,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[5,6,7,8,9]}},{"count":5,"sides":8,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[5,6,7,8,9]}}]},"wall-of-ice":{"save":["dex","con"],"half":true,"rolls":[{"count":10,"sides":6,"bonus":0,"types":["cold"],"upcast":{"step":2,"levels":[7,8,9]}},{"count":5,"sides":6,"bonus":0,"types":["cold"],"upcast":{"step":1,"levels":[7,8,9]}}]},"wall-of-light":{"attack":"R","save":["con"],"half":true,"rolls":[{"count":4,"sides":8,"bonus":0,"types":["radiant"],"upcast":{"step":1,"levels":[6,7,8,9]}},{"count":4,"sides":8,"bonus":0,"types":["radiant"],"upcast":{"step":1,"levels":[6,7,8,9]}},{"count":4,"sides":8,"bonus":0,"types":["radiant"],"upcast":{"step":1,"levels":[6,7,8,9]}}]},"wall-of-thorns":{"save":["dex"],"half":true,"rolls":[{"count":7,"sides":8,"bonus":0,"types":["piercing"],"upcast":{"step":1,"levels":[7,8,9]}},{"count":7,"sides":8,"bonus":0,"types":["slashing"],"upcast":{"step":1,"levels":[7,8,9]}}]},"web":{"save":["dex"],"rolls":[{"count":2,"sides":4,"bonus":0,"types":["fire"]}]},"weird":{"save":["wis"],"rolls":[{"count":4,"sides":10,"bonus":0,"types":["psychic"]}]},"whirlwind":{"save":["dex","str"],"half":true,"rolls":[{"count":10,"sides":6,"bonus":0,"types":["bludgeoning"]}]},"wind-wall":{"save":["str"],"half":true,"rolls":[{"count":3,"sides":8,"bonus":0,"types":["bludgeoning"]}]},"wish":{"rolls":[{"count":1,"sides":10,"bonus":0,"types":["necrotic"]}]},"witch-bolt":{"attack":"R","rolls":[{"count":1,"sides":12,"bonus":0,"types":["lightning"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}},{"count":1,"sides":12,"bonus":0,"types":["lightning"]}]},"wither-and-bloom":{"save":["con"],"half":true,"rolls":[{"count":2,"sides":6,"bonus":0,"types":["necrotic"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"word-of-radiance":{"save":["con"],"rolls":[{"levels":{"1":"1d6","5":"2d6","11":"3d6","17":"4d6"},"types":["radiant"]}]},"wrath-of-nature":{"attack":"R","save":["dex","str"],"rolls":[{"count":4,"sides":6,"bonus":0,"types":["slashing"]},{"count":3,"sides":8,"bonus":0,"types":[]}]},"wrathful-smite":{"save":["wis"],"rolls":[{"count":1,"sides":6,"bonus":0,"types":["psychic"]}]},"zephyr-strike":{"rolls":[{"count":1,"sides":8,"bonus":0,"types":["force"]}]}};
+const SPELL_DICE = {"abi-dalzims-horrid-wilting":{"save":["con"],"half":true,"rolls":[{"count":12,"sides":8,"bonus":0,"types":["necrotic"]}]},"absorb-elements":{"rolls":[{"count":1,"sides":6,"bonus":0,"types":[],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"acid-splash":{"save":["dex"],"rolls":[{"levels":{"1":"1d6","5":"2d6","11":"3d6","17":"4d6"},"types":["acid"]}]},"aganazzars-scorcher":{"save":["dex"],"half":true,"rolls":[{"count":3,"sides":8,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"alter-self":{"rolls":[{"count":1,"sides":6,"bonus":0,"types":["bludgeoning","piercing","slashing"]}]},"animate-objects":{"rolls":[{"count":1,"sides":4,"bonus":4,"types":[]},{"count":1,"sides":8,"bonus":2,"types":[]},{"count":2,"sides":6,"bonus":1,"types":[]},{"count":2,"sides":10,"bonus":2,"types":[]},{"count":2,"sides":12,"bonus":4,"types":[]}]},"antagonize":{"save":["wis"],"half":true,"rolls":[{"count":4,"sides":4,"bonus":0,"types":["psychic"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"arms-of-hadar":{"save":["str"],"rolls":[{"count":2,"sides":6,"bonus":0,"types":["necrotic"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"ashardalons-stride":{"rolls":[{"count":1,"sides":6,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"aura-of-vitality":{"heal":{"count":2,"sides":6,"bonus":0},"rolls":[]},"banishing-smite":{"rolls":[{"count":5,"sides":10,"bonus":0,"types":["force"]}]},"bestow-curse":{"save":["wis"],"rolls":[{"count":1,"sides":8,"bonus":0,"types":["necrotic"]}]},"bigbys-hand":{"attack":"M","rolls":[{"count":4,"sides":8,"bonus":0,"types":["force"],"upcast":{"step":2,"levels":[6,7,8,9]}},{"count":2,"sides":6,"bonus":0,"modifier":true,"types":["bludgeoning"],"upcast":{"step":2,"levels":[6,7,8,9]}}]},"blade-barrier":{"save":["dex"],"half":true,"rolls":[{"count":6,"sides":10,"bonus":0,"types":["slashing"]}]},"blade-of-disaster":{"attack":"M","rolls":[{"count":4,"sides":12,"bonus":0,"types":["force"]},{"count":8,"sides":12,"bonus":0,"types":["force"]},{"count":12,"sides":12,"bonus":0,"types":["force"]}]},"blight":{"save":["con"],"half":true,"rolls":[{"count":8,"sides":8,"bonus":0,"types":["necrotic"],"upcast":{"step":1,"levels":[5,6,7,8,9]}}]},"blinding-smite":{"save":["con"],"rolls":[{"count":3,"sides":8,"bonus":0,"types":["radiant"]}]},"bones-of-the-earth":{"save":["dex"],"rolls":[{"count":6,"sides":6,"bonus":0,"types":["bludgeoning"]}]},"booming-blade":{"attack":"M","rolls":[{"levels":{"1":"1d8","5":"2d8","11":"3d8","17":"4d8"},"types":["thunder"]},{"levels":{"5":"1d8","11":"2d8","17":"3d8"},"types":["thunder"]}]},"branding-smite":{"rolls":[{"count":2,"sides":6,"bonus":0,"types":["radiant"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"burning-hands":{"save":["dex"],"half":true,"rolls":[{"count":3,"sides":6,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"call-lightning":{"save":["dex"],"half":true,"rolls":[{"count":3,"sides":10,"bonus":0,"types":["lightning"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}},{"count":1,"sides":10,"bonus":0,"types":[]}]},"catapult":{"save":["dex"],"rolls":[{"count":3,"sides":8,"bonus":0,"types":["bludgeoning"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"chain-lightning":{"save":["dex"],"half":true,"rolls":[{"count":10,"sides":8,"bonus":0,"types":["lightning"]}]},"chill-touch":{"attack":"R","rolls":[{"levels":{"1":"1d8","5":"2d8","11":"3d8","17":"4d8"},"types":["necrotic"]}]},"chromatic-orb":{"attack":"R","rolls":[{"count":3,"sides":8,"bonus":0,"types":[],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"circle-of-death":{"save":["con"],"half":true,"rolls":[{"count":8,"sides":6,"bonus":0,"types":["necrotic"],"upcast":{"step":2,"levels":[7,8,9]}}]},"cloud-of-daggers":{"rolls":[{"count":4,"sides":4,"bonus":0,"types":["slashing"],"upcast":{"step":2,"levels":[3,4,5,6,7,8,9]}}]},"cloudkill":{"save":["con"],"half":true,"rolls":[{"count":5,"sides":8,"bonus":0,"types":["poison"],"upcast":{"step":1,"levels":[6,7,8,9]}}]},"cone-of-cold":{"save":["con"],"half":true,"rolls":[{"count":8,"sides":8,"bonus":0,"types":["cold"],"upcast":{"step":1,"levels":[6,7,8,9]}}]},"conjure-barrage":{"save":["dex"],"half":true,"rolls":[{"count":3,"sides":8,"bonus":0,"types":[]}]},"conjure-volley":{"save":["dex"],"half":true,"rolls":[{"count":8,"sides":8,"bonus":0,"types":[]}]},"contact-other-plane":{"save":["int"],"rolls":[{"count":6,"sides":6,"bonus":0,"types":["psychic"]}]},"control-water":{"save":["str"],"rolls":[{"count":2,"sides":8,"bonus":0,"types":["bludgeoning"]},{"count":2,"sides":8,"bonus":0,"types":["bludgeoning"]}]},"cordon-of-arrows":{"save":["dex"],"rolls":[{"count":1,"sides":6,"bonus":0,"types":["piercing"]}]},"create-bonfire":{"save":["dex"],"rolls":[{"levels":{"1":"1d8","5":"2d8","11":"3d8","17":"4d8"},"types":["fire"]}]},"create-homunculus":{"rolls":[{"count":2,"sides":4,"bonus":0,"types":["piercing"]}]},"crown-of-stars":{"attack":"R","rolls":[{"count":4,"sides":12,"bonus":0,"types":["radiant"]}]},"crusaders-mantle":{"rolls":[{"count":1,"sides":4,"bonus":0,"types":["radiant"]}]},"cure-wounds":{"heal":{"count":1,"sides":8,"bonus":0,"modifier":true,"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}},"rolls":[]},"dark-star":{"save":["con"],"half":true,"rolls":[{"count":8,"sides":10,"bonus":0,"types":["force"]}]},"dawn":{"save":["con"],"half":true,"rolls":[{"count":4,"sides":10,"bonus":0,"types":["radiant"]}]},"delayed-blast-fireball":{"save":["dex"],"half":true,"rolls":[{"count":12,"sides":6,"bonus":0,"types":[],"upcast":{"step":1,"levels":[8,9]}},{"count":1,"sides":6,"bonus":0,"types":[]}]},"destructive-wave":{"save":["con"],"half":true,"rolls":[{"count":5,"sides":6,"bonus":0,"types":["thunder"]},{"count":5,"sides":6,"bonus":0,"join":true,"types":["radiant","necrotic"]}]},"dimension-door":{"rolls":[{"count":4,"sides":6,"bonus":0,"types":["force"]}]},"disintegrate":{"save":["dex"],"rolls":[{"count":10,"sides":6,"bonus":40,"types":["force"],"upcast":{"step":3,"levels":[7,8,9]}}]},"dissonant-whispers":{"save":["wis"],"half":true,"rolls":[{"count":3,"sides":6,"bonus":0,"types":["psychic"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"divine-favor":{"rolls":[{"count":1,"sides":4,"bonus":0,"types":["radiant"]}]},"draconic-transformation":{"save":["dex"],"half":true,"rolls":[{"count":6,"sides":8,"bonus":0,"types":["force"]}]},"dragons-breath":{"save":["dex"],"half":true,"rolls":[{"count":3,"sides":6,"bonus":0,"types":[],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"dream":{"save":["wis"],"rolls":[{"count":3,"sides":6,"bonus":0,"types":["psychic"]}]},"dust-devil":{"save":["str"],"half":true,"rolls":[{"count":1,"sides":8,"bonus":0,"types":["bludgeoning"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"earth-tremor":{"save":["dex"],"rolls":[{"count":1,"sides":6,"bonus":0,"types":["bludgeoning"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"earthquake":{"save":["con","dex"],"half":true,"rolls":[{"count":5,"sides":6,"bonus":0,"types":["bludgeoning"]}]},"eldritch-blast":{"attack":"R","count":{"unit":"beam","tiers":{"1":1,"5":2,"11":3,"17":4}},"rolls":[{"count":1,"sides":10,"bonus":0,"types":["force"]}]},"elemental-bane":{"save":["con"],"rolls":[{"count":2,"sides":6,"bonus":0,"types":[]}]},"elemental-weapon":{"rolls":[{"count":1,"sides":4,"bonus":0,"types":[],"upcast":{"step":3,"levels":[4,5,6,7,8,9]}}]},"enervation":{"save":["dex"],"rolls":[{"count":2,"sides":8,"bonus":0,"types":["necrotic"]},{"count":4,"sides":8,"bonus":0,"types":["necrotic"]},{"count":4,"sides":8,"bonus":0,"types":["necrotic"]}]},"enlarge-reduce":{"save":["con"],"rolls":[{"count":1,"sides":4,"bonus":0,"types":[]},{"count":1,"sides":4,"bonus":0,"types":[]}]},"ensnaring-strike":{"save":["str"],"rolls":[{"count":1,"sides":6,"bonus":0,"types":["piercing"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"erupting-earth":{"save":["dex"],"half":true,"rolls":[{"count":3,"sides":12,"bonus":0,"types":["bludgeoning"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"evards-black-tentacles":{"save":["dex"],"rolls":[{"count":3,"sides":6,"bonus":0,"types":["bludgeoning"]},{"count":3,"sides":6,"bonus":0,"types":["bludgeoning"]}]},"feeblemind":{"save":["int"],"rolls":[{"count":4,"sides":6,"bonus":0,"types":["psychic"]}]},"finger-of-death":{"save":["con"],"half":true,"rolls":[{"count":7,"sides":8,"bonus":30,"types":["necrotic"]}]},"fire-bolt":{"attack":"R","rolls":[{"levels":{"1":"1d10","5":"2d10","11":"3d10","17":"4d10"},"types":["fire"]}]},"fire-shield":{"rolls":[{"count":2,"sides":8,"bonus":0,"types":["fire"]},{"count":2,"sides":8,"bonus":0,"types":["cold"]}]},"fire-storm":{"save":["dex"],"half":true,"rolls":[{"count":7,"sides":10,"bonus":0,"types":["fire"]}]},"fireball":{"save":["dex"],"half":true,"rolls":[{"count":8,"sides":6,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"flame-arrows":{"rolls":[{"count":1,"sides":6,"bonus":0,"types":["fire"]}]},"flame-blade":{"attack":"M","rolls":[{"count":3,"sides":6,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[4,6,8]}}]},"flame-strike":{"save":["dex"],"half":true,"rolls":[{"count":4,"sides":6,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[6,7,8,9]}},{"count":4,"sides":6,"bonus":0,"join":true,"types":["radiant"]}]},"flaming-sphere":{"save":["dex"],"half":true,"rolls":[{"count":2,"sides":6,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"forbiddance":{"rolls":[{"count":5,"sides":10,"bonus":0,"types":["radiant","necrotic"]}]},"frost-fingers":{"save":["con"],"half":true,"rolls":[{"count":2,"sides":8,"bonus":0,"types":["cold"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"frostbite":{"save":["con"],"rolls":[{"levels":{"1":"1d6","5":"2d6","11":"3d6","17":"4d6"},"types":["cold"]}]},"geas":{"save":["wis"],"rolls":[{"count":5,"sides":10,"bonus":0,"types":["psychic"]}]},"glyph-of-warding":{"save":["dex"],"half":true,"rolls":[{"count":5,"sides":8,"bonus":0,"types":["acid","cold","fire","lightning","thunder"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"gravity-fissure":{"save":["con"],"half":true,"rolls":[{"count":8,"sides":8,"bonus":0,"types":["force"],"upcast":{"step":1,"levels":[7,8,9]}},{"count":8,"sides":8,"bonus":0,"types":["force"],"upcast":{"step":1,"levels":[7,8,9]}}]},"gravity-sinkhole":{"save":["con"],"half":true,"rolls":[{"count":5,"sides":10,"bonus":0,"types":["force"],"upcast":{"step":1,"levels":[5,6,7,8,9]}}]},"green-flame-blade":{"attack":"M","rolls":[{"levels":{"1":"","5":"1d8","11":"2d8","17":"3d8"},"modifier":true,"types":["fire"]},{"levels":{"5":"1d8","11":"2d8","17":"3d8"},"types":["fire"]}]},"guardian-of-nature":{"rolls":[{"count":1,"sides":6,"bonus":0,"types":["force"]}]},"guiding-bolt":{"attack":"R","rolls":[{"count":4,"sides":6,"bonus":0,"types":["radiant"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"hail-of-thorns":{"save":["dex"],"half":true,"rolls":[{"count":1,"sides":10,"bonus":0,"types":["piercing"],"upcast":{"step":1,"levels":[2,3,4,5,6]}}]},"harm":{"save":["con"],"half":true,"rolls":[{"count":14,"sides":6,"bonus":0,"types":["necrotic"]}]},"healing-word":{"heal":{"count":1,"sides":4,"bonus":0,"modifier":true,"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}},"rolls":[]},"heat-metal":{"save":["con"],"rolls":[{"count":2,"sides":8,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"hellish-rebuke":{"save":["dex"],"half":true,"rolls":[{"count":2,"sides":10,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"hex":{"rolls":[{"count":1,"sides":6,"bonus":0,"types":["necrotic"]}]},"holy-weapon":{"save":["con"],"half":true,"rolls":[{"count":2,"sides":8,"bonus":0,"types":["radiant"]},{"count":4,"sides":8,"bonus":0,"types":["radiant"]}]},"hunger-of-hadar":{"save":["dex"],"rolls":[{"count":2,"sides":6,"bonus":0,"types":["cold"]},{"count":2,"sides":6,"bonus":0,"types":["acid"]}]},"hunters-mark":{"rolls":[{"count":1,"sides":6,"bonus":0,"types":[]}]},"ice-knife":{"attack":"R","save":["dex"],"rolls":[{"count":1,"sides":10,"bonus":0,"types":["piercing"]},{"count":2,"sides":6,"bonus":0,"types":["cold"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"ice-storm":{"save":["dex"],"half":true,"rolls":[{"count":2,"sides":8,"bonus":0,"types":["bludgeoning"],"upcast":{"step":1,"levels":[5,6,7,8,9]}},{"count":4,"sides":6,"bonus":0,"join":true,"types":["cold"]}]},"illusory-dragon":{"save":["wis","int"],"half":true,"rolls":[{"count":7,"sides":6,"bonus":0,"types":[]}]},"immolation":{"save":["dex"],"half":true,"rolls":[{"count":8,"sides":6,"bonus":0,"types":["fire"]},{"count":4,"sides":6,"bonus":0,"types":["fire"]}]},"incendiary-cloud":{"save":["dex"],"half":true,"rolls":[{"count":10,"sides":8,"bonus":0,"types":["fire"]}]},"infestation":{"save":["con"],"rolls":[{"levels":{"1":"1d6","5":"2d6","11":"3d6","17":"4d6"},"types":["poison"]}]},"inflict-wounds":{"attack":"M","rolls":[{"count":3,"sides":10,"bonus":0,"types":["necrotic"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"insect-plague":{"save":["con"],"half":true,"rolls":[{"count":4,"sides":10,"bonus":0,"types":["piercing"],"upcast":{"step":1,"levels":[6,7,8,9]}}]},"investiture-of-flame":{"save":["dex"],"half":true,"rolls":[{"count":1,"sides":10,"bonus":0,"types":["fire"]},{"count":4,"sides":8,"bonus":0,"types":["fire"]}]},"investiture-of-ice":{"save":["con"],"half":true,"rolls":[{"count":4,"sides":6,"bonus":0,"types":["cold"]}]},"investiture-of-wind":{"save":["con"],"half":true,"rolls":[{"count":2,"sides":10,"bonus":0,"types":["bludgeoning"]}]},"jims-magic-missile":{"attack":"R","rolls":[{"count":2,"sides":4,"bonus":0,"types":["force"]},{"count":5,"sides":4,"bonus":0,"types":["force"]}]},"kinetic-jaunt":{"rolls":[{"count":1,"sides":8,"bonus":0,"types":["force"]}]},"life-transference":{"rolls":[{"count":4,"sides":8,"bonus":0,"types":["necrotic"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"lightning-arrow":{"save":["dex"],"half":true,"rolls":[{"count":4,"sides":8,"bonus":0,"types":["lightning"]},{"count":2,"sides":8,"bonus":0,"types":["lightning"]}]},"lightning-bolt":{"save":["dex"],"half":true,"rolls":[{"count":8,"sides":6,"bonus":0,"types":["lightning"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"lightning-lure":{"save":["str"],"rolls":[{"levels":{"1":"1d8","5":"2d8","11":"3d8","17":"4d8"},"types":["lightning"]}]},"maddening-darkness":{"save":["wis"],"half":true,"rolls":[{"count":8,"sides":8,"bonus":0,"types":["psychic"]}]},"maelstrom":{"save":["str"],"rolls":[{"count":6,"sides":6,"bonus":0,"types":["bludgeoning"]}]},"magic-missile":{"count":{"unit":"dart","base":3,"from":1,"combine":true},"rolls":[{"count":1,"sides":4,"bonus":1,"types":["force"]}]},"magic-stone":{"attack":"R","rolls":[{"count":1,"sides":6,"bonus":0,"modifier":true,"types":["bludgeoning"]}]},"magnify-gravity":{"save":["con"],"half":true,"rolls":[{"count":2,"sides":8,"bonus":0,"types":["force"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"mass-cure-wounds":{"heal":{"count":3,"sides":8,"bonus":0,"modifier":true,"upcast":{"step":1,"levels":[6,7,8,9]}},"rolls":[]},"mass-healing-word":{"heal":{"count":1,"sides":4,"bonus":0,"modifier":true,"upcast":{"step":1,"levels":[4,5,6,7,8,9]}},"rolls":[]},"maximilians-earthen-grasp":{"save":["str"],"half":true,"rolls":[{"count":2,"sides":6,"bonus":0,"types":["bludgeoning"]},{"count":2,"sides":6,"bonus":0,"types":["bludgeoning"]}]},"meld-into-stone":{"rolls":[{"count":6,"sides":6,"bonus":0,"types":["bludgeoning"]}]},"melfs-acid-arrow":{"attack":"R","rolls":[{"count":4,"sides":4,"bonus":0,"types":["acid"]},{"count":2,"sides":4,"bonus":0,"types":["acid"]}]},"melfs-minute-meteors":{"save":["dex"],"half":true,"rolls":[{"count":2,"sides":6,"bonus":0,"types":["fire"]}]},"mental-prison":{"save":["int"],"rolls":[{"count":5,"sides":10,"bonus":0,"types":["psychic"]},{"count":5,"sides":10,"bonus":0,"types":["psychic"]},{"count":10,"sides":10,"bonus":0,"types":["psychic"]}]},"meteor-swarm":{"save":["dex"],"half":true,"rolls":[{"count":20,"sides":6,"bonus":0,"types":["fire"]},{"count":20,"sides":6,"bonus":0,"join":true,"types":["bludgeoning"]}]},"mind-sliver":{"save":["int"],"rolls":[{"levels":{"1":"1d6","5":"2d6","11":"3d6","17":"4d6"},"types":["psychic"]}]},"mind-spike":{"save":["wis"],"half":true,"rolls":[{"count":3,"sides":8,"bonus":0,"types":["psychic"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"moonbeam":{"save":["con"],"half":true,"rolls":[{"count":2,"sides":10,"bonus":0,"types":["radiant"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"mordenkainens-faithful-hound":{"rolls":[{"count":4,"sides":8,"bonus":0,"types":["piercing"]}]},"mordenkainens-sword":{"attack":"M","rolls":[{"count":3,"sides":10,"bonus":0,"types":["force"]}]},"negative-energy-flood":{"save":["con"],"half":true,"rolls":[{"count":5,"sides":12,"bonus":0,"types":["necrotic"]}]},"otilukes-freezing-sphere":{"save":["con"],"half":true,"rolls":[{"count":10,"sides":6,"bonus":0,"types":["cold"],"upcast":{"step":1,"levels":[7,8,9]}}]},"phantasmal-force":{"save":["int"],"rolls":[{"count":1,"sides":6,"bonus":0,"types":["psychic"]}]},"phantasmal-killer":{"save":["wis"],"rolls":[{"count":4,"sides":10,"bonus":0,"types":["psychic"],"upcast":{"step":1,"levels":[5,6,7,8,9]}}]},"poison-spray":{"save":["con"],"rolls":[{"levels":{"1":"1d12","5":"2d12","11":"3d12","17":"4d12"},"types":["poison"]}]},"prayer-of-healing":{"heal":{"count":2,"sides":8,"bonus":0,"modifier":true,"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}},"rolls":[]},"primal-savagery":{"attack":"M","rolls":[{"levels":{"1":"1d10","5":"2d10","11":"3d10","17":"4d10"},"types":["acid"]}]},"prismatic-spray":{"save":["dex","con","wis"],"half":true,"rolls":[{"count":10,"sides":6,"bonus":0,"types":["fire"]},{"count":10,"sides":6,"bonus":0,"types":["acid"]},{"count":10,"sides":6,"bonus":0,"types":["lightning"]},{"count":10,"sides":6,"bonus":0,"types":["poison"]},{"count":10,"sides":6,"bonus":0,"types":["cold"]}]},"prismatic-wall":{"save":["con","dex","wis"],"half":true,"rolls":[{"count":10,"sides":6,"bonus":0,"types":["fire"]},{"count":10,"sides":6,"bonus":0,"types":["acid"]},{"count":10,"sides":6,"bonus":0,"types":["lightning"]},{"count":10,"sides":6,"bonus":0,"types":["poison"]},{"count":10,"sides":6,"bonus":0,"types":["cold"]}]},"produce-flame":{"attack":"R","rolls":[{"levels":{"1":"1d8","5":"2d8","11":"3d8","17":"4d8"},"types":["fire"]}]},"psychic-scream":{"save":["int"],"half":true,"rolls":[{"count":14,"sides":6,"bonus":0,"types":["psychic"]}]},"pulse-wave":{"save":["con"],"half":true,"rolls":[{"count":6,"sides":6,"bonus":0,"types":["force"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"raulothims-psychic-lance":{"save":["int"],"half":true,"rolls":[{"count":7,"sides":6,"bonus":0,"types":["psychic"],"upcast":{"step":1,"levels":[5,6,7,8,9]}}]},"ravenous-void":{"save":["str"],"rolls":[{"count":5,"sides":10,"bonus":0,"types":["force"]}]},"ray-of-frost":{"attack":"R","rolls":[{"levels":{"1":"1d8","5":"2d8","11":"3d8","17":"4d8"},"types":["cold"]}]},"ray-of-sickness":{"attack":"R","save":["con"],"rolls":[{"count":2,"sides":8,"bonus":0,"types":["poison"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"reality-break":{"save":["wis","dex"],"half":true,"rolls":[{"count":6,"sides":12,"bonus":0,"types":["psychic"]},{"count":8,"sides":12,"bonus":0,"types":["force"]},{"count":10,"sides":12,"bonus":0,"types":["force"]},{"count":10,"sides":12,"bonus":0,"types":["cold"]}]},"regenerate":{"heal":{"count":4,"sides":8,"bonus":15},"rolls":[]},"rimes-binding-ice":{"save":["con"],"half":true,"rolls":[{"count":3,"sides":8,"bonus":0,"types":["cold"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"sacred-flame":{"save":["dex"],"rolls":[{"levels":{"1":"1d8","5":"2d8","11":"3d8","17":"4d8"},"types":["radiant"]}]},"sapping-sting":{"save":["con"],"rolls":[{"levels":{"1":"1d4","5":"2d4","11":"3d4","17":"4d4"},"types":["necrotic"]}]},"scorching-ray":{"attack":"R","count":{"unit":"ray","base":3,"from":2},"rolls":[{"count":2,"sides":6,"bonus":0,"types":["fire"]}]},"searing-smite":{"save":["con"],"rolls":[{"count":1,"sides":6,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}},{"count":1,"sides":6,"bonus":0,"types":["fire"]}]},"shadow-blade":{"rolls":[{"count":2,"sides":8,"bonus":0,"types":["psychic"]}]},"shadow-of-moil":{"rolls":[{"count":2,"sides":8,"bonus":0,"types":["necrotic"]}]},"shatter":{"save":["con"],"half":true,"rolls":[{"count":3,"sides":8,"bonus":0,"types":["thunder"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"shocking-grasp":{"attack":"M","rolls":[{"levels":{"1":"1d8","5":"2d8","11":"3d8","17":"4d8"},"types":["lightning"]}]},"sickening-radiance":{"save":["con"],"rolls":[{"count":4,"sides":10,"bonus":0,"types":["radiant"]}]},"snillocs-snowball-swarm":{"save":["dex"],"half":true,"rolls":[{"count":3,"sides":6,"bonus":0,"types":["cold"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"soul-cage":{"heal":{"count":2,"sides":8,"bonus":0},"rolls":[]},"spike-growth":{"rolls":[{"count":2,"sides":4,"bonus":0,"types":["piercing"]}]},"spirit-guardians":{"save":["wis"],"half":true,"rolls":[{"count":3,"sides":8,"bonus":0,"types":["radiant"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}},{"count":3,"sides":8,"bonus":0,"types":["necrotic"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"spirit-shroud":{"rolls":[{"count":1,"sides":8,"bonus":0,"types":[],"upcast":{"step":1,"levels":[5,7,9]}}]},"spiritual-weapon":{"attack":"M","rolls":[{"count":1,"sides":8,"bonus":0,"modifier":true,"types":["force"],"upcast":{"step":1,"levels":[4,6,8]}}]},"spray-of-cards":{"save":["dex"],"half":true,"rolls":[{"count":2,"sides":10,"bonus":0,"types":["force"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"staggering-smite":{"save":["wis"],"rolls":[{"count":4,"sides":6,"bonus":0,"types":["psychic"]}]},"steel-wind-strike":{"attack":"M","rolls":[{"count":6,"sides":10,"bonus":0,"types":["force"]}]},"storm-of-vengeance":{"save":["con","dex"],"half":true,"rolls":[{"count":2,"sides":6,"bonus":0,"types":["thunder"]},{"count":1,"sides":6,"bonus":0,"types":["acid"]},{"count":10,"sides":6,"bonus":0,"types":["lightning"]},{"count":2,"sides":6,"bonus":0,"types":["bludgeoning"]},{"count":1,"sides":6,"bonus":0,"types":["cold"]}]},"storm-sphere":{"attack":"R","save":["str"],"rolls":[{"count":2,"sides":6,"bonus":0,"types":["bludgeoning"]},{"count":4,"sides":6,"bonus":0,"types":["lightning"]}]},"sunbeam":{"save":["con"],"half":true,"rolls":[{"count":6,"sides":8,"bonus":0,"types":["radiant"]}]},"sunburst":{"save":["con"],"half":true,"rolls":[{"count":12,"sides":6,"bonus":0,"types":["radiant"]}]},"sword-burst":{"save":["dex"],"rolls":[{"levels":{"1":"1d6","5":"2d6","11":"3d6","17":"4d6"},"types":["force"]}]},"symbol":{"save":["con","wis","cha","int"],"half":true,"rolls":[{"count":10,"sides":10,"bonus":0,"types":["necrotic"]}]},"synaptic-static":{"save":["int","con"],"half":true,"rolls":[{"count":8,"sides":6,"bonus":0,"types":["psychic"]}]},"tashas-caustic-brew":{"save":["dex"],"rolls":[{"count":2,"sides":4,"bonus":0,"types":["acid"],"upcast":{"step":2,"levels":[2,3,4,5,6,7,8,9]}}]},"tashas-mind-whip":{"save":["int"],"half":true,"rolls":[{"count":3,"sides":6,"bonus":0,"types":["psychic"]}]},"teleport":{"rolls":[{"count":3,"sides":10,"bonus":0,"types":["force"]}]},"tensers-transformation":{"save":["con"],"rolls":[{"count":2,"sides":12,"bonus":0,"types":["force"]}]},"thorn-whip":{"attack":"M","rolls":[{"levels":{"1":"1d6","5":"2d6","11":"3d6","17":"4d6"},"types":["piercing"]}]},"thunder-step":{"save":["con"],"half":true,"rolls":[{"count":3,"sides":10,"bonus":0,"types":["thunder"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"thunderclap":{"save":["con"],"rolls":[{"levels":{"1":"1d6","5":"2d6","11":"3d6","17":"4d6"},"types":["thunder"]}]},"thunderous-smite":{"save":["str"],"rolls":[{"count":2,"sides":6,"bonus":0,"types":["thunder"]}]},"thunderwave":{"save":["con"],"half":true,"rolls":[{"count":2,"sides":8,"bonus":0,"types":["thunder"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}}]},"tidal-wave":{"save":["dex"],"half":true,"rolls":[{"count":4,"sides":8,"bonus":0,"types":["bludgeoning"]}]},"time-ravage":{"save":["con"],"half":true,"rolls":[{"count":10,"sides":12,"bonus":0,"types":["necrotic"]}]},"toll-the-dead":{"save":["wis"],"rolls":[{"levels":{"1":"1d8","5":"2d8","11":"3d8","17":"4d8"},"types":["necrotic"]},{"levels":{"1":"1d12","5":"2d12","11":"3d12","17":"4d12"},"types":["necrotic"]}]},"transmute-rock":{"save":["str","dex"],"half":true,"rolls":[{"count":4,"sides":8,"bonus":0,"types":["bludgeoning"]}]},"tsunami":{"save":["str"],"half":true,"rolls":[{"count":6,"sides":10,"bonus":0,"types":["bludgeoning"]},{"count":5,"sides":10,"bonus":0,"types":["bludgeoning"]}]},"vampiric-touch":{"attack":"M","rolls":[{"count":3,"sides":6,"bonus":0,"types":["necrotic"],"upcast":{"step":1,"levels":[4,5,6,7,8,9]}}]},"vicious-mockery":{"save":["wis"],"rolls":[{"levels":{"1":"1d4","5":"2d4","11":"3d4","17":"4d4"},"types":["psychic"]}]},"vitriolic-sphere":{"save":["dex"],"rolls":[{"count":10,"sides":4,"bonus":0,"types":["acid"],"upcast":{"step":2,"levels":[5,6,7,8,9]}},{"count":5,"sides":4,"bonus":0,"types":["acid"]}]},"wall-of-fire":{"save":["dex"],"half":true,"rolls":[{"count":5,"sides":8,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[5,6,7,8,9]}},{"count":5,"sides":8,"bonus":0,"types":["fire"],"upcast":{"step":1,"levels":[5,6,7,8,9]}}]},"wall-of-ice":{"save":["dex","con"],"half":true,"rolls":[{"count":10,"sides":6,"bonus":0,"types":["cold"],"upcast":{"step":2,"levels":[7,8,9]}},{"count":5,"sides":6,"bonus":0,"types":["cold"],"upcast":{"step":1,"levels":[7,8,9]}}]},"wall-of-light":{"attack":"R","save":["con"],"half":true,"rolls":[{"count":4,"sides":8,"bonus":0,"types":["radiant"],"upcast":{"step":1,"levels":[6,7,8,9]}},{"count":4,"sides":8,"bonus":0,"types":["radiant"],"upcast":{"step":1,"levels":[6,7,8,9]}},{"count":4,"sides":8,"bonus":0,"types":["radiant"],"upcast":{"step":1,"levels":[6,7,8,9]}}]},"wall-of-thorns":{"save":["dex"],"half":true,"rolls":[{"count":7,"sides":8,"bonus":0,"types":["piercing"],"upcast":{"step":1,"levels":[7,8,9]}},{"count":7,"sides":8,"bonus":0,"types":["slashing"],"upcast":{"step":1,"levels":[7,8,9]}}]},"web":{"save":["dex"],"rolls":[{"count":2,"sides":4,"bonus":0,"types":["fire"]}]},"weird":{"save":["wis"],"rolls":[{"count":4,"sides":10,"bonus":0,"types":["psychic"]}]},"whirlwind":{"save":["dex","str"],"half":true,"rolls":[{"count":10,"sides":6,"bonus":0,"types":["bludgeoning"]}]},"wind-wall":{"save":["str"],"half":true,"rolls":[{"count":3,"sides":8,"bonus":0,"types":["bludgeoning"]}]},"wish":{"rolls":[{"count":1,"sides":10,"bonus":0,"types":["necrotic"]}]},"witch-bolt":{"attack":"R","rolls":[{"count":1,"sides":12,"bonus":0,"types":["lightning"],"upcast":{"step":1,"levels":[2,3,4,5,6,7,8,9]}},{"count":1,"sides":12,"bonus":0,"types":["lightning"]}]},"wither-and-bloom":{"save":["con"],"half":true,"rolls":[{"count":2,"sides":6,"bonus":0,"types":["necrotic"],"upcast":{"step":1,"levels":[3,4,5,6,7,8,9]}}]},"word-of-radiance":{"save":["con"],"rolls":[{"levels":{"1":"1d6","5":"2d6","11":"3d6","17":"4d6"},"types":["radiant"]}]},"wrath-of-nature":{"attack":"R","save":["dex","str"],"rolls":[{"count":4,"sides":6,"bonus":0,"types":["slashing"]},{"count":3,"sides":8,"bonus":0,"types":[]}]},"wrathful-smite":{"save":["wis"],"rolls":[{"count":1,"sides":6,"bonus":0,"types":["psychic"]}]},"zephyr-strike":{"rolls":[{"count":1,"sides":8,"bonus":0,"types":["force"]}]}};
 
 
 // Module : spell-dice
@@ -14682,6 +14990,14 @@ function spellDamageRolls(spellId, { slotLevel = 0, characterLevel = 1, modifier
   return { attack: data.attack || null, save: data.save || [], half: !!data.half, count: data.count && count > 1 ? { unit: data.count.unit, value: count, combine: !!data.count.combine } : null, rolls };
 }
 
+/** Soins d'un sort au niveau lancé : « 2d8 + 3 » pour Soins au niveau 2 avec +3 de modificateur. */
+function spellHealRoll(spellId, { slotLevel = 0, modifier = 0 } = {}) {
+  const heal = SPELL_DICE[spellId]?.heal;
+  if (!heal) return null;
+  const count = heal.count + (heal.upcast?.levels.filter((level) => level <= slotLevel).length || 0) * (heal.upcast?.step || 0);
+  return { count, sides: heal.sides, bonus: (heal.bonus || 0) + (heal.modifier ? modifier : 0) };
+}
+
 
 // Module : generated/reference-pilot
 // Généré par tools/catalogue/build.mjs. Ne pas modifier à la main.
@@ -14704,12 +15020,6 @@ const PORTRAIT_FAMILIES = [
       "human",
       "humanVariant",
       "customLineageTce",
-      "humanMarkOfHandlingErlw",
-      "humanMarkOfMakingErlw",
-      "humanMarkOfPassageErlw",
-      "humanMarkOfSentinelErlw",
-      "humanMarkOfFindingErlw",
-      "kalashtarErlw",
       "humanIxalanPsx",
       "humanKaladeshPsk",
       "humanZendikarPsz",
@@ -14727,7 +15037,6 @@ const PORTRAIT_FAMILIES = [
     "raceIds": [
       "hillDwarf",
       "mountainDwarf",
-      "dwarfMarkOfWardingErlw",
       "dwarfKaladeshPsk"
     ]
   },
@@ -14737,8 +15046,6 @@ const PORTRAIT_FAMILIES = [
     "raceIds": [
       "highElf",
       "woodElf",
-      "elfMarkOfShadowErlw",
-      "elfPallidEgw",
       "elfKaladeshBishatarAndTiraharPsk",
       "elfKaladeshVahadarPsk",
       "elfZendikarJoragaNationPsz",
@@ -14760,9 +15067,7 @@ const PORTRAIT_FAMILIES = [
       "lightfoot",
       "stout",
       "ghostwiseScag",
-      "halflingLotusdenEgw",
-      "halflingMarkOfHealingErlw",
-      "halflingMarkOfHospitalityErlw"
+      "halflingLotusdenEgw"
     ]
   },
   {
@@ -14770,9 +15075,6 @@ const PORTRAIT_FAMILIES = [
     "name": "Drakéides",
     "raceIds": [
       "dragonborn",
-      "dragonbornChromaticFtd",
-      "dragonbornGemFtd",
-      "dragonbornMetallicFtd",
       "dragonbornDraconbloodEgw",
       "dragonbornRaveniteEgw"
     ]
@@ -14782,8 +15084,7 @@ const PORTRAIT_FAMILIES = [
     "name": "Gnomes",
     "raceIds": [
       "forestGnome",
-      "rockGnome",
-      "gnomeMarkOfScribingErlw"
+      "rockGnome"
     ]
   },
   {
@@ -14791,20 +15092,15 @@ const PORTRAIT_FAMILIES = [
     "name": "Demi-elfes",
     "raceIds": [
       "halfElf",
-      "halfElfAquaticScag",
-      "halfElfDrowScag",
       "halfElfHighScag",
-      "halfElfWoodScag",
-      "halfElfMarkOfDetectionErlw",
-      "halfElfMarkOfStormErlw"
+      "halfElfWoodScag"
     ]
   },
   {
     "id": "half-orc",
     "name": "Demi-orcs",
     "raceIds": [
-      "halfOrc",
-      "halfOrcMarkOfFindingErlw"
+      "halfOrc"
     ]
   },
   {
@@ -14823,8 +15119,7 @@ const PORTRAIT_FAMILIES = [
       "tieflingZarielMtf",
       "tieflingDevilsTongueScag",
       "tieflingHellfireScag",
-      "tieflingInfernalScag",
-      "tieflingWingedScag"
+      "tieflingInfernalScag"
     ]
   },
   {
@@ -14848,9 +15143,6 @@ const PORTRAIT_FAMILIES = [
     "name": "Aasimars",
     "raceIds": [
       "aasimar",
-      "aasimarFallenVgm",
-      "aasimarProtectorVgm",
-      "aasimarScourgeVgm",
       "aasimarDmg"
     ]
   },
@@ -14997,12 +15289,7 @@ const PORTRAIT_FAMILIES = [
   {
     "id": "gith",
     "name": "Giths",
-    "raceIds": [
-      "githyankiMtf",
-      "githzeraiMtf",
-      "githyankiMpmm",
-      "githzeraiMpmm"
-    ]
+    "raceIds": []
   },
   {
     "id": "goblin",
@@ -15224,11 +15511,7 @@ const PORTRAIT_FAMILIES = [
     "id": "shifter",
     "name": "Féraux",
     "raceIds": [
-      "shifterMpmm",
-      "shifterBeasthideErlw",
-      "shifterLongtoothErlw",
-      "shifterSwiftstrideErlw",
-      "shifterWildhuntErlw"
+      "shifterMpmm"
     ]
   },
   {
@@ -15298,6 +15581,248 @@ const PORTRAIT_FAMILIES = [
     "raceIds": [
       "yuanTiVgm",
       "yuanTiMpmm"
+    ]
+  },
+  {
+    "id": "aasimar-fallen",
+    "name": "Aasimar déchu",
+    "raceIds": [
+      "aasimarFallenVgm"
+    ]
+  },
+  {
+    "id": "aasimar-protector",
+    "name": "Aasimar protecteur",
+    "raceIds": [
+      "aasimarProtectorVgm"
+    ]
+  },
+  {
+    "id": "aasimar-scourge",
+    "name": "Aasimar fléau",
+    "raceIds": [
+      "aasimarScourgeVgm"
+    ]
+  },
+  {
+    "id": "half-elf-drow",
+    "name": "Demi-elfe drow",
+    "raceIds": [
+      "halfElfDrowScag"
+    ]
+  },
+  {
+    "id": "half-elf-aquatic",
+    "name": "Demi-elfe aquatique",
+    "raceIds": [
+      "halfElfAquaticScag"
+    ]
+  },
+  {
+    "id": "dragonborn-chromatic",
+    "name": "Drakéide chromatique",
+    "raceIds": [
+      "dragonbornChromaticFtd"
+    ]
+  },
+  {
+    "id": "dragonborn-metallic",
+    "name": "Drakéide métallique",
+    "raceIds": [
+      "dragonbornMetallicFtd"
+    ]
+  },
+  {
+    "id": "dragonborn-gem",
+    "name": "Drakéide de gemme",
+    "raceIds": [
+      "dragonbornGemFtd"
+    ]
+  },
+  {
+    "id": "tiefling-winged",
+    "name": "Tieffelin ailé",
+    "raceIds": [
+      "tieflingWingedScag"
+    ]
+  },
+  {
+    "id": "simic-climber",
+    "name": "Hybride simic grimpeur",
+    "raceIds": []
+  },
+  {
+    "id": "simic-glider",
+    "name": "Hybride simic planeur",
+    "raceIds": []
+  },
+  {
+    "id": "simic-aquatic",
+    "name": "Hybride simic aquatique",
+    "raceIds": []
+  },
+  {
+    "id": "human-sentinel",
+    "name": "Humains, marque de la sentinelle",
+    "raceIds": [
+      "humanMarkOfSentinelErlw"
+    ]
+  },
+  {
+    "id": "human-finding",
+    "name": "Humains, marque de la Découverte",
+    "raceIds": [
+      "humanMarkOfFindingErlw"
+    ]
+  },
+  {
+    "id": "shifter-beasthide",
+    "name": "Féral peau de bête",
+    "raceIds": [
+      "shifterBeasthideErlw"
+    ]
+  },
+  {
+    "id": "shifter-longtooth",
+    "name": "Féral longues dents",
+    "raceIds": [
+      "shifterLongtoothErlw"
+    ]
+  },
+  {
+    "id": "shifter-swiftstride",
+    "name": "Féral longues foulées",
+    "raceIds": [
+      "shifterSwiftstrideErlw"
+    ]
+  },
+  {
+    "id": "shifter-wildhunt",
+    "name": "Féral traque sauvage",
+    "raceIds": [
+      "shifterWildhuntErlw"
+    ]
+  },
+  {
+    "id": "githyanki",
+    "name": "Githyanki",
+    "raceIds": [
+      "githyankiMtf",
+      "githyankiMpmm"
+    ]
+  },
+  {
+    "id": "githzerai",
+    "name": "Githzerai",
+    "raceIds": [
+      "githzeraiMtf",
+      "githzeraiMpmm"
+    ]
+  },
+  {
+    "id": "pallid-elf",
+    "name": "Elfe pâle",
+    "raceIds": [
+      "elfPallidEgw"
+    ]
+  },
+  {
+    "id": "kalashtar",
+    "name": "Kalashtar",
+    "raceIds": [
+      "kalashtarErlw"
+    ]
+  },
+  {
+    "id": "simic-grappler",
+    "name": "Hybride simic agrippeur",
+    "raceIds": []
+  },
+  {
+    "id": "simic-carapace",
+    "name": "Hybride simic carapace",
+    "raceIds": []
+  },
+  {
+    "id": "simic-acid",
+    "name": "Hybride simic acide",
+    "raceIds": []
+  },
+  {
+    "id": "dwarf-warding",
+    "name": "Nains, marque de la Protection",
+    "raceIds": [
+      "dwarfMarkOfWardingErlw"
+    ]
+  },
+  {
+    "id": "elf-shadow",
+    "name": "Elfes, marque de l’Ombre",
+    "raceIds": [
+      "elfMarkOfShadowErlw"
+    ]
+  },
+  {
+    "id": "gnome-scribing",
+    "name": "Gnomes, marque de l’Écriture",
+    "raceIds": [
+      "gnomeMarkOfScribingErlw"
+    ]
+  },
+  {
+    "id": "half-elf-detection",
+    "name": "Demi-elfes, marque de la Détection",
+    "raceIds": [
+      "halfElfMarkOfDetectionErlw"
+    ]
+  },
+  {
+    "id": "half-elf-storm",
+    "name": "Demi-elfes, marque de la Tempête",
+    "raceIds": [
+      "halfElfMarkOfStormErlw"
+    ]
+  },
+  {
+    "id": "half-orc-finding",
+    "name": "Demi-orcs, marque de la Découverte",
+    "raceIds": [
+      "halfOrcMarkOfFindingErlw"
+    ]
+  },
+  {
+    "id": "halfling-healing",
+    "name": "Halfelins, marque de la Guérison",
+    "raceIds": [
+      "halflingMarkOfHealingErlw"
+    ]
+  },
+  {
+    "id": "halfling-hospitality",
+    "name": "Halfelins, marque de l’Hospitalité",
+    "raceIds": [
+      "halflingMarkOfHospitalityErlw"
+    ]
+  },
+  {
+    "id": "human-handling",
+    "name": "Humains, marque du dressage",
+    "raceIds": [
+      "humanMarkOfHandlingErlw"
+    ]
+  },
+  {
+    "id": "human-making",
+    "name": "Humains, marque de la fabrication",
+    "raceIds": [
+      "humanMarkOfMakingErlw"
+    ]
+  },
+  {
+    "id": "human-passage",
+    "name": "Humains, marque du passage",
+    "raceIds": [
+      "humanMarkOfPassageErlw"
     ]
   }
 ];
@@ -19653,6 +20178,2438 @@ const PORTRAITS = [
     "variant": 4,
     "name": "Yuan-tis · Portrait masculin 4",
     "url": "./portraits/yuan-ti-male-4.webp"
+  },
+  {
+    "id": "aasimar-fallen-female-1",
+    "family": "aasimar-fallen",
+    "sex": "female",
+    "variant": 1,
+    "name": "Aasimar déchu · Portrait féminin 1",
+    "url": "./portraits/aasimar-fallen-female-1.webp"
+  },
+  {
+    "id": "aasimar-fallen-female-2",
+    "family": "aasimar-fallen",
+    "sex": "female",
+    "variant": 2,
+    "name": "Aasimar déchu · Portrait féminin 2",
+    "url": "./portraits/aasimar-fallen-female-2.webp"
+  },
+  {
+    "id": "aasimar-fallen-female-3",
+    "family": "aasimar-fallen",
+    "sex": "female",
+    "variant": 3,
+    "name": "Aasimar déchu · Portrait féminin 3",
+    "url": "./portraits/aasimar-fallen-female-3.webp"
+  },
+  {
+    "id": "aasimar-fallen-female-4",
+    "family": "aasimar-fallen",
+    "sex": "female",
+    "variant": 4,
+    "name": "Aasimar déchu · Portrait féminin 4",
+    "url": "./portraits/aasimar-fallen-female-4.webp"
+  },
+  {
+    "id": "aasimar-fallen-male-1",
+    "family": "aasimar-fallen",
+    "sex": "male",
+    "variant": 1,
+    "name": "Aasimar déchu · Portrait masculin 1",
+    "url": "./portraits/aasimar-fallen-male-1.webp"
+  },
+  {
+    "id": "aasimar-fallen-male-2",
+    "family": "aasimar-fallen",
+    "sex": "male",
+    "variant": 2,
+    "name": "Aasimar déchu · Portrait masculin 2",
+    "url": "./portraits/aasimar-fallen-male-2.webp"
+  },
+  {
+    "id": "aasimar-fallen-male-3",
+    "family": "aasimar-fallen",
+    "sex": "male",
+    "variant": 3,
+    "name": "Aasimar déchu · Portrait masculin 3",
+    "url": "./portraits/aasimar-fallen-male-3.webp"
+  },
+  {
+    "id": "aasimar-fallen-male-4",
+    "family": "aasimar-fallen",
+    "sex": "male",
+    "variant": 4,
+    "name": "Aasimar déchu · Portrait masculin 4",
+    "url": "./portraits/aasimar-fallen-male-4.webp"
+  },
+  {
+    "id": "aasimar-protector-female-1",
+    "family": "aasimar-protector",
+    "sex": "female",
+    "variant": 1,
+    "name": "Aasimar protecteur · Portrait féminin 1",
+    "url": "./portraits/aasimar-female-1.webp"
+  },
+  {
+    "id": "aasimar-protector-female-2",
+    "family": "aasimar-protector",
+    "sex": "female",
+    "variant": 2,
+    "name": "Aasimar protecteur · Portrait féminin 2",
+    "url": "./portraits/aasimar-female-2.webp"
+  },
+  {
+    "id": "aasimar-protector-female-3",
+    "family": "aasimar-protector",
+    "sex": "female",
+    "variant": 3,
+    "name": "Aasimar protecteur · Portrait féminin 3",
+    "url": "./portraits/aasimar-female-3.webp"
+  },
+  {
+    "id": "aasimar-protector-female-4",
+    "family": "aasimar-protector",
+    "sex": "female",
+    "variant": 4,
+    "name": "Aasimar protecteur · Portrait féminin 4",
+    "url": "./portraits/aasimar-female-4.webp"
+  },
+  {
+    "id": "aasimar-protector-male-1",
+    "family": "aasimar-protector",
+    "sex": "male",
+    "variant": 1,
+    "name": "Aasimar protecteur · Portrait masculin 1",
+    "url": "./portraits/aasimar-male-1.webp"
+  },
+  {
+    "id": "aasimar-protector-male-2",
+    "family": "aasimar-protector",
+    "sex": "male",
+    "variant": 2,
+    "name": "Aasimar protecteur · Portrait masculin 2",
+    "url": "./portraits/aasimar-male-2.webp"
+  },
+  {
+    "id": "aasimar-protector-male-3",
+    "family": "aasimar-protector",
+    "sex": "male",
+    "variant": 3,
+    "name": "Aasimar protecteur · Portrait masculin 3",
+    "url": "./portraits/aasimar-male-3.webp"
+  },
+  {
+    "id": "aasimar-protector-male-4",
+    "family": "aasimar-protector",
+    "sex": "male",
+    "variant": 4,
+    "name": "Aasimar protecteur · Portrait masculin 4",
+    "url": "./portraits/aasimar-male-4.webp"
+  },
+  {
+    "id": "aasimar-scourge-female-1",
+    "family": "aasimar-scourge",
+    "sex": "female",
+    "variant": 1,
+    "name": "Aasimar fléau · Portrait féminin 1",
+    "url": "./portraits/aasimar-scourge-female-1.webp"
+  },
+  {
+    "id": "aasimar-scourge-female-2",
+    "family": "aasimar-scourge",
+    "sex": "female",
+    "variant": 2,
+    "name": "Aasimar fléau · Portrait féminin 2",
+    "url": "./portraits/aasimar-scourge-female-2.webp"
+  },
+  {
+    "id": "aasimar-scourge-female-3",
+    "family": "aasimar-scourge",
+    "sex": "female",
+    "variant": 3,
+    "name": "Aasimar fléau · Portrait féminin 3",
+    "url": "./portraits/aasimar-scourge-female-3.webp"
+  },
+  {
+    "id": "aasimar-scourge-female-4",
+    "family": "aasimar-scourge",
+    "sex": "female",
+    "variant": 4,
+    "name": "Aasimar fléau · Portrait féminin 4",
+    "url": "./portraits/aasimar-scourge-female-4.webp"
+  },
+  {
+    "id": "aasimar-scourge-male-1",
+    "family": "aasimar-scourge",
+    "sex": "male",
+    "variant": 1,
+    "name": "Aasimar fléau · Portrait masculin 1",
+    "url": "./portraits/aasimar-scourge-male-1.webp"
+  },
+  {
+    "id": "aasimar-scourge-male-2",
+    "family": "aasimar-scourge",
+    "sex": "male",
+    "variant": 2,
+    "name": "Aasimar fléau · Portrait masculin 2",
+    "url": "./portraits/aasimar-scourge-male-2.webp"
+  },
+  {
+    "id": "aasimar-scourge-male-3",
+    "family": "aasimar-scourge",
+    "sex": "male",
+    "variant": 3,
+    "name": "Aasimar fléau · Portrait masculin 3",
+    "url": "./portraits/aasimar-scourge-male-3.webp"
+  },
+  {
+    "id": "aasimar-scourge-male-4",
+    "family": "aasimar-scourge",
+    "sex": "male",
+    "variant": 4,
+    "name": "Aasimar fléau · Portrait masculin 4",
+    "url": "./portraits/aasimar-scourge-male-4.webp"
+  },
+  {
+    "id": "half-elf-drow-female-1",
+    "family": "half-elf-drow",
+    "sex": "female",
+    "variant": 1,
+    "name": "Demi-elfe drow · Portrait féminin 1",
+    "url": "./portraits/half-elf-drow-female-1.webp"
+  },
+  {
+    "id": "half-elf-drow-female-2",
+    "family": "half-elf-drow",
+    "sex": "female",
+    "variant": 2,
+    "name": "Demi-elfe drow · Portrait féminin 2",
+    "url": "./portraits/half-elf-drow-female-2.webp"
+  },
+  {
+    "id": "half-elf-drow-female-3",
+    "family": "half-elf-drow",
+    "sex": "female",
+    "variant": 3,
+    "name": "Demi-elfe drow · Portrait féminin 3",
+    "url": "./portraits/half-elf-drow-female-3.webp"
+  },
+  {
+    "id": "half-elf-drow-female-4",
+    "family": "half-elf-drow",
+    "sex": "female",
+    "variant": 4,
+    "name": "Demi-elfe drow · Portrait féminin 4",
+    "url": "./portraits/half-elf-drow-female-4.webp"
+  },
+  {
+    "id": "half-elf-drow-male-1",
+    "family": "half-elf-drow",
+    "sex": "male",
+    "variant": 1,
+    "name": "Demi-elfe drow · Portrait masculin 1",
+    "url": "./portraits/half-elf-drow-male-1.webp"
+  },
+  {
+    "id": "half-elf-drow-male-2",
+    "family": "half-elf-drow",
+    "sex": "male",
+    "variant": 2,
+    "name": "Demi-elfe drow · Portrait masculin 2",
+    "url": "./portraits/half-elf-drow-male-2.webp"
+  },
+  {
+    "id": "half-elf-drow-male-3",
+    "family": "half-elf-drow",
+    "sex": "male",
+    "variant": 3,
+    "name": "Demi-elfe drow · Portrait masculin 3",
+    "url": "./portraits/half-elf-drow-male-3.webp"
+  },
+  {
+    "id": "half-elf-drow-male-4",
+    "family": "half-elf-drow",
+    "sex": "male",
+    "variant": 4,
+    "name": "Demi-elfe drow · Portrait masculin 4",
+    "url": "./portraits/half-elf-drow-male-4.webp"
+  },
+  {
+    "id": "half-elf-aquatic-female-1",
+    "family": "half-elf-aquatic",
+    "sex": "female",
+    "variant": 1,
+    "name": "Demi-elfe aquatique · Portrait féminin 1",
+    "url": "./portraits/half-elf-aquatic-female-1.webp"
+  },
+  {
+    "id": "half-elf-aquatic-female-2",
+    "family": "half-elf-aquatic",
+    "sex": "female",
+    "variant": 2,
+    "name": "Demi-elfe aquatique · Portrait féminin 2",
+    "url": "./portraits/half-elf-aquatic-female-2.webp"
+  },
+  {
+    "id": "half-elf-aquatic-female-3",
+    "family": "half-elf-aquatic",
+    "sex": "female",
+    "variant": 3,
+    "name": "Demi-elfe aquatique · Portrait féminin 3",
+    "url": "./portraits/half-elf-aquatic-female-3.webp"
+  },
+  {
+    "id": "half-elf-aquatic-female-4",
+    "family": "half-elf-aquatic",
+    "sex": "female",
+    "variant": 4,
+    "name": "Demi-elfe aquatique · Portrait féminin 4",
+    "url": "./portraits/half-elf-aquatic-female-4.webp"
+  },
+  {
+    "id": "half-elf-aquatic-male-1",
+    "family": "half-elf-aquatic",
+    "sex": "male",
+    "variant": 1,
+    "name": "Demi-elfe aquatique · Portrait masculin 1",
+    "url": "./portraits/half-elf-aquatic-male-1.webp"
+  },
+  {
+    "id": "half-elf-aquatic-male-2",
+    "family": "half-elf-aquatic",
+    "sex": "male",
+    "variant": 2,
+    "name": "Demi-elfe aquatique · Portrait masculin 2",
+    "url": "./portraits/half-elf-aquatic-male-2.webp"
+  },
+  {
+    "id": "half-elf-aquatic-male-3",
+    "family": "half-elf-aquatic",
+    "sex": "male",
+    "variant": 3,
+    "name": "Demi-elfe aquatique · Portrait masculin 3",
+    "url": "./portraits/half-elf-aquatic-male-3.webp"
+  },
+  {
+    "id": "half-elf-aquatic-male-4",
+    "family": "half-elf-aquatic",
+    "sex": "male",
+    "variant": 4,
+    "name": "Demi-elfe aquatique · Portrait masculin 4",
+    "url": "./portraits/half-elf-aquatic-male-4.webp"
+  },
+  {
+    "id": "dragonborn-chromatic-female-1",
+    "family": "dragonborn-chromatic",
+    "sex": "female",
+    "variant": 1,
+    "name": "Drakéide chromatique · Portrait féminin 1",
+    "url": "./portraits/dragonborn-chromatic-female-1.webp"
+  },
+  {
+    "id": "dragonborn-chromatic-female-2",
+    "family": "dragonborn-chromatic",
+    "sex": "female",
+    "variant": 2,
+    "name": "Drakéide chromatique · Portrait féminin 2",
+    "url": "./portraits/dragonborn-chromatic-female-2.webp"
+  },
+  {
+    "id": "dragonborn-chromatic-female-3",
+    "family": "dragonborn-chromatic",
+    "sex": "female",
+    "variant": 3,
+    "name": "Drakéide chromatique · Portrait féminin 3",
+    "url": "./portraits/dragonborn-chromatic-female-3.webp"
+  },
+  {
+    "id": "dragonborn-chromatic-female-4",
+    "family": "dragonborn-chromatic",
+    "sex": "female",
+    "variant": 4,
+    "name": "Drakéide chromatique · Portrait féminin 4",
+    "url": "./portraits/dragonborn-chromatic-female-4.webp"
+  },
+  {
+    "id": "dragonborn-chromatic-male-1",
+    "family": "dragonborn-chromatic",
+    "sex": "male",
+    "variant": 1,
+    "name": "Drakéide chromatique · Portrait masculin 1",
+    "url": "./portraits/dragonborn-male-1.webp"
+  },
+  {
+    "id": "dragonborn-chromatic-male-2",
+    "family": "dragonborn-chromatic",
+    "sex": "male",
+    "variant": 2,
+    "name": "Drakéide chromatique · Portrait masculin 2",
+    "url": "./portraits/dragonborn-chromatic-male-2.webp"
+  },
+  {
+    "id": "dragonborn-chromatic-male-3",
+    "family": "dragonborn-chromatic",
+    "sex": "male",
+    "variant": 3,
+    "name": "Drakéide chromatique · Portrait masculin 3",
+    "url": "./portraits/dragonborn-chromatic-male-3.webp"
+  },
+  {
+    "id": "dragonborn-chromatic-male-4",
+    "family": "dragonborn-chromatic",
+    "sex": "male",
+    "variant": 4,
+    "name": "Drakéide chromatique · Portrait masculin 4",
+    "url": "./portraits/dragonborn-chromatic-male-4.webp"
+  },
+  {
+    "id": "dragonborn-metallic-female-1",
+    "family": "dragonborn-metallic",
+    "sex": "female",
+    "variant": 1,
+    "name": "Drakéide métallique · Portrait féminin 1",
+    "url": "./portraits/dragonborn-metallic-female-1.webp"
+  },
+  {
+    "id": "dragonborn-metallic-female-2",
+    "family": "dragonborn-metallic",
+    "sex": "female",
+    "variant": 2,
+    "name": "Drakéide métallique · Portrait féminin 2",
+    "url": "./portraits/dragonborn-metallic-female-2.webp"
+  },
+  {
+    "id": "dragonborn-metallic-female-3",
+    "family": "dragonborn-metallic",
+    "sex": "female",
+    "variant": 3,
+    "name": "Drakéide métallique · Portrait féminin 3",
+    "url": "./portraits/dragonborn-metallic-female-3.webp"
+  },
+  {
+    "id": "dragonborn-metallic-female-4",
+    "family": "dragonborn-metallic",
+    "sex": "female",
+    "variant": 4,
+    "name": "Drakéide métallique · Portrait féminin 4",
+    "url": "./portraits/dragonborn-metallic-female-4.webp"
+  },
+  {
+    "id": "dragonborn-metallic-male-1",
+    "family": "dragonborn-metallic",
+    "sex": "male",
+    "variant": 1,
+    "name": "Drakéide métallique · Portrait masculin 1",
+    "url": "./portraits/dragonborn-metallic-male-1.webp"
+  },
+  {
+    "id": "dragonborn-metallic-male-2",
+    "family": "dragonborn-metallic",
+    "sex": "male",
+    "variant": 2,
+    "name": "Drakéide métallique · Portrait masculin 2",
+    "url": "./portraits/dragonborn-metallic-male-2.webp"
+  },
+  {
+    "id": "dragonborn-metallic-male-3",
+    "family": "dragonborn-metallic",
+    "sex": "male",
+    "variant": 3,
+    "name": "Drakéide métallique · Portrait masculin 3",
+    "url": "./portraits/dragonborn-metallic-male-3.webp"
+  },
+  {
+    "id": "dragonborn-metallic-male-4",
+    "family": "dragonborn-metallic",
+    "sex": "male",
+    "variant": 4,
+    "name": "Drakéide métallique · Portrait masculin 4",
+    "url": "./portraits/dragonborn-metallic-male-4.webp"
+  },
+  {
+    "id": "dragonborn-gem-female-1",
+    "family": "dragonborn-gem",
+    "sex": "female",
+    "variant": 1,
+    "name": "Drakéide de gemme · Portrait féminin 1",
+    "url": "./portraits/dragonborn-gem-female-1.webp"
+  },
+  {
+    "id": "dragonborn-gem-female-2",
+    "family": "dragonborn-gem",
+    "sex": "female",
+    "variant": 2,
+    "name": "Drakéide de gemme · Portrait féminin 2",
+    "url": "./portraits/dragonborn-gem-female-2.webp"
+  },
+  {
+    "id": "dragonborn-gem-female-3",
+    "family": "dragonborn-gem",
+    "sex": "female",
+    "variant": 3,
+    "name": "Drakéide de gemme · Portrait féminin 3",
+    "url": "./portraits/dragonborn-gem-female-3.webp"
+  },
+  {
+    "id": "dragonborn-gem-female-4",
+    "family": "dragonborn-gem",
+    "sex": "female",
+    "variant": 4,
+    "name": "Drakéide de gemme · Portrait féminin 4",
+    "url": "./portraits/dragonborn-gem-female-4.webp"
+  },
+  {
+    "id": "dragonborn-gem-male-1",
+    "family": "dragonborn-gem",
+    "sex": "male",
+    "variant": 1,
+    "name": "Drakéide de gemme · Portrait masculin 1",
+    "url": "./portraits/dragonborn-gem-male-1.webp"
+  },
+  {
+    "id": "dragonborn-gem-male-2",
+    "family": "dragonborn-gem",
+    "sex": "male",
+    "variant": 2,
+    "name": "Drakéide de gemme · Portrait masculin 2",
+    "url": "./portraits/dragonborn-gem-male-2.webp"
+  },
+  {
+    "id": "dragonborn-gem-male-3",
+    "family": "dragonborn-gem",
+    "sex": "male",
+    "variant": 3,
+    "name": "Drakéide de gemme · Portrait masculin 3",
+    "url": "./portraits/dragonborn-gem-male-3.webp"
+  },
+  {
+    "id": "dragonborn-gem-male-4",
+    "family": "dragonborn-gem",
+    "sex": "male",
+    "variant": 4,
+    "name": "Drakéide de gemme · Portrait masculin 4",
+    "url": "./portraits/dragonborn-gem-male-4.webp"
+  },
+  {
+    "id": "tiefling-winged-female-1",
+    "family": "tiefling-winged",
+    "sex": "female",
+    "variant": 1,
+    "name": "Tieffelin ailé · Portrait féminin 1",
+    "url": "./portraits/tiefling-winged-female-1.webp"
+  },
+  {
+    "id": "tiefling-winged-female-2",
+    "family": "tiefling-winged",
+    "sex": "female",
+    "variant": 2,
+    "name": "Tieffelin ailé · Portrait féminin 2",
+    "url": "./portraits/tiefling-winged-female-2.webp"
+  },
+  {
+    "id": "tiefling-winged-female-3",
+    "family": "tiefling-winged",
+    "sex": "female",
+    "variant": 3,
+    "name": "Tieffelin ailé · Portrait féminin 3",
+    "url": "./portraits/tiefling-winged-female-3.webp"
+  },
+  {
+    "id": "tiefling-winged-female-4",
+    "family": "tiefling-winged",
+    "sex": "female",
+    "variant": 4,
+    "name": "Tieffelin ailé · Portrait féminin 4",
+    "url": "./portraits/tiefling-winged-female-4.webp"
+  },
+  {
+    "id": "tiefling-winged-male-1",
+    "family": "tiefling-winged",
+    "sex": "male",
+    "variant": 1,
+    "name": "Tieffelin ailé · Portrait masculin 1",
+    "url": "./portraits/tiefling-winged-male-1.webp"
+  },
+  {
+    "id": "tiefling-winged-male-2",
+    "family": "tiefling-winged",
+    "sex": "male",
+    "variant": 2,
+    "name": "Tieffelin ailé · Portrait masculin 2",
+    "url": "./portraits/tiefling-winged-male-2.webp"
+  },
+  {
+    "id": "tiefling-winged-male-3",
+    "family": "tiefling-winged",
+    "sex": "male",
+    "variant": 3,
+    "name": "Tieffelin ailé · Portrait masculin 3",
+    "url": "./portraits/tiefling-winged-male-3.webp"
+  },
+  {
+    "id": "tiefling-winged-male-4",
+    "family": "tiefling-winged",
+    "sex": "male",
+    "variant": 4,
+    "name": "Tieffelin ailé · Portrait masculin 4",
+    "url": "./portraits/tiefling-winged-male-4.webp"
+  },
+  {
+    "id": "simic-climber-female-1",
+    "family": "simic-climber",
+    "sex": "female",
+    "variant": 1,
+    "name": "Hybride simic grimpeur · Portrait féminin 1",
+    "url": "./portraits/simic-climber-female-1.webp"
+  },
+  {
+    "id": "simic-climber-female-2",
+    "family": "simic-climber",
+    "sex": "female",
+    "variant": 2,
+    "name": "Hybride simic grimpeur · Portrait féminin 2",
+    "url": "./portraits/simic-climber-female-2.webp"
+  },
+  {
+    "id": "simic-climber-female-3",
+    "family": "simic-climber",
+    "sex": "female",
+    "variant": 3,
+    "name": "Hybride simic grimpeur · Portrait féminin 3",
+    "url": "./portraits/simic-climber-female-3.webp"
+  },
+  {
+    "id": "simic-climber-female-4",
+    "family": "simic-climber",
+    "sex": "female",
+    "variant": 4,
+    "name": "Hybride simic grimpeur · Portrait féminin 4",
+    "url": "./portraits/simic-climber-female-4.webp"
+  },
+  {
+    "id": "simic-climber-male-1",
+    "family": "simic-climber",
+    "sex": "male",
+    "variant": 1,
+    "name": "Hybride simic grimpeur · Portrait masculin 1",
+    "url": "./portraits/simic-climber-male-1.webp"
+  },
+  {
+    "id": "simic-climber-male-2",
+    "family": "simic-climber",
+    "sex": "male",
+    "variant": 2,
+    "name": "Hybride simic grimpeur · Portrait masculin 2",
+    "url": "./portraits/simic-climber-male-2.webp"
+  },
+  {
+    "id": "simic-climber-male-3",
+    "family": "simic-climber",
+    "sex": "male",
+    "variant": 3,
+    "name": "Hybride simic grimpeur · Portrait masculin 3",
+    "url": "./portraits/simic-climber-male-3.webp"
+  },
+  {
+    "id": "simic-climber-male-4",
+    "family": "simic-climber",
+    "sex": "male",
+    "variant": 4,
+    "name": "Hybride simic grimpeur · Portrait masculin 4",
+    "url": "./portraits/simic-climber-male-4.webp"
+  },
+  {
+    "id": "simic-glider-female-1",
+    "family": "simic-glider",
+    "sex": "female",
+    "variant": 1,
+    "name": "Hybride simic planeur · Portrait féminin 1",
+    "url": "./portraits/simic-glider-female-1.webp"
+  },
+  {
+    "id": "simic-glider-female-2",
+    "family": "simic-glider",
+    "sex": "female",
+    "variant": 2,
+    "name": "Hybride simic planeur · Portrait féminin 2",
+    "url": "./portraits/simic-glider-female-2.webp"
+  },
+  {
+    "id": "simic-glider-female-3",
+    "family": "simic-glider",
+    "sex": "female",
+    "variant": 3,
+    "name": "Hybride simic planeur · Portrait féminin 3",
+    "url": "./portraits/simic-glider-female-3.webp"
+  },
+  {
+    "id": "simic-glider-female-4",
+    "family": "simic-glider",
+    "sex": "female",
+    "variant": 4,
+    "name": "Hybride simic planeur · Portrait féminin 4",
+    "url": "./portraits/simic-glider-female-4.webp"
+  },
+  {
+    "id": "simic-glider-male-1",
+    "family": "simic-glider",
+    "sex": "male",
+    "variant": 1,
+    "name": "Hybride simic planeur · Portrait masculin 1",
+    "url": "./portraits/simic-glider-male-1.webp"
+  },
+  {
+    "id": "simic-glider-male-2",
+    "family": "simic-glider",
+    "sex": "male",
+    "variant": 2,
+    "name": "Hybride simic planeur · Portrait masculin 2",
+    "url": "./portraits/simic-glider-male-2.webp"
+  },
+  {
+    "id": "simic-glider-male-3",
+    "family": "simic-glider",
+    "sex": "male",
+    "variant": 3,
+    "name": "Hybride simic planeur · Portrait masculin 3",
+    "url": "./portraits/simic-glider-male-3.webp"
+  },
+  {
+    "id": "simic-glider-male-4",
+    "family": "simic-glider",
+    "sex": "male",
+    "variant": 4,
+    "name": "Hybride simic planeur · Portrait masculin 4",
+    "url": "./portraits/simic-glider-male-4.webp"
+  },
+  {
+    "id": "simic-aquatic-female-1",
+    "family": "simic-aquatic",
+    "sex": "female",
+    "variant": 1,
+    "name": "Hybride simic aquatique · Portrait féminin 1",
+    "url": "./portraits/simic-hybrid-female-1.webp"
+  },
+  {
+    "id": "simic-aquatic-female-2",
+    "family": "simic-aquatic",
+    "sex": "female",
+    "variant": 2,
+    "name": "Hybride simic aquatique · Portrait féminin 2",
+    "url": "./portraits/simic-aquatic-female-2.webp"
+  },
+  {
+    "id": "simic-aquatic-female-3",
+    "family": "simic-aquatic",
+    "sex": "female",
+    "variant": 3,
+    "name": "Hybride simic aquatique · Portrait féminin 3",
+    "url": "./portraits/simic-aquatic-female-3.webp"
+  },
+  {
+    "id": "simic-aquatic-female-4",
+    "family": "simic-aquatic",
+    "sex": "female",
+    "variant": 4,
+    "name": "Hybride simic aquatique · Portrait féminin 4",
+    "url": "./portraits/simic-aquatic-female-4.webp"
+  },
+  {
+    "id": "simic-aquatic-male-1",
+    "family": "simic-aquatic",
+    "sex": "male",
+    "variant": 1,
+    "name": "Hybride simic aquatique · Portrait masculin 1",
+    "url": "./portraits/simic-aquatic-male-1.webp"
+  },
+  {
+    "id": "simic-aquatic-male-2",
+    "family": "simic-aquatic",
+    "sex": "male",
+    "variant": 2,
+    "name": "Hybride simic aquatique · Portrait masculin 2",
+    "url": "./portraits/simic-aquatic-male-2.webp"
+  },
+  {
+    "id": "simic-aquatic-male-3",
+    "family": "simic-aquatic",
+    "sex": "male",
+    "variant": 3,
+    "name": "Hybride simic aquatique · Portrait masculin 3",
+    "url": "./portraits/simic-aquatic-male-3.webp"
+  },
+  {
+    "id": "simic-aquatic-male-4",
+    "family": "simic-aquatic",
+    "sex": "male",
+    "variant": 4,
+    "name": "Hybride simic aquatique · Portrait masculin 4",
+    "url": "./portraits/simic-aquatic-male-4.webp"
+  },
+  {
+    "id": "human-sentinel-female-1",
+    "family": "human-sentinel",
+    "sex": "female",
+    "variant": 1,
+    "name": "Humains, marque de la sentinelle · Portrait féminin 1",
+    "url": "./portraits/human-sentinel-female-1.webp"
+  },
+  {
+    "id": "human-sentinel-female-2",
+    "family": "human-sentinel",
+    "sex": "female",
+    "variant": 2,
+    "name": "Humains, marque de la sentinelle · Portrait féminin 2",
+    "url": "./portraits/human-sentinel-female-2.webp"
+  },
+  {
+    "id": "human-sentinel-female-3",
+    "family": "human-sentinel",
+    "sex": "female",
+    "variant": 3,
+    "name": "Humains, marque de la sentinelle · Portrait féminin 3",
+    "url": "./portraits/human-sentinel-female-3.webp"
+  },
+  {
+    "id": "human-sentinel-female-4",
+    "family": "human-sentinel",
+    "sex": "female",
+    "variant": 4,
+    "name": "Humains, marque de la sentinelle · Portrait féminin 4",
+    "url": "./portraits/human-sentinel-female-4.webp"
+  },
+  {
+    "id": "human-sentinel-male-1",
+    "family": "human-sentinel",
+    "sex": "male",
+    "variant": 1,
+    "name": "Humains, marque de la sentinelle · Portrait masculin 1",
+    "url": "./portraits/human-sentinel-male-1.webp"
+  },
+  {
+    "id": "human-sentinel-male-2",
+    "family": "human-sentinel",
+    "sex": "male",
+    "variant": 2,
+    "name": "Humains, marque de la sentinelle · Portrait masculin 2",
+    "url": "./portraits/human-sentinel-male-2.webp"
+  },
+  {
+    "id": "human-sentinel-male-3",
+    "family": "human-sentinel",
+    "sex": "male",
+    "variant": 3,
+    "name": "Humains, marque de la sentinelle · Portrait masculin 3",
+    "url": "./portraits/human-sentinel-male-3.webp"
+  },
+  {
+    "id": "human-sentinel-male-4",
+    "family": "human-sentinel",
+    "sex": "male",
+    "variant": 4,
+    "name": "Humains, marque de la sentinelle · Portrait masculin 4",
+    "url": "./portraits/human-sentinel-male-4.webp"
+  },
+  {
+    "id": "human-finding-female-1",
+    "family": "human-finding",
+    "sex": "female",
+    "variant": 1,
+    "name": "Humains, marque de la Découverte · Portrait féminin 1",
+    "url": "./portraits/human-finding-female-1.webp"
+  },
+  {
+    "id": "human-finding-female-2",
+    "family": "human-finding",
+    "sex": "female",
+    "variant": 2,
+    "name": "Humains, marque de la Découverte · Portrait féminin 2",
+    "url": "./portraits/human-finding-female-2.webp"
+  },
+  {
+    "id": "human-finding-female-3",
+    "family": "human-finding",
+    "sex": "female",
+    "variant": 3,
+    "name": "Humains, marque de la Découverte · Portrait féminin 3",
+    "url": "./portraits/human-finding-female-3.webp"
+  },
+  {
+    "id": "human-finding-female-4",
+    "family": "human-finding",
+    "sex": "female",
+    "variant": 4,
+    "name": "Humains, marque de la Découverte · Portrait féminin 4",
+    "url": "./portraits/human-finding-female-4.webp"
+  },
+  {
+    "id": "human-finding-male-1",
+    "family": "human-finding",
+    "sex": "male",
+    "variant": 1,
+    "name": "Humains, marque de la Découverte · Portrait masculin 1",
+    "url": "./portraits/human-finding-male-1.webp"
+  },
+  {
+    "id": "human-finding-male-2",
+    "family": "human-finding",
+    "sex": "male",
+    "variant": 2,
+    "name": "Humains, marque de la Découverte · Portrait masculin 2",
+    "url": "./portraits/human-finding-male-2.webp"
+  },
+  {
+    "id": "human-finding-male-3",
+    "family": "human-finding",
+    "sex": "male",
+    "variant": 3,
+    "name": "Humains, marque de la Découverte · Portrait masculin 3",
+    "url": "./portraits/human-finding-male-3.webp"
+  },
+  {
+    "id": "human-finding-male-4",
+    "family": "human-finding",
+    "sex": "male",
+    "variant": 4,
+    "name": "Humains, marque de la Découverte · Portrait masculin 4",
+    "url": "./portraits/human-finding-male-4.webp"
+  },
+  {
+    "id": "shifter-beasthide-female-1",
+    "family": "shifter-beasthide",
+    "sex": "female",
+    "variant": 1,
+    "name": "Féral peau de bête · Portrait féminin 1",
+    "url": "./portraits/shifter-female-1.webp"
+  },
+  {
+    "id": "shifter-beasthide-female-2",
+    "family": "shifter-beasthide",
+    "sex": "female",
+    "variant": 2,
+    "name": "Féral peau de bête · Portrait féminin 2",
+    "url": "./portraits/shifter-beasthide-female-2.webp"
+  },
+  {
+    "id": "shifter-beasthide-female-3",
+    "family": "shifter-beasthide",
+    "sex": "female",
+    "variant": 3,
+    "name": "Féral peau de bête · Portrait féminin 3",
+    "url": "./portraits/shifter-beasthide-female-3.webp"
+  },
+  {
+    "id": "shifter-beasthide-female-4",
+    "family": "shifter-beasthide",
+    "sex": "female",
+    "variant": 4,
+    "name": "Féral peau de bête · Portrait féminin 4",
+    "url": "./portraits/shifter-beasthide-female-4.webp"
+  },
+  {
+    "id": "shifter-beasthide-male-1",
+    "family": "shifter-beasthide",
+    "sex": "male",
+    "variant": 1,
+    "name": "Féral peau de bête · Portrait masculin 1",
+    "url": "./portraits/shifter-male-1.webp"
+  },
+  {
+    "id": "shifter-beasthide-male-2",
+    "family": "shifter-beasthide",
+    "sex": "male",
+    "variant": 2,
+    "name": "Féral peau de bête · Portrait masculin 2",
+    "url": "./portraits/shifter-beasthide-male-2.webp"
+  },
+  {
+    "id": "shifter-beasthide-male-3",
+    "family": "shifter-beasthide",
+    "sex": "male",
+    "variant": 3,
+    "name": "Féral peau de bête · Portrait masculin 3",
+    "url": "./portraits/shifter-beasthide-male-3.webp"
+  },
+  {
+    "id": "shifter-beasthide-male-4",
+    "family": "shifter-beasthide",
+    "sex": "male",
+    "variant": 4,
+    "name": "Féral peau de bête · Portrait masculin 4",
+    "url": "./portraits/shifter-beasthide-male-4.webp"
+  },
+  {
+    "id": "shifter-longtooth-female-1",
+    "family": "shifter-longtooth",
+    "sex": "female",
+    "variant": 1,
+    "name": "Féral longues dents · Portrait féminin 1",
+    "url": "./portraits/shifter-female-2.webp"
+  },
+  {
+    "id": "shifter-longtooth-female-2",
+    "family": "shifter-longtooth",
+    "sex": "female",
+    "variant": 2,
+    "name": "Féral longues dents · Portrait féminin 2",
+    "url": "./portraits/shifter-longtooth-female-2.webp"
+  },
+  {
+    "id": "shifter-longtooth-female-3",
+    "family": "shifter-longtooth",
+    "sex": "female",
+    "variant": 3,
+    "name": "Féral longues dents · Portrait féminin 3",
+    "url": "./portraits/shifter-longtooth-female-3.webp"
+  },
+  {
+    "id": "shifter-longtooth-female-4",
+    "family": "shifter-longtooth",
+    "sex": "female",
+    "variant": 4,
+    "name": "Féral longues dents · Portrait féminin 4",
+    "url": "./portraits/shifter-longtooth-female-4.webp"
+  },
+  {
+    "id": "shifter-longtooth-male-1",
+    "family": "shifter-longtooth",
+    "sex": "male",
+    "variant": 1,
+    "name": "Féral longues dents · Portrait masculin 1",
+    "url": "./portraits/shifter-male-2.webp"
+  },
+  {
+    "id": "shifter-longtooth-male-2",
+    "family": "shifter-longtooth",
+    "sex": "male",
+    "variant": 2,
+    "name": "Féral longues dents · Portrait masculin 2",
+    "url": "./portraits/shifter-longtooth-male-2.webp"
+  },
+  {
+    "id": "shifter-longtooth-male-3",
+    "family": "shifter-longtooth",
+    "sex": "male",
+    "variant": 3,
+    "name": "Féral longues dents · Portrait masculin 3",
+    "url": "./portraits/shifter-longtooth-male-3.webp"
+  },
+  {
+    "id": "shifter-longtooth-male-4",
+    "family": "shifter-longtooth",
+    "sex": "male",
+    "variant": 4,
+    "name": "Féral longues dents · Portrait masculin 4",
+    "url": "./portraits/shifter-longtooth-male-4.webp"
+  },
+  {
+    "id": "shifter-swiftstride-female-1",
+    "family": "shifter-swiftstride",
+    "sex": "female",
+    "variant": 1,
+    "name": "Féral longues foulées · Portrait féminin 1",
+    "url": "./portraits/shifter-female-3.webp"
+  },
+  {
+    "id": "shifter-swiftstride-female-2",
+    "family": "shifter-swiftstride",
+    "sex": "female",
+    "variant": 2,
+    "name": "Féral longues foulées · Portrait féminin 2",
+    "url": "./portraits/shifter-swiftstride-female-2.webp"
+  },
+  {
+    "id": "shifter-swiftstride-female-3",
+    "family": "shifter-swiftstride",
+    "sex": "female",
+    "variant": 3,
+    "name": "Féral longues foulées · Portrait féminin 3",
+    "url": "./portraits/shifter-swiftstride-female-3.webp"
+  },
+  {
+    "id": "shifter-swiftstride-female-4",
+    "family": "shifter-swiftstride",
+    "sex": "female",
+    "variant": 4,
+    "name": "Féral longues foulées · Portrait féminin 4",
+    "url": "./portraits/shifter-swiftstride-female-4.webp"
+  },
+  {
+    "id": "shifter-swiftstride-male-1",
+    "family": "shifter-swiftstride",
+    "sex": "male",
+    "variant": 1,
+    "name": "Féral longues foulées · Portrait masculin 1",
+    "url": "./portraits/shifter-male-3.webp"
+  },
+  {
+    "id": "shifter-swiftstride-male-2",
+    "family": "shifter-swiftstride",
+    "sex": "male",
+    "variant": 2,
+    "name": "Féral longues foulées · Portrait masculin 2",
+    "url": "./portraits/shifter-swiftstride-male-2.webp"
+  },
+  {
+    "id": "shifter-swiftstride-male-3",
+    "family": "shifter-swiftstride",
+    "sex": "male",
+    "variant": 3,
+    "name": "Féral longues foulées · Portrait masculin 3",
+    "url": "./portraits/shifter-swiftstride-male-3.webp"
+  },
+  {
+    "id": "shifter-swiftstride-male-4",
+    "family": "shifter-swiftstride",
+    "sex": "male",
+    "variant": 4,
+    "name": "Féral longues foulées · Portrait masculin 4",
+    "url": "./portraits/shifter-swiftstride-male-4.webp"
+  },
+  {
+    "id": "shifter-wildhunt-female-1",
+    "family": "shifter-wildhunt",
+    "sex": "female",
+    "variant": 1,
+    "name": "Féral traque sauvage · Portrait féminin 1",
+    "url": "./portraits/shifter-female-4.webp"
+  },
+  {
+    "id": "shifter-wildhunt-female-2",
+    "family": "shifter-wildhunt",
+    "sex": "female",
+    "variant": 2,
+    "name": "Féral traque sauvage · Portrait féminin 2",
+    "url": "./portraits/shifter-wildhunt-female-2.webp"
+  },
+  {
+    "id": "shifter-wildhunt-female-3",
+    "family": "shifter-wildhunt",
+    "sex": "female",
+    "variant": 3,
+    "name": "Féral traque sauvage · Portrait féminin 3",
+    "url": "./portraits/shifter-wildhunt-female-3.webp"
+  },
+  {
+    "id": "shifter-wildhunt-female-4",
+    "family": "shifter-wildhunt",
+    "sex": "female",
+    "variant": 4,
+    "name": "Féral traque sauvage · Portrait féminin 4",
+    "url": "./portraits/shifter-wildhunt-female-4.webp"
+  },
+  {
+    "id": "shifter-wildhunt-male-1",
+    "family": "shifter-wildhunt",
+    "sex": "male",
+    "variant": 1,
+    "name": "Féral traque sauvage · Portrait masculin 1",
+    "url": "./portraits/shifter-male-4.webp"
+  },
+  {
+    "id": "shifter-wildhunt-male-2",
+    "family": "shifter-wildhunt",
+    "sex": "male",
+    "variant": 2,
+    "name": "Féral traque sauvage · Portrait masculin 2",
+    "url": "./portraits/shifter-wildhunt-male-2.webp"
+  },
+  {
+    "id": "shifter-wildhunt-male-3",
+    "family": "shifter-wildhunt",
+    "sex": "male",
+    "variant": 3,
+    "name": "Féral traque sauvage · Portrait masculin 3",
+    "url": "./portraits/shifter-wildhunt-male-3.webp"
+  },
+  {
+    "id": "shifter-wildhunt-male-4",
+    "family": "shifter-wildhunt",
+    "sex": "male",
+    "variant": 4,
+    "name": "Féral traque sauvage · Portrait masculin 4",
+    "url": "./portraits/shifter-wildhunt-male-4.webp"
+  },
+  {
+    "id": "githyanki-female-1",
+    "family": "githyanki",
+    "sex": "female",
+    "variant": 1,
+    "name": "Githyanki · Portrait féminin 1",
+    "url": "./portraits/gith-female-1.webp"
+  },
+  {
+    "id": "githyanki-female-2",
+    "family": "githyanki",
+    "sex": "female",
+    "variant": 2,
+    "name": "Githyanki · Portrait féminin 2",
+    "url": "./portraits/gith-female-2.webp"
+  },
+  {
+    "id": "githyanki-female-3",
+    "family": "githyanki",
+    "sex": "female",
+    "variant": 3,
+    "name": "Githyanki · Portrait féminin 3",
+    "url": "./portraits/githyanki-female-3.webp"
+  },
+  {
+    "id": "githyanki-female-4",
+    "family": "githyanki",
+    "sex": "female",
+    "variant": 4,
+    "name": "Githyanki · Portrait féminin 4",
+    "url": "./portraits/githyanki-female-4.webp"
+  },
+  {
+    "id": "githyanki-male-1",
+    "family": "githyanki",
+    "sex": "male",
+    "variant": 1,
+    "name": "Githyanki · Portrait masculin 1",
+    "url": "./portraits/gith-male-1.webp"
+  },
+  {
+    "id": "githyanki-male-2",
+    "family": "githyanki",
+    "sex": "male",
+    "variant": 2,
+    "name": "Githyanki · Portrait masculin 2",
+    "url": "./portraits/gith-male-2.webp"
+  },
+  {
+    "id": "githyanki-male-3",
+    "family": "githyanki",
+    "sex": "male",
+    "variant": 3,
+    "name": "Githyanki · Portrait masculin 3",
+    "url": "./portraits/githyanki-male-3.webp"
+  },
+  {
+    "id": "githyanki-male-4",
+    "family": "githyanki",
+    "sex": "male",
+    "variant": 4,
+    "name": "Githyanki · Portrait masculin 4",
+    "url": "./portraits/githyanki-male-4.webp"
+  },
+  {
+    "id": "githzerai-female-1",
+    "family": "githzerai",
+    "sex": "female",
+    "variant": 1,
+    "name": "Githzerai · Portrait féminin 1",
+    "url": "./portraits/gith-female-3.webp"
+  },
+  {
+    "id": "githzerai-female-2",
+    "family": "githzerai",
+    "sex": "female",
+    "variant": 2,
+    "name": "Githzerai · Portrait féminin 2",
+    "url": "./portraits/gith-female-4.webp"
+  },
+  {
+    "id": "githzerai-female-3",
+    "family": "githzerai",
+    "sex": "female",
+    "variant": 3,
+    "name": "Githzerai · Portrait féminin 3",
+    "url": "./portraits/githzerai-female-3.webp"
+  },
+  {
+    "id": "githzerai-female-4",
+    "family": "githzerai",
+    "sex": "female",
+    "variant": 4,
+    "name": "Githzerai · Portrait féminin 4",
+    "url": "./portraits/githzerai-female-4.webp"
+  },
+  {
+    "id": "githzerai-male-1",
+    "family": "githzerai",
+    "sex": "male",
+    "variant": 1,
+    "name": "Githzerai · Portrait masculin 1",
+    "url": "./portraits/gith-male-3.webp"
+  },
+  {
+    "id": "githzerai-male-2",
+    "family": "githzerai",
+    "sex": "male",
+    "variant": 2,
+    "name": "Githzerai · Portrait masculin 2",
+    "url": "./portraits/gith-male-4.webp"
+  },
+  {
+    "id": "githzerai-male-3",
+    "family": "githzerai",
+    "sex": "male",
+    "variant": 3,
+    "name": "Githzerai · Portrait masculin 3",
+    "url": "./portraits/githzerai-male-3.webp"
+  },
+  {
+    "id": "githzerai-male-4",
+    "family": "githzerai",
+    "sex": "male",
+    "variant": 4,
+    "name": "Githzerai · Portrait masculin 4",
+    "url": "./portraits/githzerai-male-4.webp"
+  },
+  {
+    "id": "pallid-elf-female-1",
+    "family": "pallid-elf",
+    "sex": "female",
+    "variant": 1,
+    "name": "Elfe pâle · Portrait féminin 1",
+    "url": "./portraits/elf-female-1.webp"
+  },
+  {
+    "id": "pallid-elf-female-2",
+    "family": "pallid-elf",
+    "sex": "female",
+    "variant": 2,
+    "name": "Elfe pâle · Portrait féminin 2",
+    "url": "./portraits/pallid-elf-female-2.webp"
+  },
+  {
+    "id": "pallid-elf-female-3",
+    "family": "pallid-elf",
+    "sex": "female",
+    "variant": 3,
+    "name": "Elfe pâle · Portrait féminin 3",
+    "url": "./portraits/pallid-elf-female-3.webp"
+  },
+  {
+    "id": "pallid-elf-female-4",
+    "family": "pallid-elf",
+    "sex": "female",
+    "variant": 4,
+    "name": "Elfe pâle · Portrait féminin 4",
+    "url": "./portraits/pallid-elf-female-4.webp"
+  },
+  {
+    "id": "pallid-elf-male-1",
+    "family": "pallid-elf",
+    "sex": "male",
+    "variant": 1,
+    "name": "Elfe pâle · Portrait masculin 1",
+    "url": "./portraits/pallid-elf-male-1.webp"
+  },
+  {
+    "id": "pallid-elf-male-2",
+    "family": "pallid-elf",
+    "sex": "male",
+    "variant": 2,
+    "name": "Elfe pâle · Portrait masculin 2",
+    "url": "./portraits/pallid-elf-male-2.webp"
+  },
+  {
+    "id": "pallid-elf-male-3",
+    "family": "pallid-elf",
+    "sex": "male",
+    "variant": 3,
+    "name": "Elfe pâle · Portrait masculin 3",
+    "url": "./portraits/pallid-elf-male-3.webp"
+  },
+  {
+    "id": "pallid-elf-male-4",
+    "family": "pallid-elf",
+    "sex": "male",
+    "variant": 4,
+    "name": "Elfe pâle · Portrait masculin 4",
+    "url": "./portraits/pallid-elf-male-4.webp"
+  },
+  {
+    "id": "kalashtar-female-1",
+    "family": "kalashtar",
+    "sex": "female",
+    "variant": 1,
+    "name": "Kalashtar · Portrait féminin 1",
+    "url": "./portraits/kalashtar-female-1.webp"
+  },
+  {
+    "id": "kalashtar-female-2",
+    "family": "kalashtar",
+    "sex": "female",
+    "variant": 2,
+    "name": "Kalashtar · Portrait féminin 2",
+    "url": "./portraits/kalashtar-female-2.webp"
+  },
+  {
+    "id": "kalashtar-female-3",
+    "family": "kalashtar",
+    "sex": "female",
+    "variant": 3,
+    "name": "Kalashtar · Portrait féminin 3",
+    "url": "./portraits/kalashtar-female-3.webp"
+  },
+  {
+    "id": "kalashtar-female-4",
+    "family": "kalashtar",
+    "sex": "female",
+    "variant": 4,
+    "name": "Kalashtar · Portrait féminin 4",
+    "url": "./portraits/kalashtar-female-4.webp"
+  },
+  {
+    "id": "kalashtar-male-1",
+    "family": "kalashtar",
+    "sex": "male",
+    "variant": 1,
+    "name": "Kalashtar · Portrait masculin 1",
+    "url": "./portraits/kalashtar-male-1.webp"
+  },
+  {
+    "id": "kalashtar-male-2",
+    "family": "kalashtar",
+    "sex": "male",
+    "variant": 2,
+    "name": "Kalashtar · Portrait masculin 2",
+    "url": "./portraits/kalashtar-male-2.webp"
+  },
+  {
+    "id": "kalashtar-male-3",
+    "family": "kalashtar",
+    "sex": "male",
+    "variant": 3,
+    "name": "Kalashtar · Portrait masculin 3",
+    "url": "./portraits/kalashtar-male-3.webp"
+  },
+  {
+    "id": "kalashtar-male-4",
+    "family": "kalashtar",
+    "sex": "male",
+    "variant": 4,
+    "name": "Kalashtar · Portrait masculin 4",
+    "url": "./portraits/kalashtar-male-4.webp"
+  },
+  {
+    "id": "human-diversity-female-1",
+    "family": "human",
+    "sex": "female",
+    "variant": 5,
+    "name": "Humains · Portrait féminin 5",
+    "url": "./portraits/human-diversity-female-1.webp"
+  },
+  {
+    "id": "human-diversity-female-2",
+    "family": "human",
+    "sex": "female",
+    "variant": 6,
+    "name": "Humains · Portrait féminin 6",
+    "url": "./portraits/human-diversity-female-2.webp"
+  },
+  {
+    "id": "human-diversity-female-3",
+    "family": "human",
+    "sex": "female",
+    "variant": 7,
+    "name": "Humains · Portrait féminin 7",
+    "url": "./portraits/human-diversity-female-3.webp"
+  },
+  {
+    "id": "human-diversity-female-4",
+    "family": "human",
+    "sex": "female",
+    "variant": 8,
+    "name": "Humains · Portrait féminin 8",
+    "url": "./portraits/human-diversity-female-4.webp"
+  },
+  {
+    "id": "human-diversity-male-1",
+    "family": "human",
+    "sex": "male",
+    "variant": 5,
+    "name": "Humains · Portrait masculin 5",
+    "url": "./portraits/human-diversity-male-1.webp"
+  },
+  {
+    "id": "human-diversity-male-2",
+    "family": "human",
+    "sex": "male",
+    "variant": 6,
+    "name": "Humains · Portrait masculin 6",
+    "url": "./portraits/human-diversity-male-2.webp"
+  },
+  {
+    "id": "human-diversity-male-3",
+    "family": "human",
+    "sex": "male",
+    "variant": 7,
+    "name": "Humains · Portrait masculin 7",
+    "url": "./portraits/human-diversity-male-3.webp"
+  },
+  {
+    "id": "human-diversity-male-4",
+    "family": "human",
+    "sex": "male",
+    "variant": 8,
+    "name": "Humains · Portrait masculin 8",
+    "url": "./portraits/human-diversity-male-4.webp"
+  },
+  {
+    "id": "half-elf-diversity-female-1",
+    "family": "half-elf",
+    "sex": "female",
+    "variant": 5,
+    "name": "Demi-elfes · Portrait féminin 5",
+    "url": "./portraits/half-elf-diversity-female-1.webp"
+  },
+  {
+    "id": "half-elf-diversity-female-2",
+    "family": "half-elf",
+    "sex": "female",
+    "variant": 6,
+    "name": "Demi-elfes · Portrait féminin 6",
+    "url": "./portraits/half-elf-diversity-female-2.webp"
+  },
+  {
+    "id": "half-elf-diversity-female-3",
+    "family": "half-elf",
+    "sex": "female",
+    "variant": 7,
+    "name": "Demi-elfes · Portrait féminin 7",
+    "url": "./portraits/half-elf-diversity-female-3.webp"
+  },
+  {
+    "id": "half-elf-diversity-female-4",
+    "family": "half-elf",
+    "sex": "female",
+    "variant": 8,
+    "name": "Demi-elfes · Portrait féminin 8",
+    "url": "./portraits/half-elf-diversity-female-4.webp"
+  },
+  {
+    "id": "half-elf-diversity-male-1",
+    "family": "half-elf",
+    "sex": "male",
+    "variant": 5,
+    "name": "Demi-elfes · Portrait masculin 5",
+    "url": "./portraits/half-elf-diversity-male-1.webp"
+  },
+  {
+    "id": "half-elf-diversity-male-2",
+    "family": "half-elf",
+    "sex": "male",
+    "variant": 6,
+    "name": "Demi-elfes · Portrait masculin 6",
+    "url": "./portraits/half-elf-diversity-male-2.webp"
+  },
+  {
+    "id": "half-elf-diversity-male-3",
+    "family": "half-elf",
+    "sex": "male",
+    "variant": 7,
+    "name": "Demi-elfes · Portrait masculin 7",
+    "url": "./portraits/half-elf-diversity-male-3.webp"
+  },
+  {
+    "id": "half-elf-diversity-male-4",
+    "family": "half-elf",
+    "sex": "male",
+    "variant": 8,
+    "name": "Demi-elfes · Portrait masculin 8",
+    "url": "./portraits/half-elf-diversity-male-4.webp"
+  },
+  {
+    "id": "simic-grappler-female-1",
+    "family": "simic-grappler",
+    "sex": "female",
+    "variant": 1,
+    "name": "Hybride simic agrippeur · Portrait féminin 1",
+    "url": "./portraits/simic-grappler-female-1.webp"
+  },
+  {
+    "id": "simic-grappler-female-2",
+    "family": "simic-grappler",
+    "sex": "female",
+    "variant": 2,
+    "name": "Hybride simic agrippeur · Portrait féminin 2",
+    "url": "./portraits/simic-grappler-female-2.webp"
+  },
+  {
+    "id": "simic-grappler-female-3",
+    "family": "simic-grappler",
+    "sex": "female",
+    "variant": 3,
+    "name": "Hybride simic agrippeur · Portrait féminin 3",
+    "url": "./portraits/simic-grappler-female-3.webp"
+  },
+  {
+    "id": "simic-grappler-female-4",
+    "family": "simic-grappler",
+    "sex": "female",
+    "variant": 4,
+    "name": "Hybride simic agrippeur · Portrait féminin 4",
+    "url": "./portraits/simic-grappler-female-4.webp"
+  },
+  {
+    "id": "simic-grappler-male-1",
+    "family": "simic-grappler",
+    "sex": "male",
+    "variant": 1,
+    "name": "Hybride simic agrippeur · Portrait masculin 1",
+    "url": "./portraits/simic-grappler-male-1.webp"
+  },
+  {
+    "id": "simic-grappler-male-2",
+    "family": "simic-grappler",
+    "sex": "male",
+    "variant": 2,
+    "name": "Hybride simic agrippeur · Portrait masculin 2",
+    "url": "./portraits/simic-grappler-male-2.webp"
+  },
+  {
+    "id": "simic-grappler-male-3",
+    "family": "simic-grappler",
+    "sex": "male",
+    "variant": 3,
+    "name": "Hybride simic agrippeur · Portrait masculin 3",
+    "url": "./portraits/simic-grappler-male-3.webp"
+  },
+  {
+    "id": "simic-grappler-male-4",
+    "family": "simic-grappler",
+    "sex": "male",
+    "variant": 4,
+    "name": "Hybride simic agrippeur · Portrait masculin 4",
+    "url": "./portraits/simic-grappler-male-4.webp"
+  },
+  {
+    "id": "simic-carapace-female-1",
+    "family": "simic-carapace",
+    "sex": "female",
+    "variant": 1,
+    "name": "Hybride simic carapace · Portrait féminin 1",
+    "url": "./portraits/simic-carapace-female-1.webp"
+  },
+  {
+    "id": "simic-carapace-female-2",
+    "family": "simic-carapace",
+    "sex": "female",
+    "variant": 2,
+    "name": "Hybride simic carapace · Portrait féminin 2",
+    "url": "./portraits/simic-carapace-female-2.webp"
+  },
+  {
+    "id": "simic-carapace-female-3",
+    "family": "simic-carapace",
+    "sex": "female",
+    "variant": 3,
+    "name": "Hybride simic carapace · Portrait féminin 3",
+    "url": "./portraits/simic-carapace-female-3.webp"
+  },
+  {
+    "id": "simic-carapace-female-4",
+    "family": "simic-carapace",
+    "sex": "female",
+    "variant": 4,
+    "name": "Hybride simic carapace · Portrait féminin 4",
+    "url": "./portraits/simic-carapace-female-4.webp"
+  },
+  {
+    "id": "simic-carapace-male-1",
+    "family": "simic-carapace",
+    "sex": "male",
+    "variant": 1,
+    "name": "Hybride simic carapace · Portrait masculin 1",
+    "url": "./portraits/simic-carapace-male-1.webp"
+  },
+  {
+    "id": "simic-carapace-male-2",
+    "family": "simic-carapace",
+    "sex": "male",
+    "variant": 2,
+    "name": "Hybride simic carapace · Portrait masculin 2",
+    "url": "./portraits/simic-carapace-male-2.webp"
+  },
+  {
+    "id": "simic-carapace-male-3",
+    "family": "simic-carapace",
+    "sex": "male",
+    "variant": 3,
+    "name": "Hybride simic carapace · Portrait masculin 3",
+    "url": "./portraits/simic-carapace-male-3.webp"
+  },
+  {
+    "id": "simic-carapace-male-4",
+    "family": "simic-carapace",
+    "sex": "male",
+    "variant": 4,
+    "name": "Hybride simic carapace · Portrait masculin 4",
+    "url": "./portraits/simic-carapace-male-4.webp"
+  },
+  {
+    "id": "simic-acid-female-1",
+    "family": "simic-acid",
+    "sex": "female",
+    "variant": 1,
+    "name": "Hybride simic acide · Portrait féminin 1",
+    "url": "./portraits/simic-acid-female-1.webp"
+  },
+  {
+    "id": "simic-acid-female-2",
+    "family": "simic-acid",
+    "sex": "female",
+    "variant": 2,
+    "name": "Hybride simic acide · Portrait féminin 2",
+    "url": "./portraits/simic-acid-female-2.webp"
+  },
+  {
+    "id": "simic-acid-female-3",
+    "family": "simic-acid",
+    "sex": "female",
+    "variant": 3,
+    "name": "Hybride simic acide · Portrait féminin 3",
+    "url": "./portraits/simic-acid-female-3.webp"
+  },
+  {
+    "id": "simic-acid-female-4",
+    "family": "simic-acid",
+    "sex": "female",
+    "variant": 4,
+    "name": "Hybride simic acide · Portrait féminin 4",
+    "url": "./portraits/simic-acid-female-4.webp"
+  },
+  {
+    "id": "simic-acid-male-1",
+    "family": "simic-acid",
+    "sex": "male",
+    "variant": 1,
+    "name": "Hybride simic acide · Portrait masculin 1",
+    "url": "./portraits/simic-acid-male-1.webp"
+  },
+  {
+    "id": "simic-acid-male-2",
+    "family": "simic-acid",
+    "sex": "male",
+    "variant": 2,
+    "name": "Hybride simic acide · Portrait masculin 2",
+    "url": "./portraits/simic-acid-male-2.webp"
+  },
+  {
+    "id": "simic-acid-male-3",
+    "family": "simic-acid",
+    "sex": "male",
+    "variant": 3,
+    "name": "Hybride simic acide · Portrait masculin 3",
+    "url": "./portraits/simic-acid-male-3.webp"
+  },
+  {
+    "id": "simic-acid-male-4",
+    "family": "simic-acid",
+    "sex": "male",
+    "variant": 4,
+    "name": "Hybride simic acide · Portrait masculin 4",
+    "url": "./portraits/simic-acid-male-4.webp"
+  },
+  {
+    "id": "dwarf-warding-female-1",
+    "family": "dwarf-warding",
+    "sex": "female",
+    "variant": 1,
+    "name": "Nains, marque de la Protection · Portrait féminin 1",
+    "url": "./portraits/dwarf-warding-female-1.webp"
+  },
+  {
+    "id": "dwarf-warding-female-2",
+    "family": "dwarf-warding",
+    "sex": "female",
+    "variant": 2,
+    "name": "Nains, marque de la Protection · Portrait féminin 2",
+    "url": "./portraits/dwarf-warding-female-2.webp"
+  },
+  {
+    "id": "dwarf-warding-female-3",
+    "family": "dwarf-warding",
+    "sex": "female",
+    "variant": 3,
+    "name": "Nains, marque de la Protection · Portrait féminin 3",
+    "url": "./portraits/dwarf-warding-female-3.webp"
+  },
+  {
+    "id": "dwarf-warding-female-4",
+    "family": "dwarf-warding",
+    "sex": "female",
+    "variant": 4,
+    "name": "Nains, marque de la Protection · Portrait féminin 4",
+    "url": "./portraits/dwarf-warding-female-4.webp"
+  },
+  {
+    "id": "dwarf-warding-male-1",
+    "family": "dwarf-warding",
+    "sex": "male",
+    "variant": 1,
+    "name": "Nains, marque de la Protection · Portrait masculin 1",
+    "url": "./portraits/dwarf-warding-male-1.webp"
+  },
+  {
+    "id": "dwarf-warding-male-2",
+    "family": "dwarf-warding",
+    "sex": "male",
+    "variant": 2,
+    "name": "Nains, marque de la Protection · Portrait masculin 2",
+    "url": "./portraits/dwarf-warding-male-2.webp"
+  },
+  {
+    "id": "dwarf-warding-male-3",
+    "family": "dwarf-warding",
+    "sex": "male",
+    "variant": 3,
+    "name": "Nains, marque de la Protection · Portrait masculin 3",
+    "url": "./portraits/dwarf-warding-male-3.webp"
+  },
+  {
+    "id": "dwarf-warding-male-4",
+    "family": "dwarf-warding",
+    "sex": "male",
+    "variant": 4,
+    "name": "Nains, marque de la Protection · Portrait masculin 4",
+    "url": "./portraits/dwarf-warding-male-4.webp"
+  },
+  {
+    "id": "elf-shadow-female-1",
+    "family": "elf-shadow",
+    "sex": "female",
+    "variant": 1,
+    "name": "Elfes, marque de l’Ombre · Portrait féminin 1",
+    "url": "./portraits/elf-shadow-female-1.webp"
+  },
+  {
+    "id": "elf-shadow-female-2",
+    "family": "elf-shadow",
+    "sex": "female",
+    "variant": 2,
+    "name": "Elfes, marque de l’Ombre · Portrait féminin 2",
+    "url": "./portraits/elf-shadow-female-2.webp"
+  },
+  {
+    "id": "elf-shadow-female-3",
+    "family": "elf-shadow",
+    "sex": "female",
+    "variant": 3,
+    "name": "Elfes, marque de l’Ombre · Portrait féminin 3",
+    "url": "./portraits/elf-shadow-female-3.webp"
+  },
+  {
+    "id": "elf-shadow-female-4",
+    "family": "elf-shadow",
+    "sex": "female",
+    "variant": 4,
+    "name": "Elfes, marque de l’Ombre · Portrait féminin 4",
+    "url": "./portraits/elf-shadow-female-4.webp"
+  },
+  {
+    "id": "elf-shadow-male-1",
+    "family": "elf-shadow",
+    "sex": "male",
+    "variant": 1,
+    "name": "Elfes, marque de l’Ombre · Portrait masculin 1",
+    "url": "./portraits/elf-shadow-male-1.webp"
+  },
+  {
+    "id": "elf-shadow-male-2",
+    "family": "elf-shadow",
+    "sex": "male",
+    "variant": 2,
+    "name": "Elfes, marque de l’Ombre · Portrait masculin 2",
+    "url": "./portraits/elf-shadow-male-2.webp"
+  },
+  {
+    "id": "elf-shadow-male-3",
+    "family": "elf-shadow",
+    "sex": "male",
+    "variant": 3,
+    "name": "Elfes, marque de l’Ombre · Portrait masculin 3",
+    "url": "./portraits/elf-shadow-male-3.webp"
+  },
+  {
+    "id": "elf-shadow-male-4",
+    "family": "elf-shadow",
+    "sex": "male",
+    "variant": 4,
+    "name": "Elfes, marque de l’Ombre · Portrait masculin 4",
+    "url": "./portraits/elf-shadow-male-4.webp"
+  },
+  {
+    "id": "gnome-scribing-female-1",
+    "family": "gnome-scribing",
+    "sex": "female",
+    "variant": 1,
+    "name": "Gnomes, marque de l’Écriture · Portrait féminin 1",
+    "url": "./portraits/gnome-scribing-female-1.webp"
+  },
+  {
+    "id": "gnome-scribing-female-2",
+    "family": "gnome-scribing",
+    "sex": "female",
+    "variant": 2,
+    "name": "Gnomes, marque de l’Écriture · Portrait féminin 2",
+    "url": "./portraits/gnome-scribing-female-2.webp"
+  },
+  {
+    "id": "gnome-scribing-female-3",
+    "family": "gnome-scribing",
+    "sex": "female",
+    "variant": 3,
+    "name": "Gnomes, marque de l’Écriture · Portrait féminin 3",
+    "url": "./portraits/gnome-scribing-female-3.webp"
+  },
+  {
+    "id": "gnome-scribing-female-4",
+    "family": "gnome-scribing",
+    "sex": "female",
+    "variant": 4,
+    "name": "Gnomes, marque de l’Écriture · Portrait féminin 4",
+    "url": "./portraits/gnome-scribing-female-4.webp"
+  },
+  {
+    "id": "gnome-scribing-male-1",
+    "family": "gnome-scribing",
+    "sex": "male",
+    "variant": 1,
+    "name": "Gnomes, marque de l’Écriture · Portrait masculin 1",
+    "url": "./portraits/gnome-scribing-male-1.webp"
+  },
+  {
+    "id": "gnome-scribing-male-2",
+    "family": "gnome-scribing",
+    "sex": "male",
+    "variant": 2,
+    "name": "Gnomes, marque de l’Écriture · Portrait masculin 2",
+    "url": "./portraits/gnome-scribing-male-2.webp"
+  },
+  {
+    "id": "gnome-scribing-male-3",
+    "family": "gnome-scribing",
+    "sex": "male",
+    "variant": 3,
+    "name": "Gnomes, marque de l’Écriture · Portrait masculin 3",
+    "url": "./portraits/gnome-scribing-male-3.webp"
+  },
+  {
+    "id": "gnome-scribing-male-4",
+    "family": "gnome-scribing",
+    "sex": "male",
+    "variant": 4,
+    "name": "Gnomes, marque de l’Écriture · Portrait masculin 4",
+    "url": "./portraits/gnome-scribing-male-4.webp"
+  },
+  {
+    "id": "half-elf-detection-female-1",
+    "family": "half-elf-detection",
+    "sex": "female",
+    "variant": 1,
+    "name": "Demi-elfes, marque de la Détection · Portrait féminin 1",
+    "url": "./portraits/half-elf-detection-female-1.webp"
+  },
+  {
+    "id": "half-elf-detection-female-2",
+    "family": "half-elf-detection",
+    "sex": "female",
+    "variant": 2,
+    "name": "Demi-elfes, marque de la Détection · Portrait féminin 2",
+    "url": "./portraits/half-elf-detection-female-2.webp"
+  },
+  {
+    "id": "half-elf-detection-female-3",
+    "family": "half-elf-detection",
+    "sex": "female",
+    "variant": 3,
+    "name": "Demi-elfes, marque de la Détection · Portrait féminin 3",
+    "url": "./portraits/half-elf-detection-female-3.webp"
+  },
+  {
+    "id": "half-elf-detection-female-4",
+    "family": "half-elf-detection",
+    "sex": "female",
+    "variant": 4,
+    "name": "Demi-elfes, marque de la Détection · Portrait féminin 4",
+    "url": "./portraits/half-elf-detection-female-4.webp"
+  },
+  {
+    "id": "half-elf-detection-male-1",
+    "family": "half-elf-detection",
+    "sex": "male",
+    "variant": 1,
+    "name": "Demi-elfes, marque de la Détection · Portrait masculin 1",
+    "url": "./portraits/half-elf-detection-male-1.webp"
+  },
+  {
+    "id": "half-elf-detection-male-2",
+    "family": "half-elf-detection",
+    "sex": "male",
+    "variant": 2,
+    "name": "Demi-elfes, marque de la Détection · Portrait masculin 2",
+    "url": "./portraits/half-elf-detection-male-2.webp"
+  },
+  {
+    "id": "half-elf-detection-male-3",
+    "family": "half-elf-detection",
+    "sex": "male",
+    "variant": 3,
+    "name": "Demi-elfes, marque de la Détection · Portrait masculin 3",
+    "url": "./portraits/half-elf-detection-male-3.webp"
+  },
+  {
+    "id": "half-elf-detection-male-4",
+    "family": "half-elf-detection",
+    "sex": "male",
+    "variant": 4,
+    "name": "Demi-elfes, marque de la Détection · Portrait masculin 4",
+    "url": "./portraits/half-elf-detection-male-4.webp"
+  },
+  {
+    "id": "half-elf-storm-female-1",
+    "family": "half-elf-storm",
+    "sex": "female",
+    "variant": 1,
+    "name": "Demi-elfes, marque de la Tempête · Portrait féminin 1",
+    "url": "./portraits/half-elf-storm-female-1.webp"
+  },
+  {
+    "id": "half-elf-storm-female-2",
+    "family": "half-elf-storm",
+    "sex": "female",
+    "variant": 2,
+    "name": "Demi-elfes, marque de la Tempête · Portrait féminin 2",
+    "url": "./portraits/half-elf-storm-female-2.webp"
+  },
+  {
+    "id": "half-elf-storm-female-3",
+    "family": "half-elf-storm",
+    "sex": "female",
+    "variant": 3,
+    "name": "Demi-elfes, marque de la Tempête · Portrait féminin 3",
+    "url": "./portraits/half-elf-storm-female-3.webp"
+  },
+  {
+    "id": "half-elf-storm-female-4",
+    "family": "half-elf-storm",
+    "sex": "female",
+    "variant": 4,
+    "name": "Demi-elfes, marque de la Tempête · Portrait féminin 4",
+    "url": "./portraits/half-elf-storm-female-4.webp"
+  },
+  {
+    "id": "half-elf-storm-male-1",
+    "family": "half-elf-storm",
+    "sex": "male",
+    "variant": 1,
+    "name": "Demi-elfes, marque de la Tempête · Portrait masculin 1",
+    "url": "./portraits/half-elf-storm-male-1.webp"
+  },
+  {
+    "id": "half-elf-storm-male-2",
+    "family": "half-elf-storm",
+    "sex": "male",
+    "variant": 2,
+    "name": "Demi-elfes, marque de la Tempête · Portrait masculin 2",
+    "url": "./portraits/half-elf-storm-male-2.webp"
+  },
+  {
+    "id": "half-elf-storm-male-3",
+    "family": "half-elf-storm",
+    "sex": "male",
+    "variant": 3,
+    "name": "Demi-elfes, marque de la Tempête · Portrait masculin 3",
+    "url": "./portraits/half-elf-storm-male-3.webp"
+  },
+  {
+    "id": "half-elf-storm-male-4",
+    "family": "half-elf-storm",
+    "sex": "male",
+    "variant": 4,
+    "name": "Demi-elfes, marque de la Tempête · Portrait masculin 4",
+    "url": "./portraits/half-elf-storm-male-4.webp"
+  },
+  {
+    "id": "half-orc-finding-female-1",
+    "family": "half-orc-finding",
+    "sex": "female",
+    "variant": 1,
+    "name": "Demi-orcs, marque de la Découverte · Portrait féminin 1",
+    "url": "./portraits/half-orc-finding-female-1.webp"
+  },
+  {
+    "id": "half-orc-finding-female-2",
+    "family": "half-orc-finding",
+    "sex": "female",
+    "variant": 2,
+    "name": "Demi-orcs, marque de la Découverte · Portrait féminin 2",
+    "url": "./portraits/half-orc-finding-female-2.webp"
+  },
+  {
+    "id": "half-orc-finding-female-3",
+    "family": "half-orc-finding",
+    "sex": "female",
+    "variant": 3,
+    "name": "Demi-orcs, marque de la Découverte · Portrait féminin 3",
+    "url": "./portraits/half-orc-finding-female-3.webp"
+  },
+  {
+    "id": "half-orc-finding-female-4",
+    "family": "half-orc-finding",
+    "sex": "female",
+    "variant": 4,
+    "name": "Demi-orcs, marque de la Découverte · Portrait féminin 4",
+    "url": "./portraits/half-orc-finding-female-4.webp"
+  },
+  {
+    "id": "half-orc-finding-male-1",
+    "family": "half-orc-finding",
+    "sex": "male",
+    "variant": 1,
+    "name": "Demi-orcs, marque de la Découverte · Portrait masculin 1",
+    "url": "./portraits/half-orc-finding-male-1.webp"
+  },
+  {
+    "id": "half-orc-finding-male-2",
+    "family": "half-orc-finding",
+    "sex": "male",
+    "variant": 2,
+    "name": "Demi-orcs, marque de la Découverte · Portrait masculin 2",
+    "url": "./portraits/half-orc-finding-male-2.webp"
+  },
+  {
+    "id": "half-orc-finding-male-3",
+    "family": "half-orc-finding",
+    "sex": "male",
+    "variant": 3,
+    "name": "Demi-orcs, marque de la Découverte · Portrait masculin 3",
+    "url": "./portraits/half-orc-finding-male-3.webp"
+  },
+  {
+    "id": "half-orc-finding-male-4",
+    "family": "half-orc-finding",
+    "sex": "male",
+    "variant": 4,
+    "name": "Demi-orcs, marque de la Découverte · Portrait masculin 4",
+    "url": "./portraits/half-orc-finding-male-4.webp"
+  },
+  {
+    "id": "halfling-healing-female-1",
+    "family": "halfling-healing",
+    "sex": "female",
+    "variant": 1,
+    "name": "Halfelins, marque de la Guérison · Portrait féminin 1",
+    "url": "./portraits/halfling-healing-female-1.webp"
+  },
+  {
+    "id": "halfling-healing-female-2",
+    "family": "halfling-healing",
+    "sex": "female",
+    "variant": 2,
+    "name": "Halfelins, marque de la Guérison · Portrait féminin 2",
+    "url": "./portraits/halfling-healing-female-2.webp"
+  },
+  {
+    "id": "halfling-healing-female-3",
+    "family": "halfling-healing",
+    "sex": "female",
+    "variant": 3,
+    "name": "Halfelins, marque de la Guérison · Portrait féminin 3",
+    "url": "./portraits/halfling-healing-female-3.webp"
+  },
+  {
+    "id": "halfling-healing-female-4",
+    "family": "halfling-healing",
+    "sex": "female",
+    "variant": 4,
+    "name": "Halfelins, marque de la Guérison · Portrait féminin 4",
+    "url": "./portraits/halfling-healing-female-4.webp"
+  },
+  {
+    "id": "halfling-healing-male-1",
+    "family": "halfling-healing",
+    "sex": "male",
+    "variant": 1,
+    "name": "Halfelins, marque de la Guérison · Portrait masculin 1",
+    "url": "./portraits/halfling-healing-male-1.webp"
+  },
+  {
+    "id": "halfling-healing-male-2",
+    "family": "halfling-healing",
+    "sex": "male",
+    "variant": 2,
+    "name": "Halfelins, marque de la Guérison · Portrait masculin 2",
+    "url": "./portraits/halfling-healing-male-2.webp"
+  },
+  {
+    "id": "halfling-healing-male-3",
+    "family": "halfling-healing",
+    "sex": "male",
+    "variant": 3,
+    "name": "Halfelins, marque de la Guérison · Portrait masculin 3",
+    "url": "./portraits/halfling-healing-male-3.webp"
+  },
+  {
+    "id": "halfling-healing-male-4",
+    "family": "halfling-healing",
+    "sex": "male",
+    "variant": 4,
+    "name": "Halfelins, marque de la Guérison · Portrait masculin 4",
+    "url": "./portraits/halfling-healing-male-4.webp"
+  },
+  {
+    "id": "halfling-hospitality-female-1",
+    "family": "halfling-hospitality",
+    "sex": "female",
+    "variant": 1,
+    "name": "Halfelins, marque de l’Hospitalité · Portrait féminin 1",
+    "url": "./portraits/halfling-hospitality-female-1.webp"
+  },
+  {
+    "id": "halfling-hospitality-female-2",
+    "family": "halfling-hospitality",
+    "sex": "female",
+    "variant": 2,
+    "name": "Halfelins, marque de l’Hospitalité · Portrait féminin 2",
+    "url": "./portraits/halfling-hospitality-female-2.webp"
+  },
+  {
+    "id": "halfling-hospitality-female-3",
+    "family": "halfling-hospitality",
+    "sex": "female",
+    "variant": 3,
+    "name": "Halfelins, marque de l’Hospitalité · Portrait féminin 3",
+    "url": "./portraits/halfling-hospitality-female-3.webp"
+  },
+  {
+    "id": "halfling-hospitality-female-4",
+    "family": "halfling-hospitality",
+    "sex": "female",
+    "variant": 4,
+    "name": "Halfelins, marque de l’Hospitalité · Portrait féminin 4",
+    "url": "./portraits/halfling-hospitality-female-4.webp"
+  },
+  {
+    "id": "halfling-hospitality-male-1",
+    "family": "halfling-hospitality",
+    "sex": "male",
+    "variant": 1,
+    "name": "Halfelins, marque de l’Hospitalité · Portrait masculin 1",
+    "url": "./portraits/halfling-hospitality-male-1.webp"
+  },
+  {
+    "id": "halfling-hospitality-male-2",
+    "family": "halfling-hospitality",
+    "sex": "male",
+    "variant": 2,
+    "name": "Halfelins, marque de l’Hospitalité · Portrait masculin 2",
+    "url": "./portraits/halfling-hospitality-male-2.webp"
+  },
+  {
+    "id": "halfling-hospitality-male-3",
+    "family": "halfling-hospitality",
+    "sex": "male",
+    "variant": 3,
+    "name": "Halfelins, marque de l’Hospitalité · Portrait masculin 3",
+    "url": "./portraits/halfling-hospitality-male-3.webp"
+  },
+  {
+    "id": "halfling-hospitality-male-4",
+    "family": "halfling-hospitality",
+    "sex": "male",
+    "variant": 4,
+    "name": "Halfelins, marque de l’Hospitalité · Portrait masculin 4",
+    "url": "./portraits/halfling-hospitality-male-4.webp"
+  },
+  {
+    "id": "human-handling-female-1",
+    "family": "human-handling",
+    "sex": "female",
+    "variant": 1,
+    "name": "Humains, marque du dressage · Portrait féminin 1",
+    "url": "./portraits/human-handling-female-1.webp"
+  },
+  {
+    "id": "human-handling-female-2",
+    "family": "human-handling",
+    "sex": "female",
+    "variant": 2,
+    "name": "Humains, marque du dressage · Portrait féminin 2",
+    "url": "./portraits/human-handling-female-2.webp"
+  },
+  {
+    "id": "human-handling-female-3",
+    "family": "human-handling",
+    "sex": "female",
+    "variant": 3,
+    "name": "Humains, marque du dressage · Portrait féminin 3",
+    "url": "./portraits/human-handling-female-3.webp"
+  },
+  {
+    "id": "human-handling-female-4",
+    "family": "human-handling",
+    "sex": "female",
+    "variant": 4,
+    "name": "Humains, marque du dressage · Portrait féminin 4",
+    "url": "./portraits/human-handling-female-4.webp"
+  },
+  {
+    "id": "human-handling-male-1",
+    "family": "human-handling",
+    "sex": "male",
+    "variant": 1,
+    "name": "Humains, marque du dressage · Portrait masculin 1",
+    "url": "./portraits/human-handling-male-1.webp"
+  },
+  {
+    "id": "human-handling-male-2",
+    "family": "human-handling",
+    "sex": "male",
+    "variant": 2,
+    "name": "Humains, marque du dressage · Portrait masculin 2",
+    "url": "./portraits/human-handling-male-2.webp"
+  },
+  {
+    "id": "human-handling-male-3",
+    "family": "human-handling",
+    "sex": "male",
+    "variant": 3,
+    "name": "Humains, marque du dressage · Portrait masculin 3",
+    "url": "./portraits/human-handling-male-3.webp"
+  },
+  {
+    "id": "human-handling-male-4",
+    "family": "human-handling",
+    "sex": "male",
+    "variant": 4,
+    "name": "Humains, marque du dressage · Portrait masculin 4",
+    "url": "./portraits/human-handling-male-4.webp"
+  },
+  {
+    "id": "human-making-female-1",
+    "family": "human-making",
+    "sex": "female",
+    "variant": 1,
+    "name": "Humains, marque de la fabrication · Portrait féminin 1",
+    "url": "./portraits/human-making-female-1.webp"
+  },
+  {
+    "id": "human-making-female-2",
+    "family": "human-making",
+    "sex": "female",
+    "variant": 2,
+    "name": "Humains, marque de la fabrication · Portrait féminin 2",
+    "url": "./portraits/human-making-female-2.webp"
+  },
+  {
+    "id": "human-making-female-3",
+    "family": "human-making",
+    "sex": "female",
+    "variant": 3,
+    "name": "Humains, marque de la fabrication · Portrait féminin 3",
+    "url": "./portraits/human-making-female-3.webp"
+  },
+  {
+    "id": "human-making-female-4",
+    "family": "human-making",
+    "sex": "female",
+    "variant": 4,
+    "name": "Humains, marque de la fabrication · Portrait féminin 4",
+    "url": "./portraits/human-making-female-4.webp"
+  },
+  {
+    "id": "human-making-male-1",
+    "family": "human-making",
+    "sex": "male",
+    "variant": 1,
+    "name": "Humains, marque de la fabrication · Portrait masculin 1",
+    "url": "./portraits/human-making-male-1.webp"
+  },
+  {
+    "id": "human-making-male-2",
+    "family": "human-making",
+    "sex": "male",
+    "variant": 2,
+    "name": "Humains, marque de la fabrication · Portrait masculin 2",
+    "url": "./portraits/human-making-male-2.webp"
+  },
+  {
+    "id": "human-making-male-3",
+    "family": "human-making",
+    "sex": "male",
+    "variant": 3,
+    "name": "Humains, marque de la fabrication · Portrait masculin 3",
+    "url": "./portraits/human-making-male-3.webp"
+  },
+  {
+    "id": "human-making-male-4",
+    "family": "human-making",
+    "sex": "male",
+    "variant": 4,
+    "name": "Humains, marque de la fabrication · Portrait masculin 4",
+    "url": "./portraits/human-making-male-4.webp"
+  },
+  {
+    "id": "human-passage-female-1",
+    "family": "human-passage",
+    "sex": "female",
+    "variant": 1,
+    "name": "Humains, marque du passage · Portrait féminin 1",
+    "url": "./portraits/human-passage-female-1.webp"
+  },
+  {
+    "id": "human-passage-female-2",
+    "family": "human-passage",
+    "sex": "female",
+    "variant": 2,
+    "name": "Humains, marque du passage · Portrait féminin 2",
+    "url": "./portraits/human-passage-female-2.webp"
+  },
+  {
+    "id": "human-passage-female-3",
+    "family": "human-passage",
+    "sex": "female",
+    "variant": 3,
+    "name": "Humains, marque du passage · Portrait féminin 3",
+    "url": "./portraits/human-passage-female-3.webp"
+  },
+  {
+    "id": "human-passage-female-4",
+    "family": "human-passage",
+    "sex": "female",
+    "variant": 4,
+    "name": "Humains, marque du passage · Portrait féminin 4",
+    "url": "./portraits/human-passage-female-4.webp"
+  },
+  {
+    "id": "human-passage-male-1",
+    "family": "human-passage",
+    "sex": "male",
+    "variant": 1,
+    "name": "Humains, marque du passage · Portrait masculin 1",
+    "url": "./portraits/human-passage-male-1.webp"
+  },
+  {
+    "id": "human-passage-male-2",
+    "family": "human-passage",
+    "sex": "male",
+    "variant": 2,
+    "name": "Humains, marque du passage · Portrait masculin 2",
+    "url": "./portraits/human-passage-male-2.webp"
+  },
+  {
+    "id": "human-passage-male-3",
+    "family": "human-passage",
+    "sex": "male",
+    "variant": 3,
+    "name": "Humains, marque du passage · Portrait masculin 3",
+    "url": "./portraits/human-passage-male-3.webp"
+  },
+  {
+    "id": "human-passage-male-4",
+    "family": "human-passage",
+    "sex": "male",
+    "variant": 4,
+    "name": "Humains, marque du passage · Portrait masculin 4",
+    "url": "./portraits/human-passage-male-4.webp"
   }
 ];
 const PORTRAIT_COVERAGE = [
@@ -19666,9 +22623,12 @@ const PORTRAIT_COVERAGE = [
   {
     "family": "aasimar",
     "galleryIds": [
-      "aasimar"
+      "aasimar",
+      "aasimar-fallen",
+      "aasimar-protector",
+      "aasimar-scourge"
     ],
-    "reason": "Galerie acquise conservée ; les variantes de règles partagent les mêmes traits morphologiques."
+    "reason": "Galerie générale conservée et variantes visuelles validées disponibles au choix."
   },
   {
     "family": "astral-elf",
@@ -19775,9 +22735,45 @@ const PORTRAIT_COVERAGE = [
       "vedalken",
       "verdan",
       "warforged",
-      "yuan-ti"
+      "yuan-ti",
+      "aasimar-fallen",
+      "aasimar-protector",
+      "aasimar-scourge",
+      "half-elf-drow",
+      "half-elf-aquatic",
+      "dragonborn-chromatic",
+      "dragonborn-metallic",
+      "dragonborn-gem",
+      "tiefling-winged",
+      "simic-climber",
+      "simic-glider",
+      "simic-aquatic",
+      "human-sentinel",
+      "human-finding",
+      "shifter-beasthide",
+      "shifter-longtooth",
+      "shifter-swiftstride",
+      "shifter-wildhunt",
+      "githyanki",
+      "githzerai",
+      "pallid-elf",
+      "kalashtar",
+      "simic-grappler",
+      "simic-carapace",
+      "simic-acid",
+      "dwarf-warding",
+      "elf-shadow",
+      "gnome-scribing",
+      "half-elf-detection",
+      "half-elf-storm",
+      "half-orc-finding",
+      "halfling-healing",
+      "halfling-hospitality",
+      "human-handling",
+      "human-making",
+      "human-passage"
     ],
-    "reason": "Aucune morphologie imposée : le sélecteur permet de choisir explicitement toute galerie, une photo personnelle ou Sans portrait.",
+    "reason": "Galerie générale conservée et variantes visuelles validées disponibles au choix.",
     "choice": true
   },
   {
@@ -19798,9 +22794,12 @@ const PORTRAIT_COVERAGE = [
   {
     "family": "dmg-aasimar",
     "galleryIds": [
-      "aasimar"
+      "aasimar",
+      "aasimar-fallen",
+      "aasimar-protector",
+      "aasimar-scourge"
     ],
-    "reason": "Morphologie humaine marquée par une ascendance céleste ; les huit aasimars acquis conviennent à la variante DMG.",
+    "reason": "Galerie générale conservée et variantes visuelles validées disponibles au choix.",
     "sharesWith": "aasimar"
   },
   {
@@ -19814,9 +22813,12 @@ const PORTRAIT_COVERAGE = [
   {
     "family": "dragonborn",
     "galleryIds": [
-      "dragonborn"
+      "dragonborn",
+      "dragonborn-chromatic",
+      "dragonborn-metallic",
+      "dragonborn-gem"
     ],
-    "reason": "Galerie acquise conservée ; les variantes de règles partagent les mêmes traits morphologiques."
+    "reason": "Galerie générale conservée et variantes visuelles validées disponibles au choix."
   },
   {
     "family": "duergar",
@@ -19828,9 +22830,10 @@ const PORTRAIT_COVERAGE = [
   {
     "family": "dwarf",
     "galleryIds": [
-      "dwarf"
+      "dwarf",
+      "dwarf-warding"
     ],
-    "reason": "Galerie acquise conservée ; les variantes de règles partagent les mêmes traits morphologiques."
+    "reason": "Galerie générale conservée et variantes visuelles validées disponibles au choix."
   },
   {
     "family": "eladrin",
@@ -19843,9 +22846,11 @@ const PORTRAIT_COVERAGE = [
     "family": "elf",
     "galleryIds": [
       "elf",
-      "drow"
+      "drow",
+      "pallid-elf",
+      "elf-shadow"
     ],
-    "reason": "Galerie acquise conservée ; les variantes de règles partagent les mêmes traits morphologiques."
+    "reason": "Galerie générale conservée et variantes visuelles validées disponibles au choix."
   },
   {
     "family": "fairy",
@@ -19881,16 +22886,19 @@ const PORTRAIT_COVERAGE = [
   {
     "family": "gith",
     "galleryIds": [
-      "gith"
+      "gith",
+      "githyanki",
+      "githzerai"
     ],
-    "reason": "Galerie dédiée aux traits morphologiques décrits par les références 2014 de cette famille."
+    "reason": "Galerie générale conservée et variantes visuelles validées disponibles au choix."
   },
   {
     "family": "gnome",
     "galleryIds": [
-      "gnome"
+      "gnome",
+      "gnome-scribing"
     ],
-    "reason": "Galerie acquise conservée ; les variantes de règles partagent les mêmes traits morphologiques."
+    "reason": "Galerie générale conservée et variantes visuelles validées disponibles au choix."
   },
   {
     "family": "goblin",
@@ -19924,23 +22932,30 @@ const PORTRAIT_COVERAGE = [
   {
     "family": "half-elf",
     "galleryIds": [
-      "half-elf"
+      "half-elf",
+      "half-elf-drow",
+      "half-elf-aquatic",
+      "half-elf-detection",
+      "half-elf-storm"
     ],
-    "reason": "Galerie acquise conservée ; les variantes de règles partagent les mêmes traits morphologiques."
+    "reason": "Galerie générale conservée et variantes visuelles validées disponibles au choix."
   },
   {
     "family": "half-orc",
     "galleryIds": [
-      "half-orc"
+      "half-orc",
+      "half-orc-finding"
     ],
-    "reason": "Galerie acquise conservée ; les variantes de règles partagent les mêmes traits morphologiques."
+    "reason": "Galerie générale conservée et variantes visuelles validées disponibles au choix."
   },
   {
     "family": "halfling",
     "galleryIds": [
-      "halfling"
+      "halfling",
+      "halfling-healing",
+      "halfling-hospitality"
     ],
-    "reason": "Galerie acquise conservée ; les variantes de règles partagent les mêmes traits morphologiques."
+    "reason": "Galerie générale conservée et variantes visuelles validées disponibles au choix."
   },
   {
     "family": "harengon",
@@ -19966,16 +22981,28 @@ const PORTRAIT_COVERAGE = [
   {
     "family": "human",
     "galleryIds": [
-      "human"
+      "human",
+      "human-sentinel",
+      "human-finding",
+      "kalashtar",
+      "human-handling",
+      "human-making",
+      "human-passage"
     ],
-    "reason": "Galerie acquise conservée ; les variantes de règles partagent les mêmes traits morphologiques."
+    "reason": "Galerie générale conservée et variantes visuelles validées disponibles au choix."
   },
   {
     "family": "kalashtar",
     "galleryIds": [
-      "human"
+      "human",
+      "human-sentinel",
+      "human-finding",
+      "kalashtar",
+      "human-handling",
+      "human-making",
+      "human-passage"
     ],
-    "reason": "La source ERLW décrit une apparence humaine ; les yeux ne brillent que dans certains états émotionnels. Les portraits humains au repos sont réutilisés.",
+    "reason": "Galerie générale conservée et variantes visuelles validées disponibles au choix.",
     "sharesWith": "human"
   },
   {
@@ -20074,17 +23101,20 @@ const PORTRAIT_COVERAGE = [
   {
     "family": "ps-dwarf",
     "galleryIds": [
-      "dwarf"
+      "dwarf",
+      "dwarf-warding"
     ],
-    "reason": "Morphologie naine conservée à Kaladesh ; le costume sobre ne présume aucune classe.",
+    "reason": "Galerie générale conservée et variantes visuelles validées disponibles au choix.",
     "sharesWith": "dwarf"
   },
   {
     "family": "ps-elf",
     "galleryIds": [
-      "elf"
+      "elf",
+      "pallid-elf",
+      "elf-shadow"
     ],
-    "reason": "Morphologie elfique commune ; les nations et dracogrammes gardent leur identité de règles.",
+    "reason": "Galerie générale conservée et variantes visuelles validées disponibles au choix.",
     "sharesWith": "elf"
   },
   {
@@ -20098,9 +23128,15 @@ const PORTRAIT_COVERAGE = [
   {
     "family": "ps-human",
     "galleryIds": [
-      "human"
+      "human",
+      "human-sentinel",
+      "human-finding",
+      "kalashtar",
+      "human-handling",
+      "human-making",
+      "human-passage"
     ],
-    "reason": "Les origines de Plane Shift conservent la diversité morphologique humaine.",
+    "reason": "Galerie générale conservée et variantes visuelles validées disponibles au choix.",
     "sharesWith": "human"
   },
   {
@@ -20201,16 +23237,26 @@ const PORTRAIT_COVERAGE = [
   {
     "family": "shifter",
     "galleryIds": [
-      "shifter"
+      "shifter",
+      "shifter-beasthide",
+      "shifter-longtooth",
+      "shifter-swiftstride",
+      "shifter-wildhunt"
     ],
-    "reason": "Galerie dédiée aux traits morphologiques décrits par les références 2014 de cette famille."
+    "reason": "Galerie générale conservée et variantes visuelles validées disponibles au choix."
   },
   {
     "family": "simic-hybrid",
     "galleryIds": [
-      "simic-hybrid"
+      "simic-hybrid",
+      "simic-climber",
+      "simic-glider",
+      "simic-aquatic",
+      "simic-grappler",
+      "simic-carapace",
+      "simic-acid"
     ],
-    "reason": "Galerie dédiée aux traits morphologiques décrits par les références 2014 de cette famille."
+    "reason": "Galerie générale conservée et variantes visuelles validées disponibles au choix."
   },
   {
     "family": "tabaxi",
@@ -20229,9 +23275,10 @@ const PORTRAIT_COVERAGE = [
   {
     "family": "tiefling",
     "galleryIds": [
-      "tiefling"
+      "tiefling",
+      "tiefling-winged"
     ],
-    "reason": "Galerie acquise conservée ; les variantes de règles partagent les mêmes traits morphologiques."
+    "reason": "Galerie générale conservée et variantes visuelles validées disponibles au choix."
   },
   {
     "family": "tortle",
@@ -21437,6 +24484,8 @@ function readerAlignment(alignment, language) {
 }
 // omit : faits à masquer, par leur libellé anglais en minuscules (« level », « school »…).
 function referenceFacts(raw, language = "fr", type = "", omit = []) {
+  if (omit === true) return [];
+  if (!Array.isArray(omit)) omit = [];
   const fr = language === "fr", facts = [], add = (labels, value) => { if (value !== undefined && value !== null && value !== "" && !omit.includes(labels[1].toLowerCase())) facts.push([readerLabel(labels, language), referenceExpression(value, language)]); };
   add(["Niveau", "Level"], raw.level);
   if (type === "spell") {
@@ -33132,7 +36181,13 @@ const RECEIVED_GUIDES = Object.freeze({
   "mage-armor": { formula: "mageArmor", summary: "CA de base : 13 + DEX, sans armure" },
   longstrider: { target: "speed", value: 3, summary: "+3 m de vitesse" },
   aid: { target: "hp", level: 2, summary: "+5 PV maximum et actuels par niveau à partir du 2e" },
+  // Dés ajoutés aux jets : proposés dans la fenêtre de dés ; once : retirés de la fiche après usage.
+  bless: { dice: { notation: "1d4", rolls: ["attack", "save"], once: false }, summary: "+1d4 aux jets d’attaque et de sauvegarde · Concentration du lanceur" },
+  guidance: { dice: { notation: "1d4", rolls: ["check"], once: true }, summary: "+1d4 à un test de caractéristique, une fois" },
+  resistance: { dice: { notation: "1d4", rolls: ["save"], once: true }, summary: "+1d4 à un jet de sauvegarde, une fois" },
+  "bardic-inspiration": { name: "Inspiration bardique", dieChoice: true, dice: { notation: "1d6", rolls: ["check", "attack", "save"], once: true }, summary: "Un dé à ajouter à un test, une attaque ou une sauvegarde, une fois" },
 });
+const RECEIVED_ROLLS = ["attack", "damage", "save", "check"];
 function receivedContribution(entry) {
   const guide = RECEIVED_GUIDES[entry.spellId];
   return guide ? { target: guide.target, value: entry.spellId === "aid" ? 5 * (entry.level - 1) : guide.value, formula: guide.formula } : { target: entry.target, value: entry.value };
@@ -33163,9 +36218,25 @@ function receivedProjection(c) {
 function validateReceivedEffects(entries) {
   if (!Array.isArray(entries) || entries.length > 200 || new Set(entries.map((entry) => entry?.id)).size !== entries.length) throw new Error(uiText("Liste d’effets reçus invalide."));
   for (const entry of entries) {
+    const dice = entry?.dice;
+    if (dice !== undefined && (!dice || typeof dice !== "object" || !/^1d(4|6|8|10|12)$/.test(dice.notation) || !Array.isArray(dice.rolls) || !dice.rolls.length || dice.rolls.some((roll) => !RECEIVED_ROLLS.includes(roll)) || new Set(dice.rolls).size !== dice.rolls.length || typeof dice.once !== "boolean")) throw new Error(uiText("Dé d’effet reçu invalide."));
     if (entry?.affection !== undefined && typeof entry.affection !== "boolean" || entry?.conditions !== undefined && (!Array.isArray(entry.conditions) || entry.conditions.length > Object.keys(CONDITIONS).length || new Set(entry.conditions).size !== entry.conditions.length || entry.conditions.some((name) => !Object.hasOwn(CONDITIONS, name)))) throw new Error(uiText("États d’affection invalides."));
     if (!entry || typeof entry !== "object" || ["id", "name", "source", "caster", "duration", "description", "referenceId", "spellId"].some((key) => typeof entry[key] !== "string" || entry[key].length > (key === "description" ? 6000 : 300)) || !entry.id || !entry.name.trim() || !Number.isInteger(entry.level) || entry.level < (RECEIVED_GUIDES[entry.spellId]?.level || 0) || entry.level > 9 || !(entry.target === "" || Object.hasOwn(RECEIVED_TARGETS, entry.target)) || !Number.isFinite(entry.value) || Math.abs(entry.value) > 10000) throw new Error(uiText("Effet reçu invalide."));
   }
+}
+/**
+ * Effets reçus à dé proposés dans un jet. kinds : ["attack", "damage"] pour une attaque, ["save"] ou ["check"] pour un test.
+ * Un effet à usage unique est décoché par défaut et retiré de la fiche quand le jet l'utilise.
+ */
+function receivedRollOptions(c, kinds) {
+  return activeReceivedEffects(c).filter((entry) => entry.dice?.rolls.some((roll) => kinds.includes(roll))).map((entry) => {
+    const piece = { notation: entry.dice.notation }, option = { id: `received:${entry.id}`, label: entry.name, note: entry.dice.once ? uiText("Une seule fois : retiré de la fiche après le jet") : uiText("Effet reçu actif"), on: !entry.dice.once, once: entry.dice.once };
+    if (entry.dice.once) option.cost = { received: entry.id };
+    if (kinds.includes("attack") && entry.dice.rolls.includes("attack")) option.attack = piece;
+    if (kinds.includes("damage") && entry.dice.rolls.includes("damage")) option.damage = { ...piece };
+    if (kinds.some((kind) => ["save", "check"].includes(kind) && entry.dice.rolls.includes(kind))) option.check = piece;
+    return option;
+  });
 }
 function setReceivedEffect(c, entry, id) {
   const next = structuredClone(c), before = activeReceivedEffects(c).filter((e) => e.spellId === "aid").reduce((sum, e) => sum + receivedContribution(e).value, 0);
@@ -33813,6 +36884,10 @@ function _featSpellChoices(featId, c, key, upTo = levelOf(c)) {
   }
   return Object.fromEntries(Object.entries(config).map(([field, choice]) => [field, { ...choice, from: SPELLS.filter((spell) => spell.level === choice.level && (!choice.ritual || spell.ritual) && (!choice.schools || choice.schools.includes(spell.school)) && (!choice.list || spell.classes.includes(choice.list) || SPELL_ACCESS[spell.id]?.classes.some((entry) => entry.id === choice.list && !entry.optional))).map((spell) => spell.id) }]));
 }
+/** Dons choisis par le personnage (race, historique, niveaux). */
+function characterFeatIds(c) {
+  return _selectedFeatSources(c).map((source) => source.featId);
+}
 function _selectedFeatSources(c, upTo = levelOf(c)) {
   return [...(raceOf(c, upTo).grants?.feat && c.raceFeat ? [{ featId: c.raceFeat, key: "feat|race", acquiredLevel: 1 }] : []),
     ...(backgroundOf(c).grants?.feats || []).map((featId) => ({ featId, key: `feat|bg|${featId}`, acquiredLevel: 1 })),
@@ -34320,8 +37395,9 @@ function _applyGrants(acc, c, src) {
     const ability = klass && CLASSES[klass] ? CLASSES[klass].ability : "int";
     if (feat.special === "magicInitiate" && klass) {
       for (const id of picksOf(c, src.key, "cantrips").slice(0, 2)) acc.cantrips.push({ id, ability, source: src.label, sourceKey: src.key });
+      // Sage Advice Compendium : les emplacements servent seulement si la classe choisie est une des classes du personnage.
       for (const id of picksOf(c, src.key, "spells").slice(0, 1))
-        acc.innate.push({ id, ability, castLevel: 1, reset: "long", source: src.label, sourceKey: src.key });
+        acc.innate.push({ id, ability, castLevel: 1, reset: "long", allowSlots: classLevel(c, klass) > 0, source: src.label, sourceKey: src.key });
     }
     if (feat.special === "spellSniper" && klass)
       for (const id of picksOf(c, src.key, "cantrips").slice(0, 1)) acc.cantrips.push({ id, ability, source: src.label, sourceKey: src.key });
@@ -34906,6 +37982,24 @@ function _spendOrdinarySpellSlot(c, level) {
   c.state.slotsUsed[level] = (c.state.slotsUsed[level] || 0) + 1;
   if (level === 3 && c.state.pearlSlotOrigins?.length) c.state.pearlSlotOrigins.shift();
 }
+/** Emplacements encore disponibles, ordinaires (temporaires compris) et de pacte : pour une aptitude payée en emplacement. */
+function availableSpellSlots(c, d = derive(c)) {
+  const levels = Math.max(d.slots.length, ...Object.keys(c.state.temporarySlots || {}).map(Number)), out = [];
+  for (let level = 1; level <= levels; level++) {
+    const remaining = (d.slots[level - 1] || 0) + (c.state.temporarySlots?.[level] || 0) - (c.state.slotsUsed[level] || 0);
+    if (remaining > 0) out.push({ level, remaining, pact: false });
+  }
+  if (d.pact && d.pact.count > (c.state.pactUsed || 0)) out.push({ level: d.pact.slotLevel, remaining: d.pact.count - (c.state.pactUsed || 0), pact: true });
+  return out;
+}
+/** Dépense un emplacement pour une aptitude (Châtiment divin), sans lancer de sort. */
+function spendSpellSlot(c, { level, pact = false }) {
+  if (!availableSpellSlots(c).some((slot) => slot.level === level && slot.pact === pact)) throw new Error(uiText("Aucun emplacement de ce niveau disponible."));
+  const next = clone(c);
+  if (pact) next.state.pactUsed = (next.state.pactUsed || 0) + 1;
+  else _spendOrdinarySpellSlot(next, level);
+  return next;
+}
 
 /** Applique le coût d’un lancement autorisé sans modifier la fiche reçue. */
 function castSpell(c, id, mode, { acquisitionId = null, material = null, componentTracking = true } = {}) {
@@ -34952,6 +38046,13 @@ function _spellPersonalActions(c, event) {
   const recovery = resourceRecoveryOptions(c).find((option) => option.kind === "spell");
   if (recovery) out.push({ id: "recovery", label: "Confirmer la récupération sur sort", summary: recovery.gains.map((gain) => `${gain.name} : ${gain.before} → ${gain.after}`).join(" ; ") });
   return out.filter((action) => !event.personalActions?.includes(action.id));
+}
+/** Termine un sort actif sans concentration déclaré au lancement. */
+function endOngoingSpell(c, eventId) {
+  const next = clone(c), event = next.state.spellEvents.find((row) => row.id === eventId);
+  if (!event?.ongoing) throw new Error(uiText("Ce sort n’est plus actif."));
+  delete event.ongoing;
+  return next;
 }
 function applySpellPersonalAction(c, eventId, actionId) {
   const action = spellPersonalActions(c, eventId).find((row) => row.id === actionId);
@@ -37498,6 +40599,8 @@ function restCharacter(c, type, { fed = true, rolls = [], runeInscriptions } = {
   if (type === "long" && next.state.bard?.spiritSession) next.state.bard.spiritSession.active = false;
   if (next.state.ranger) next.state.ranger.tide = false;
   if (next.state.wizard) next.state.wizard.bladesong = false;
+  // Un sort actif sans concentration (Arme spirituelle) ne dure pas au-delà d'un repos.
+  for (const event of next.state.spellEvents || []) delete event.ongoing;
   if (next.state.exhaustion >= 6 || next.state.deathFailure >= 3) return reconcileState(next);
   if (type === "short" && rolls.length) next = spendHitDice(next, rolls);
   if (type === "long" && hasSubclass(next, "sorcerer", "lunar")) { next.state.sorcerer ||= {}; next.state.sorcerer.phaseRestAvailable = true; }
@@ -38380,7 +41483,7 @@ function validateImport(input) {
     const m = event.material;
     if (!plain(m) || !["item", "gold", "table", "untracked"].includes(m.method) || typeof m.consumed !== "boolean" || m.method === "item" && (typeof m.itemId !== "string" || typeof m.name !== "string" || !Number.isInteger(m.quantity) || m.quantity < 1 || !Number.isFinite(m.value) || m.value < 0) || m.method === "gold" && (!m.consumed || !Number.isFinite(m.amount) || m.amount <= 0) || m.method === "table" && (typeof m.note !== "string" || !m.note.trim() || m.note.length > 1000)) throw new Error(uiText("Déclaration de composante invalide."));
   }
-  for (const event of c.state.spellEvents) if (!plain(event) || typeof event.id !== "string" || typeof event.spellId !== "string" || !Number.isInteger(event.effectiveLevel) || event.effectiveLevel < 0 || event.effectiveLevel > 9 || !plain(event.costs) || event.noConcentration !== undefined && typeof event.noConcentration !== "boolean" || event.personalActions !== undefined && (!Array.isArray(event.personalActions) || event.personalActions.some((action) => !["concentration", "ward", "recovery"].includes(action)) || new Set(event.personalActions).size !== event.personalActions.length)) throw new Error(uiText("Événement de lancement invalide."));
+  for (const event of c.state.spellEvents) if (!plain(event) || typeof event.id !== "string" || typeof event.spellId !== "string" || !Number.isInteger(event.effectiveLevel) || event.effectiveLevel < 0 || event.effectiveLevel > 9 || !plain(event.costs) || event.noConcentration !== undefined && typeof event.noConcentration !== "boolean" || event.ongoing !== undefined && event.ongoing !== true || event.personalActions !== undefined && (!Array.isArray(event.personalActions) || event.personalActions.some((action) => !["concentration", "ward", "recovery"].includes(action)) || new Set(event.personalActions).size !== event.personalActions.length)) throw new Error(uiText("Événement de lancement invalide."));
   if (c.state.pactPearlSlots !== undefined && (!Number.isInteger(c.state.pactPearlSlots) || c.state.pactPearlSlots < 0 || c.state.pactPearlSlots > Math.min(pactMagic(c)?.count || 0, c.state.pactUsed || 0) || c.state.pactPearlSlots > 0 && (pactMagic(c)?.slotLevel || 0) <= 3)) throw new Error(uiText("Réserve de pacte abaissé invalide."));
   if (c.state.pearlSlotOrigins !== undefined && (!Array.isArray(c.state.pearlSlotOrigins) || c.state.pearlSlotOrigins.length > (c.state.temporarySlots[3] || 0) || c.state.pearlSlotOrigins.some((level) => !Number.isInteger(level) || level < 4 || level > 9))) throw new Error(uiText("Origine d’emplacement abaissé invalide."));
   for (const event of c.state.spellEvents) if (event.costs.pactPearl !== undefined && (event.costs.pactPearl !== true || event.costs.pact || event.costs.slot || event.effectiveLevel !== 3)) throw new Error(uiText("Coût de pacte abaissé invalide."));
@@ -39528,6 +42631,10 @@ function attackAddition(piece, factor = 1) {
     : { fixedBonus: true, bonus: (Number(piece.notation) || 0) + (piece.bonus || 0), source: piece.label, type: piece.type || "" };
 }
 
+/** Pièces d'options ajoutées à un test ou une sauvegarde (Assistance, Résistance…). */
+function optionAdditions(pieces) {
+  return pieces.map((piece) => attackAddition(piece));
+}
 /** Jet pour toucher : d20 + bonus, et les dés ajoutés choisis (Bénédiction, inspiration…). */
 function attackRollRequest(bonus, pieces = []) {
   return { kind: "attack", bonus, additions: pieces.map((piece) => attackAddition(piece)) };
@@ -39564,20 +42671,115 @@ function diceFormula(roll) {
 function weaponAttackProfile(c, d, index) {
   const a = d.attacks[index];
   if (!a) return null;
-  const options = [];
-  if (a.divineDamageDice) options.push({ id: "improved-smite", step: "damage", label: uiText("Châtiment divin amélioré"), notation: a.divineDamageDice, bonus: 0, type: damageTypeLabel(["radiant"]), on: true });
-  if (a.additionalDamageDice) options.push({ id: "elemental-cleaver", step: "damage", label: uiText("Fendoir élémentaire"), notation: a.additionalDamageDice, bonus: 0, type: a.type, on: true });
-  if (d.sneakAttack && (a.weapon?.finesse || a.weapon?.ranged)) {
-    options.push({ id: "sneak-attack", step: "damage", label: uiText("Attaque sournoise"), notation: rogueSneakAttack(c).notation, bonus: 0, type: a.type, note: uiText("Une fois par tour, conditions vérifiées à la table") });
-    if (hasSubclass(c, "rogue", "inquisitive") && classLevel(c, "rogue") >= 17) options.push({ id: "eye-for-weakness", step: "damage", label: uiText("Œil pour la faiblesse"), notation: "3d6", bonus: 0, type: a.type, note: uiText("Combat intuitif contre cette cible") });
-  }
   // La rage est déjà dans le bonus de l'arme : on le dit pour éviter de l'ajouter deux fois.
   const rage = a.provenance?.damage?.details.some((effect) => effect.sourceKey === "barbarian|rage" && effect.applied);
-  return { name: a.name, attack: { bonus: a.attack, critThreshold: Math.min(a.critThreshold || 20, d.critThreshold) }, parts: [{ label: a.name, notation: a.damageDice, bonus: a.damageBonus, type: a.type }], options, note: rage ? uiText(" Le bonus de rage déclaré est déjà inclus.").trim() : "" };
+  return { name: a.name, attack: { bonus: a.attack, critThreshold: Math.min(a.critThreshold || 20, d.critThreshold) }, parts: [{ label: a.name, notation: a.damageDice, bonus: a.damageBonus, type: a.type }], options: attackOptions(c, d, { weapon: a }), note: rage ? uiText(" Le bonus de rage déclaré est déjà inclus.").trim() : "" };
+}
+
+// Domaines dont la Frappe divine ajoute des dégâts ; null : type de l'arme.
+const DIVINE_STRIKE_TYPES = { life: ["radiant"], nature: ["cold", "fire", "lightning"], tempest: ["thunder"], trickery: ["poison"], war: null, forge: ["fire"], order: ["psychic"], twilight: ["radiant"], death: ["necrotic"] };
+// Taille du dé d'une ressource, écrite dans son nom ou sa note (« d8 », « (d10) »).
+function resourceDie(resource) {
+  return Number(/\bd(4|6|8|10|12)\b/.exec(`${resource?.name || ""} ${resource?.note || ""}`)?.[1]) || null;
+}
+/**
+ * Options de jet d'une attaque, d'après la fiche : aptitudes de classe, sorts actifs et dons.
+ * Une option : { id, label, note, on, attack?, damage?, critThreshold?, criticalOnly?, doubled?, requires?, cost?, choices? }.
+ * attack et damage sont les pièces ajoutées au toucher et aux dégâts ; cost est dépensé au lancer des dés.
+ */
+function attackOptions(c, d, { weapon = null, spell = null } = {}) {
+  const options = [], available = resources(c), resource = (id) => available.find((entry) => entry.id === id && entry.remaining > 0);
+  const left = (entry) => uiText("{p0} restant(s)", { p0: entry.remaining });
+  const melee = !!weapon && !weapon.weapon?.ranged, ranged = !!weapon?.weapon?.ranged, type = weapon?.type || "";
+  const concentrating = (id) => !!c.state.concentration && c.state.concentration === spellById(c, id)?.name;
+  const attackRoll = !!weapon || !!spell?.attack, feats = characterFeatIds(c);
+  if (weapon) {
+    if (weapon.divineDamageDice) options.push({ id: "improved-smite", label: uiText("Châtiment divin amélioré"), damage: { notation: weapon.divineDamageDice, type: damageTypeLabel(["radiant"]) }, on: true });
+    if (weapon.additionalDamageDice) options.push({ id: "elemental-cleaver", label: uiText("Fendoir élémentaire"), damage: { notation: weapon.additionalDamageDice, type }, on: true });
+    if (d.sneakAttack && (weapon.weapon?.finesse || ranged)) {
+      options.push({ id: "sneak-attack", label: uiText("Attaque sournoise"), note: uiText("Une fois par tour, conditions vérifiées à la table"), damage: { notation: rogueSneakAttack(c).notation, type } });
+      if (hasSubclass(c, "rogue", "inquisitive") && classLevel(c, "rogue") >= 17) options.push({ id: "eye-for-weakness", label: uiText("Œil pour la faiblesse"), note: uiText("Combat intuitif contre cette cible"), damage: { notation: "3d6", type }, requires: "sneak-attack" });
+    }
+    const slots = melee && classLevel(c, "paladin") >= 2 ? availableSpellSlots(c, d) : [];
+    if (slots.length) {
+      options.push({ id: "divine-smite", label: uiText("Châtiment divin"), damage: { notation: "2d8", type: damageTypeLabel(["radiant"]) },
+        choices: slots.map((slot) => ({ value: `${slot.pact ? "pact" : "slot"}:${slot.level}`, label: slot.pact ? uiText("Emplacement de pacte niveau {p0} · {p1} restant(s)", { p0: slot.level, p1: slot.remaining }) : uiText("Emplacement niveau {p0} · {p1} restant(s)", { p0: slot.level, p1: slot.remaining }), notation: `${Math.min(5, slot.level + 1)}d8`, cost: { slot: { level: slot.level, pact: slot.pact } } })) });
+      options.push({ id: "divine-smite-undead", label: uiText("Cible mort-vivant ou fiélon"), damage: { notation: "1d8", type: damageTypeLabel(["radiant"]) }, requires: "divine-smite" });
+    }
+    const domain = Object.keys(DIVINE_STRIKE_TYPES).find((id) => hasSubclass(c, "cleric", id));
+    if (domain && classLevel(c, "cleric") >= 8) options.push({ id: "divine-strike", label: uiText("Frappe divine"), note: uiText("Une fois par tour"), damage: { notation: classLevel(c, "cleric") >= 14 ? "2d8" : "1d8", type: DIVINE_STRIKE_TYPES[domain] ? damageTypeLabel(DIVINE_STRIKE_TYPES[domain]) : type } });
+    const superiority = resource("superiorityDice");
+    if (superiority) {
+      const die = `1d${resourceDie(superiority) || 8}`;
+      if (allChoices(c, "maneuvers").includes("precisionAttack")) options.push({ id: "precision-attack", label: uiText("Attaque précise"), note: left(superiority), attack: { notation: die }, cost: { resource: "superiorityDice" } });
+      options.push({ id: "maneuver", label: uiText("Manœuvre : dé de supériorité"), note: left(superiority), damage: { notation: die, type }, cost: { resource: "superiorityDice" } });
+    }
+    const psi = resource("fighter-psi-dice");
+    if (psi && hasSubclass(c, "fighter", "psiWarrior")) options.push({ id: "psionic-strike", label: uiText("Frappe psionique"), note: `${uiText("Une fois par tour")} · ${left(psi)}`, damage: { notation: `1d${resourceDie(psi) || 6}`, bonus: Math.max(1, d.mods.int), type: damageTypeLabel(["force"]) }, cost: { resource: "fighter-psi-dice" } });
+    const blades = resource("rogue-psi-dice");
+    if (blades && String(weapon.id || "").startsWith("rogue-psychic")) options.push({ id: "homing-strikes", label: uiText("Frappes guidées"), note: left(blades), attack: { notation: `1d${resourceDie(blades) || 6}` }, cost: { resource: "rogue-psi-dice" } });
+    if (concentrating("hunters-mark")) options.push({ id: "hunters-mark", label: uiText("Marque du chasseur"), damage: { notation: "1d6", type }, on: true });
+    if (hasSubclass(c, "ranger", "hunter") && allChoices(c, "hunter3").includes("colossus")) options.push({ id: "colossus-slayer", label: uiText("Tueur de colosses"), note: uiText("Une fois par tour, cible déjà blessée"), damage: { notation: "1d8", type } });
+    if (hasSubclass(c, "barbarian", "zealot") && barbarianStatus(c).active) options.push({ id: "divine-fury", label: uiText("Fureur divine"), note: uiText("Une fois par tour"), damage: { notation: "1d6", bonus: Math.floor(classLevel(c, "barbarian") / 2), type: damageTypeLabel([allChoices(c, "divineFury")[0] || "radiant"]) } });
+    if (melee && weapon.weapon?.heavy && feats.includes("greatWeaponMaster")) options.push({ id: "great-weapon-master", label: uiText("Maître des armes à deux mains"), attack: { bonus: -5 }, damage: { bonus: 10, type } });
+    if (ranged && feats.includes("sharpshooter")) options.push({ id: "sharpshooter", label: uiText("Tireur d’élite"), attack: { bonus: -5 }, damage: { bonus: 10, type } });
+    // Dés supplémentaires d'un critique au corps à corps : ajoutés une fois, sans être doublés.
+    const weaponDie = /d(\d+)$/.exec(weapon.damageDice || "")?.[1];
+    const brutal = classLevel(c, "barbarian") >= 17 ? 3 : classLevel(c, "barbarian") >= 13 ? 2 : classLevel(c, "barbarian") >= 9 ? 1 : 0;
+    if (melee && weaponDie && brutal) options.push({ id: "brutal-critical", label: uiText("Critique brutal"), damage: { notation: `${brutal}d${weaponDie}`, type }, criticalOnly: true, doubled: false, on: true });
+    if (melee && weaponDie && raceOf(c)?.id === "halfOrc") options.push({ id: "savage-attacks", label: uiText("Attaques sauvages"), damage: { notation: `1d${weaponDie}`, type }, criticalOnly: true, doubled: false, on: true });
+  }
+  if (attackRoll && concentrating("hex")) options.push({ id: "hex", label: uiText("Maléfice"), damage: { notation: "1d6", type: damageTypeLabel(["necrotic"]) }, on: true });
+  if (attackRoll && hasSubclass(c, "warlock", "hexblade")) options.push({ id: "hexblade-curse", label: uiText("Malédiction du Magelame"), note: uiText("Cible maudite : critique sur 19-20"), critThreshold: 19, damage: { bonus: d.prof, type } });
+  const foe = available.find((entry) => entry.id === "favored-foe");
+  if (attackRoll && foe) {
+    const level = classLevel(c, "ranger"), die = level >= 14 ? "1d8" : level >= 6 ? "1d6" : "1d4";
+    options.push({ id: "favored-foe", label: uiText("Ennemi juré"), note: uiText("Une fois par tour"), damage: { notation: die, type },
+      choices: [{ value: "marked", label: uiText("Cible déjà marquée") }, ...(foe.remaining > 0 ? [{ value: "mark", label: uiText("Marquer la cible · {p0} restant(s)", { p0: foe.remaining }), cost: { resource: "favored-foe" } }] : [])] });
+  }
+  if (spell?.id === "eldritch-blast" && allChoices(c, "invocations").includes("agonizing")) options.push({ id: "agonizing-blast", label: uiText("Décharge déchirante"), damage: { bonus: d.mods.cha }, on: true });
+  if (spell && hasSubclass(c, "wizard", "evocation") && classLevel(c, "wizard") >= 10 && spell.school === "Évocation") options.push({ id: "empowered-evocation", label: uiText("Évocation renforcée"), damage: { bonus: d.mods.int }, on: true });
+  return options;
+}
+
+// État d'une option pour un jet : visible à cette étape, cochée, et son choix éventuel.
+function optionPiece(option, step) {
+  return step === "attack" ? option.attack : step === "damage" ? option.damage : option.check;
+}
+function optionVisible(option, state, step, { critical = false } = {}) {
+  // Un effet à usage unique dépensé au toucher ne revient pas aux dégâts.
+  if (option.once && state.spent?.[option.id] && state.spent[option.id] !== step) return false;
+  return !!(optionPiece(option, step) || step === "attack" && option.critThreshold) && (!option.criticalOnly || critical) && (!option.requires || !!state.on[option.requires]);
+}
+function optionChoice(option, state) {
+  return option.choices?.find((choice) => choice.value === state.choice?.[option.id]) || option.choices?.[0] || null;
+}
+/** Pièces ajoutées au jet par les options cochées et visibles à cette étape. */
+function optionPieces(options, state, step, { critical = false } = {}) {
+  return options.filter((option) => state.on[option.id] && optionVisible(option, state, step, { critical }) && optionPiece(option, step)).map((option) => {
+    const piece = optionPiece(option, step), choice = optionChoice(option, state);
+    return { label: option.label, notation: choice?.notation || piece.notation || "", bonus: piece.bonus || 0, type: piece.type || "", doubled: option.doubled !== false };
+  });
+}
+/** Dépenses des options cochées à cette étape : ressource ou emplacement. */
+function optionCosts(options, state, step, { critical = false } = {}) {
+  return options.filter((option) => state.on[option.id] && optionVisible(option, state, step, { critical })).map((option) => ({ id: option.id, label: option.label, cost: optionChoice(option, state)?.cost || option.cost || null })).filter((entry) => entry.cost);
+}
+/** Seuil de critique du toucher, abaissé par une option cochée (Malédiction du Hexblade). */
+function optionCritThreshold(base, options, state) {
+  return Math.min(base, ...options.filter((option) => state.on[option.id] && option.critThreshold).map((option) => option.critThreshold));
+}
+
+/** Souffle draconique : sauvegarde imposée, dégâts selon le niveau, une utilisation dépensée au lancer. */
+function breathProfile(c, d) {
+  if (c.raceId !== "dragonborn") return null;
+  const dragon = DRAGONS[picksOf(c, "race", "dragon")[0]] || DRAGONS.red, type = Object.keys(DAMAGE_TYPE_LABELS).find((id) => DAMAGE_TYPE_LABELS[id] === dragon[1]);
+  const dice = d.level >= 16 ? 5 : d.level >= 11 ? 4 : d.level >= 6 ? 3 : 2, name = uiText("Souffle draconique");
+  return { name, attack: null, save: { abilities: [dragon[3] === "CON" ? "con" : "dex"], dc: 8 + d.mods.con + d.prof, half: true }, parts: [{ label: name, notation: `${dice}d6`, bonus: 0, type: type ? damageTypeLabel([type]) : dragon[1] }], options: [], note: dragon[2], cost: { resource: "breath" } };
 }
 
 /** model : dés du sort au niveau lancé (spellDamageRolls) ; attackBonus : attaque de sort de la voie choisie. */
-function spellAttackProfile(spell, event, model, attackBonus) {
+function spellAttackProfile(spell, event, model, attackBonus, options = []) {
   if (!model?.rolls.length || !spell) return null;
   const count = model.count, each = model.rolls[0].each;
   return {
@@ -39588,7 +42790,7 @@ function spellAttackProfile(spell, event, model, attackBonus) {
     parts: model.rolls.map((roll, i) => ({ label: spell.name, notation: roll.notation, bonus: roll.bonus, type: damageTypeLabel(roll.types), on: i === 0 || !!roll.join })),
     units: count?.combine && each ? { count: count.value, each } : null,
     perAttack: count && !count.combine ? { unit: count.unit, count: count.value } : null,
-    options: [],
+    options,
   };
 }
 
@@ -39883,14 +43085,13 @@ function setProgressionClass(c, level, classId, { repair = false } = {}) {
   return setStartLevel(c, levelOf(c));
 }
 
-/** Choix encore incomplets, avec leur source et leur emplacement dans les éditeurs existants. */
-function progressionRequirements(c) {
+/** Liste de classe et sorts accordés par un don. Ceux du don d’origine se choisissent à l’étape Magie. */
+const featSpellChoice = (spec) => spec.source.kind === "feat" && (spec.type === "spell" || spec.field === "class");
+const originFeatSpellChoice = (spec) => spec.source.key === "feat|race" && featSpellChoice(spec);
+
+function pickRequirements(c, specs) {
   const requirements = [], chipTypes = ["skill", "language", "tool", "weapon", "skillOrTool", "toolOrLanguage"];
-  const add = (label, step, level = null, path = "", classId = null) => requirements.push({ label, step, level, path, classId });
-  const cls = CLASSES[primaryClassId(c)];
-  if (c.skills.length !== cls.pick || new Set(c.skills).size !== cls.pick || c.skills.some((id) => !cls.skills.includes(id))) add(uiText("Compétences de la classe de départ"), "skills", null, "skills");
-  if (raceOf(c).grants?.feat && !c.raceFeat) add(uiText("{name} : choisir un don", { name: raceOf(c).name }), "race", null, "raceFeat");
-  for (const spec of pickSpecs(c)) {
+  for (const spec of specs) {
     const selected = new Set(spec.selected.filter((id) => Object.hasOwn(spec.options, id)));
     if (selected.size >= spec.count || spec.optional && !spec.selected.length) continue;
     const source = spec.source;
@@ -39899,12 +43100,25 @@ function progressionRequirements(c) {
       const atClassLevel = source.kind === "subclass" ? Number(source.key.split("|")[2]) : source.kind === "pact" ? 3 : 1;
       level = c.levels.find((entry) => entry.classId === source.classId && classLevelAt(c, entry.level) === atClassLevel)?.level || null;
     }
-    const step = level > 1 ? "levels" : source.key.startsWith("feat|race") || source.key === "race" && !chipTypes.includes(spec.type) ? "race" : source.key.startsWith("feat|bg") || source.key === "bg" && !chipTypes.includes(spec.type) ? "background" : chipTypes.includes(spec.type) ? "skills" : "class";
+    const step = level > 1 ? "levels" : originFeatSpellChoice(spec) ? "magic" : source.key.startsWith("feat|race") || source.key === "race" && !chipTypes.includes(spec.type) ? "race" : source.key.startsWith("feat|bg") || source.key === "bg" && !chipTypes.includes(spec.type) ? "background" : chipTypes.includes(spec.type) ? "skills" : "class";
     const personal = source.kind === "race" && c.raceId === "custom" || source.kind === "background" && c.background?.id === "custom";
     const title = uiChoiceTitle(spec, personal);
     const label = spec.title.startsWith(source.label) ? title : `${personal ? source.label : uiCatalogueName(source.label, source.referenceId)} : ${title}`;
-    add(`${label} (${selected.size}/${spec.count})`, step, level, `picks.${spec.path || spec.key}`);
+    requirements.push({ label: `${label} (${selected.size}/${spec.count})`, step, level, path: `picks.${spec.path || spec.key}`, classId: null });
   }
+  return requirements;
+}
+/** Sorts d’un don encore à choisir : rappelés dans le grimoire. */
+const featSpellRequirements = (c) => pickRequirements(c, pickSpecs(c).filter(featSpellChoice));
+
+/** Choix encore incomplets, avec leur source et leur emplacement dans les éditeurs existants. */
+function progressionRequirements(c) {
+  const requirements = [];
+  const add = (label, step, level = null, path = "", classId = null) => requirements.push({ label, step, level, path, classId });
+  const cls = CLASSES[primaryClassId(c)];
+  if (c.skills.length !== cls.pick || new Set(c.skills).size !== cls.pick || c.skills.some((id) => !cls.skills.includes(id))) add(uiText("Compétences de la classe de départ"), "skills", null, "skills");
+  if (raceOf(c).grants?.feat && !c.raceFeat) add(uiText("{name} : choisir un don", { name: raceOf(c).name }), "race", null, "raceFeat");
+  requirements.push(...pickRequirements(c, pickSpecs(c)));
   for (const entry of c.levels) {
     const cls = CLASSES[entry.classId], k = classLevelAt(c, entry.level), step = entry.level === 1 ? "class" : "levels";
     if (k === cls.subLevel && !c.subclasses[entry.classId]) add(uiText("{name} {level} : choisir {subclass}", { name: cls.name, level: k, subclass: cls.subLabel.toLowerCase() }), step, entry.level);
@@ -41270,7 +44484,8 @@ const iconPaths={
  camera:'<path d="M9 4h6l2 3h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h3Z"/><circle cx="12" cy="13" r="4"/>',
  image:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>',
  replace:'<path d="M20 7v5h-5M4 17v-5h5M6 8a7 7 0 0 1 12-2l2 3M4 15l2 3a7 7 0 0 0 12-2"/>',
- print:'<path d="M6 8V2h12v6M6 17H3V8h18v9h-3M6 14h12v8H6Z"/>'
+ print:'<path d="M6 8V2h12v6M6 17H3V8h18v9h-3M6 14h12v8H6Z"/>',
+ external:'<path d="M14 4h6v6m0-6-9 9m7 1v6H4V6h6"/>'
 };
 function icon(name,size=22){return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${iconPaths[name]||iconPaths.sparkles}</svg>`;}
 const esc = value => String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -42630,7 +45845,7 @@ const diceFxInternals = (() => {
 
     // Il ricoche de plus en plus vite. L'éclair plein écran revient une frappe sur deux.
     const modes = [...x.dialog.querySelectorAll(".dice-roll-modes button")], foot = [...x.dialog.querySelectorAll(".modal-footer .btn")];
-    const close = x.dialog.querySelector(".icon-btn"), title = x.dialog.querySelector("#dialog-title"), reach = d.r * .8, grow = Math.min(w, 560) / 390;
+    const close = x.dialog.querySelector('.modal-head [data-action="close-modal"]'), title = x.dialog.querySelector("#dialog-title"), reach = d.r * .8, grow = Math.min(w, 560) / 390;
     const hits = [
       { at: [w - 58, 56], wall: [.7, -.7], knock: [close], ms: 230 },
       { at: [50, h * .34], wall: [-1, 0], knock: modes.slice(0, 2), ms: 205 },
@@ -43062,8 +46277,9 @@ const diceFxInternals = (() => {
     plantage: { crit: plantageCrit, fumble: plantageFumble },
   };
 
-  function verdictOf(result, { total = false } = {}) {
-    const kind = result.natural === 20 ? "crit" : result.natural === 1 ? "fumble" : null;
+  function verdictOf(result, { total = false, critThreshold = 20 } = {}) {
+    // Une attaque critique dès son seuil (19 pour un champion) ; un test, seulement sur 20.
+    const kind = result.natural >= critThreshold ? "crit" : result.natural === 1 ? "fumble" : null;
     if (!kind) return null;
     const discarded = result.dice.filter((die) => !die.kept).map((die) => die.value);
     // À l'initiative, le MJ a besoin du total pour placer le tour : le calcul complet reste sous le mot.
@@ -43297,6 +46513,177 @@ function uiBeastEntry(beast) {
 }
 
 
+// Module : creation-choices
+
+/** Rang d’une source dans un groupe : du choix le plus contraint au plus libre. La sous-classe se choisit avant ce qui en dépend. */
+const CREATION_LINE_RANKS = { subclassChoice: -1, class: 0, subclass: 1, background: 2, feat: 3, race: 4, expertise: 5 };
+const CREATION_LINE_GROUPS = ["class", "skills", "languages", "tools", "options", "feat"];
+/** Ligne de maîtrises : clé de son intitulé, taille de sa famille d’options (0 pour une famille mixte) et groupe d’affichage. */
+const CREATION_LINE_PROFICIENCIES = {
+  skill: ["creation.line.skills", () => Object.keys(SKILLS).length, "skills"],
+  skillOrTool: ["creation.line.skillsOrTools", () => 0, "skills"],
+  language: ["creation.line.languages", () => Object.values(LANGUAGES).filter((language) => language.type !== "secret").length, "languages"],
+  toolOrLanguage: ["creation.line.languagesOrTools", () => 0, "languages"],
+  tool: ["creation.line.tools", () => Object.keys(TOOLS).length, "tools"],
+  weapon: ["creation.line.weapons", () => Object.keys(WEAPONS).length - 1, "tools"],
+  weaponOrTool: ["creation.line.weaponsOrTools", () => 0, "tools"],
+};
+/** Objets du kit d’historique : listes d’outils ou d’armes sans maîtrise associée. */
+const creationKitField = (field) => /^(equipment|gladiatorWeapon|merchantEquipment|secondaryGuild)|EquipmentTool$/.test(field);
+
+/** Étape où un choix se pose : bonus de race aux Caracs, sorts à la Magie, le reste sur l’écran Choix. */
+function creationLineStage(spec) {
+  if (spec.source.key === "race" && (spec.type === "ability" || spec.field === "abilityMode")) return "abilities";
+  if (spec.type === "spell" || ["race", "feat"].includes(spec.source.kind) && ["class", "spellAbility"].includes(spec.field)) return "magic";
+  return "skills";
+}
+
+function creationLineSource(c, source) {
+  const classId = source.classId || primaryClassId(c);
+  if (source.kind === "race") return { kind: "race", origin: "race", name: uiRaceOf(c).name };
+  if (source.kind === "background") return { kind: "background", origin: "background", name: uiBackgroundOf(c).name };
+  if (source.kind === "feat") return { kind: "feat", origin: source.key === "feat|race" ? "race" : "background", name: uiFeats[source.featId]?.name || uiCatalogueName(source.label, source.referenceId) };
+  if (source.kind === "subclass") return { kind: "subclass", origin: "class", name: uiSubclassOf(c, classId)?.name || uiClasses[classId].subLabel };
+  // Une aptitude de classe garde son nom (Ennemi juré, Technique supérieure) ; la classe elle-même affiche le sien.
+  return { kind: "class", origin: "class", name: source.key === `class|${classId}` ? uiClasses[classId].name : uiCatalogueName(source.label, source.referenceId) };
+}
+
+/** Intitulé d’une spec sans le nom de sa source, déjà affiché en tête de ligne. */
+function creationLineTitle(c, spec) {
+  const personal = spec.source.kind === "race" && c.raceId === "custom" || spec.source.kind === "background" && c.background?.id === "custom";
+  const head = `${personal ? spec.source.label : uiCatalogueName(spec.source.label, spec.source.referenceId)} : `;
+  const title = spec.title.startsWith(head) ? spec.title.slice(head.length) : spec.title;
+  return title.charAt(0).toLocaleUpperCase(uiLocale()) + title.slice(1);
+}
+
+function creationProficiencyLabel(type, count, available, extra = "") {
+  const [key, total] = CREATION_LINE_PROFICIENCIES[type];
+  const hint = available < total() ? uiText("creation.line.among", { count: available }) : uiText("creation.line.free");
+  return { label: uiText(key, { count, s: count > 1 ? "s" : "" }), hint: [hint, extra].filter(Boolean).join(", ") };
+}
+
+/** Maîtrises fixes du niveau 1 et source qui les donne, pour dire pourquoi une option est grisée. */
+function creationFixedProficiencies(c) {
+  const fixed = new Map(), add = (ids, name) => { for (const id of ids || []) if (!fixed.has(id)) fixed.set(id, name); };
+  if ((c.background?.id || "custom") !== "custom") add(uiBackgroundOf(c).skills, uiBackgroundOf(c).name);
+  for (const source of grantSources(c, 1)) {
+    const name = creationLineSource(c, source).name;
+    for (const field of ["skills", "languages", "tools"]) add(source.grants?.[field], name);
+  }
+  return fixed;
+}
+
+/**
+ * Lignes de choix du niveau 1 d’un brouillon de création, dans l’ordre d’affichage.
+ * Chaque ligne porte son étape (abilities, skills, magic), son groupe, sa liaison et l’état de ses options.
+ */
+function creationLines(c) {
+  const classId = primaryClassId(c), cls = uiClasses[classId], race = uiRaceOf(c), background = uiBackgroundOf(c), backgroundId = c.background?.id || "custom";
+  const lines = [];
+  const push = (line) => lines.push({ stage: "skills", count: 1, required: true, bind: "array", hint: "", help: "", owned: [], pool: false, plain: false, kind: "option", order: lines.length, ...line });
+  const option = ([id, entry]) => Array.isArray(entry) ? { id, name: entry[0], desc: entry[1] || "" } : { id, name: String(entry), desc: "" };
+
+  if (cls.subLevel === 1) push({
+    id: "subclass", group: "class", rank: CREATION_LINE_RANKS.subclassChoice, origin: "class", source: cls.name, label: cls.subLabel, plain: true, kind: "subclass",
+    path: `subclasses.${classId}`, bind: "value", raw: [c.subclasses?.[classId]],
+    options: [...Object.entries(uiSubclasses[classId] || {}).map(([id, sub]) => ({ id, name: sub.name, desc: sub.desc || "", source: sub.source, more: (sub.features || []).filter(([level]) => level === 1).map(([, name, text]) => [name, text]) })),
+      { id: "custom", name: uiText("Sous-classe maison"), desc: uiText("Création de ta table, effets manuels.") }],
+  });
+  for (const choice of uiChoicesFor(c, 1)) {
+    const value = c.levels[0].choices?.[choice.key], expertise = choice.key === "expertise";
+    push({
+      id: `choice:${choice.key}`, group: expertise ? "skills" : "class", rank: expertise ? CREATION_LINE_RANKS.expertise : CREATION_LINE_RANKS.class, origin: "class", source: cls.name, label: choice.title, plain: true, help: choice.help || "",
+      path: `levels.0.choices.${choice.key}`, bind: choice.type === "text" ? "text" : choice.type === "one" ? "value" : "array", count: choice.count || 1,
+      raw: choice.type === "text" ? [] : Array.isArray(value) ? value : [value], text: choice.type === "text" ? String(value || "") : "", options: Object.entries(choice.options || {}).map(option),
+    });
+  }
+  push({
+    id: "skills", group: "skills", rank: CREATION_LINE_RANKS.class, origin: "class", source: cls.name, ...creationProficiencyLabel("skill", cls.pick, cls.skills.length), kind: "skill",
+    path: "skills", count: cls.pick, raw: c.skills || [], options: cls.skills.map((id) => ({ id, name: uiSkills[id][0], desc: "" })), pool: true,
+  });
+  if (backgroundId === "custom") push({
+    id: "background-skills", group: "skills", rank: CREATION_LINE_RANKS.background, origin: "background", source: background.name, ...creationProficiencyLabel("skill", 2, Object.keys(SKILLS).length), kind: "skill",
+    path: "background.skills", count: 2, raw: c.background?.skills || [], options: Object.keys(SKILLS).map((id) => ({ id, name: uiSkills[id][0], desc: "" })), pool: true,
+  });
+  if (uiBackgrounds[backgroundId]?.variants?.length) push({
+    id: "variant", group: "options", rank: CREATION_LINE_RANKS.background, origin: "background", source: uiBackgrounds[backgroundId].name, label: uiText("background.variant"), plain: true, required: false,
+    path: "background.variantId", bind: "value", raw: [c.background.variantId || ""],
+    options: [{ id: "", name: uiText("background.base"), desc: "" }, ...uiBackgrounds[backgroundId].variants.map((variant) => ({ id: variant.id, name: variant.name, desc: variant.note || "" }))],
+  });
+
+  const firstLevel = new Set(grantSources(c, 1).map((source) => source.key));
+  for (const spec of uiPickSpecs(c)) {
+    if (!firstLevel.has(spec.source.key) || spec.minLevel > 1) continue;
+    const source = creationLineSource(c, spec.source), stage = creationLineStage(spec), options = Object.entries(spec.options || {}).map(option);
+    const replacement = { compensateSkill: "skill", compensateTool: "tool" }[spec.field], expertise = spec.field === "expertiseChoice";
+    const type = replacement || (CREATION_LINE_PROFICIENCIES[spec.type] && !creationKitField(spec.field) ? spec.type : null);
+    let text = { label: creationLineTitle(c, spec), hint: "" }, group = spec.field === "featChoice" ? "feat" : source.origin === "class" ? "class" : "options";
+    if (replacement) text = { label: uiText(replacement === "skill" ? "creation.line.replacementSkills" : "creation.line.replacementTools", { count: spec.count, s: spec.count > 1 ? "s" : "" }), hint: "" };
+    else if (type && !expertise) text = creationProficiencyLabel(type, spec.count, options.length, spec.source.grants?.skillChoice?.expertise && spec.field === "skillChoice" ? uiText("creation.line.withExpertise") : "");
+    else if (spec.field === "abilityChoice") text = { label: uiText("creation.line.abilityBonus", { count: spec.count, amount: spec.source.grants?.abilityChoice?.amount ?? 1 }), hint: options.length < 6 ? uiText("creation.line.among", { count: options.length }) : "" };
+    if (type) group = CREATION_LINE_PROFICIENCIES[type][2];
+    push({
+      id: `pick:${spec.path}`, stage, group, rank: expertise ? CREATION_LINE_RANKS.expertise : CREATION_LINE_RANKS[source.kind], origin: source.origin, source: source.name, ...text, kind: replacement || spec.type,
+      help: replacement ? uiText("creation.line.replacementHelp") : spec.help || "", path: `picks.${spec.path}`, count: spec.count, required: !spec.optional, raw: spec.selected || [], owned: spec.owned || [], options, pool: !!type && !expertise,
+    });
+  }
+  if (race.grants?.feat) {
+    const before = { ...c, raceFeat: null }, context = { ...collect(before), prerequisiteLevel: 1 };
+    push({
+      id: "feat", group: "feat", rank: CREATION_LINE_RANKS.race, origin: "race", source: race.name, label: uiText("Don de départ"), plain: true, kind: "feat", path: "raceFeat", bind: "value", raw: [c.raceFeat],
+      options: Object.entries(uiFeats).filter(([, feat]) => !feat.backgroundOnly).sort((a, b) => a[1].name.localeCompare(b[1].name, uiLocale())).map(([id, feat]) => {
+        const met = feat.prereq ? meetsPrereq(before, feat.prereq, undefined, context) : { ok: true };
+        return { id, name: feat.name, desc: feat.summary || "", source: feat.source, ...(met.ok ? {} : { off: true, why: uiText("creation.reason.prereq", { reasons: feat.prereqLabel || met.reasons.join(", ") }) }) };
+      }),
+    });
+  }
+
+  const fixed = creationFixedProficiencies(c), pools = lines.filter((line) => line.pool);
+  for (const line of lines) {
+    const known = new Set(line.options.map((entry) => entry.id)), raw = line.raw.filter((id) => id != null && (id !== "" || known.has("")));
+    line.selected = [...new Set(raw.filter((id) => known.has(id)))];
+    line.stale = raw.filter((id) => !known.has(id));
+  }
+  for (const line of lines) {
+    for (const entry of line.options) {
+      entry.on = line.selected.includes(entry.id);
+      if (entry.on || entry.off) continue;
+      const masculine = Object.hasOwn(TOOLS, entry.id), holder = line.pool && pools.find((other) => other !== line && other.selected.includes(entry.id));
+      if (line.pool && fixed.has(entry.id)) Object.assign(entry, { off: true, why: uiText(masculine ? "creation.reason.ownedByM" : "creation.reason.ownedBy", { source: fixed.get(entry.id) }) });
+      else if (holder) Object.assign(entry, { off: true, why: uiText(masculine ? "creation.reason.takenByM" : "creation.reason.takenBy", { source: holder.source }), holder: { id: holder.id, path: holder.path } });
+      else if (line.owned.includes(entry.id)) Object.assign(entry, { off: true, why: uiText(masculine ? "creation.reason.ownedM" : "creation.reason.owned") });
+    }
+    // Une ligne ne demande jamais plus que ce qui peut encore être coché ou libéré : aucun cul-de-sac.
+    const reachable = line.options.filter((entry) => entry.on || !entry.off || entry.holder).length;
+    line.missing = Math.max(0, line.count - line.selected.length);
+    line.free = line.options.filter((entry) => !entry.on && !entry.off).length;
+    // Pénurie : seules les lignes de maîtrises partagent leurs options avec d’autres lignes.
+    line.short = line.pool && line.missing > 0 && line.free < line.missing;
+    line.blockers = line.short ? line.options.filter((entry) => entry.holder) : [];
+    line.done = !line.required || (line.bind === "text" ? !!line.text.trim() : line.selected.length >= Math.min(line.count, reachable));
+    line.name = line.plain ? line.label : `${line.source}, ${line.label}`;
+    // Une ligne avec saisie (texte libre, sous-classe maison) ne se replie pas d’elle-même.
+    line.typing = line.bind === "text" || line.kind === "subclass" && line.selected.includes("custom");
+  }
+  return lines.sort((a, b) => CREATION_LINE_GROUPS.indexOf(a.group) - CREATION_LINE_GROUPS.indexOf(b.group) || a.rank - b.rank || a.order - b.order);
+}
+
+/** Retire les choix de niveau 1 devenus inadmissibles et renvoie leur nombre ; un retrait peut en entraîner d’autres. */
+function creationLinesReconcile(c) {
+  let removed = 0;
+  for (let pass = 0; pass < 4; pass++) {
+    const stale = creationLines(c).filter((line) => line.stale.length);
+    if (!stale.length) break;
+    for (const line of stale) {
+      const keys = line.path.split("."), last = keys.pop(), target = keys.reduce((value, key) => value[key] ??= {}, c);
+      target[last] = line.bind === "array" ? line.selected : line.selected[0] ?? null;
+      removed += line.stale.length;
+    }
+  }
+  return removed;
+}
+
+
 // Module : dashboard-ui
 
 let dashboardSession = null;
@@ -43491,7 +46878,442 @@ function mountDashboard(root, character, { save, tell, onError }) {
 }
 
 
+// Module : creation-family-labels
+// Repères courts pour comparer les familles ; les variantes portent leurs règles précises.
+const CREATION_FAMILY_LABELS = {
+  "Humain": "Polyvalence · Adaptabilité",
+  "Nain": "Résistance · Savoir artisanal",
+  "Elfe": "Précision · Sens aiguisés",
+  "Halfelin": "Chance · Agilité",
+  "Drakéide": "Souffle draconique · Résistance",
+  "Gnome": "Ingéniosité · Résistance mentale",
+  "Demi-elfe": "Charisme · Polyvalence",
+  "Demi-orc": "Endurance · Attaques puissantes",
+  "Tieffelin": "Magie infernale · Résistance au feu",
+  "Goliath": "Ascendance géante · Endurance",
+  "Kenku": "Imitation · Reproduction experte",
+  "Aasimar": "Ascendance céleste · Soins",
+  "Génasi": "Ascendance élémentaire · Magie innée",
+  "Aarakocra": "Vol · Serres",
+  "Gobelours": "Longs bras · Attaque surprise",
+  "Firbolg": "Magie naturelle · Discrétion",
+  "Gith": "Pouvoirs psioniques · Discipline",
+  "Gobelin": "Mobilité · Fuite agile",
+  "Hobgobelin": "Esprit de groupe · Entraide",
+  "Kobold": "Ruse · Esprit de meute",
+  "Homme-lézard": "Armure naturelle · Survie",
+  "Orc": "Puissance · Mobilité",
+  "Tabaxi": "Agilité féline · Escalade",
+  "Triton": "Vie aquatique · Magie de l’eau",
+  "Yuan-ti": "Héritage serpentin · Résistance magique",
+  "Centaure": "Charge · Carrure équine",
+  "Changelin": "Métamorphose · Talents sociaux",
+  "Fée": "Vol · Magie féerique",
+  "Harengon": "Réflexes · Bonds",
+  "Minotaure": "Cornes · Charge",
+  "Satyre": "Bonds · Résistance magique",
+  "Féral": "Instincts bestiaux · Transformation",
+  "Tortle": "Carapace · Défense naturelle",
+  "Autognome": "Corps mécanique · Protection intégrée",
+  "Lignée sur mesure": "Personnalisation · Don au choix",
+  "Dhampir": "Morsure vampirique · Escalade",
+  "Giff": "Armes à feu · Puissante carrure",
+  "Gobelin de Dankwood": "Fuite agile · Lien avec les animaux",
+  "Grung": "Peau empoisonnée · Sauts",
+  "Hadozée": "Vol plané · Pieds adroits",
+  "Sang maudit": "Maléfices · Héritage féerique",
+  "Kalashtar": "Télépathie · Discipline mentale",
+  "Kender": "Audace · Curiosité",
+  "Léonin": "Griffes · Rugissement intimidant",
+  "Locathah": "Vie aquatique · Volonté tenace",
+  "Loxodon": "Trompe · Sérénité",
+  "Hiboulin": "Vol silencieux · Vision nocturne",
+  "Plasmoïde": "Corps malléable · Résistance",
+  "Éthérien": "Énergie éthérique · Présence menaçante",
+  "Avemain": "Vol · Regard perçant",
+  "Khenra": "Lien gémellaire · Armes",
+  "Kor": "Escalade · Chance",
+  "Ondin": "Vie aquatique · Magie innée",
+  "Naga": "Constriction · Poison",
+  "Sirène": "Vol · Chant enchanteur",
+  "Vampire": "Soif de sang · Vision nocturne",
+  "Vedalken": "Ruse · Savoir",
+  "Ressuscité": "Endurance surnaturelle · Souvenirs anciens",
+  "Hybride simic": "Adaptations animales · Personnalisation",
+  "Thri-kreen": "Bras supplémentaires · Camouflage",
+  "Verdan": "Télépathie · Récupération",
+  "Forgelier": "Corps artificiel · Protection intégrée",
+  "Maison": "Traits et bonus personnalisés",
+};
+
+
+// Module : creation-background-descriptions
+// Repères de sélection tirés des aptitudes des historiques du catalogue 2014.
+const CREATION_BACKGROUND_DESCRIPTIONS = {
+  anthropologist: "Tu apprends à communiquer en observant les langues et les coutumes d’autres peuples.",
+  archaeologist: "Tu reconnais la fonction des ruines et les peuples qui les ont bâties.",
+  astralDrifter: "Ton voyage astral t’a accordé le don Initié à la magie, avec la liste de clerc.",
+  athlete: "Tes exploits sportifs te valent l’admiration et l’accueil de tes pairs.",
+  azoriusFunctionary: "Ton autorité te permet de faire respecter les lois de Ravnica.",
+  borosLegionnaire: "Ton rang dans la Légion boros t’ouvre ses installations et son réseau militaire.",
+  celebrityAdventurersScion: "La renommée de ta famille te donne des contacts parmi les personnes influentes.",
+  cityWatch: "Tu connais les lois locales et sais reconnaître les lieux fréquentés par les criminels.",
+  clanCrafter: "Ton artisanat te vaut le respect et l’hospitalité des clans nains.",
+  cloisteredScholar: "Tu as accès aux archives de ta bibliothèque et connais les réseaux d’érudits.",
+  courtier: "Tu sais obtenir l’accès aux archives et aux rouages des cours et des gouvernements.",
+  dimirOperative: "Tes identités de couverture te permettent d’infiltrer les autres guildes.",
+  faceless: "Une identité publique protège la personne que tu es réellement.",
+  factionAgent: "Un réseau secret d’agents et de partisans peut t’aider dans tes aventures.",
+  failedMerchant: "Tes anciennes relations commerciales te donnent accès à des fournisseurs et des marchands.",
+  farTraveler: "Ton origine lointaine attire la curiosité et peut t’ouvrir des portes.",
+  feylost: "Ta connaissance des coutumes féeriques te fait reconnaître comme un familier de la Féerie.",
+  fisher: "Tu maîtrises la pêche et sais trouver de quoi nourrir ton groupe.",
+  gambler: "Tu sais évaluer les probabilités et les risques des jeux de hasard.",
+  gateWarden: "La proximité des portails t’a imprégné d’énergie planaire.",
+  giantFoundling: "Ton éducation parmi les géants t’accorde le don Frappe des géants.",
+  golgariAgent: "Tu connais les passages souterrains permettant de traverser la ville discrètement.",
+  grinner: "Le réseau des Souriants peut t’aider à trouver une cachette.",
+  gruulAnarch: "Tu connais les quartiers sauvages et dévastés de la ville.",
+  hauntedOne: "Ceux qui reconnaissent les horreurs que tu as affrontées peuvent t’offrir leur aide.",
+  houseAgent: "Les enclaves de ta Maison peuvent fournir un abri et une assistance à ton groupe.",
+  inheritor: "Un héritage singulier te lie à ton passé et donne une direction à tes aventures.",
+  initiate: "Tu te prépares aux cinq épreuves qui déterminent ton accès à l’au-delà.",
+  inquisitor: "Ton autorité religieuse te permet d’enquêter et d’arrêter les criminels.",
+  investigator: "Tu sais obtenir l’accès aux personnes et aux lieux utiles à une enquête.",
+  izzetEngineer: "Tu connais la structure des bâtiments et sais où trouver leurs plans.",
+  knightOfSolamnia: "Ton engagement chevaleresque t’accorde le don Écuyer de Solamnie.",
+  knightOfTheOrder: "Ton ordre de chevalerie et ses alliés peuvent t’offrir le gîte et leur aide.",
+  loreholdStudent: "Tu étudies la magie de Forsapience et obtiens le don Initié de Strixhaven.",
+  mageOfHighSorcery: "Ta formation magique t’accorde le don Initié de Haute Sorcellerie.",
+  marine: "Ton entraînement te permet de soutenir de longues marches et de reconnaître les débarcadères.",
+  mercenaryVeteran: "Tu connais les compagnies de mercenaires et sais où trouver leurs employeurs.",
+  orzhovRepresentative: "Ta place dans la guilde te permet de solliciter l’aide de ses subordonnés.",
+  plaintiff: "Tu connais le système juridique local et sais y faire valoir ta cause.",
+  planarPhilosopher: "Tes convictions planaires t’accordent le don Héritier des plans extérieurs.",
+  prismariStudent: "Tu étudies la magie artistique de Prismari et obtiens le don Initié de Strixhaven.",
+  quandrixStudent: "Tu étudies la magie de Quandrix et obtiens le don Initié de Strixhaven.",
+  rakdosCultist: "Tes spectacles mêlent acrobaties, feu et performances dangereuses.",
+  rewarded: "Un heureux coup du sort t’accorde un don à choisir.",
+  rivalIntern: "Tu conserves des contacts auprès de ton ancien employeur et de ses partenaires.",
+  ruined: "Une épreuve dévastatrice a révélé des ressources cachées, représentées par un don au choix.",
+  selesnyaInitiate: "Les membres du Conclave peuvent t’offrir un abri et leur assistance.",
+  shipwright: "Avec du bois et tes outils, tu sais réparer la coque d’un navire.",
+  silverquillStudent: "Tu étudies la magie de l’éloquence de Plumargent et obtiens le don Initié de Strixhaven.",
+  simicScientist: "Tu sais où chercher les connaissances magiques et scientifiques qui te manquent.",
+  smuggler: "Ton réseau de contrebandiers peut t’aider à trouver un refuge discret.",
+  urbanBountyHunter: "Tu es régulièrement en contact avec des personnes du milieu social fréquenté par tes proies.",
+  uthgardtTribeMember: "Tu connais les territoires du Nord et sais y trouver nourriture et eau.",
+  vizier: "Ton autorité religieuse te permet de guider les initiés et de solliciter leur aide.",
+  volstruckerAgent: "Une encre arcanique te permet de communiquer avec le réseau secret du Volstrucker.",
+  waterdhavianNoble: "Le nom de ta maison ouvre des portes et couvre tes besoins quotidiens dans le Nord.",
+  wildspacer: "Ton expérience spatiale t’accorde le don Dur à cuire et une adaptation à l’apesanteur.",
+  witchlightHand: "Le carnaval du Sorcelume t’offre le gîte, la nourriture et l’accès à ses attractions.",
+  witherbloomStudent: "Tu étudies la magie du vivant de Flestfleur et obtiens le don Initié de Strixhaven.",
+};
+
+
+// Module : creation-next
+const CREATION_NEXT_KEY = "companion.creation-next.draft.v1";
+function creationNextActive() { return new URLSearchParams(location.search).has("creation"); }
+function isNextWizard(w = ui.wizard) { return !!w && !w.original && !w.aidedd; }
+/** Brouillon de création conservé sur cet appareil, ou null. */
+function creationNextSavedDraft() {
+  try { const saved = JSON.parse(localStorage.getItem(CREATION_NEXT_KEY)); return saved?.wizard?.draft ? saved : null; } catch { return null; }
+}
+/** Rouvre un brouillon de création à l’étape où il a été laissé. */
+function creationNextRestore(saved) {
+  ui.wizard = saved.wizard; ui.wizard.flow = "next"; ui.raceFamily = saved.family || "all"; ui.creationRaceInspect = saved.inspect || null;
+  if (ui.wizard.nextClassConfirmed) ui.creationClassInspect = primaryClassId(ui.wizard.draft);
+  if (ui.wizard.nextBackgroundConfirmed) ui.creationBackgroundInspect = ui.wizard.draft.background.id || "custom";
+  const creationUrl = new URL(location.href);
+  creationUrl.searchParams.set("creation", "next");
+  creationUrl.searchParams.delete("welcome");
+  history.replaceState(null, "", creationUrl);
+}
+/** Nom affiché d’un brouillon de création : le sien, sinon ce qui est déjà choisi. */
+function creationNextDraftName(saved) {
+  const w = saved.wizard, d = w.draft;
+  return d.name || [w.nextRaceChosen ? uiRaceOf(d).name : "", w.nextClassConfirmed ? uiClasses[primaryClassId(d)]?.name : ""].filter(Boolean).join(" · ") || uiText("personnage sans nom");
+}
+window.companionCreationNext = { snapshot: () => isNextWizard() ? clone({ draft: ui.wizard.draft, step: ui.wizard.step, family: ui.raceFamily, line: ui.creationLine?.id ?? null }) : null };
+
+const creationNextPortraitAssignments = new Map();
+function creationNextPortraitId(id) {
+  const family = portraitFamilyOf({ raceId: id }).id;
+  const group = RACES[id]?.group || RACES[id]?.name || family, key = `${family}|${group}`;
+  if (!creationNextPortraitAssignments.has(key)) {
+    const pool = PORTRAITS.filter((portrait) => portrait.family === family);
+    let seed = 0; for (const char of family) seed = (seed * 31 + char.charCodeAt(0)) >>> 0;
+    const ordered = [...pool];
+    for (let i = ordered.length - 1; i > 0; i--) { seed = (seed * 1664525 + 1013904223) >>> 0; const j = seed % (i + 1); [ordered[i], ordered[j]] = [ordered[j], ordered[i]]; }
+    const ids = Object.keys(RACES).filter((raceId) => portraitFamilyOf({ raceId }).id === family && (RACES[raceId].group || RACES[raceId].name || family) === group);
+    creationNextPortraitAssignments.set(key, new Map(ids.map((raceId, index) => [raceId, ordered[index % ordered.length]?.id])));
+  }
+  return creationNextPortraitAssignments.get(key).get(id);
+}
+function creationNextPortrait(id) {
+  const portrait = creationNextPortraitId(id);
+  return portrait ? portraitUrl({ portrait: { kind: "preset", id: portrait } }) : portraitUrl({ raceId: id });
+}
+
+/* ---------------------------------------------------------------- sélection */
+function creationNextFamilyRaces(family) {
+  return family === "Maison" ? ["custom"] : Object.keys(uiRaces).filter((id) => (RACES[id].group || RACES[id].name) === family);
+}
+/** Un clic dans la liste adopte la race. Rien n’est précoché : l’ascendance posée par selectCharacterRace est retirée. */
+function creationNextSelectRace(id) {
+  const draft = ui.wizard.draft;
+  if (draft.raceId !== id) {
+    Object.assign(draft, selectCharacterRace(draft, id, { replacing: false }));
+    delete draft.picks["race|dragon"];
+    creationLinesReconcile(draft);
+    ui.wizard = applyCreationIdentityDefaults(ui.wizard);
+  }
+  const identity = ui.wizard.identityDefaults, portraitId = id !== "custom" && creationNextPortraitId(id);
+  if (identity?.automatic?.portrait && portraitId) {
+    ui.wizard.draft.portrait = { kind: "preset", id: portraitId };
+    identity.values.portrait = portraitId;
+    identity.portraits[id] = portraitId;
+  }
+  ui.wizard.nextRaceChosen = true;
+  ui.creationRaceInspect = id;
+}
+/** Le niveau de départ ne choisit pas la sous-classe de niveau 1 à la place du joueur. */
+function creationNextSetStartLevel(c, level) {
+  const classId = primaryClassId(c), chosen = c.subclasses[classId];
+  setStartLevel(c, level);
+  if (!chosen && uiClasses[classId].subLevel === 1) delete c.subclasses[classId];
+}
+/** Étape dont un choix obligatoire reste à faire. */
+function creationNextIncomplete(w, step) {
+  if (step === "race") return !w.nextRaceChosen;
+  if (step === "class") return !w.nextClassConfirmed;
+  if (step === "background") return !w.nextBackgroundConfirmed;
+  return ["abilities", "skills"].includes(step) && creationLines(w.draft).some((line) => line.stage === step && !line.done);
+}
+function creationNextReconcile() {
+  if (!["abilities", "skills", "magic"].includes(ui.wizard.step)) return;
+  const removed = creationLinesReconcile(ui.wizard.draft);
+  if (removed) toast(uiText("creation.removed", { count: removed, s: removed > 1 ? "s" : "" }));
+}
+
+/* -------------------------------------------------------------------- fiche */
+/** Bouton « Source (…) » d’une fiche : livres distincts de l’élément et de sa référence. Sans référence consultable, le même libellé reste passif. */
+function creationNextSource(name, codes, referenceId) {
+  const labels = [...new Set([...codes, referenceId?.split("|")[1]].filter(Boolean).map(sourceLabel))];
+  if (!labels.length) return "";
+  const text = `<span class="pill outline source-pill">${esc(uiText("creation.source", { labels: `${labels.slice(0, 2).join(", ")}${labels.length > 2 ? ", …" : ""}` }))}`;
+  return referenceId && !window.COMPANION_STANDALONE
+    ? `<button type="button" class="creation-source" data-action="open-reference" data-id="${esc(referenceId)}" aria-label="${esc(uiText("creation.sourceRead", { name }))}">${text}${icon("external", 13)}</span></button>`
+    : `<span class="creation-source">${text}</span></span>`;
+}
+/** Choix à venir d’une race, d’une classe ou d’un historique, avec l’étape où ils seront posés. */
+function creationNextTodo(c, origin, title, first = [], last = []) {
+  const stages = { abilities: uiText("Caracs"), skills: uiText("creation.choices"), magic: uiText("Magie") };
+  const rows = creationLines(c).filter((line) => line.origin === origin).map((line) => [line.plain || line.source === title ? [line.label, line.hint].filter(Boolean).join(" ") : `${line.source} : ${line.label}`, line.stage]);
+  return [...first, ...rows, ...last].sort((a, b) => Object.keys(stages).indexOf(a[1]) - Object.keys(stages).indexOf(b[1])).map(([what, stage]) => [what, uiText("creation.todoStep", { step: stages[stage] })]);
+}
+/** Fiche de lecture commune à la race, la classe et l’historique. Sans sélection, une ligne dit quoi faire. */
+function creationNextFiche(kind, fiche) {
+  const label = { race: uiText("creation.raceDetail"), class: uiText("Détail de la classe"), background: uiText("Détail de l’historique") }[kind];
+  const empty = { race: "creation.emptyRace", class: "creation.emptyClass", background: "creation.emptyBackground" }[kind];
+  if (!fiche) return `<section id="creation-${kind}-detail" class="creation-choice-detail creation-fiche" aria-label="${label}" tabindex="-1"><p class="creation-choice-empty" role="status">${uiText(empty)}</p></section>`;
+  const facts = fiche.facts.filter(Boolean);
+  return `<section id="creation-${kind}-detail" class="creation-choice-detail creation-fiche" aria-label="${label}" tabindex="-1"><header class="creation-fiche-head">${fiche.image}<div class="creation-fiche-title"><h2>${esc(fiche.title)}</h2>${fiche.subtitle ? `<p class="creation-fiche-subtitle">${esc(fiche.subtitle)}</p>` : ""}${creationNextSource(fiche.title, [fiche.source], fiche.reference)}</div></header>${fiche.lead ? `<p class="creation-choice-lead">${esc(fiche.lead)}</p>` : ""}${creationChoiceFacts([...facts.filter((fact) => !creationFactWide(fact)), ...facts.filter(creationFactWide)], "creation-fiche-facts")}${fiche.sections.map(([name, text]) => `<section class="creation-choice-feature"><h3>${esc(name)}</h3><p class="preserve">${esc(text || "")}</p></section>`).join("")}${fiche.fields || ""}${fiche.todo.length ? `<aside class="creation-fiche-todo"><h3>${uiText("creation.todo")}</h3><ul>${fiche.todo.map(([what, where]) => `<li><span>${esc(what)}</span><em>${esc(where)}</em></li>`).join("")}</ul></aside>` : ""}</section>`;
+}
+
+function renderCreationNextRace(w, c) {
+  const groups = {};
+  for (const [id, race] of Object.entries(uiRaces)) (groups[RACES[id].group || RACES[id].name] ||= []).push([id, race]);
+  const order = [...RACE_GROUP_ORDER.filter((g) => groups[g]), ...Object.keys(groups).filter((g) => !RACE_GROUP_ORDER.includes(g)), "Maison"];
+  const query = creationChoiceNormalize(ui.raceQuery);
+  const entries = order.flatMap((family) => family === "Maison" ? [{ id: "custom", family, race: { name: uiText("creation.homebrewOrigin") } }] : groups[family].map(([id, race]) => ({ id, race, family })));
+  if (ui.raceFamily === "all") return `<div class="origin-tools origin-family-search"><div class="search-wrap">${icon("search", 18)}<input id="origin-search" class="search-input" data-bind="ui.raceQuery" value="${esc(ui.raceQuery || "")}" placeholder="${uiText("creation.searchRace")}" aria-label="${uiText("creation.searchRace")}"></div></div><div class="origin-family-grid">${order.map((family) => {
+    const members = entries.filter((entry) => entry.family === family && (!query || creationChoiceNormalize(`${entry.race.name} ${entry.race.originalName || ""} ${family}`).includes(query)));
+    if (!members.length) return "";
+    const sample = members[0];
+    return `<button type="button" class="origin-family-card" data-action="choose-race-family" data-value="${esc(family)}">${sample.id !== "custom" ? `<img src="${esc(creationNextPortrait(sample.id))}" alt="" loading="lazy">` : ""}<span><strong>${esc(uiSystemText(uiCatalogueName(family)))}</strong><span>${esc(CREATION_FAMILY_LABELS[family] || "")}</span><small class="next-family-count">${members.length > 1 ? uiText("creation.familyCount", { count: members.length, s: "s" }) : uiText("creation.familySingle")}</small></span>${icon("arrow", 16)}</button>`;
+  }).join("")}</div>`;
+  const members = entries.filter((entry) => entry.family === ui.raceFamily), chosen = w.nextRaceChosen && members.some((entry) => entry.id === c.raceId);
+  const genericTraits = /^(âge|taille|langues?|augmentation de caractéristiques|type de créature)$/i;
+  const variantTraits = (option) => (option.traits || []).map(([name]) => name).filter((name) => !genericTraits.test(name) && !members.some((entry) => entry.race !== option && (entry.race.traits || []).some(([other]) => other === name))).slice(0, 2).join(" · ");
+  const variants = members.map(({ id, race: option }) => `<button type="button" id="creation-race-${esc(id)}" class="next-variant ${chosen && c.raceId === id ? "selected" : ""}" data-action="creation-race-inspect" data-id="${esc(id)}" aria-pressed="${chosen && c.raceId === id}" aria-controls="creation-race-detail"><img src="${esc(creationNextPortrait(id))}" alt=""><span><strong>${esc(option.name)}</strong><small class="next-variant-bonus">${esc(bonusLine(option.grants))}</small><small class="next-variant-summary">${esc(variantTraits(option))}</small><small class="next-variant-source">${esc(sourceLabel(id === "custom" ? "homebrew" : option.source))}</small></span></button>`).join("");
+  const race = uiRaceOf(c), custom = c.raceId === "custom";
+  // Bonus et langues figurent déjà dans la liste de faits : leurs traits ne sont pas répétés en sections.
+  const repeatedTraits = /^(langues?|augmentation de caractéristiques)$/i;
+  const fiche = chosen && {
+    image: `<img class="creation-fiche-image" src="${esc(creationNextPortrait(c.raceId))}" alt="">`,
+    title: race.name, subtitle: race.subtitle, source: race.source, reference: libraryRuntimeReference("race", c.raceId), lead: race.desc,
+    facts: [[uiText("creation.bonus"), bonusLine(race.grants)], ...creationRaceFacts(race).map(([name, value]) => name === uiText("Taille") && RACES[c.raceId]?.sizeChoice && !c.picks["race|size"]?.length ? [name, uiText("creation.sizeChoice")] : [name, value])],
+    sections: (race.traits || []).filter((trait, index) => !repeatedTraits.test(RACES[c.raceId]?.traits?.[index]?.[0] || trait[0])),
+    fields: custom ? `<div class="creation-choice-custom"><div class="form-grid">${field(uiText("Nom de l’origine"), "wiz.customRace.name", c.customRace.name, "text", "", 'maxlength="80"')}${field(uiText("Vitesse (m)"), "wiz.customRace.speed", c.customRace.speed, "number", "", 'min="0" max="90" step="0.5"')}${selectField(uiText("Taille"), "wiz.customRace.size", c.customRace.size, { P: uiText("Petite"), M: uiText("Moyenne") })}${field(uiText("Langues au choix"), "wiz.customRace.languageCount", c.customRace.languageCount ?? 1, "number", "", 'min="0" max="5"')}</div>${field(uiText("Traits de cette origine"), "wiz.customRace.description", c.customRace.description || "", "textarea", "", 'maxlength="6000"')}</div>` : "",
+    todo: creationNextTodo(c, "race", race.name),
+  };
+  return `<div class="${creationChoiceLayout("race")}"><aside class="creation-choice-directory next-navigation" aria-label="${uiText("creation.variants")}"><h2>${uiText("creation.variants")}</h2>${variants}</aside>${creationNextFiche("race", fiche)}</div>`;
+}
+function renderCreationNextClass(w, c) {
+  const id = primaryClassId(c), chosen = !!w.nextClassConfirmed, cls = uiClasses[id], multiclass = CLASS_EXTRAS[id]?.multiclass?.prereq;
+  const [weapons, armors, saves, skills, tools, magic] = creationClassFacts(id);
+  const fiche = chosen && {
+    image: classIllustration(id, "creation-fiche-image") || `<span class="creation-choice-emblem" aria-hidden="true">${icon(cls.icon, 36)}</span>`,
+    title: cls.name, subtitle: cls.role, source: CLASS_LEVEL_RULES[id]?.source, reference: libraryRuntimeReference("class", id), lead: cls.desc,
+    facts: [[uiText("Dé de vie"), `d${cls.die}`], [uiText("Caractéristique clé"), uiAbilities[cls.primary[0]]?.name || ""], saves, magic, [cls.subLabel, uiText("Niveau {p10}", { p10: cls.subLevel })], multiclass ? [uiText("creation.multiclass"), prereqText(multiclass)] : null, ...[weapons, armors, skills, tools].filter(Boolean).map(([name, value]) => [name, value, "wide"])],
+    sections: [],
+    todo: creationNextTodo(c, "class", cls.name, [[uiText("Niveau de départ"), "skills"]], spellcasters(c).length ? [[uiText("creation.todoClassSpells"), "magic"]] : []),
+  };
+  return `<div class="${creationChoiceLayout("class")}">${creationChoiceDirectory("class", Object.entries(uiClasses), chosen ? id : null, chosen ? id : null)}${creationNextFiche("class", fiche)}</div>`;
+}
+function creationNextBackgroundDescription(id, background) {
+  if (id === "custom") return "Deux compétences et une aptitude à définir.";
+  return background.desc || CREATION_BACKGROUND_DESCRIPTIONS[id] || "";
+}
+function creationNextBackgroundBenefits(background) {
+  const grants = background.grants || {};
+  const benefits = (background.skills || []).map((id) => uiSkills[id]?.[0] || id);
+  if (grants.skillChoice) benefits.push(`${grants.skillChoice.count} compétences au choix`);
+  benefits.push(...(grants.tools || []).map((id) => uiTools[id]?.name || id));
+  if (grants.toolChoice) benefits.push(`${grants.toolChoice.count} outil${grants.toolChoice.count > 1 ? "s" : ""} au choix`);
+  benefits.push(...(grants.languages || []).map((id) => uiLanguages[id]?.name || id));
+  if (grants.languageChoice) benefits.push(`${grants.languageChoice.count} langue${grants.languageChoice.count > 1 ? "s" : ""} au choix`);
+  if (grants.toolOrLanguageChoice) benefits.push(`${grants.toolOrLanguageChoice.count} langue${grants.toolOrLanguageChoice.count > 1 ? "s" : ""} ou outil${grants.toolOrLanguageChoice.count > 1 ? "s" : ""} au choix`);
+  return benefits.join(" · ");
+}
+function renderCreationNextBackground(w, c) {
+  const id = c.background.id || "custom", chosen = !!w.nextBackgroundConfirmed, bg = uiBackgroundOf(c), custom = id === "custom";
+  const items = [...Object.entries(uiBackgrounds), ["custom", { name: uiText("Personnalisé"), skills: [] }]];
+  const fiche = chosen && {
+    image: backgroundIllustration(id, "creation-fiche-image"),
+    title: bg.name, subtitle: custom ? uiText("Avec l’accord du MJ") : "", source: bg.source, reference: bg.referenceId || libraryRuntimeReference("background", id), lead: creationNextBackgroundDescription(id, bg),
+    facts: creationBackgroundFacts(bg),
+    sections: [...(!custom && bg.feature?.[0] ? [bg.feature] : []), ...(bg.grants?.feats || []).filter((featId) => uiFeats[featId]).map((featId) => [uiFeats[featId].name, uiFeats[featId].summary])],
+    fields: custom ? `<div class="creation-choice-custom"><div class="form-grid">${field(uiText("Nom de l’historique"), "wiz.background.name", c.background.name, "text", "", 'maxlength="80"')}${field(uiText("Nom de l’aptitude"), "wiz.background.featureName", c.background.featureName || "", "text", "", 'maxlength="120"')}</div>${field(uiText("Aptitude d’historique"), "wiz.background.feature", c.background.feature || "", "textarea", uiText("Avantage narratif à valider avec le MJ."), 'maxlength="4000"')}${field(uiText("Équipement"), "wiz.background.equipment", c.background.equipment || "", "text", "", 'maxlength="600"')}</div>` : "",
+    todo: creationNextTodo(c, "background", bg.name),
+  };
+  return `<div class="${creationChoiceLayout("background")}">${creationChoiceDirectory("background", items, chosen ? id : null, chosen ? id : null)}${creationNextFiche("background", fiche)}</div>`;
+}
+
+/* ---------------------------------------------------------- lignes de choix */
+function creationNextSlug(id) { return String(id).replace(/[^a-zA-Z0-9_-]+/g, "-"); }
+/** Ligne ouverte de l’écran : la première incomplète, puis la suivante dès qu’une ligne vient d’être complétée. Une ligne rouverte à la main, ou avec une saisie, reste ouverte. */
+function creationNextOpenLine(lines, step) {
+  let state = ui.creationLine;
+  if (state?.step !== step) state = ui.creationLine = { step, id: undefined, pinned: false };
+  const current = lines.find((line) => line.id === state.id);
+  if (current && !current.done) state.pinned = false;
+  else if (state.id !== null && !(current && (state.pinned || current.typing))) Object.assign(state, { id: lines.find((line) => !line.done)?.id ?? null, pinned: false });
+  if (state.query !== state.id) { state.query = state.id; ui.creationChoiceQuery = ""; }
+  return state.id;
+}
+/** Le focus suit la ligne ouverte quand le champ actif a disparu avec sa ligne ; sans ligne ouverte, il va sur « Suivant ». */
+function creationNextFocusLine(force = false) {
+  if (!force && document.activeElement && document.activeElement !== document.body) return;
+  const head = document.querySelector(".choice-line.open > .choice-line-head") || document.getElementById("workflow-next");
+  if (!head) return;
+  head.focus({ preventScroll: true });
+  // L’en-tête de ligne doit rester lisible sous la barre d’étapes collante.
+  const top = head.getBoundingClientRect().top, bar = document.querySelector(".workflow-header")?.getBoundingClientRect().bottom || 0;
+  if (head.matches(".choice-line-head") && (force || top < bar || top > innerHeight * 0.6)) head.scrollIntoView({ block: "start" });
+}
+function renderCreationNextSpellDetails(c, spell, path) {
+  const facts = [
+    ["Incantation", spell.casting?.includes(",") ? spell.casting : null],
+    ["Portée", uiSpellRange(spell, c)],
+    ["Durée", spell.duration],
+    ["Composantes", spell.components],
+  ];
+  return `<details class="choice-option-details" data-detail="${esc(`creation-next-${path}-${spell.id}`)}"><summary>${uiText("Détails")}</summary>
+    <div class="spell-data">${facts.filter(([, value]) => value).map(([label, value]) => `<div><b>${uiText(label)}</b>${esc(value)}</div>`).join("")}</div>
+    ${renderSpellDescription(spell, c, { omitFacts: ["level", "school", "casting time", "range", "duration", "components"], fallbackNotice: false })}
+  </details>`;
+}
+/** Composant unique des choix de création : en-tête repliable, puis options natives liées au brouillon. */
+function renderCreationNextLine(c, line, open) {
+  const slug = creationNextSlug(line.id), chosen = line.options.filter((entry) => entry.on).map((entry) => entry.name);
+  const selection = line.bind === "text" && line.text.trim() ? line.text : chosen.length ? chosen.join(", ") : line.required ? uiText("creation.line.toChoose") : uiText("creation.line.optional");
+  const made = line.bind === "text" ? Number(!!line.text.trim()) : line.selected.length;
+  const head = `<button type="button" class="choice-line-head" id="choice-line-${slug}" data-action="creation-line-toggle" data-id="${esc(line.id)}" aria-expanded="${open}" ${open ? `aria-controls="choice-body-${slug}"` : ""}><span class="choice-line-main"><span class="choice-line-source">${esc(line.source)}</span><span class="choice-line-what"><strong>${esc(line.label)}</strong>${line.hint ? ` <small>${esc(line.hint)}</small>` : ""}</span><span class="choice-line-selection">${esc(selection)}</span></span><span class="pill outline choice-line-count">${made} / ${line.count}</span><span class="choice-line-arrow" aria-hidden="true">${icon("chevron", 14)}</span></button>`;
+  const state = `${open ? "open" : ""} ${line.done && made ? "done" : ""} ${line.short ? "short" : ""}`;
+  if (!open) return `<div class="choice-line ${state}" data-line="${esc(line.id)}">${head}</div>`;
+  const path = `wiz.${line.path}`, help = line.help ? `<p class="choice-line-help">${esc(line.help)}</p>` : "";
+  if (line.bind === "text") return `<div class="choice-line ${state}" data-line="${esc(line.id)}">${head}<div class="choice-line-body" id="choice-body-${slug}">${help}<label class="field" for="choice-${slug}-text"><span class="sr-only">${esc(line.label)}</span><input id="choice-${slug}-text" type="text" data-bind="${esc(path)}" data-live="1" value="${esc(line.text)}" maxlength="300"></label></div></div>`;
+  const single = line.count === 1, type = single && line.required || line.bind === "value" ? "radio" : "checkbox", full = !single && line.selected.length >= line.count;
+  const binding = line.bind === "value" ? `data-bind="${esc(path)}"` : `data-array="${esc(path)}" data-limit="${line.count}"`;
+  const query = creationChoiceNormalize(ui.creationChoiceQuery), languages = ["language", "toolOrLanguage"].includes(line.kind) && line.options.some((entry) => uiLanguages[entry.id]?.type === "standard");
+  const visible = line.options.map((entry, index) => ({ entry, index })).filter(({ entry }) => entry.on || (!query || creationChoiceNormalize(entry.name).includes(query)) && !(languages && !ui.creationLanguageExotic && uiLanguages[entry.id]?.type === "exotic"));
+  const warning = line.short ? `<div class="choice-line-warning" role="status"><strong>${uiText("creation.shortage", { need: line.missing, free: line.free, s: line.free > 1 ? "s" : "" })}</strong> ${line.blockers.length ? uiText("creation.shortage.release") : uiText("creation.shortage.none")}${line.blockers.length ? `<div class="choice-line-release">${line.blockers.map((entry) => button(esc(`${entry.name}, ${entry.why}`), "creation-line-release", `data-path="${esc(entry.holder.path)}" data-value="${esc(entry.id)}" data-focus="choice-${slug}-${line.options.indexOf(entry)}"`, "small-btn")).join("")}</div>` : ""}</div>` : "";
+  const search = line.options.length > 8 ? `<label class="search-wrap choice-line-search">${icon("search", 17)}<span class="sr-only">${uiText("creation.searchOption")}</span><input id="choice-search-${slug}" type="search" class="search-input" data-bind="ui.creationChoiceQuery" value="${esc(ui.creationChoiceQuery || "")}" placeholder="${uiText("creation.searchPlaceholder")}"></label>` : "";
+  const rows = visible.map(({ entry, index }) => {
+    const id = `choice-${slug}-${index}`, off = entry.off && !entry.on, spell = line.kind === "spell" ? uiSpellById(c, entry.id) : null;
+    const brief = !spell && entry.desc && entry.desc.length <= 160;
+    const tags = spell ? [spell.school, spell.casting?.split(",")[0], spell.concentration ? uiText("Concentration") : "", spell.ritual ? uiText("Rituel") : ""].filter(Boolean) : [];
+    const more = spell ? renderCreationNextSpellDetails(c, spell, line.path)
+      : entry.desc && !brief || entry.more?.length ? `<details class="choice-option-details" data-detail="${id}"><summary>${uiText("Détails")}</summary>${entry.desc && !brief ? `<p>${esc(entry.desc)}</p>` : ""}${(entry.more || []).map(([name, text]) => `<p><strong>${esc(name)}</strong><br>${esc(text)}</p>`).join("")}</details>` : "";
+    return `<div class="choice-option ${off ? "off" : ""} ${entry.on ? "selected" : ""}"><label class="choice-option-pick" for="${id}"><input type="${type}" id="${id}" name="choice-${slug}" ${binding} value="${esc(entry.id)}" ${entry.on ? "checked" : ""} ${off || full && !entry.on ? "disabled" : ""}><span class="choice-option-name">${esc(entry.name)}${brief ? `<small>${esc(entry.desc)}</small>` : ""}</span></label>${off ? `<span class="choice-option-why">${esc(entry.why)}</span>` : ""}${tags.length ? `<span class="choice-option-tags">${tags.map((tag) => `<span class="pill outline">${esc(tag)}</span>`).join("")}</span>` : ""}${spell?.referenceId && !window.COMPANION_STANDALONE ? smallIcon("info", "open-reference", uiText("creation.sourceRead", { name: entry.name }), `data-id="${esc(spell.referenceId)}"`) : ""}${more}</div>`;
+  }).join("");
+  const fields = line.kind === "subclass" && line.typing ? `<div class="choice-line-fields"><div class="form-grid">${field(uiText("Nom de la sous-classe"), `${path.replace("subclasses", "customSubclasses")}.name`, c.customSubclasses?.[primaryClassId(c)]?.name || "", "text", "", 'maxlength="100"')}</div>${field(uiText("Aptitudes et niveaux"), `${path.replace("subclasses", "customSubclasses")}.description`, c.customSubclasses?.[primaryClassId(c)]?.description || "", "textarea", uiText("Effets descriptifs. Les bonus chiffrés et compteurs s’ajoutent dans Maison."), 'maxlength="10000"')}</div>` : "";
+  const columns = line.pool && visible.length > 8 ? "columns" : "";
+  return `<div class="choice-line ${state}" data-line="${esc(line.id)}">${head}<div class="choice-line-body" id="choice-body-${slug}">${warning}${help}${search}<div class="choice-line-options ${columns}" role="group" aria-label="${esc(line.name)}">${rows || `<p class="creation-choice-empty">${uiText("creation.noOption")}</p>`}</div>${fields}</div></div>`;
+}
+/** Ce qui manque, chaque manque ouvrant sa ligne. */
+function renderCreationNextRemaining(lines) {
+  const missing = lines.filter((line) => !line.done);
+  return missing.length
+    ? `<p class="choice-remaining" role="status">${uiText("creation.remaining", { count: missing.length, s: missing.length > 1 ? "s" : "" })} ${missing.map((line, index) => `<button type="button" class="choice-remaining-link" id="choice-missing-${creationNextSlug(line.id)}" data-action="creation-line-open" data-id="${esc(line.id)}"><span>${esc(line.name)}</span>${index < missing.length - 1 ? "," : "."}</button>`).join(" ")}</p>`
+    : `<p class="choice-remaining complete" role="status">${uiText("creation.complete")}</p>`;
+}
+/** Maîtrises fixes d’une famille (compétences, langues, outils), regroupées par source. */
+function creationNextAcquired(c, family, key) {
+  const bySource = new Map();
+  for (const [id, source] of creationFixedProficiencies(c)) if (Object.hasOwn(family, id)) bySource.set(source, [...(bySource.get(source) || []), family[id].name || family[id][0]]);
+  return bySource.size ? `<span class="choice-group-acquired">${esc(uiText(key, { list: [...bySource].map(([source, names]) => `${names.join(", ")} (${source})`).join(" · ") }))}</span>` : "";
+}
+/** Choix d’une étape hors écran Choix : bonus de race aux Caracs, sorts de race et de don à la Magie. */
+function renderCreationNextStage(c, stage, title) {
+  const lines = creationLines(c).filter((line) => line.stage === stage);
+  if (!lines.length) return "";
+  const open = creationNextOpenLine(lines, stage);
+  return `<section class="choice-group choice-stage"><div class="choice-group-head"><h3>${esc(title)}</h3></div>${renderCreationNextRemaining(lines)}${lines.map((line) => renderCreationNextLine(c, line, line.id === open)).join("")}</section>`;
+}
+/** Écran Choix : tout ce qui se décide une fois la race, la classe et l’historique connus. */
+function renderCreationNextChoices(w, c) {
+  const lines = creationLines(c).filter((line) => line.stage === "skills"), open = creationNextOpenLine(lines, "skills"), level = levelOf(c);
+  const required = lines.filter((line) => line.required && line.bind !== "text");
+  // Les lignes de la classe suivent la première rangée sans intitulé : leur source les nomme déjà.
+  const heads = {
+    class: null,
+    skills: [uiText("Compétences"), creationNextAcquired(c, uiSkills, "creation.acquired")],
+    languages: [uiText("Langues"), `${creationNextAcquired(c, uiLanguages, "creation.acquired")}<label class="choice-group-toggle" for="choice-exotic-languages"><input id="choice-exotic-languages" type="checkbox" data-bind="ui.creationLanguageExotic" ${ui.creationLanguageExotic ? "checked" : ""}>${uiText("creation.exoticLanguages")}</label>`],
+    tools: [uiText("creation.group.tools"), creationNextAcquired(c, uiTools, "creation.acquiredM")],
+    options: [uiText("creation.group.options"), ""],
+    feat: [uiText("Don"), ""],
+  };
+  const startLevel = `<div class="choice-screen-level">${selectField(uiText("Niveau de départ"), "ui.wizard.startLevel", level, Object.fromEntries(Array.from({ length: 20 }, (_, index) => [index + 1, uiText("Niveau {p0}", { p0: index + 1 })])), level > 1 ? uiText("creation.levelNote", { level }) : "", 'data-number="1"')}</div>`;
+  // Première rangée : niveau de départ, ce qui manque, compteur. Le fil d’étapes porte déjà le titre visible.
+  return `<div class="choice-screen"><h2 class="sr-only">${uiText("creation.choices")}</h2><div class="choice-screen-head">${startLevel}${renderCreationNextRemaining(lines)}<span class="pill outline choice-screen-count">${required.reduce((sum, line) => sum + Math.min(line.selected.length, line.count), 0)} / ${required.reduce((sum, line) => sum + line.count, 0)}</span></div>${Object.entries(heads).map(([group, head]) => {
+    const rows = lines.filter((line) => line.group === group);
+    return rows.length ? `<section class="choice-group" data-group="${group}">${head ? `<div class="choice-group-head"><h3>${head[0]}</h3>${head[1]}</div>` : ""}${rows.map((line) => renderCreationNextLine(c, line, line.id === open)).join("")}</section>` : "";
+  }).join("")}</div>`;
+}
+
+/* ------------------------------------------------------------------- aperçu */
+function renderCreationNextPreview(w) {
+  const c = w.draft, familyRace = ui.raceFamily !== "all" && !w.nextRaceChosen ? creationNextFamilyRaces(ui.raceFamily).find((id) => id !== "custom") : null;
+  const preview = familyRace ? { ...c, raceId: familyRace, portrait: { kind: "preset", id: creationNextPortraitId(familyRace) } } : c;
+  const origin = w.nextRaceChosen ? uiRaceOf(c).name : familyRace ? uiText("creation.familyPreview", { family: uiSystemText(uiCatalogueName(ui.raceFamily)) }) : uiText("creation.originToChoose");
+  return `<aside class="preview-panel"><div class="eyebrow">${uiText("Aperçu du personnage")}</div><div class="preview-identity">${characterPortrait(preview, { editable: true, id: "preview-portrait" })}<div class="preview-identity-copy"><div class="preview-name">${esc(c.name || uiText("Ton aventurier"))}</div><div class="preview-meta">${esc(origin)} · ${esc(w.nextClassConfirmed ? classSummary(c) : uiText("creation.classToChoose"))}</div></div></div></aside>`;
+}
+/** Historique et maîtrises réunies, mis à jour à chaque choix. */
+function renderCreationNextPreviewChoices(c) {
+  if (!ui.wizard.nextBackgroundConfirmed) return `<div class="next-preview-choices"><strong>${uiText("creation.backgroundToChoose")}</strong></div>`;
+  const d = uiDerive(c), rows = [[uiText("Compétences"), Object.keys(uiSkills).filter((id) => d.ranks[id]).map((id) => uiSkills[id][0])], [uiText("Langues"), d.languages.map((entry) => entry.name)], [uiText("Outils"), d.tools.map((entry) => entry.name)]];
+  return `<div class="next-preview-choices"><strong>${esc(uiBackgroundOf(c).name)}</strong>${rows.filter(([, names]) => names.length).map(([label, names]) => `<div><small>${label}</small><br>${esc(names.join(", "))}</div>`).join("")}</div>`;
+}
+
+
 // Module : app
+// Réactiver après qualification du parcours d’import AideDD.
+const AIDEDD_IMPORT_ENABLED = false;
+const welcomePortrait = PORTRAITS[Math.floor(Math.random() * PORTRAITS.length)];
 const dashboardDesktopMedia = window.matchMedia("(min-width: 1001px)");
 dashboardDesktopMedia.addEventListener("change", () => render());
 const root = document.getElementById("app"),
@@ -43535,6 +47357,7 @@ const ui = {
   editorContext: null,
   creationClassQuery: "",
   creationBackgroundQuery: "",
+  creationRaceInspect: null,
   creationClassInspect: null,
   creationBackgroundInspect: null,
   rollMode: "normal",
@@ -43788,8 +47611,9 @@ function impactHtml(before, after, extraRows = []) {
     : notice(uiText("Les valeurs calculées ne changent pas. Tes textes, choix ou sélections seront bien enregistrés."));
 }
 function miniPreview(c, { editablePortrait = false } = {}) {
+  if (isNextWizard() && !ui.wizard.nextClassConfirmed) return `<aside class="preview-panel"><div class="eyebrow">${uiText("Aperçu du personnage")}</div><div class="preview-identity">${characterPortrait(c, { editable: editablePortrait, id: "preview-portrait" })}<div class="preview-identity-copy"><div class="preview-name">${esc(c.name || uiText("Ton aventurier"))}</div><div class="preview-meta">${esc(uiRaceOf(c).name)} · ${uiText("creation.classToChoose")}</div></div></div><div class="preview-abilities">${Object.entries(uiAbilities).map(([a, v]) => `<span><small>${v.short}</small><strong>${signed(uiDerive(c).mods[a])}</strong><em>${uiDerive(c).scores[a]}</em></span>`).join("")}</div></aside>`;
   const d = uiDerive(c);
-  return `<aside class="preview-panel" style="--livery:${liveryOf(c)}"><div class="eyebrow">${uiText("Aperçu du personnage")}</div><div class="preview-identity">${characterPortrait(c, { editable: editablePortrait, id: "preview-portrait" })}<div class="preview-identity-copy"><div class="preview-name">${esc(c.name || uiText("Ton aventurier"))}</div><div class="preview-meta">${esc(d.race.name)} · ${esc(classSummary(c))}</div></div></div><div class="preview-stats"><div class="preview-stat">${d.maxHp}<span>${uiText("PV maximum")}</span></div><div class="preview-stat">${d.ac}<span>${uiText("Classe d’armure")}</span></div><div class="preview-stat">${signed(d.initiative)}<span>${uiText("Initiative")}</span></div><div class="preview-stat">${d.spellDC ?? signed(d.attack)}<span>${d.spellDC ? uiText("DD des sorts") : uiText("Attaque principale")}</span></div></div><div class="preview-abilities">${Object.entries(uiAbilities)
+  return `<aside class="preview-panel" style="--livery:${liveryOf(c)}"><div class="eyebrow">${uiText("Aperçu du personnage")}</div><div class="preview-identity">${characterPortrait(c, { editable: editablePortrait, id: "preview-portrait" })}<div class="preview-identity-copy"><div class="preview-name">${esc(c.name || uiText("Ton aventurier"))}</div><div class="preview-meta">${esc(d.race.name)} · ${esc(classSummary(c))}</div></div></div>${isNextWizard() ? renderCreationNextPreviewChoices(c) : ""}<div class="preview-stats"><div class="preview-stat">${d.maxHp}<span>${uiText("PV maximum")}</span></div><div class="preview-stat">${d.ac}<span>${uiText("Classe d’armure")}</span></div><div class="preview-stat">${signed(d.initiative)}<span>${uiText("Initiative")}</span></div><div class="preview-stat">${d.spellDC ?? signed(d.attack)}<span>${d.spellDC ? uiText("DD des sorts") : uiText("Attaque principale")}</span></div></div><div class="preview-abilities">${Object.entries(uiAbilities)
     .map(([a, v]) => `<span><small>${v.short}</small><strong>${signed(d.mods[a])}</strong><em>${d.scores[a]}</em></span>`)
     .join("")}</div><div class="preview-tip">${uiText("{p11} La fiche sera mise à jour après validation.", { p11: icon("eye", 16) })}</div></aside>`;
 }
@@ -43813,11 +47637,12 @@ function render() {
     return;
   }
   const c = activeCharacter(),
-    wizardActive = !!ui.wizard || !!ui.levelFlow;
+    wizardActive = !!ui.wizard || !!ui.levelFlow,
+    emptyHome = !appData.characters.length && ui.route === "home" && !wizardActive;
   const saveLabel = ui.saving ? uiText("save.saving") : localStore.readOnly ? uiText("save.readonly") : localStore.mode === "memory" ? uiText("save.memory") : ui.online ? uiText("save.local") : uiText("save.offline");
   const mobileStatus = ui.saving ? uiText("save.saving") : localStore.readOnly ? uiText("save.readonly") : localStore.mode === "memory" ? uiText("save.unsaved") : ui.online ? uiText("save.saved") : uiText("save.offlineShort");
   clearDashboardMount();
-  root.innerHTML = `<a class="skip" href="#main-content">${uiText("shell.skip")}</a><div class="app-shell" style="--livery:${liveryOf(c)}"><aside class="sidebar"><button class="brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 30)}</span><span><span class="brand-name">Compagnon</span></span></button><div class="sidebar-label">${uiText("shell.table")}</div>${navFor(c).map(([route, ico, label]) => `<button class="nav-btn ${ui.route === route && !wizardActive ? "active" : ""}" data-action="navigate" data-route="${route}" ${ui.route === route && !wizardActive ? 'aria-current="page"' : ""} ${!c ? "disabled" : ""}>${icon(ico, 20)}${uiText(`nav.${route}`)}</button>`).join("")}<div class="sidebar-bottom"><button class="nav-btn ${ui.route === "library" ? "active" : ""}" data-action="navigate" data-route="library">${uiText("{p6}Bibliothèque", { p6: icon("book", 20) })}</button><button class="nav-btn ${ui.route === "offline" ? "active" : ""}" data-action="navigate" data-route="offline">${uiText("{p8}Contenu hors ligne", { p8: icon("download", 20) })}</button><button class="nav-btn ${ui.route === "home" && !wizardActive ? "active" : ""}" data-action="navigate" data-route="home">${uiText("{p10}Mes personnages", { p10: icon("users", 20) })}</button><button class="nav-btn ${ui.route === "settings" ? "active" : ""}" data-action="navigate" data-route="settings">${uiText("{p12}Réglages & sauvegardes", { p12: icon("settings", 20) })}</button><div class="local-note">${icon("lock", 19)}<div>${uiText("shell.local")}</div></div><div class="side-footer"><span>${uiText("shell.rules")}</span><span>v${APP_VERSION}</span></div></div></aside><div class="main-shell"><header class="topbar"><div class="top-title"><strong>${wizardActive ? uiText("shell.creation") : uiText(`nav.${ui.route}`)}</strong></div><button class="brand mobile-brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 26)}</span><span><span class="brand-name">Compagnon</span><span class="brand-sub">${uiText("shell.rules")}</span></span></button><div class="top-actions"><span class="save-status" title="${esc(saveLabel)}" role="status"><span class="status-dot" style="${localStore.mode === "memory" || localStore.readOnly ? "background:var(--warning)" : ""}" aria-hidden="true"></span><span class="status-text">${esc(saveLabel)}</span><span class="status-mobile">${esc(mobileStatus)}</span></span>${c && !wizardActive ? renderCharacterMenu(c) : !isInstalledApp() ? `<span class="top-utility">${smallIcon("phone", "install", uiText("shell.install"))}</span>` : ""}</div></header>${ui.languageWarning ? notice(uiText("language.failure"), "warning") : ""}${ui.update ? `<div class="update-banner">${uiText("Une nouvelle version est prête. Tes fiches seront conservées.{p0}", { p0: button(uiText("Mettre à jour"), "update-app", "", "small-btn") })}</div>` : ""}${localStore.mode === "memory" ? notice(("Le navigateur bloque le stockage. <strong>" + uiText("Les changements ne survivront pas à la fermeture.") + "</strong> Exporte tes fiches et ouvre l’application hors navigation privée."), "error") : ""}${localStore.readOnly ? notice(uiText("Le stockage de ce navigateur est en lecture seule. Exporte tes fiches pour les conserver dans un navigateur compatible."), "warning") : ""}${localStore.pendingState ? notice(uiText("Une modification n’a pas été enregistrée. {p0}", { p0: button(uiText("Exporter les modifications en attente"), "export-pending", "", "small-btn") }), "warning") : ""}${appData.recovery?.length ? notice(uiText("{p0} fiche(s) nécessitent une récupération. Les autres restent accessibles. {p1}", { p0: appData.recovery.length, p1: button(uiText("Exporter les données à récupérer"), "export-recovery", "", "small-btn") }), "warning") : ""}<main class="main ${wizardActive ? "wizard-active" : ""}" id="main-content" tabindex="-1">${ui.wizard ? renderWizard() : ui.levelFlow ? renderLevelFlow() : renderPage(c)}${c ? printSheet(c) : ""}</main></div></div><nav class="mobile-nav" aria-label="${esc(uiText("shell.navigation"))}">${[
+  root.innerHTML = `<a class="skip" href="#main-content">${uiText("shell.skip")}</a><div class="app-shell ${emptyHome ? "empty-home" : ""}" style="--livery:${liveryOf(c)}"><aside class="sidebar"><button class="brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 30)}</span><span><span class="brand-name">Compagnon</span></span></button><div class="sidebar-label">${uiText("shell.table")}</div>${navFor(c).map(([route, ico, label]) => `<button class="nav-btn ${ui.route === route && !wizardActive ? "active" : ""}" data-action="navigate" data-route="${route}" ${ui.route === route && !wizardActive ? 'aria-current="page"' : ""} ${!c ? "disabled" : ""}>${icon(ico, 20)}${uiText(`nav.${route}`)}</button>`).join("")}<div class="sidebar-bottom"><button class="nav-btn ${ui.route === "library" ? "active" : ""}" data-action="navigate" data-route="library">${uiText("{p6}Bibliothèque", { p6: icon("book", 20) })}</button><button class="nav-btn ${ui.route === "offline" ? "active" : ""}" data-action="navigate" data-route="offline">${uiText("{p8}Contenu hors ligne", { p8: icon("download", 20) })}</button><button class="nav-btn ${ui.route === "home" && !wizardActive ? "active" : ""}" data-action="navigate" data-route="home">${uiText("{p10}Mes personnages", { p10: icon("users", 20) })}</button><button class="nav-btn ${ui.route === "settings" ? "active" : ""}" data-action="navigate" data-route="settings">${uiText("{p12}Réglages & sauvegardes", { p12: icon("settings", 20) })}</button><div class="local-note">${icon("lock", 19)}<div>${uiText("shell.local")}</div></div><div class="side-footer"><span>${uiText("shell.rules")}</span><span>v${APP_VERSION}</span></div></div></aside><div class="main-shell"><header class="topbar"><div class="top-title"><strong>${wizardActive ? uiText("shell.creation") : uiText(`nav.${ui.route}`)}</strong></div><button class="brand mobile-brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 26)}</span><span><span class="brand-name">Compagnon</span><span class="brand-sub">${uiText("shell.rules")}</span></span></button><div class="top-actions"><span class="save-status" title="${esc(saveLabel)}" role="status"><span class="status-dot" style="${localStore.mode === "memory" || localStore.readOnly ? "background:var(--warning)" : ""}" aria-hidden="true"></span><span class="status-text">${esc(saveLabel)}</span><span class="status-mobile">${esc(mobileStatus)}</span></span>${c && !wizardActive ? renderCharacterMenu(c) : !isInstalledApp() ? `<span class="top-utility">${smallIcon("phone", "install", uiText("shell.install"))}</span>` : ""}</div></header>${ui.languageWarning ? notice(uiText("language.failure"), "warning") : ""}${ui.update ? `<div class="update-banner">${uiText("Une nouvelle version est prête. Tes fiches seront conservées.{p0}", { p0: button(uiText("Mettre à jour"), "update-app", "", "small-btn") })}</div>` : ""}${localStore.mode === "memory" ? notice(("Le navigateur bloque le stockage. <strong>" + uiText("Les changements ne survivront pas à la fermeture.") + "</strong> Exporte tes fiches et ouvre l’application hors navigation privée."), "error") : ""}${localStore.readOnly ? notice(uiText("Le stockage de ce navigateur est en lecture seule. Exporte tes fiches pour les conserver dans un navigateur compatible."), "warning") : ""}${localStore.pendingState ? notice(uiText("Une modification n’a pas été enregistrée. {p0}", { p0: button(uiText("Exporter les modifications en attente"), "export-pending", "", "small-btn") }), "warning") : ""}${appData.recovery?.length ? notice(uiText("{p0} fiche(s) nécessitent une récupération. Les autres restent accessibles. {p1}", { p0: appData.recovery.length, p1: button(uiText("Exporter les données à récupérer"), "export-recovery", "", "small-btn") }), "warning") : ""}<main class="main ${wizardActive ? "wizard-active" : ""}" id="main-content" tabindex="-1">${ui.wizard ? renderWizard() : ui.levelFlow ? renderLevelFlow() : renderPage(c)}${c ? printSheet(c) : ""}</main></div></div><nav class="mobile-nav" aria-label="${esc(uiText("shell.navigation"))}">${[
     ["sheet", "clipboard", uiText("Fiche")],
     ["spells", "book", uiText("Sorts")],
     ["features", "swords", uiText("Aptitudes")],
@@ -43881,7 +47706,7 @@ function render() {
   if (mb) mb.scrollTop = modalScroll;
 }
 function renderPage(c) {
-  if (ui.route === "home") return renderHome() + (window.COMPANION_STANDALONE ? "" : `<div class="actions section-gap">${button(uiText("{p0} Bibliothèque 2014", { p0: icon("book", 18) }), "navigate", 'data-route="library"')}${button(uiText("{p0} Contenu hors ligne", { p0: icon("download", 18) }), "navigate", 'data-route="offline"')}</div>`);
+  if (ui.route === "home") return renderHome() + (!appData.characters.length || window.COMPANION_STANDALONE ? "" : `<div class="actions section-gap">${button(uiText("{p0} Bibliothèque 2014", { p0: icon("book", 18) }), "navigate", 'data-route="library"')}${button(uiText("{p0} Contenu hors ligne", { p0: icon("download", 18) }), "navigate", 'data-route="offline"')}</div>`);
   if (ui.route === "settings") return renderSettings();
   if (ui.route === "more") return renderMore(c);
   if (ui.route === "offline") return renderOffline();
@@ -43902,18 +47727,18 @@ function renderPage(c) {
   )(c);
 }
 function renderHome() {
-  return `${IS_ARTIFACT ? notice(("<strong>" + uiText("Version d’essai en ligne.") + "</strong>Tes fiches restent dans ce navigateur, sans garantie de conservation. Pour jouer avec ta table, installe la version hébergée et transfère tes fiches avec « Copier la sauvegarde » puis « Coller une sauvegarde »."), "warning") + '<div class="spacer"></div>' : ""}<div class="page-head"><div><h1>${appData.characters.length ? uiText("Mes personnages") : uiText("Crée ton premier personnage")}</h1></div>${appData.characters.length ? button(uiText("{p0} Nouveau", { p0: icon("plus", 18) }), "new-character", "", "primary") : ""}</div>${appData.draft && !ui.wizard ? `<div class="notice section-gap">${icon("note", 19)}<div><strong>${uiText("Brouillon : {p1}", { p1: esc(appData.draft.draft?.name || uiText("personnage sans nom")) })}</strong>${uiText("La fiche validée n’a pas été modifiée.")}<div class="actions">${button(uiText("Reprendre"), "resume-draft", "", "small-btn")}${button(uiText("Oublier le brouillon"), "discard-draft", "", "small-btn ghost")}</div></div></div><div class="spacer"></div>` : ""}${
+  const savedCreation = ui.wizard ? null : creationNextSavedDraft();
+  const creationDraft = savedCreation ? `<div class="notice section-gap">${icon("note", 19)}<div><strong>${uiText("Brouillon : {p1}", { p1: esc(creationNextDraftName(savedCreation)) })}</strong>${uiText("creation.draft.step", { step: esc(wizardSteps(savedCreation.wizard).find(([id]) => id === savedCreation.wizard.step)?.[1] || "") })}<div class="actions">${button(uiText("Reprendre"), "resume-draft", 'data-kind="creation"', "small-btn")}${button(uiText("Oublier le brouillon"), "discard-draft", 'data-kind="creation"', "small-btn ghost")}</div></div></div><div class="spacer"></div>` : "";
+  return `${IS_ARTIFACT ? notice(("<strong>" + uiText("Version d’essai en ligne.") + "</strong>Tes fiches restent dans ce navigateur, sans garantie de conservation. Pour jouer avec ta table, installe la version hébergée et transfère tes fiches avec « Copier la sauvegarde » puis « Coller une sauvegarde »."), "warning") + '<div class="spacer"></div>' : ""}<div class="page-head ${appData.characters.length ? "" : "sr-only"}"><div><h1>${appData.characters.length ? uiText("Mes personnages") : uiText("Crée ton premier personnage")}</h1></div>${appData.characters.length ? button(uiText("{p0} Nouveau", { p0: icon("plus", 18) }), "new-character", "", "primary") : ""}</div>${creationDraft}${appData.draft && !ui.wizard ? `<div class="notice section-gap">${icon("note", 19)}<div><strong>${uiText("Brouillon : {p1}", { p1: esc(appData.draft.draft?.name || uiText("personnage sans nom")) })}</strong>${uiText("La fiche validée n’a pas été modifiée.")}<div class="actions">${button(uiText("Reprendre"), "resume-draft", "", "small-btn")}${button(uiText("Oublier le brouillon"), "discard-draft", "", "small-btn ghost")}</div></div></div><div class="spacer"></div>` : ""}${
     !appData.characters.length
-      ? `<section class="welcome creation-welcome"><div class="welcome-copy"><div class="actions">${button(uiText("{p0} Créer mon personnage", { p0: icon("plus", 18) }), "new-character", "", "primary")}${button(uiText("Voir un exemple"), "demo", "", "ghost")}</div></div><div class="creation-classes"><div class="section-title"><h3>${uiText("Commencer avec une classe")}</h3></div><div class="welcome-shields" aria-label="${uiText("Commencer avec une classe")}">${Object.entries(uiClasses)
-          .map(([id, k]) => `<button type="button" class="creation-class" data-action="new-character" data-class="${id}" aria-label="${uiText("Créer un personnage {p1}", { p1: esc(k.name.toLowerCase()) })}">${classIllustration(id, "creation-class-image") || `<span class="creation-class-icon">${icon(k.icon, 26)}</span>`}<span><strong>${k.name}</strong><small>${esc(k.role)}</small></span>${icon("arrow", 16)}</button>`)
-          .join("")}</div></div></section>`
+      ? `<section class="creation-empty">${button(`<img class="creation-welcome-portrait" src="${esc(portraitUrl({ portrait: { kind: "preset", id: welcomePortrait.id } }))}" alt=""><span class="creation-first-character-label">${icon("plus", 26)}<span>${uiText("creation.firstCharacter")}</span></span>`, "new-character", "", "creation-first-character")}</section>`
       : `<div class="grid-2">${appData.characters
           .map((c) => {
             const d = uiDerive(c);
-            return `<article class="char-card" style="--livery:${liveryOf(c)}"><div class="char-card-head">${characterPortrait(c, { small: true })}<div><h3>${esc(c.name)}</h3><div class="meta">${esc(d.race.name)} · ${esc(classSummary(c))}</div></div></div><div class="card-footer"><div class="card-stats"><span><strong>${d.currentHp}/${d.maxHp}</strong>${uiText(" PV")}</span><span><strong>${d.ac}</strong>${uiText(" CA")}</span><span><strong>${d.level}</strong>${uiText(" niv.")}</span></div>${button(uiText("Ouvrir {p0}", { p0: icon("arrow", 16) }), "open-character", `data-id="${esc(c.id)}"`, "small-btn green")}</div></article>`;
+            return `<article class="char-card" style="--livery:${liveryOf(c)}"><div class="char-card-head">${characterPortrait(c, { small: true })}<div><h3>${esc(c.name)}</h3><div class="meta">${esc(d.race.name)} · ${esc(classSummary(c))}</div></div>${smallIcon("trash", "delete-character", uiText("home.deleteCharacter", { name: c.name }), `data-id="${esc(c.id)}"`)}</div><div class="card-footer"><div class="card-stats"><span><strong>${d.currentHp}/${d.maxHp}</strong>${uiText(" PV")}</span><span><strong>${d.ac}</strong>${uiText(" CA")}</span><span><strong>${d.level}</strong>${uiText(" niv.")}</span></div>${button(uiText("Ouvrir {p0}", { p0: icon("arrow", 16) }), "open-character", `data-id="${esc(c.id)}"`, "small-btn green")}</div></article>`;
           })
           .join("")}</div>`
-  }<div class="actions section-gap">${button(uiText("{p0} Importer une sauvegarde", { p0: icon("upload", 17) }), "import", "", "ghost")}${button(uiText("aidedd.open"), "aidedd-open", "", "ghost")}${appData.characters.length ? button(uiText("{p0} Sauvegarder toutes mes fiches", { p0: icon("download", 17) }), "export-all", "", "ghost") : ""}</div>`;
+  }<div class="actions section-gap">${button(uiText("{p0} Importer une sauvegarde", { p0: icon("upload", 17) }), "import", "", "ghost")}${AIDEDD_IMPORT_ENABLED ? button(uiText("aidedd.open"), "aidedd-open", "", "ghost") : ""}${appData.characters.length ? button(uiText("{p0} Sauvegarder toutes mes fiches", { p0: icon("download", 17) }), "export-all", "", "ghost") : ""}</div>`;
 }
 function uiMeters(value) { return formatGameMeasure(value, "m", { language: uiLanguage() }); }
 function formatCarriedWeight(value) { return formatGameMeasure(value, "kg", { language: uiLanguage() }); }
@@ -44357,7 +48182,7 @@ function renderSpellDescription(spell, c = ui.wizard?.draft || ui.levelFlow?.dra
   const text = reference ? referenceDescription(spell.referenceId, language) : SPELL_ACCESS[spell.id]?.description || spell.description;
   const sourceLanguage = reference ? language : SPELL_ACCESS[spell.id] ? "en" : language;
   const fallback = language === "fr" && sourceLanguage === "en";
-  return `<p class="preserve" lang="${sourceLanguage}">${esc(referenceEntries(text, sourceLanguage))}</p>${fallback ? `<p class="tiny muted">${uiText("language.fallback")}</p>` : language === "fr" && reference && libraryNeedsReview(reference) ? `<p class="tiny muted">${LIBRARY_TRANSLATION_REVIEW}</p>` : ""}`;
+  return `<p class="preserve" lang="${sourceLanguage}">${esc(referenceEntries(text, sourceLanguage))}</p>${fallback && options.fallbackNotice !== false ? `<p class="tiny muted">${uiText("language.fallback")}</p>` : language === "fr" && reference && libraryNeedsReview(reference) ? `<p class="tiny muted">${LIBRARY_TRANSLATION_REVIEW}</p>` : ""}`;
 }
 async function loadSpellCastReference(cast, spell) {
   try {
@@ -44505,7 +48330,7 @@ function renderSpells(c) {
       return head + spellCard(c, s);
     })
     .join("");
-  return `<div class="page-head mobile-stack carnet-spell-head"><h1>${uiText("nav.spells")}</h1><details class="carnet-edit-menu"><summary aria-label="${uiText("Choisir mes sorts")}">${icon("edit", 17)}</summary><div class="carnet-edit-popover">${casters.length ? button(uiText("Choisir mes sorts"), "edit-magic", "", "ghost") : ""}${spellCopyBooks(c).length ? button(uiText("Copier un sort"), "copy-spell", "", "ghost") : ""}<div class="segmented"><button data-action="spell-tab" data-value="mine" class="${ui.spellTab === "mine" ? "active" : ""}">${uiText("Mes sorts ({p13})", { p13: ids.size })}</button>${casters.length || c.spells.allowExceptions ? `<button data-action="spell-tab" data-value="catalogue" class="${ui.spellTab === "catalogue" ? "active" : ""}">${uiText("Catalogue de ma classe")}</button>` : ""}</div></div></details></div>${overview ? `<div class="desktop-magic-overview magic-overview"><div class="desktop-magic-metrics">` : ""}${metrics}${innateNote.length ? `<p class="tiny muted">${uiText("Magie d’origine ou de don : {p0}.", { p0: innateNote.map((a) => uiText("{p0} DD {p1}, attaque {p2}", { p0: uiAbilities[a].name, p1: 8 + d.prof + d.mods[a], p2: signed(d.prof + d.mods[a]) })).join(" · ") })}</p>` : ""}${overview ? "</div>" : ""}${
+  return `<div class="page-head mobile-stack carnet-spell-head"><h1>${uiText("nav.spells")}</h1><details class="carnet-edit-menu"><summary aria-label="${uiText("Choisir mes sorts")}">${icon("edit", 17)}</summary><div class="carnet-edit-popover">${casters.length ? button(uiText("Choisir mes sorts"), "edit-magic", "", "ghost") : ""}${spellCopyBooks(c).length ? button(uiText("Copier un sort"), "copy-spell", "", "ghost") : ""}<div class="segmented"><button data-action="spell-tab" data-value="mine" class="${ui.spellTab === "mine" ? "active" : ""}">${uiText("Mes sorts ({p13})", { p13: ids.size })}</button>${casters.length || c.spells.allowExceptions ? `<button data-action="spell-tab" data-value="catalogue" class="${ui.spellTab === "catalogue" ? "active" : ""}">${uiText("Catalogue de ma classe")}</button>` : ""}</div></div></details></div>${renderProgressionRequirements(c, featSpellRequirements(c))}${overview ? `<div class="desktop-magic-overview magic-overview"><div class="desktop-magic-metrics">` : ""}${metrics}${innateNote.length ? `<p class="tiny muted">${uiText("Magie d’origine ou de don : {p0}.", { p0: innateNote.map((a) => uiText("{p0} DD {p1}, attaque {p2}", { p0: uiAbilities[a].name, p1: 8 + d.prof + d.mods[a], p2: signed(d.prof + d.mods[a]) })).join(" · ") })}</p>` : ""}${overview ? "</div>" : ""}${
     slotGroupCount
       ? `<details class="panel slot-summary-panel" data-detail="spell-slots-${c.id}"><summary><strong>${uiText("Emplacements")}</strong><span>${Array.from({ length: 9 }, (_, i) => { const max = (d.slots[i] || 0) + (c.state.temporarySlots?.[i + 1] || 0); return max ? `${i + 1} · ${Math.max(0, max - (c.state.slotsUsed?.[i + 1] || 0))}/${max}` : ""; }).filter(Boolean).join(" · ")}${d.pact ? ` · ${uiText("Pacte")} ${Math.max(0, d.pact.count - (c.state.pactUsed || 0))}/${d.pact.count}` : ""}</span></summary>${renderSlots(c, { compact: true })}</details>`
       : notice(casters.length ? uiText("Tes premiers emplacements arrivent avec le prochain niveau de ta classe.") : uiText("Ta classe ne lance pas de sorts. La magie d’origine, de don ou maison reste utilisable."))
@@ -44972,22 +48797,22 @@ function librarySelection(entry) {
   return null;
 }
 function openReceivedEffect(c, { spellId = "", id = "", referenceId = "", name = "", description = "", level, affection = false } = {}) {
-  const saved = (c.receivedEffects || []).find((entry) => entry.id === id), spell = uiSpellById(c, spellId);
+  const saved = (c.receivedEffects || []).find((entry) => entry.id === id), spell = uiSpellById(c, spellId), guide = RECEIVED_GUIDES[spellId];
   ui.receivedQuery = "";
   ui.receivedAll = false;
   ui.receivedSelected = !!(saved || spellId || name || affection);
-  ui.form = saved ? clone(saved) : { ...(affection ? { affection: true, conditions: [] } : {}), id: "", spellId, referenceId: referenceId || spell?.referenceId || "", name: name || spell?.name || "", description, source: spell ? `${spell.name} (${spell.source.toUpperCase()})` : name, caster: "", duration: spell?.duration || "", target: "", value: 0, level: level ?? spell?.level ?? 0 };
+  ui.form = saved ? clone(saved) : { ...(affection ? { affection: true, conditions: [] } : {}), ...(guide?.dice ? { dice: clone(guide.dice) } : {}), id: "", spellId, referenceId: referenceId || spell?.referenceId || "", name: name || spell?.name || (guide?.name ? uiText(guide.name) : ""), description, source: spell ? `${spell.name} (${spell.source.toUpperCase()})` : name, caster: "", duration: spell?.duration || "", target: "", value: 0, level: level ?? spell?.level ?? 0 };
   openModal("received-effect");
 }
 function renderReceivedEffects(c, compact = false) {
   const active = new Set(activeReceivedEffects(c).map((entry) => entry.id));
   if (compact && !(c.receivedEffects || []).length) return "";
-  return `<div class="received-effect-list ${compact ? "" : "section-gap"}">${compact ? "" : `<div class="panel-head"><h3>${uiText("Effets reçus")}</h3><div>${button(uiText("Ajouter un effet"), "received-add", "", "small-btn")}${button(uiText("Ajouter une affection"), "affection-add", "", "small-btn ghost")}</div></div>`}${(c.receivedEffects || []).map((entry) => `<div class="summary-row"><div><strong>${esc(entry.name)}</strong><small class="muted">${esc([entry.source, entry.caster, entry.duration, ...(entry.conditions || []), entry.target ? `${RECEIVED_TARGETS[entry.target]} : ${signed(entry.value)}` : ""].filter(Boolean).join(" · "))}${active.has(entry.id) ? "" : uiText(" · même effet, contribution non cumulée")}</small></div>${button(uiText("Détail / corriger"), "received-edit", `data-id="${esc(entry.id)}"`, "small-btn ghost")}</div>`).join("")}</div>`;
+  return `<div class="received-effect-list ${compact ? "" : "section-gap"}">${compact ? "" : `<div class="panel-head"><h3>${uiText("Effets reçus")}</h3><div>${button(uiText("Ajouter un effet"), "received-add", "", "small-btn")}${button(uiText("Ajouter une affection"), "affection-add", "", "small-btn ghost")}</div></div>`}${(c.receivedEffects || []).map((entry) => `<div class="summary-row"><div><strong>${esc(entry.name)}</strong><small class="muted">${esc([entry.source, entry.caster, entry.duration, ...(entry.conditions || []), entry.target ? `${RECEIVED_TARGETS[entry.target]} : ${signed(entry.value)}` : "", entry.dice && `+${entry.dice.notation}`].filter(Boolean).join(" · "))}${active.has(entry.id) ? "" : uiText(" · même effet, contribution non cumulée")}</small></div>${button(uiText("Détail / corriger"), "received-edit", `data-id="${esc(entry.id)}"`, "small-btn ghost")}</div>`).join("")}</div>`;
 }
 function receivedEffectModal(c) {
   const f = ui.form, guide = RECEIVED_GUIDES[f.spellId], selected = ui.receivedSelected, query = librarySearchText(ui.receivedQuery || "").trim();
   const matches = uiSpellCatalogue(c).filter((spell) => query ? librarySearchText(`${spell.name} ${spell.englishName || ""} ${spell.id}`).includes(query) : ui.receivedAll || Object.hasOwn(RECEIVED_GUIDES, spell.id));
-  const search = selected ? "" : `<div class="search-wrap">${icon("search", 18)}<input id="received-search" class="search-input" type="search" data-bind="ui.receivedQuery" value="${esc(ui.receivedQuery || "")}" placeholder="${uiText("audit.effects.search")}" aria-label="${uiText("Rechercher un effet")}"></div>${query || ui.receivedAll ? `<p class="small muted" role="status">${uiText("{p1} résultat(s).{p2}", { p1: matches.length, p2: matches.length > 25 ? uiText(" Les 25 premiers sont affichés, précise le nom pour retrouver les autres.") : "" })}</p>` : ""}<div class="library-list received-options">${matches.slice(0, 25).map((spell) => `<button class="library-row" data-action="received-select" data-id="${esc(spell.id)}">${icon(spell.id === "shield-of-faith" ? "sheet" : spell.id === "aid" ? "plus" : "sparkles", 19)}<span><strong>${esc(spell.name)}</strong><small>${esc(RECEIVED_GUIDES[spell.id] ? uiSystemText(RECEIVED_GUIDES[spell.id].summary) : spell.level ? uiText("Niveau {p0}", { p0: spell.level }) : uiText("Sort mineur"))}</small></span></button>`).join("")}</div><div class="library-group-list received-other">${button(uiText("Effet personnalisé"), "received-custom", "", "ghost")}${!ui.receivedAll && !query ? button(uiText("audit.effects.all"), "received-all", "", "ghost") : ""}</div>`;
+  const search = selected ? "" : `<div class="search-wrap">${icon("search", 18)}<input id="received-search" class="search-input" type="search" data-bind="ui.receivedQuery" value="${esc(ui.receivedQuery || "")}" placeholder="${uiText("audit.effects.search")}" aria-label="${uiText("Rechercher un effet")}"></div>${query || ui.receivedAll ? `<p class="small muted" role="status">${uiText("{p1} résultat(s).{p2}", { p1: matches.length, p2: matches.length > 25 ? uiText(" Les 25 premiers sont affichés, précise le nom pour retrouver les autres.") : "" })}</p>` : ""}<div class="library-list received-options">${query ? "" : `<button class="library-row" data-action="received-select" data-id="bardic-inspiration">${icon("music", 19)}<span><strong>${uiText("Inspiration bardique")}</strong><small>${esc(uiSystemText(RECEIVED_GUIDES["bardic-inspiration"].summary))}</small></span></button>`}${matches.slice(0, 25).map((spell) => `<button class="library-row" data-action="received-select" data-id="${esc(spell.id)}">${icon(spell.id === "shield-of-faith" ? "sheet" : spell.id === "aid" ? "plus" : "sparkles", 19)}<span><strong>${esc(spell.name)}</strong><small>${esc(RECEIVED_GUIDES[spell.id] ? uiSystemText(RECEIVED_GUIDES[spell.id].summary) : spell.level ? uiText("Niveau {p0}", { p0: spell.level }) : uiText("Sort mineur"))}</small></span></button>`).join("")}</div><div class="library-group-list received-other">${button(uiText("Effet personnalisé"), "received-custom", "", "ghost")}${!ui.receivedAll && !query ? button(uiText("audit.effects.all"), "received-all", "", "ghost") : ""}</div>`;
   let preview = "";
   if (selected) {
     try {
@@ -44997,7 +48822,7 @@ function receivedEffectModal(c) {
       if (changes.length) preview = `<div role="status" class="notice">${changes.join(" · ")}</div>`;
     } catch { preview = ("<p role=\"alert\">" + uiText("Renseigne un nom et des valeurs valides.") + "</p>"); }
   }
-  return modalShell(f.affection ? (f.id ? uiText("Corriger une affection") : uiText("Ajouter une affection")) : (f.id ? uiText("Corriger un effet reçu") : uiText("Ajouter un effet")), search + (selected ? `${field(uiText("Nom"), "form.name", f.name, "text", "", 'maxlength="300"')}${f.affection ? `${field(uiText("Source de l’affection"), "form.source", f.source, "text", "", 'maxlength="300"')}<h3>${uiText("États associés")}</h3>${conditionSelector(f.conditions || [], "toggle-affection-condition")}${(f.conditions || []).map((name) => `<details class="feature-item"><summary>${esc(uiSystemText(name))}</summary><div class="detail-copy">${esc(uiSystemText(CONDITIONS[name]))}</div></details>`).join("")}` : ""}${guide ? `<p><strong>${esc(guide.summary)}</strong></p>` : ""}${guide?.level ? field(uiText("Niveau de lancement"), "form.level", f.level, "number", "", `min="${guide.level}" max="9" step="1"`) : ""}${!guide ? `<div class="form-grid">${selectField(uiText("Bonus ou malus"), "form.target", f.target, { "": uiText("Description seulement"), ...RECEIVED_TARGETS })}${f.target ? field("Valeur", "form.value", f.value, "number", "", 'min="-10000" max="10000" step="0.5"') : ""}</div>` : ""}${preview}${f.referenceId ? libraryReferenceButton(f.referenceId) : ""}${f.spellId && uiSpellById(c, f.spellId) ? `<details><summary>${uiText("Règle de référence")}</summary>${renderSpellDescription(uiSpellById(c, f.spellId))}</details>` : ""}${field(f.affection ? uiText("Évolution et guérison (notes)") : uiText("Notes ou description (facultatif)"), "form.description", f.description, "textarea", "", 'maxlength="6000" rows="4"')}<details data-detail="received-source"><summary>${f.affection ? uiText("Durée (note)") : uiText("Source et durée (facultatif)")}</summary>${!f.affection ? `${field("Source", "form.source", f.source, "text", "", 'maxlength="300"')}${field(uiText("Nom du lanceur"), "form.caster", f.caster, "text", "", 'maxlength="300"')}` : ""}${field(uiText("Durée (note)"), "form.duration", f.duration, "text", "", 'maxlength="300"')}</details>` : ""), (selected ? button(uiText("Annuler"), "close-modal") : "") + (f.id ? button(uiText("Retirer cet effet"), "received-remove", `data-id="${esc(f.id)}"`, "danger") : "") + (selected ? button(f.id ? uiText("Enregistrer") : uiText("Appliquer"), "received-save", "", "primary") : ""), false, "", "carnet-effects-modal");
+  return modalShell(f.affection ? (f.id ? uiText("Corriger une affection") : uiText("Ajouter une affection")) : (f.id ? uiText("Corriger un effet reçu") : uiText("Ajouter un effet")), search + (selected ? `${field(uiText("Nom"), "form.name", f.name, "text", "", 'maxlength="300"')}${f.affection ? `${field(uiText("Source de l’affection"), "form.source", f.source, "text", "", 'maxlength="300"')}<h3>${uiText("États associés")}</h3>${conditionSelector(f.conditions || [], "toggle-affection-condition")}${(f.conditions || []).map((name) => `<details class="feature-item"><summary>${esc(uiSystemText(name))}</summary><div class="detail-copy">${esc(uiSystemText(CONDITIONS[name]))}</div></details>`).join("")}` : ""}${guide ? `<p><strong>${esc(guide.summary)}</strong></p>` : ""}${guide?.level ? field(uiText("Niveau de lancement"), "form.level", f.level, "number", "", `min="${guide.level}" max="9" step="1"`) : ""}${guide?.dieChoice ? `<div class="form-grid">${selectField(uiText("Dé reçu"), "form.dice.notation", f.dice.notation, Object.fromEntries([6, 8, 10, 12].map((n) => [`1d${n}`, `1d${n}`])))}</div>${checkField(uiText("Aussi aux dégâts (collège de la Vaillance)"), "form.diceDamage", f.diceDamage ?? f.dice.rolls.includes("damage"))}` : ""}${!guide ? `<div class="form-grid">${selectField(uiText("Bonus ou malus"), "form.target", f.target, { "": uiText("Description seulement"), ...RECEIVED_TARGETS })}${f.target ? field("Valeur", "form.value", f.value, "number", "", 'min="-10000" max="10000" step="0.5"') : ""}</div>` : ""}${preview}${f.referenceId ? libraryReferenceButton(f.referenceId) : ""}${f.spellId && uiSpellById(c, f.spellId) ? `<details><summary>${uiText("Règle de référence")}</summary>${renderSpellDescription(uiSpellById(c, f.spellId))}</details>` : ""}${field(f.affection ? uiText("Évolution et guérison (notes)") : uiText("Notes ou description (facultatif)"), "form.description", f.description, "textarea", "", 'maxlength="6000" rows="4"')}<details data-detail="received-source"><summary>${f.affection ? uiText("Durée (note)") : uiText("Source et durée (facultatif)")}</summary>${!f.affection ? `${field("Source", "form.source", f.source, "text", "", 'maxlength="300"')}${field(uiText("Nom du lanceur"), "form.caster", f.caster, "text", "", 'maxlength="300"')}` : ""}${field(uiText("Durée (note)"), "form.duration", f.duration, "text", "", 'maxlength="300"')}</details>` : ""), (selected ? button(uiText("Annuler"), "close-modal") : "") + (f.id ? button(uiText("Retirer cet effet"), "received-remove", `data-id="${esc(f.id)}"`, "danger") : "") + (selected ? button(f.id ? uiText("Enregistrer") : uiText("Appliquer"), "received-save", "", "primary") : ""), false, "", "carnet-effects-modal");
 }
 
 function captureRuleTableInput(el) {
@@ -45111,6 +48936,42 @@ function castOptions(c, d, s) {
 function castDiceModel(c, d, event) {
   return event ? spellDamageRolls(event.spellId, { slotLevel: event.effectiveLevel, characterLevel: levelOf(c), modifier: event.ability ? d.mods[event.ability] : 0 }) : null;
 }
+// Attaques listées avec les armes : souffle draconique, sorts mineurs offensifs et sort actif à effet répété.
+// Le sort actif est celui de la concentration en cours, ou un sort sans concentration marqué au lancement.
+function spellCastingFor(c, d, s) {
+  const { details } = castOptions(c, d, s), casting = Object.values(details)[0];
+  return casting ? { ability: casting.ability || null, dc: casting.dc || null, attack: casting.spellAttack ?? null } : null;
+}
+function extraAttackEntries(c, d) {
+  const out = [], breath = breathProfile(c, d);
+  if (breath) out.push({ key: "breath", profile: breath, resource: resources(c).find((entry) => entry.id === "breath") });
+  const owned = new Set([...c.spells.known, ...spellAcquisitions(c).map((entry) => entry.spellId), ...innateSpells(c).map((entry) => entry.id)]);
+  for (const s of uiSpellCatalogue(c).filter((spell) => spell.level === 0 && owned.has(spell.id) && SPELL_DICE[spell.id]?.rolls.length)) {
+    const casting = spellCastingFor(c, d, s);
+    if (!casting) continue;
+    const event = { spellId: s.id, effectiveLevel: 0, ability: casting.ability, dc: casting.dc }, model = castDiceModel(c, d, event);
+    out.push({ key: `cantrip:${s.id}`, profile: spellAttackProfile(s, event, model, casting.attack, attackOptions(c, d, { spell: { id: s.id, school: s.school, attack: !!model.attack } })) });
+  }
+  const events = (c.state.spellEvents || []).slice().reverse(), seen = new Set();
+  for (const event of events) {
+    const s = uiSpellById(c, event.spellId);
+    if (!s || seen.has(s.id) || ["hex", "hunters-mark"].includes(s.id) || !SPELL_DICE[s.id]?.rolls.length || s.level === 0) continue;
+    const active = event.ongoing || s.concentration && c.state.concentration === spellById(c, s.id)?.name;
+    if (!active) continue;
+    seen.add(s.id);
+    const model = castDiceModel(c, d, event), attack = d.casting.find((row) => row.ability === event.ability)?.attack ?? (event.ability ? d.prof + d.mods[event.ability] : null);
+    out.push({ key: `event:${event.id}`, profile: spellAttackProfile(s, event, model, attack, attackOptions(c, d, { spell: { id: s.id, school: s.school, attack: !!model.attack } })), ongoing: !!event.ongoing, eventId: event.id });
+  }
+  return out.filter((entry) => entry.profile);
+}
+function renderExtraAttack(entry) {
+  const p = entry.profile, part = p.parts.find((piece) => piece.on !== false) || p.parts[0], spent = entry.resource && !entry.resource.remaining;
+  const meta = [`${diceFormula(part)} ${part.type}`.trim(), p.save && uiText("spells.dice.save", { ability: p.save.abilities.map((key) => uiAbilities[key].name).join(", "), dc: p.save.dc }), p.note, entry.resource && uiText("{p0} restant(s)", { p0: entry.resource.remaining })].filter(Boolean).join(" · ");
+  const attack = p.attack ? `<button class="attack-roll" data-action="roll-extra-attack" data-key="${esc(entry.key)}" data-step="attack" aria-label="${uiText("Jet d’attaque {p11}", { p11: esc(p.name) })}"><strong>${signed(p.attack.bonus)}</strong><small>${uiText("toucher")}</small></button>` : "";
+  const damage = `<button class="attack-roll ghost" data-action="roll-extra-attack" data-key="${esc(entry.key)}" data-step="damage" aria-label="${uiText("Dégâts {p15}", { p15: esc(p.name) })}" ${spent ? "disabled" : ""}>${icon("dice", 18)}<small>${uiText("dégâts")}</small></button>`;
+  const end = entry.ongoing ? `<button class="link-btn" data-action="end-ongoing-spell" data-id="${esc(entry.eventId)}">${uiText("Terminer")}</button>` : "";
+  return `<div class="attack-card" data-extra-attack="${esc(entry.key)}"><div class="attack-main"><div class="attack-title">${esc(p.name)}</div><div class="attack-meta">${esc(meta)}</div>${end}</div>${attack}${damage}</div>`;
+}
 // Ce que le sort produit au niveau choisi, affiché sous le choix du niveau.
 function castEffectSummary(c, d, s, casting, level) {
   const model = spellDamageRolls(s.id, { slotLevel: level, characterLevel: levelOf(c), modifier: casting.ability ? d.mods[casting.ability] : 0 });
@@ -45124,6 +48985,17 @@ function refreshClassSkills(c) {
   const granted = new Set([...backgroundSkills(c), ...(uiRaceOf(c).grants?.skills || []), ...picksOf(c, "race", "skillChoice")]);
   const pool = cls.skills.filter((id) => !granted.has(id));
   c.skills = [...new Set([...c.skills.filter((id) => pool.includes(id)), ...pool])].slice(0, cls.pick);
+}
+/** Change de sous-classe et retire les choix qui dépendaient de l’ancienne. */
+function selectSubclass(draft, classId, id) {
+  const old = uiSubclasses[classId]?.[draft.subclasses[classId]];
+  draft.subclasses[classId] = id;
+  const keys = (old?.choices || []).map((ch) => ch.key).concat(old?.dragonChoice ? ["dragon"] : []);
+  if (!["barbarian", "fighter", "monk", "paladin", "ranger"].includes(classId)) {
+    clearPicks(draft, [`sub|${classId}|`]);
+    for (const l of draft.levels) if (l.classId === classId) for (const k of keys) delete l.choices[k];
+  }
+  if (id === "custom") draft.customSubclasses[classId] ||= { name: "", description: "" };
 }
 function levelDraft(prefix) {
   return prefix === "lvl" ? ui.levelFlow?.draft : ui.wizard?.draft;
@@ -45147,7 +49019,7 @@ function renderAttacks(c, d) {
       (a, i) =>
         `<div class="attack-card"><div class="attack-main"><div class="attack-title">${esc(a.name)}${a.proficient ? "" : (" <span class=\"pill red\">" + uiText("non maîtrisée") + "</span>")}</div><div class="attack-meta">${esc(a.damageDice)} ${signed(a.damageBonus)} ${esc(a.type)}${a.additionalDamageDice ? uiText(" + {p0} (fendoir)", { p0: a.additionalDamageDice }) : ""}${a.divineDamageDice ? uiText(" + {p0} radiants (châtiment amélioré)", { p0: a.divineDamageDice }) : ""}${a.properties.length ? ` · ${esc(a.properties.join(", "))}` : ""}${a.pactWeapon ? uiText(" · arme de pacte") : ""}${a.attacksPerAction > 1 ? uiText(" · {p0} attaques par action", { p0: a.attacksPerAction }) : ""}</div></div><button class="attack-roll" data-action="roll-attack" data-index="${i}" aria-label="${uiText("Jet d’attaque {p11}", { p11: esc(a.name) })}"><strong>${signed(a.attack)}</strong><small>${uiText("toucher")}</small></button><button class="attack-roll ghost" data-action="roll-damage" data-index="${i}" aria-label="${uiText("Dégâts {p15}", { p15: esc(a.name) })}">${icon("dice", 18)}<small>${uiText("dégâts")}</small></button></div>`,
     )
-    .join("")}${extras.length ? `<p class="tiny muted attack-extras">${extras.map(esc).join(" · ")}</p>` : ""}`;
+    .join("")}${extraAttackEntries(c, d).map(renderExtraAttack).join("")}${extras.length ? `<p class="tiny muted attack-extras">${extras.map(esc).join(" · ")}</p>` : ""}`;
 }
 function renderProficiencies(d) {
   const armorNames = { light: uiText("Légères"), medium: uiText("Intermédiaires"), heavy: uiText("Lourdes"), shield: uiText("Boucliers") };
@@ -45199,17 +49071,28 @@ function subclassSummary(c) {
     .filter(Boolean)
     .join(" · ");
 }
+function sourceCampaign(code) {
+  return { aag: ["Spelljammer", "2022"], ai: ["Acquisitions Incorporated", "2019"], dmg: ["DMG", "2014"], dsotdq: ["Dragonlance", "2022"], egw: ["Wildemount", "2020"], erlw: ["Eberron", "2019"], ftd: ["Fizban", "2021"], ggr: ["Ravnica", "2018"], mot: ["Theros", "2020"], scc: ["Strixhaven", "2021"], tce: ["Tasha", "2020"], ttp: ["Tortle Package", "2017"], vrgr: ["Van Richten", "2021"], wbtw: [uiText("Féerie"), "2021"] }[code];
+}
+/** Libellé court d’un livre, commun aux pastilles et au bouton « Source » des fiches. Le code est normalisé en minuscules. */
+function sourceLabel(source) {
+  const code = String(source || "").toLowerCase(), campaign = sourceCampaign(code);
+  if (code === "phb") return uiText("Manuel");
+  if (code === "srd") return "SRD";
+  if (["eepc", "mtf", "scag"].includes(code)) return `${code.toUpperCase()} · ${{ eepc: "2015", mtf: "2018", scag: "2015" }[code]}`;
+  if (code === "vgm") return "Volo · 2016";
+  if (["motm", "mpmm"].includes(code)) return uiText("Multivers · 2022");
+  // BGG est le code de catalogue du livre des géants de 2023, noté gotg dans les données de l’application.
+  if (["gotg", "bgg"].includes(code)) return uiText("Géants · 2023");
+  if (code === "homebrew") return uiText("Maison");
+  return campaign ? `${code.toUpperCase()} · ${campaign[1]}` : code.toUpperCase();
+}
 function sourcePill(source) {
-  if (source === "phb") return ("<span class=\"pill outline source-pill\" title=\"" + uiText("Manuel des joueurs 2014, résumé original") + "\">" + uiText("Manuel") + "</span>");
-  if (source === "srd") return ("<span class=\"pill outline source-pill\" title=\"" + uiText("SRD 5.1, licence CC BY 4.0") + "\">SRD</span>");
-  if (["eepc", "mtf", "scag"].includes(source)) return `<span class="pill outline source-pill">${source.toUpperCase()} · ${{ eepc: "2015", mtf: "2018", scag: "2015" }[source]}</span>`;
-  if (source === "vgm") return '<span class="pill outline source-pill">Volo · 2016</span>';
-  if (["motm", "mpmm"].includes(source)) return ("<span class=\"pill outline source-pill\">" + uiText("Multivers · 2022") + "</span>");
-  if (source === "gotg") return ("<span class=\"pill outline source-pill\">" + uiText("Géants · 2023") + "</span>");
-  if (source === "homebrew") return ("<span class=\"pill sand source-pill\">" + uiText("Maison") + "</span>");
   if (!source) return "";
-  const campaign = { aag: ["Spelljammer", "2022"], ai: ["Acquisitions Incorporated", "2019"], dmg: ["DMG", "2014"], dsotdq: ["Dragonlance", "2022"], egw: ["Wildemount", "2020"], erlw: ["Eberron", "2019"], ftd: ["Fizban", "2021"], ggr: ["Ravnica", "2018"], mot: ["Theros", "2020"], scc: ["Strixhaven", "2021"], tce: ["Tasha", "2020"], ttp: ["Tortle Package", "2017"], vrgr: ["Van Richten", "2021"], wbtw: [uiText("Féerie"), "2021"] }[source];
-  return `<span class="pill outline source-pill" title="${esc(campaign ? `${source.toUpperCase()} · ${campaign[0]}` : source.toUpperCase())}">${esc(campaign ? `${source.toUpperCase()} · ${campaign[1]}` : source.toUpperCase())}</span>`;
+  const code = String(source).toLowerCase(), campaign = sourceCampaign(code);
+  const title = code === "phb" ? uiText("Manuel des joueurs 2014, résumé original") : code === "srd" ? uiText("SRD 5.1, licence CC BY 4.0")
+    : ["eepc", "mtf", "scag", "vgm", "motm", "mpmm", "gotg", "bgg", "homebrew"].includes(code) ? "" : campaign ? `${code.toUpperCase()} · ${campaign[0]}` : code.toUpperCase();
+  return `<span class="pill ${code === "homebrew" ? "sand" : "outline"} source-pill"${title ? ` title="${esc(title)}"` : ""}>${esc(sourceLabel(code))}</span>`;
 }
 function bonusLine(grants = {}) {
   const parts = Object.entries(grants.abilities || {}).map(([a, n]) => `${uiAbilities[a].short} ${signed(n)}`);
@@ -45371,44 +49254,27 @@ function renderLevelEditor(c, level, prefix) {
 function wizardSteps(w) {
   const c = w.draft,
     steps = [
-      ["race", uiText("Origine")],
+      ["race", uiText("creation.race")],
       ["class", uiText("Classe")],
       ["background", uiText("Historique")],
       ["abilities", uiText("Caracs")],
-      ["skills", uiText("Compétences")],
+      ["skills", isNextWizard(w) ? uiText("creation.choices") : uiText("Compétences")],
     ];
   if (!w.original) steps.push(["gear", uiText("Équipement")]);
   if (!w.original && levelOf(c) > 1) steps.push(["levels", uiText("Niveaux")]);
-  if (spellcasters(c).length || innateSpells(c).length) steps.push(["magic", uiText("Magie")]);
+  if (spellcasters(c).length || innateSpells(c).length || (isNextWizard(w) ? creationLines(c).some((line) => line.stage === "magic") : c.raceFeat && pickSpecs(c, (src) => src.key === "feat|race").some(originFeatSpellChoice))) steps.push(["magic", uiText("Magie")]);
   steps.push(["review", uiText("Personnage")]);
   return steps;
 }
 function wizardPreview(w) {
   return !w.original && w.draft.startKit?.mode === "kit" ? applyStartingKit(w.draft) : w.draft;
 }
-function renderRaceStep(w, c) {
-  const r = uiRaceOf(c),
-    groups = {};
-  for (const [id, race] of Object.entries(uiRaces)) (groups[RACES[id].group || RACES[id].name] ||= []).push([id, race]);
-  const order = [...RACE_GROUP_ORDER.filter((g) => groups[g]), ...Object.keys(groups).filter((g) => !RACE_GROUP_ORDER.includes(g))];
-  const query = (ui.raceQuery || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr-FR");
-  const card = (id, race, family) =>
-    `<button type="button" class="choice-card race-card ${c.raceId === id ? "selected" : ""}" id="origin-choice-${id}" data-action="choose-race" data-id="${id}" aria-pressed="${c.raceId === id}">${c.raceId === id ? `<span class="selected-check">${icon("check", 14)}</span>` : ""}<span class="choice-name">${esc(race.name)}</span>${sourcePill(race.source)}<span class="choice-bonus">${esc(bonusLine(race.grants))}</span>${race.traits?.length ? `<span class="choice-meta">${esc(race.traits.map((trait) => trait[0]).join(" · "))}</span>` : ""}</button>`;
-  const entries = order.flatMap((family) => groups[family].map(([id, race]) => ({ id, race, family }))).concat([{ id: "custom", family: "Maison", race: { name: uiText("Origine maison"), subtitle: uiText("Les traits de ton choix"), grants: c.customRace ? { abilities: c.customRace.bonuses } : {} } }]);
-  if (ui.raceFamily === "all" && !query) {
-    const families = [...order, "Maison"];
-    return `<div class="origin-heading"><h2>${uiText(ui.raceFamily === "all" && !query ? "Choisis une race" : "Choisis une origine")}</h2>${button(icon("book", 18), "library-browse", `data-type="race" data-target="wizard" aria-label="${uiText("Bibliothèque")}"`, "small-btn ghost origin-library")}</div><div class="origin-tools"><div class="search-wrap">${icon("search", 18)}<input id="origin-search" class="search-input" data-bind="ui.raceQuery" value="" placeholder="${uiText("Chercher une origine…")}" aria-label="${uiText("Chercher une origine")}"></div></div><div class="origin-family-grid">${families.map((family) => {
-      const members = entries.filter((entry) => entry.family === family), sample = members[0];
-      const image = sample?.id !== "custom" ? portraitUrl({ raceId: sample.id }) : "";
-      return `<button type="button" class="origin-family-card" data-action="choose-race-family" data-value="${esc(family)}">${image ? `<img src="${esc(image)}" alt="" loading="lazy">` : ""}<strong>${esc(uiSystemText(uiCatalogueName(family)))}</strong></button>`;
-    }).join("")}</div>`;
-  }
-  const visible = entries.filter(({ race, family }) => (ui.raceFamily === "all" || ui.raceFamily === family) && (!query || `${race.name} ${race.originalName || ""} ${race.source || ""} ${race.subtitle || ""} ${family} ${["motm", "mpmm"].includes(race.source) ? "MPMM MOTM Multivers 2022" : ""}`.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr-FR").includes(query)));
-  const grid = `<div class="origin-directory"><div class="origin-tools">${button(uiText("Toutes les familles"), "choose-race-family", 'data-value="all"', "small-btn ghost")}<div class="search-wrap">${icon("search", 18)}<input id="origin-search" class="search-input" data-bind="ui.raceQuery" value="${esc(ui.raceQuery || "")}" placeholder="${uiText("Chercher une origine…")}" aria-label="${uiText("Chercher une origine")}"></div><select id="origin-family" class="select-plain" data-bind="ui.raceFamily" aria-label="${uiText("Filtrer les origines par famille")}"><option value="all">${uiText("Toutes les familles")}</option>${[...order, "Maison"].map((family) => `<option value="${esc(family)}" ${ui.raceFamily === family ? "selected" : ""}>${esc(uiSystemText(uiCatalogueName(family)))}</option>`).join("")}</select></div><div class="origin-count" role="status">${uiText("{p4} origine{p5}", { p4: visible.length, p5: visible.length > 1 ? "s" : "" })}</div><div class="origin-options" data-scroll-key="${esc(`${ui.raceFamily}:${ui.raceQuery}`)}" tabindex="0" aria-label="${uiText("Origines disponibles")}">${visible.map(({ id, race, family }) => card(id, race, family)).join("") || ("<p class=\"muted small\">" + uiText("Aucune origine ne correspond à ta recherche.") + "</p>")}</div></div>`;
+/** Faits d’une origine, communs à la création et à la correction. */
+function creationRaceFacts(r) {
   const g = r.grants || {},
     langs = (g.languages || []).map((l) => uiLanguages[l]?.name || l);
   if (g.languageChoice) langs.push(uiText("{p0} au choix", { p0: g.languageChoice.count }));
-  const facts = [
+  return [
     [uiText("Vitesse"), uiMeters(r.speed + (g.speed || 0))],
     r.creatureType ? ["Type", ({ humanoid: uiText("Humanoïde"), fey: uiText("Fée"), construct: uiText("Artificiel"), monstrosity: uiText("Monstruosité"), ooze: uiText("Vase") })[r.creatureType] || r.creatureType] : null,
     g.swimSpeed ? [uiText("Nage"), uiMeters(g.swimSpeed === "walk" ? r.speed : g.swimSpeed)] : null,
@@ -45419,8 +49285,37 @@ function renderRaceStep(w, c) {
     [uiText("Langues"), langs.join(", ") || uiText("À préciser")],
     g.resistances?.length ? [uiText("Résistances"), g.resistances.join(", ")] : null,
   ].filter(Boolean);
+}
+// Sélecteur conservé pour corriger une fiche existante ou importée.
+function renderRaceCorrectionStep(w, current) {
+  const groups = {};
+  for (const [id, race] of Object.entries(uiRaces)) (groups[RACES[id].group || RACES[id].name] ||= []).push([id, race]);
+  const order = [...RACE_GROUP_ORDER.filter((g) => groups[g]), ...Object.keys(groups).filter((g) => !RACE_GROUP_ORDER.includes(g))];
+  const query = (ui.raceQuery || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr-FR");
+  const card = (id, race, family) =>
+    `<button type="button" class="choice-card race-card ${current.raceId === id ? "selected" : ""}" id="origin-choice-${id}" data-action="creation-race-inspect" data-id="${id}" aria-pressed="${ui.creationRaceInspect === id}"><img class="origin-option-image" src="${esc(portraitUrl({ raceId: id }))}" alt="" loading="lazy">${current.raceId === id ? `<span class="selected-check">${icon("check", 14)}</span>` : ""}<span class="choice-name">${esc(race.name)}</span>${sourcePill(race.source)}<span class="choice-bonus">${esc(bonusLine(race.grants))}</span>${race.traits?.length ? `<span class="choice-meta">${esc(race.traits.map((trait) => trait[0]).join(" · "))}</span>` : ""}</button>`;
+  const entries = order.flatMap((family) => groups[family].map(([id, race]) => ({ id, race, family }))).concat([{ id: "custom", family: "Maison", race: { name: uiText("Origine maison"), subtitle: uiText("Les traits de ton choix"), grants: current.customRace ? { abilities: current.customRace.bonuses } : {} } }]);
+  if (ui.raceFamily === "all" && !query) {
+    const families = [...order, "Maison"];
+    return `<div class="origin-tools origin-family-search"><div class="search-wrap">${icon("search", 18)}<input id="origin-search" class="search-input" data-bind="ui.raceQuery" value="" placeholder="${uiText("creation.searchRace")}" aria-label="${uiText("creation.searchRace")}"></div>${button(icon("book", 18), "library-browse", `data-type="race" data-target="wizard" aria-label="${uiText("Bibliothèque")}"`, "small-btn ghost origin-library")}</div><div class="origin-family-grid">${families.map((family) => {
+      const members = entries.filter((entry) => entry.family === family), sample = members[0];
+      const image = sample?.id !== "custom" ? portraitUrl({ raceId: sample.id }) : "";
+      return `<button type="button" class="origin-family-card" data-action="choose-race-family" data-value="${esc(family)}">${image ? `<img src="${esc(image)}" alt="" loading="lazy">` : ""}<span><strong>${esc(uiSystemText(uiCatalogueName(family)))}</strong><small>${esc(members.map((member) => member.race.name).join(" · "))}</small></span>${icon("arrow", 16)}</button>`;
+    }).join("")}</div>`;
+  }
+  const visible = entries.filter(({ race, family }) => (ui.raceFamily === "all" || ui.raceFamily === family) && (!query || `${race.name} ${race.originalName || ""} ${race.source || ""} ${race.subtitle || ""} ${family} ${["motm", "mpmm"].includes(race.source) ? "MPMM MOTM Multivers 2022" : ""}`.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr-FR").includes(query)));
+  const grid = `<div class="origin-directory"><div class="origin-tools">${button(uiText("Toutes les familles"), "choose-race-family", 'data-value="all"', "small-btn ghost")}<div class="search-wrap">${icon("search", 18)}<input id="origin-search" class="search-input" data-bind="ui.raceQuery" value="${esc(ui.raceQuery || "")}" placeholder="${uiText("creation.searchRace")}" aria-label="${uiText("creation.searchRace")}"></div><select id="origin-family" class="select-plain" data-bind="ui.raceFamily" aria-label="${uiText("Filtrer les origines par famille")}"><option value="all">${uiText("Toutes les familles")}</option>${[...order, "Maison"].map((family) => `<option value="${esc(family)}" ${ui.raceFamily === family ? "selected" : ""}>${esc(uiSystemText(uiCatalogueName(family)))}</option>`).join("")}</select></div><div class="origin-count" role="status">${uiText("{p4} origine{p5}", { p4: visible.length, p5: visible.length > 1 ? "s" : "" })}</div><div class="origin-options" data-scroll-key="${esc(`${ui.raceFamily}:${ui.raceQuery}`)}" tabindex="0" aria-label="${uiText("Origines disponibles")}">${visible.map(({ id, race, family }) => card(id, race, family)).join("") || ("<p class=\"muted small\">" + uiText("Aucune origine ne correspond à ta recherche.") + "</p>")}</div></div>`;
+  const inspected = ui.creationRaceInspect,
+    candidateId = inspected || visible.find((entry) => entry.id === current.raceId)?.id || visible[0]?.id || current.raceId,
+    c = candidateId !== current.raceId ? selectCharacterRace(current, candidateId, { replacing: !!w.original }) : current,
+    chosen = c.raceId === current.raceId,
+    r = uiRaceOf(c),
+    detailOpen = !!inspected,
+    layout = `origin-workspace creation-origin-workspace ${detailOpen ? "creation-detail-open" : "creation-list-open"}`;
+  const g = r.grants || {},
+    facts = creationRaceFacts(r);
   const raceSpecs = uiPickSpecs(c, (src) => src.key === "race").filter((s) => ["ability", "spell", "option"].includes(s.type));
-  const featSpecs = uiPickSpecs(c, (src) => src.key === "feat|race");
+  const featSpecs = uiPickSpecs(c, (src) => src.key === "feat|race"), featMagic = featSpecs.some(originFeatSpellChoice);
   const later = uiPickSpecs(c, (src) => src.key === "race").filter((s) => !["ability", "spell", "option"].includes(s.type));
   const custom =
     c.raceId === "custom"
@@ -45428,16 +49323,16 @@ function renderRaceStep(w, c) {
           .map(([a, v]) => field(`${v.short}`, `wiz.customRace.bonuses.${a}`, c.customRace.bonuses?.[a] || 0, "number", "", 'min="-5" max="10" step="1"'))
           .join("")}</div>${field(uiText("Traits de cette origine"), "wiz.customRace.description", c.customRace.description || "", "textarea", uiText("Effets descriptifs. Les effets chiffrés s’ajoutent ensuite dans Maison."), 'maxlength="6000"')}`
       : "";
-  return `<div class="origin-heading"><h2>${uiText(ui.raceFamily === "all" && !query ? "Choisis une race" : "Choisis une origine")}</h2>${button(icon("book", 18), "library-browse", `data-type="race" data-target="wizard" aria-label="${uiText("Bibliothèque")}"`, "small-btn ghost origin-library")}</div><div class="origin-workspace">${grid}<div class="origin-selection"><div class="selected-description race-detail"><div class="detail-head"><strong>${esc(r.name)}</strong>${sourcePill(r.source)}</div>${esc(r.desc || "")}${libraryReferenceButton(libraryRuntimeReference("race", c.raceId))}<div class="fact-row">${facts.map(([k, v]) => `<span><small>${esc(k)}</small>${esc(v)}</span>`).join("")}</div><div class="feature-list">${(r.traits || [])
+  return `<div class="origin-heading"><h2>${uiText(ui.raceFamily === "all" && !query ? "creation.chooseFamily" : "Choisis une origine")}</h2>${button(icon("book", 18), "library-browse", `data-type="race" data-target="wizard" aria-label="${uiText("Bibliothèque")}"`, "small-btn ghost origin-library")}</div><div class="${layout}">${grid}<div id="creation-race-detail" class="origin-selection" tabindex="-1">${creationChoiceBack("race")}<div class="selected-description race-detail"><img class="creation-race-detail-image" src="${esc(portraitUrl({ raceId: c.raceId }))}" alt="" loading="lazy"><div class="detail-head"><strong>${esc(r.name)}</strong>${sourcePill(r.source)}</div>${esc(r.desc || "")}${libraryReferenceButton(libraryRuntimeReference("race", c.raceId))}<div class="fact-row">${facts.map(([k, v]) => `<span><small>${esc(k)}</small>${esc(v)}</span>`).join("")}</div><div class="feature-list">${(r.traits || [])
     .map(
       ([name, desc], i) =>
         `<details class="feature-item" data-detail="wizard-race-${i}"><summary><span>${esc(name)}</span><span class="feature-arrow">${icon("chevron", 14)}</span></summary><div class="detail-copy">${esc(desc)}</div></details>`,
     )
-    .join("")}</div></div></div></div><div class="origin-complements">${custom}${c.raceId !== "custom" ? checkField(uiText("Personnaliser l’origine (Tasha, 2014)"), "wiz.rulesContext.originCustomization", !!c.rulesContext?.originCustomization, uiText("Option de table : permute uniquement les bonus, langues et maîtrises autorisés. Les traits d’origine restent inchangés.")) : ""}${renderPickSpecs(c, raceSpecs, "wiz")}${
+    .join("")}</div></div><div class="creation-choice-apply">${button(chosen ? uiText("creation.continueChoice") : uiText("creation.chooseOrigin"), chosen ? "wizard-next" : "choose-race", `data-id="${c.raceId}"`, "primary")}</div><div class="origin-complements">${chosen ? `${custom}${c.raceId !== "custom" ? checkField(uiText("Personnaliser l’origine (Tasha, 2014)"), "wiz.rulesContext.originCustomization", !!c.rulesContext?.originCustomization, uiText("Option de table : permute uniquement les bonus, langues et maîtrises autorisés. Les traits d’origine restent inchangés.")) : ""}${renderPickSpecs(c, raceSpecs, "wiz")}${
     g.feat
-      ? `<section class="choice-spec"><h3>${uiText("Don de départ")}</h3>${renderFeatPicker(c, "wiz.raceFeat", c.raceFeat, "race")}${renderPickSpecs(c, featSpecs, "wiz")}</section>`
+      ? `<section class="choice-spec"><h3>${uiText("Don de départ")}</h3>${renderFeatPicker(c, "wiz.raceFeat", c.raceFeat, "race")}${renderPickSpecs(c, featSpecs.filter((s) => !originFeatSpellChoice(s)), "wiz")}${featMagic ? notice(uiText("{p0} : sorts à choisir à l’étape Magie.", { p0: esc(uiFeats[c.raceFeat]?.name || "") })) : ""}</section>`
       : ""
-  }${later.length ? notice(uiText("{p0} : à choisir à l’étape Compétences.", { p0: later.map((s) => esc(s.title)).join(" · ") })) : ""}</div>`;
+  }${later.length ? notice(uiText("{p0} : à choisir à l’étape Compétences.", { p0: later.map((s) => esc(s.title)).join(" · ") })) : ""}` : ""}</div></div></div>`;
 }
 const CLASS_ILLUSTRATIONS = Object.freeze({ artificer: "artificier", barbarian: "barbare", bard: "barde", cleric: "clerc", druid: "druide", sorcerer: "ensorceleur", fighter: "guerrier", wizard: "magicien", monk: "moine", warlock: "occultiste", paladin: "paladin", ranger: "rodeur", rogue: "roublard" });
 function classIllustration(id, className) {
@@ -45445,6 +49340,18 @@ function classIllustration(id, className) {
   if (!name) return "";
   const src = window.COMPANION_CLASS_ILLUSTRATIONS?.[name] || `./class-illustrations/${name}-v1.webp`;
   return `<img class="${className}" src="${esc(src)}" alt="" width="128" height="128" loading="lazy">`;
+}
+function backgroundIllustration(id, className) {
+  if (id === "custom") return `<span class="creation-choice-icon" aria-hidden="true">${icon("edit", 24)}</span>`;
+  const src = window.COMPANION_BACKGROUND_ILLUSTRATIONS?.[id] || `./background-illustrations/${id}.webp`;
+  return `<img class="${className}" src="${esc(src)}" alt="" width="128" height="128" loading="lazy">`;
+}
+function creationChoiceBack(kind) {
+  return button(`${icon("back", 16)}${uiText("creation.returnList")}`, "creation-choice-back", `data-kind="${kind}"`, "small-btn ghost creation-back-list");
+}
+function creationChoiceLayout(kind) {
+  const inspected = { race: ui.creationRaceInspect, class: ui.creationClassInspect, background: ui.creationBackgroundInspect }[kind];
+  return `creation-choice-workspace ${inspected ? "creation-detail-open" : "creation-list-open"}`;
 }
 function creationChoiceNormalize(value) {
   return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr-FR");
@@ -45455,10 +49362,14 @@ function creationChoiceDirectory(kind, items, current, inspected) {
     query = ui[queryKey] || "",
     visible = items.filter(([, item]) => creationChoiceNormalize(`${item.name} ${item.role || ""} ${(item.skills || []).map((skill) => uiSkills[skill]?.[0] || skill).join(" ")} ${(item.aliases || []).join(" ")}`).includes(creationChoiceNormalize(query))),
     title = classList ? "Classes" : uiText("Historiques");
-  return `<aside class="creation-choice-directory" aria-label="${uiText("Liste des {p0}", { p0: title.toLocaleLowerCase("fr-FR") })}"><div class="creation-choice-search"><div class="search-wrap">${icon("search", 17)}<input id="creation-${kind}-search" type="search" class="search-input" data-bind="ui.${queryKey}" value="${esc(query)}" placeholder="${classList ? uiText("Nom, rôle…") : uiText("Nom, compétence…")}" aria-label="${uiText("Rechercher {p7}", { p7: classList ? uiText("une classe") : uiText("un historique") })}">${query ? `<button type="button" class="creation-choice-clear" data-action="creation-choice-clear" data-kind="${kind}" aria-label="${uiText("Effacer la recherche")}">${icon("x", 15)}</button>` : ""}</div><span class="creation-choice-count" role="status">${visible.length} ${classList ? `classe${visible.length > 1 ? "s" : ""}` : `historique${visible.length > 1 ? "s" : ""}`}</span></div><div class="creation-choice-list" data-scroll-key="${esc(`${kind}:${query}`)}">${visible.map(([id, item]) => `<button type="button" id="creation-${kind}-${id}" class="creation-choice-row ${id === inspected ? "inspected" : ""}" data-action="creation-choice-inspect" data-kind="${kind}" data-id="${id}" aria-pressed="${id === inspected}" aria-controls="creation-${kind}-detail">${classList ? `${classIllustration(id, "creation-choice-image") || `<span class="creation-choice-icon" aria-hidden="true">${icon(item.icon, 21)}</span>`}` : ""}<span class="creation-choice-name"><strong>${esc(item.name)}</strong><small>${esc(classList ? item.role : (item.skills || []).map((skill) => uiSkills[skill]?.[0] || skill).join(" · ") || uiText("Avec l’accord du MJ"))}</small></span>${id === current ? `<span class="creation-choice-adopted" aria-label="${uiText("Choix adopté")}">${icon("check", 16)}</span>` : ""}</button>`).join("") || ("<p class=\"creation-choice-empty\" role=\"status\">" + uiText("Aucun résultat.") + "</p>")}</div></aside>`;
+  return `<aside class="creation-choice-directory" aria-label="${uiText("Liste des {p0}", { p0: title.toLocaleLowerCase("fr-FR") })}"><div class="creation-choice-search"><div class="search-wrap">${icon("search", 17)}<input id="creation-${kind}-search" type="search" class="search-input" data-bind="ui.${queryKey}" value="${esc(query)}" placeholder="${classList ? uiText("Nom, rôle…") : uiText("Nom, compétence…")}" aria-label="${uiText("Rechercher {p7}", { p7: classList ? uiText("une classe") : uiText("un historique") })}">${query ? `<button type="button" class="creation-choice-clear" data-action="creation-choice-clear" data-kind="${kind}" aria-label="${uiText("Effacer la recherche")}">${icon("x", 15)}</button>` : ""}</div><span class="creation-choice-count" role="status">${visible.length} ${classList ? `classe${visible.length > 1 ? "s" : ""}` : `historique${visible.length > 1 ? "s" : ""}`}</span></div><div class="creation-choice-list" data-scroll-key="${esc(`${kind}:${query}`)}">${visible.map(([id, item]) => `<button type="button" id="creation-${kind}-${id}" class="creation-choice-row ${id === inspected ? "inspected" : ""}" data-action="creation-choice-inspect" data-kind="${kind}" data-id="${id}" aria-pressed="${id === inspected}" aria-controls="creation-${kind}-detail">${classList ? classIllustration(id, "creation-choice-image") || `<span class="creation-choice-icon" aria-hidden="true">${icon(item.icon, 21)}</span>` : backgroundIllustration(id, "creation-choice-image")}<span class="creation-choice-name"><strong>${esc(item.name)}</strong>${!classList && isNextWizard() ? `<span class="creation-choice-description">${esc(creationNextBackgroundDescription(id, item))}</span>${id === "custom" ? `<span class="creation-background-warning">${uiText("Avec l’accord du MJ")}</span>` : ""}` : ""}<small class="${!classList && isNextWizard() ? "creation-background-benefits" : ""}">${esc(classList ? item.role : isNextWizard() ? creationNextBackgroundBenefits(item) : (item.skills || []).map((skill) => uiSkills[skill]?.[0] || skill).join(" · ") || uiText("Avec l’accord du MJ"))}</small>${classList && isNextWizard() ? `<small class="creation-class-facts">Dé de vie d${item.die} · ${esc(uiAbilities[item.primary?.[0]]?.name || "")}</small>` : ""}${!classList && !isNextWizard() && item.desc ? `<span class="creation-choice-description">${esc(item.desc)}</span>` : ""}</span>${id === current ? `<span class="creation-choice-adopted" aria-label="${uiText("Choix adopté")}">${icon("check", 16)}</span>` : ""}</button>`).join("") || ("<p class=\"creation-choice-empty\" role=\"status\">" + uiText("Aucun résultat.") + "</p>")}</div></aside>`;
 }
-function creationChoiceFacts(facts) {
-  return `<dl class="creation-choice-facts">${facts.filter(Boolean).map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}</dl>`;
+/** Un fait trop long pour une demi-colonne, ou marqué « wide », occupe toute la largeur de la fiche. */
+function creationFactWide([, value, span]) {
+  return span === "wide" || String(value).length > 48;
+}
+function creationChoiceFacts(facts, className = "") {
+  return `<dl class="creation-choice-facts${className ? ` ${className}` : ""}">${facts.filter(Boolean).map((fact) => `<div${creationFactWide(fact) ? ' class="wide"' : ""}><dt>${esc(fact[0])}</dt><dd>${esc(fact[1])}</dd></div>`).join("")}</dl>`;
 }
 function creationChoicePickFields(c, specs) {
   const compact = specs.filter((spec) => ["language", "tool", "toolOrLanguage"].includes(spec.type)),
@@ -45484,6 +49395,23 @@ function creationChoiceSetPick(el) {
   queueDraft();
   render();
 }
+/** Maîtrises d’une classe, communes à la création et à la correction. */
+function creationClassFacts(id) {
+  const cls = uiClasses[id],
+    extra = CLASS_EXTRAS[id] || {},
+    armorNames = { light: uiText("Armures légères"), medium: uiText("Armures intermédiaires"), heavy: uiText("Armures lourdes"), shield: uiText("Boucliers") },
+    casting = cls.caster === "none" ? uiText("Aucune magie de classe") : `${{ full: uiText("Lanceur complet"), half: uiText("Dès le niveau 2"), pact: uiText("Magie de pacte") }[cls.caster] || cls.caster} · ${uiAbilities[cls.ability]?.name || ""}`,
+    weaponText = cls.weapons.map(weaponProficiencyLabel).join(", "),
+    tools = [...(extra.tools || []).map((key) => uiTools[key]?.name || key), ...(extra.toolChoice ? [uiText("{p0} au choix", { p0: extra.toolChoice.count })] : [])];
+  return [
+    [uiText("Armes maîtrisées"), weaponText || uiText("Aucune")],
+    [uiText("Armures maîtrisées"), cls.armors.map((key) => armorNames[key] || key).join(", ") || uiText("Aucune")],
+    [uiText("Jets de sauvegarde maîtrisés"), cls.saves.map((key) => uiAbilities[key].name).join(uiText(" et "))],
+    [uiText("Compétences"), uiText("{p0} au choix parmi {p1}", { p0: cls.pick, p1: cls.skills.map((key) => uiSkills[key]?.[0] || key).join(", ") })],
+    tools.length ? [uiText("Outils maîtrisés"), tools.join(", ")] : null,
+    [uiText("Magie"), casting],
+  ];
+}
 function renderClassStep(w, c) {
   const current = primaryClassId(c),
     id = Object.hasOwn(uiClasses, ui.creationClassInspect || "") ? ui.creationClassInspect : current,
@@ -45491,21 +49419,25 @@ function renderClassStep(w, c) {
     chosen = current === id,
     locked = false,
     extra = CLASS_EXTRAS[id] || {},
-    armorNames = { light: uiText("Armures légères"), medium: uiText("Armures intermédiaires"), heavy: uiText("Armures lourdes"), shield: uiText("Boucliers") },
-    casting = cls.caster === "none" ? uiText("Aucune magie de classe") : `${{ full: uiText("Lanceur complet"), half: uiText("Dès le niveau 2"), pact: uiText("Magie de pacte") }[cls.caster] || cls.caster} · ${uiAbilities[cls.ability]?.name || ""}`,
-    weaponText = cls.weapons.map(weaponProficiencyLabel).join(", "),
-    tools = [...(extra.tools || []).map((key) => uiTools[key]?.name || key), ...(extra.toolChoice ? [uiText("{p0} au choix", { p0: extra.toolChoice.count })] : [])],
-    facts = [
-      [uiText("Armes maîtrisées"), weaponText || uiText("Aucune")],
-      [uiText("Armures maîtrisées"), cls.armors.map((key) => armorNames[key] || key).join(", ") || uiText("Aucune")],
-      [uiText("Jets de sauvegarde maîtrisés"), cls.saves.map((key) => uiAbilities[key].name).join(uiText(" et "))],
-      [uiText("Compétences"), uiText("{p0} au choix parmi {p1}", { p0: cls.pick, p1: cls.skills.map((key) => uiSkills[key]?.[0] || key).join(", ") })],
-      tools.length ? [uiText("Outils maîtrisés"), tools.join(", ")] : null,
-      [uiText("Magie"), casting],
-    ];
+    facts = creationClassFacts(id);
   const choices = chosen ? uiChoicesFor(c, 1).filter((spec) => spec.key !== "expertise") : [];
   const settings = chosen ? `${w.original ? "" : `<section class="choice-spec creation-choice-start-level">${selectField(uiText("Niveau de départ"), "ui.wizard.startLevel", levelOf(c), Object.fromEntries(Array.from({ length: 20 }, (_, index) => [index + 1, uiText("Niveau {p0}", { p0: index + 1 })])), "", 'data-number="1"')}</section>`}${cls.subLevel === 1 ? renderSubclassPicker(c, id, "wiz") : ""}${renderPickSpecs(c, uiPickSpecs(c, (source) => source.key === `sub|${id}|1`).filter((spec) => spec.source.key === `sub|${id}|1` && !PICK_CHIP_TYPES.includes(spec.type)), "wiz")}${choices.length ? renderChoiceSpecs(c, 1, "wiz", (spec) => spec.key !== "expertise") : ""}${renderPickSpecs(c, uiPickSpecs(c, (source) => source.key === "fighter|superiorTechnique"), "wiz")}` : "";
-  return `<div class="creation-choice-workspace">${creationChoiceDirectory("class", Object.entries(uiClasses), current, id)}<section id="creation-class-detail" class="creation-choice-detail" aria-label="${uiText("Détail de la classe")}" tabindex="-1"><div class="creation-choice-heading"><div><h2>${esc(cls.name)}</h2><span class="creation-choice-role">${esc(cls.role)}</span></div>${classIllustration(id, "creation-choice-detail-image") || `<span class="creation-choice-emblem" aria-hidden="true">${icon(cls.icon, 36)}</span>`}</div><p class="creation-choice-lead">${esc(cls.desc)}</p><div class="creation-choice-summary"><div><span>${uiText("Dé de vie")}</span><strong>d${cls.die}</strong></div><div><span>${uiText("Caractéristique clé")}</span><strong>${esc(uiAbilities[cls.primary[0]]?.name || "")}</strong></div><div><span>${esc(cls.subLabel)}</span><strong>${uiText("Niveau {p10}", { p10: cls.subLevel })}</strong></div></div><h3 class="creation-choice-section-title">${uiText("Maîtrises")}</h3>${creationChoiceFacts(facts)}${extra.multiclass?.prereq ? renderCompactHelp(uiText("Multiclassage : {p0}.", { p0: prereqText(extra.multiclass.prereq) })) : ""}${locked ? notice(uiText("Ce personnage est multiclassé : sa classe de départ se corrige depuis Évolution, niveau par niveau."), "warning") : ""}<div class="creation-choice-apply">${libraryBrowseButton("class", "wizard")}${libraryReferenceButton(libraryRuntimeReference("class", id))}${button(chosen ? uiText("{p0} Classe choisie", { p0: icon("check", 16) }) : uiText("Choisir cette classe"), "choose-class", `data-id="${id}" ${chosen || locked ? "disabled" : ""}`, chosen ? "ghost" : "primary")}</div>${settings}</section></div>`;
+  return `<div class="${creationChoiceLayout("class")}">${creationChoiceDirectory("class", Object.entries(uiClasses), current, id)}<section id="creation-class-detail" class="creation-choice-detail" aria-label="${uiText("Détail de la classe")}" tabindex="-1">${creationChoiceBack("class")}<div class="creation-choice-heading"><div><h2>${esc(cls.name)}</h2><span class="creation-choice-role">${esc(cls.role)}</span></div>${classIllustration(id, "creation-choice-detail-image") || `<span class="creation-choice-emblem" aria-hidden="true">${icon(cls.icon, 36)}</span>`}</div><p class="creation-choice-lead">${esc(cls.desc)}</p><div class="creation-choice-summary"><div><span>${uiText("Dé de vie")}</span><strong>d${cls.die}</strong></div><div><span>${uiText("Caractéristique clé")}</span><strong>${esc(uiAbilities[cls.primary[0]]?.name || "")}</strong></div><div><span>${esc(cls.subLabel)}</span><strong>${uiText("Niveau {p10}", { p10: cls.subLevel })}</strong></div></div><h3 class="creation-choice-section-title">${uiText("Maîtrises")}</h3>${creationChoiceFacts(facts)}${extra.multiclass?.prereq ? renderCompactHelp(uiText("Multiclassage : {p0}.", { p0: prereqText(extra.multiclass.prereq) })) : ""}${locked ? notice(uiText("Ce personnage est multiclassé : sa classe de départ se corrige depuis Évolution, niveau par niveau."), "warning") : ""}<div class="creation-choice-apply">${libraryBrowseButton("class", "wizard")}${libraryReferenceButton(libraryRuntimeReference("class", id))}${button(chosen ? uiText("creation.continueChoice") : uiText("Choisir cette classe"), chosen ? "wizard-next" : "choose-class", `data-id="${id}" ${locked && !chosen ? "disabled" : ""}`, "primary")}</div>${settings}</section></div>`;
+}
+/** Apports d’un historique, communs à la création et à la correction. */
+function creationBackgroundFacts(bg) {
+  const g = bg.grants || {},
+    tools = [...(g.tools || []).map((key) => uiTools[key]?.name || key), ...(g.toolChoice ? [uiText("{p0} au choix", { p0: g.toolChoice.count })] : [])],
+    languages = [...(g.languages || []).map((key) => uiLanguages[key]?.name || key), ...(g.languageChoice ? [uiText("{p0} au choix", { p0: g.languageChoice.count })] : [])];
+  return [
+    [uiText("Compétences maîtrisées"), [...(bg.skills || []).map((key) => uiSkills[key]?.[0] || key), ...(g.skillChoice ? [uiText("{p0} au choix", { p0: g.skillChoice.count })] : [])].join(uiText(" et ")) || uiText("Deux au choix")],
+    tools.length ? [uiText("Outils maîtrisés"), tools.join(", ")] : null,
+    languages.length ? [uiText("Langues"), languages.join(", ")] : null,
+    g.toolOrLanguageChoice ? [uiText("Langues ou outils"), uiText("{p0} au choix", { p0: g.toolOrLanguageChoice.count })] : null,
+    bg.equipment ? [uiText("Équipement"), bg.equipment] : null,
+    bg.gold != null ? [uiText("Bourse"), uiText("{p0} po", { p0: bg.gold.toLocaleString(uiLocale()) })] : null,
+    g.expandedSpells?.length ? [uiText("Liste de sorts étendue"), uiText("Accès aux choix de classe ; aucun sort appris ou préparé automatiquement.")] : null,
+  ];
 }
 function renderBackgroundStep(w, c) {
   const current = c.background.id || "custom",
@@ -45514,21 +49446,11 @@ function renderBackgroundStep(w, c) {
     candidate = chosen ? c : { ...c, background: { ...c.background, id, variantId: null } },
     bg = uiBackgroundOf(candidate),
     g = bg.grants || {},
-    tools = [...(g.tools || []).map((key) => uiTools[key]?.name || key), ...(g.toolChoice ? [uiText("{p0} au choix", { p0: g.toolChoice.count })] : [])],
-    languages = [...(g.languages || []).map((key) => uiLanguages[key]?.name || key), ...(g.languageChoice ? [uiText("{p0} au choix", { p0: g.languageChoice.count })] : [])],
-    facts = [
-      [uiText("Compétences maîtrisées"), [...(bg.skills || []).map((key) => uiSkills[key]?.[0] || key), ...(g.skillChoice ? [uiText("{p0} au choix", { p0: g.skillChoice.count })] : [])].join(uiText(" et ")) || uiText("Deux au choix")],
-      tools.length ? [uiText("Outils maîtrisés"), tools.join(", ")] : null,
-      languages.length ? [uiText("Langues"), languages.join(", ")] : null,
-      g.toolOrLanguageChoice ? [uiText("Langues ou outils"), uiText("{p0} au choix", { p0: g.toolOrLanguageChoice.count })] : null,
-      bg.equipment ? [uiText("Équipement"), bg.equipment] : null,
-      bg.gold != null ? [uiText("Bourse"), uiText("{p0} po", { p0: bg.gold.toLocaleString(uiLocale()) })] : null,
-      g.expandedSpells?.length ? [uiText("Liste de sorts étendue"), uiText("Accès aux choix de classe ; aucun sort appris ou préparé automatiquement.")] : null,
-    ],
+    facts = creationBackgroundFacts(bg),
     items = [...Object.entries(uiBackgrounds), ["custom", { name: uiText("Personnalisé"), skills: [] }]],
     picks = chosen ? uiPickSpecs(c).filter((spec) => spec.source.key === "bg") : [],
     custom = chosen && id === "custom" ? `<div class="creation-choice-custom"><div class="form-grid">${field(uiText("Nom de l’historique"), "wiz.background.name", c.background.name, "text", "", 'maxlength="80"')}${field(uiText("Nom de l’aptitude"), "wiz.background.featureName", c.background.featureName || "", "text", "", 'maxlength="120"')}</div><h3>${uiText("Deux compétences")}</h3>${skillChips(c, "wiz.background.skills", c.background.skills, Object.keys(uiSkills), 2)}<div class="spacer"></div>${field(uiText("Aptitude d’historique"), "wiz.background.feature", c.background.feature || "", "textarea", uiText("Avantage narratif à valider avec le MJ."), 'maxlength="4000"')}${field(uiText("Équipement"), "wiz.background.equipment", c.background.equipment || "", "text", "", 'maxlength="600"')}</div>` : "";
-  return `<div class="creation-choice-workspace">${creationChoiceDirectory("background", items, current, id)}<section id="creation-background-detail" class="creation-choice-detail" aria-label="${uiText("Détail de l’historique")}" tabindex="-1"><div class="creation-choice-heading"><h2>${esc(bg.name)}</h2>${sourcePill(bg.source)}</div><p class="creation-choice-lead">${esc(bg.desc || "")}</p>${creationChoiceFacts(facts)}${bg.feature?.[0] ? `<section class="creation-choice-feature"><h3>${esc(bg.feature[0])}</h3><p class="preserve">${esc(bg.feature[1] || "")}</p></section>` : ""}<div class="creation-choice-apply">${libraryBrowseButton("background", "wizard")}${libraryReferenceButton(bg.referenceId || libraryRuntimeReference("background", id))}${button(chosen ? uiText("{p0} Historique choisi", { p0: icon("check", 16) }) : uiText("Choisir cet historique"), "choose-background", `data-id="${id}" ${chosen ? "disabled" : ""}`, chosen ? "ghost" : "primary")}</div>${chosen && uiBackgrounds[id]?.variants?.length ? selectField(uiText("background.variant"), "wiz.background.variantId", c.background.variantId || "", { "": uiText("background.base"), ...Object.fromEntries(uiBackgrounds[id].variants.map((variant) => [variant.id, variant.name])) }) : ""}${custom}${chosen ? creationChoicePickFields(c, picks) : ""}${g.expandedSpells?.length ? `<details class="creation-choice-feature"><summary>${uiText("Voir les {p0} sorts de la liste étendue", { p0: g.expandedSpells.length })}</summary><p>${esc(g.expandedSpells.map((id) => uiSpellById(c, id)?.name || id).join(", "))}</p></details>` : ""}${(g.feats || []).filter((featId) => !picks.some((spec) => spec.field === "featChoice" && Object.hasOwn(spec.options, featId))).map((featId) => uiFeats[featId] ? `<section class="creation-choice-feature"><h3>${esc(uiFeats[featId].name)}</h3><p>${esc(uiFeats[featId].summary || "")}</p></section>` : "").join("")}${chosen ? renderPickSpecs(c, uiPickSpecs(c).filter((spec) => spec.source.key.startsWith("feat|bg|")), "wiz") : ""}</section></div>`;
+  return `<div class="${creationChoiceLayout("background")}">${creationChoiceDirectory("background", items, current, id)}<section id="creation-background-detail" class="creation-choice-detail" aria-label="${uiText("Détail de l’historique")}" tabindex="-1">${creationChoiceBack("background")}<div class="creation-choice-heading"><div><h2>${esc(bg.name)}</h2>${sourcePill(bg.source)}</div>${backgroundIllustration(id, "creation-choice-detail-image")}</div><p class="creation-choice-lead">${esc(bg.desc || "")}</p>${creationChoiceFacts(facts)}${bg.feature?.[0] ? `<section class="creation-choice-feature"><h3>${esc(bg.feature[0])}</h3><p class="preserve">${esc(bg.feature[1] || "")}</p></section>` : ""}<div class="creation-choice-apply">${libraryBrowseButton("background", "wizard")}${libraryReferenceButton(bg.referenceId || libraryRuntimeReference("background", id))}${button(chosen ? uiText("creation.continueChoice") : uiText("Choisir cet historique"), chosen ? "wizard-next" : "choose-background", `data-id="${id}"`, "primary")}</div>${chosen && uiBackgrounds[id]?.variants?.length ? selectField(uiText("background.variant"), "wiz.background.variantId", c.background.variantId || "", { "": uiText("background.base"), ...Object.fromEntries(uiBackgrounds[id].variants.map((variant) => [variant.id, variant.name])) }) : ""}${custom}${chosen ? creationChoicePickFields(c, picks) : ""}${g.expandedSpells?.length ? `<details class="creation-choice-feature"><summary>${uiText("Voir les {p0} sorts de la liste étendue", { p0: g.expandedSpells.length })}</summary><p>${esc(g.expandedSpells.map((id) => uiSpellById(c, id)?.name || id).join(", "))}</p></details>` : ""}${(g.feats || []).filter((featId) => !picks.some((spec) => spec.field === "featChoice" && Object.hasOwn(spec.options, featId))).map((featId) => uiFeats[featId] ? `<section class="creation-choice-feature"><h3>${esc(uiFeats[featId].name)}</h3><p>${esc(uiFeats[featId].summary || "")}</p></section>` : "").join("")}${chosen ? renderPickSpecs(c, uiPickSpecs(c).filter((spec) => spec.source.key.startsWith("feat|bg|")), "wiz") : ""}</section></div>`;
 }
 function renderAbilitiesStep(w, c) {
   const d = uiDerive(wizardPreview(w)),
@@ -45550,7 +49472,7 @@ function renderAbilitiesStep(w, c) {
     return `<article class="creation-stat-card ${key ? "key-ability" : ""}"><h3 title="${v.name}" aria-label="${v.name}">${v.short}</h3>${key ? `<span class="creation-stat-key" title="${uiText("Caractéristique clé : {p0}", { p0: esc(cls.name) })}">${icon("sparkles", 11)}</span>` : ""}<strong class="creation-stat-mod">${signed(d.mods[a])}</strong><span class="creation-stat-score">${uiText("Score {p6}", { p6: d.scores[a] })}</span><span class="creation-stat-bonus" title="${uiText("Base {p7}{p8}", { p7: c.abilities[a], p8: bonus ? ` · ${esc(bonus)}` : "" })}">${esc(bonus) || "&nbsp;"}</span><div class="creation-stat-edit"><label for="score-${a}">Base</label>${input}</div></article>`;
   }).join("");
   const impacts = [[uiText("Points de vie"), d.maxHp], ["Initiative", signed(d.initiative)], d.spellDC !== null ? [uiText("DD des sorts"), d.spellDC] : [uiText("Attaque principale"), signed(d.attack)]];
-  return `<div class="creation-stat-layout"><nav class="creation-methods" aria-label="${uiText("Méthode de caractéristiques")}">${methods.map(([id, label, detail]) => `<button type="button" data-action="ability-method" data-value="${id}" class="creation-method ${method === id ? "selected" : ""}" aria-pressed="${method === id}"><strong>${label}</strong><small>${detail}</small></button>`).join("")}</nav><section class="creation-stat-main"><h2>${uiText("Caractéristiques")}</h2>${method === "points" ? `<div class="creation-stat-budget ${used > 27 ? "over-budget" : ""}" role="status"><strong>${uiText("{p1} / 27 points restants", { p1: 27 - used })}</strong></div>` : ""}${method === "rolled" ? `<div class="creation-stat-roll">${button(uiText("{p0} {p1} les six valeurs", { p0: icon("dice", 16), p1: pool.length ? uiText("Relancer") : uiText("Lancer") }), "roll-abilities", "", "small-btn")}${pool.length ? `<div class="learn-counts">${(w.rollDetails || []).map((r) => `<span class="pill outline" title="${r.dice.join(", ")}">${r.total}</span>`).join("")}</div>` : ""}</div>` : ""}<div class="creation-stat-grid">${cards}</div><section class="creation-stat-impacts" aria-label="${uiText("Valeurs calculées")}">${impacts.map(([label, value]) => `<div><strong>${value}</strong><span>${label}</span></div>`).join("")}</section>${["standard", "points"].includes(method) ? `<div class="actions">${button(uiText("{p0} Répartition conseillée", { p0: icon("sparkles", 16) }), "recommend-abilities", "", "small-btn ghost")}</div>` : ""}</section></div>`;
+  return `<div class="creation-stat-layout"><nav class="creation-methods" aria-label="${uiText("Méthode de caractéristiques")}">${methods.map(([id, label, detail]) => `<button type="button" data-action="ability-method" data-value="${id}" class="creation-method ${method === id ? "selected" : ""}" aria-pressed="${method === id}"><strong>${label}</strong><small>${detail}</small></button>`).join("")}</nav><section class="creation-stat-main"><h2>${uiText("Caractéristiques")}</h2>${method === "points" ? `<div class="creation-stat-budget ${used > 27 ? "over-budget" : ""}" role="status"><strong>${uiText("{p1} / 27 points restants", { p1: 27 - used })}</strong></div>` : ""}${method === "rolled" ? `<div class="creation-stat-roll">${button(uiText("{p0} {p1} les six valeurs", { p0: icon("dice", 16), p1: pool.length ? uiText("Relancer") : uiText("Lancer") }), "roll-abilities", "", "small-btn")}${pool.length ? `<div class="learn-counts">${(w.rollDetails || []).map((r) => `<span class="pill outline" title="${r.dice.join(", ")}">${r.total}</span>`).join("")}</div>` : ""}</div>` : ""}<div class="creation-stat-grid">${cards}</div>${isNextWizard(w) ? renderCreationNextStage(c, "abilities", uiText("Bonus de caractéristiques")) : ""}<section class="creation-stat-impacts" aria-label="${uiText("Valeurs calculées")}">${impacts.map(([label, value]) => `<div><strong>${value}</strong><span>${label}</span></div>`).join("")}</section>${["standard", "points"].includes(method) ? `<div class="actions">${button(uiText("{p0} Répartition conseillée", { p0: icon("sparkles", 16) }), "recommend-abilities", "", "small-btn ghost")}</div>` : ""}</section></div>`;
 }
 function renderSkillsStep(w, c) {
   const d = uiDerive(c),
@@ -45579,6 +49501,20 @@ function creationEquipmentOptionAllowed(c, option, acc = collect(c)) {
     if (uiWeapons[id]) return weaponProficiency(c, { id }, acc).proficient;
     if (uiArmors[id]) return acc.armor.has(uiArmors[id].type);
     return true;
+  });
+}
+/** Filtre « armes maîtrisées » : un choix d’arme laissé à sa valeur par défaut prend la première arme maîtrisée quand ce défaut ne l’est pas. */
+function creationEquipmentKeepProficient(c) {
+  const groups = CLASS_EXTRAS[primaryClassId(c)]?.startingEquipment || [], kit = c.startKit ||= { mode: "kit", choices: {}, picks: {} }, acc = collect(c);
+  const proficient = (id) => !uiWeapons[id] || weaponProficiency(c, { id }, acc).proficient;
+  groups.forEach((group, g) => {
+    const o = clamp(kit.choices?.[g] ?? 0, 0, group.options.length - 1);
+    (group.options[o]?.items || []).forEach(([item, qty = 1], i) => {
+      if (!item.startsWith("@")) return;
+      const options = wildcardOptions(item), first = options.find(([id]) => proficient(id))?.[0];
+      if (!first || proficient(options[0]?.[0])) return;
+      for (let n = 0; n < qty; n++) (kit.picks ||= {})[`${g}-${o}-${i}-${n}`] ||= first;
+    });
   });
 }
 function creationEquipmentPresets(c) {
@@ -45642,6 +49578,8 @@ function renderGearStep(w, c) {
     if (omitFixed) for (const [item, qty = 1] of fixedItems) if (counts.has(item)) counts.get(item).qty -= qty;
     return [...counts.values()].filter((item) => item.qty > 0).map((item) => `<li><strong>${esc(item.info.name)}${item.qty > 1 ? uiText(" ×{p0}", { p0: item.qty }) : ""}</strong>${item.info.stealth ? ("<span>" + uiText("Désavantage en Discrétion") + "</span>") : ""}</li>`).join("");
   };
+  let filterable = false;
+  const proficientWeapon = (id) => !uiWeapons[id] || weaponProficiency(c, { id }, acc).proficient;
   let body;
   if (view === "gold") {
     body = `<div class="creation-gold"><div class="creation-gold-formula">${esc(extra.startingGold || uiText("Montant fixé par le MJ"))}</div>${field(uiText("Pièces d’or de départ"), "wiz.gold", c.gold, "number", "", 'min="0" max="100000" step="1"')}${extra.startingGold ? button(uiText("{p0} Lancer l’or de départ", { p0: icon("dice", 16) }), "roll-gold", "", "primary") : ""}<p class="small muted">${uiText("Remplace l’équipement de classe.")}</p></div>`;
@@ -45652,8 +49590,11 @@ function renderGearStep(w, c) {
       return `<fieldset class="creation-gear-group"><legend>${esc(group.title || uiText("Choix {p0}", { p0: g + 1 }))}</legend>${group.options.map((option, o) => {
         const on = o === chosen, allowed = creationEquipmentOptionAllowed(c, option, acc);
         const picks = on ? option.items.map(([item, qty = 1], i) => item.startsWith("@") ? Array.from({ length: qty }, (_, n) => {
-          const key = `${g}-${o}-${i}-${n}`, options = wildcardOptions(item);
-          return selectField(`Choix${qty > 1 ? ` ${n + 1}` : ""}`, `wiz.startKit.picks.${key}`, kit.picks?.[key] || options[0]?.[0], Object.fromEntries(options));
+          const key = `${g}-${o}-${i}-${n}`, all = wildcardOptions(item), current = kit.picks?.[key] || all[0]?.[0];
+          if (all.some(([id]) => !proficientWeapon(id))) filterable = true;
+          // Le choix en cours reste listé même s'il n'est pas maîtrisé : la liste affiche toujours ce qui sera dans le sac.
+          const options = ui.creationEquipmentProficient ? all.filter(([id]) => proficientWeapon(id) || id === current) : all;
+          return selectField(`Choix${qty > 1 ? ` ${n + 1}` : ""}`, `wiz.startKit.picks.${key}`, current, Object.fromEntries(options.map(([id, name]) => [id, proficientWeapon(id) ? name : uiText("creation.gear.notProficient", { name })])));
         }).join("") : "").join("") : "";
         return `<div class="creation-gear-option ${on ? "selected" : ""}"><label><input type="radio" name="kit-${g}" data-bind="wiz.startKit.choices.${g}" data-number="1" value="${o}" ${on ? "checked" : ""} ${!allowed ? "disabled" : ""}><span>${esc(option.label)}${!allowed ? ("<small>" + uiText("Maîtrise requise") + "</small>") : ""}</span></label>${picks ? `<div class="creation-gear-picks">${picks}</div>` : ""}</div>`;
       }).join("")}</fieldset>`;
@@ -45664,7 +49605,7 @@ function renderGearStep(w, c) {
   }
   const fixed = view !== "gold" && fixedItems.length ? `<div class="creation-gear-included"><strong>${uiText("Inclus")}</strong><span>${esc(fixedItems.map(([item, qty = 1]) => `${itemInfo(item)?.name || item}${qty > 1 ? uiText(" ×{p0}", { p0: qty }) : ""}`).join(", "))}</span></div>` : "";
   const background = bg.equipment || bg.gold ? `<div class="creation-gear-background"><h3>${esc(bg.name)}</h3>${bg.equipment ? `<p>${esc(bg.equipment)}</p>` : ""}${bg.gold ? `<strong>${uiText("{p0} po", { p0: bg.gold })}</strong>` : ""}</div>` : "";
-  return `<div class="creation-gear-layout"><nav class="creation-methods" aria-label="${uiText("Mode d’équipement")}">${[["suggestions", uiText("Suggestions Compagnon"), uiText("Équipement de classe")], ["custom", uiText("Personnaliser"), uiText("Chaque choix de départ")], ["gold", uiText("Or de départ"), extra.startingGold || uiText("Montant du MJ")]].map(([mode, label, detail]) => `<button type="button" class="creation-method ${view === mode ? "selected" : ""}" data-action="creation-equipment-mode" data-value="${mode}" aria-pressed="${view === mode}"><strong>${label}</strong><small>${esc(detail)}</small></button>`).join("")}</nav><section class="creation-gear-main"><h2>${uiText("Équipement")}</h2>${body}${fixed}${background}</section></div>`;
+  return `<div class="creation-gear-layout"><nav class="creation-methods" aria-label="${uiText("Mode d’équipement")}">${[["suggestions", uiText("Suggestions Compagnon"), uiText("Équipement de classe")], ["custom", uiText("Personnaliser"), uiText("Chaque choix de départ")], ["gold", uiText("Or de départ"), extra.startingGold || uiText("Montant du MJ")]].map(([mode, label, detail]) => `<button type="button" class="creation-method ${view === mode ? "selected" : ""}" data-action="creation-equipment-mode" data-value="${mode}" aria-pressed="${view === mode}"><strong>${label}</strong><small>${esc(detail)}</small></button>`).join("")}</nav><section class="creation-gear-main"><div class="creation-gear-head"><h2>${uiText("Équipement")}</h2>${filterable ? `<label class="choice-group-toggle" for="creation-gear-proficient"><input id="creation-gear-proficient" type="checkbox" data-bind="ui.creationEquipmentProficient" data-live="1" ${ui.creationEquipmentProficient ? "checked" : ""}>${uiText("creation.gear.proficientOnly")}</label>` : ""}</div>${body}${fixed}${background}</section></div>`;
 }
 function renderMagicStep(w, c) {
   const casters = spellcasters(c),
@@ -45673,7 +49614,7 @@ function renderMagicStep(w, c) {
     innate.length
       ? notice(uiText("Magie d’origine ou de don, comptée à part : {p0}.", { p0: innate.map((x) => esc(uiSpellById(c, x.id)?.name || x.id)).join(", ") }))
       : ""
-  }${casters.length ? renderMagicEditor(c, "wizard") : ""}`;
+  }${isNextWizard(w) ? renderCreationNextStage(c, "magic", uiText("creation.group.spells")) : renderPickSpecs(c, uiPickSpecs(c, (src) => src.key === "feat|race").filter(originFeatSpellChoice), "wiz")}${casters.length ? renderMagicEditor(c, "wizard") : ""}`;
 }
 function renderStartingClassPicker(c, level) {
   const current = c.levels[level - 1].classId,
@@ -45681,8 +49622,7 @@ function renderStartingClassPicker(c, level) {
     id = `starting-class-${level}`;
   return `<section class="choice-spec"><label class="field" for="${id}"><span>${uiText("Classe du niveau {p1}", { p1: level })}</span><select id="${id}" data-bind="wiz.progressionClass.${level}">${options.map((entry) => `<option value="${entry.classId}" ${current === entry.classId ? "selected" : ""} ${entry.ok ? "" : "disabled"}>${esc(uiClasses[entry.classId].name)} ${entry.classLevel}${entry.ok ? "" : uiText(" (prérequis manquants)")}</option>`).join("")}</select></label></section>`;
 }
-function renderProgressionRequirements(c) {
-  const requirements = progressionRequirements(c);
+function renderProgressionRequirements(c, requirements = progressionRequirements(c)) {
   return requirements.length ? `<section class="review-section" data-progression-requirements><h3>${uiText("Choix à compléter ({p0})", { p0: requirements.length })}</h3>${requirements.map((entry) => `<div class="summary-row">${button(esc(entry.label), "progression-requirement", `data-step="${entry.step}" data-level="${entry.level || ""}" data-path="${esc(entry.path)}" data-class="${entry.classId || ""}"`, "small-btn ghost")}</div>`).join("")}</section>` : "";
 }
 function renderProgressionRuleNotes(c) {
@@ -45714,10 +49654,10 @@ function renderReviewStep(w, c) {
     .map((s) => uiSkills[s][0] + (d.ranks[s] === 2 ? uiText(" (expertise)") : ""))
     .join(", ")}</strong></div><div class="summary-row"><span>${uiText("Langues")}</span><strong>${esc(d.languages.map((l) => l.name).join(", "))}</strong></div><div class="summary-row"><span>${uiText("Outils")}</span><strong>${esc(d.tools.map((t) => t.name).join(", ") || uiText("Aucun"))}</strong></div><div class="summary-row"><span>${uiText("Attaques")}</span><strong>${esc(d.attacks.map((a) => `${a.name} ${signed(a.attack)}`).join(" · "))}</strong></div></div><div class="review-section"><h3>${w.original ? uiText("Ce qui change sur la fiche") : uiText("Tes valeurs de départ")}</h3>${impactHtml(w.original, wizardPreview(w))}</div>${w.original ? renderRepairConsequences(previewCharacterRepair(beginCharacterRepair(w.original), c)) : ""}${renderProgressionRequirements(c)}${renderProgressionRuleNotes(c)}${issues.errors.length ? issueList(issues.errors, "error") : ""}${issues.warnings.length ? `<details class="review-section"><summary>${uiText("Points à vérifier ({p0})", { p0: issues.warnings.length })}</summary>${issueList(issues.warnings)}</details>` : ""}`;
 }
-function renderWorkflowHeader({ context, steps, index, stepAction, leaveAction, previousAction, nextAction, nextLabel, nextDisabled = false }) {
+function renderWorkflowHeader({ context, steps, index, stepAction, leaveAction, previousAction, nextAction, nextLabel, nextDisabled = false, previousDisabled = index === 0, compact = false, abandon = false }) {
   const final = nextAction === "wizard-save" || nextAction === "level-save";
   const leaveLabel = leaveAction === "cancel-level" ? uiText("Annuler les changements de ce niveau") : uiText("Quitter et conserver le brouillon");
-  return `<div class="workflow-header"><div class="wizard-top"><span class="eyebrow">${esc(context)}</span>${button(icon("x", 18), leaveAction, `id="workflow-close" aria-label="${esc(leaveLabel)}" title="${esc(leaveLabel)}"`, "ghost workflow-close")}</div><div class="workflow-row">${button(`${icon("back", 16)}<span class="workflow-action-label">${uiText("Précédent")}</span>`, previousAction, `id="workflow-previous" aria-label="${uiText("Étape précédente")}" ${index ? "" : "disabled"}`, "ghost")}<details class="workflow-menu ${steps.length > 3 ? "workflow-many" : ""}" ${window.matchMedia("(min-width:701px)").matches ? "open" : ""}><summary id="workflow-step-summary" aria-label="${esc(uiText("Choisir une étape, étape actuelle {p0}", { p0: steps[index][1] }))}"><span class="workflow-step-title">${esc(steps[index][1])}</span><span class="workflow-step-count"><strong>${index + 1}</strong>/${steps.length}${icon("down", 12)}</span><span class="workflow-segments" aria-hidden="true">${steps.map((entry, i) => `<i class="${i < index ? "done" : i === index ? "current" : ""}"></i>`).join("")}</span></summary><div class="wizard-progress" style="--steps:${steps.length}">${steps.map(([id, label, disabled], i) => `<button type="button" id="workflow-step-${esc(String(id))}" class="wizard-step ${i === index ? "active" : i < index ? "done" : ""}" data-action="${stepAction}" data-step="${esc(String(id))}" aria-label="${esc(uiText("Étape {p0} sur {p1} : {p2}", { p0: i + 1, p1: steps.length, p2: label }))}" ${i === index ? 'aria-current="step"' : ""} ${disabled ? "disabled" : ""}><span class="step-number">${i < index ? icon("check", 13) : i + 1}</span><span class="step-label">${esc(label)}</span></button>`).join("")}</div></details>${button(`<span class="workflow-action-label">${final ? uiText("Valider") : uiText("Suivant")}</span>${icon(final ? "check" : "arrow", 16)}`, nextAction, `id="workflow-next" aria-label="${esc(nextLabel)}" ${nextDisabled ? "disabled" : ""}`, `primary ${final ? "workflow-validate" : ""}`)}</div></div>`;
+  return `<div class="workflow-header ${compact ? "workflow-compact" : ""} ${abandon ? "workflow-abandon" : ""}">${compact ? "" : `<div class="wizard-top"><span class="eyebrow">${esc(context)}</span>${button(icon("x", 18), leaveAction, `id="workflow-close" aria-label="${esc(leaveLabel)}" title="${esc(leaveLabel)}"`, "ghost workflow-close")}</div>`}<div class="workflow-row">${button(`${icon(abandon ? "x" : "back", 16)}<span class="workflow-action-label">${abandon ? uiText("creation.abandon") : uiText("Précédent")}</span>`, abandon ? leaveAction : previousAction, `id="workflow-previous" aria-label="${abandon ? uiText("creation.abandon") : uiText("Étape précédente")}" ${abandon ? `title="${esc(leaveLabel)}"` : ""} ${previousDisabled && !abandon ? "disabled" : ""}`, "ghost")}<details class="workflow-menu ${steps.length > 3 ? "workflow-many" : ""}" ${window.matchMedia("(min-width:701px)").matches ? "open" : ""}><summary id="workflow-step-summary" aria-label="${esc(uiText("Choisir une étape, étape actuelle {p0}", { p0: steps[index][1] }))}"><span class="workflow-step-title">${esc(steps[index][1])}</span><span class="workflow-step-count"><strong>${index + 1}</strong>/${steps.length}${icon("down", 12)}</span><span class="workflow-segments" aria-hidden="true">${steps.map((entry, i) => `<i class="${i < index ? "done" : i === index ? "current" : ""}"></i>`).join("")}</span></summary><div class="wizard-progress" style="--steps:${steps.length}">${steps.map(([id, label, disabled], i) => `<button type="button" id="workflow-step-${esc(String(id))}" class="wizard-step ${i === index ? "active" : i < index ? "done" : ""}" data-action="${stepAction}" data-step="${esc(String(id))}" aria-label="${esc(uiText("Étape {p0} sur {p1} : {p2}", { p0: i + 1, p1: steps.length, p2: label }))}" ${i === index ? 'aria-current="step"' : ""} ${disabled ? "disabled" : ""}><span class="step-number">${i < index ? icon("check", 13) : i + 1}</span><span class="step-label">${esc(label)}</span></button>`).join("")}</div></details><div class="workflow-forward">${button(`<span class="workflow-action-label">${final ? uiText("Valider") : uiText("Suivant")}</span>${icon(final ? "check" : "arrow", 16)}`, nextAction, `id="workflow-next" aria-label="${esc(nextLabel)}" ${nextDisabled ? "disabled" : ""}`, `primary ${final ? "workflow-validate" : ""}`)}${compact && !abandon ? button(icon("x", 18), leaveAction, `id="workflow-close" aria-label="${esc(leaveLabel)}" title="${esc(leaveLabel)}"`, "ghost workflow-close") : ""}</div></div></div>`;
 }
 function renderWorkflowPreview(c, reader, editablePortrait = false) {
   return reader ? `<details class="workflow-preview" data-detail="workflow-preview"><summary>${uiText("Aperçu du personnage")}</summary>${miniPreview(c, { editablePortrait })}</details>` : miniPreview(c, { editablePortrait });
@@ -45756,6 +49696,79 @@ function finishWorkflowNavigation() {
   if (window.matchMedia("(max-width:700px)").matches) document.getElementById("workflow-step-summary")?.focus({ preventScroll: true });
 }
 
+function creationSelectClass(id) {
+  const w = ui.wizard, cc = w.draft, next = isNextWizard(w), replaced = !next || w.nextClassConfirmed;
+  if (next) w.nextClassConfirmed = true;
+  if (primaryClassId(cc) === id) return;
+  if (w.original) {
+    setProgressionClass(cc, 1, id, { repair: true });
+    queueDraft(); render();
+    toast(uiText("Classe du niveau 1 corrigée. Vérifie les choix et les accès magiques."));
+    return;
+  }
+  const n = levelOf(cc), classSources = grantSources(cc).filter((source) => source.classId).map((source) => `${source.key}|`);
+  cc.classId = id;
+  cc.levels = [defaultLevel(id, 1)];
+  cc.subclasses = {};
+  cc.customSubclasses = {};
+  cc.skills = [];
+  if (next) {
+    // Création : ni sous-classe ni compétence posée d’office, et plus aucun choix de l’ancienne classe.
+    creationNextSetStartLevel(cc, n);
+    clearPicks(cc, classSources);
+  } else {
+    setStartLevel(cc, n);
+    if (uiClasses[id].subLevel === 1) cc.subclasses[id] = DEFAULT_SUBCLASS[id];
+    refreshClassSkills(cc);
+  }
+  clearPicks(cc, ["class|", "sub|", "feat|L", "inv|"]);
+  cc.spells = { known: [], prepared: [], sources: {}, arcana: {}, allowExceptions: cc.spells.allowExceptions };
+  cc.equipment = defaultEquipment(id);
+  cc.startKit = { mode: cc.startKit?.mode === "gold" ? "gold" : "kit", choices: {}, picks: {} };
+  if (cc.abilityMethod === "standard") cc.abilities = recommendedAbilities(id);
+  if (next) creationLinesReconcile(cc);
+  queueDraft();
+  render();
+  if (replaced) toast(uiText("Classe changée : compétences, équipement et sorts réinitialisés pour ce brouillon."));
+}
+function creationSelectBackground(id) {
+  const next = isNextWizard();
+  if (next) ui.wizard.nextBackgroundConfirmed = true;
+  const draft = ui.wizard.draft;
+  if ((draft.background.id || "custom") === id) return false;
+  draft.background = id === "custom"
+    ? { ...draft.background, id: "custom", name: draft.background.name || "Historique personnalisé", skills: [] }
+    : { ...draft.background, id, name: "", skills: [], variantId: null };
+  clearPicks(draft, ["bg|", "feat|bg|"]);
+  if (next) creationLinesReconcile(draft);
+  else if (!ui.wizard.original) refreshClassSkills(draft);
+  return true;
+}
+function creationNeedsSelection(w) {
+  if (isNextWizard(w)) return creationNextIncomplete(w, w.step) || w.step === "race" && ui.raceFamily === "all";
+  if (w.step === "race") return !ui.creationRaceInspect || ui.creationRaceInspect !== w.draft.raceId;
+  if (w.step === "class") return !ui.creationClassInspect || ui.creationClassInspect !== primaryClassId(w.draft);
+  if (w.step === "background") return !ui.creationBackgroundInspect || ui.creationBackgroundInspect !== (w.draft.background.id || "custom");
+  return false;
+}
+function advanceWizard() {
+  const w = ui.wizard;
+  if (isNextWizard(w) && creationNeedsSelection(w)) return;
+  const
+    steps = wizardSteps(w).map(([id]) => id),
+    index = steps.indexOf(w.step);
+  if (w.step === "abilities" && w.draft.abilityMethod === "rolled" && !(w.rollPool || []).length) {
+    toast(uiText("Lance d’abord tes six valeurs, ou choisis une autre méthode."));
+    return;
+  }
+  w.step = steps[Math.min(steps.length - 1, index + 1)];
+  w.visited = [...new Set([...(w.visited || []), w.step])];
+  w.error = "";
+  ui.creationLine = null;
+  queueDraft();
+  render();
+  finishWorkflowNavigation();
+}
 const PICK_CHIP_TYPES = ["ability", "skill", "language", "tool", "weapon", "weaponOrTool", "skillOrTool", "toolOrLanguage"];
 function renderWizard() {
   const w = ui.wizard,
@@ -45767,22 +49780,22 @@ function renderWizard() {
     preview = wizardPreview(w),
     reader = w.step === "magic" && spellcasters(c).length > 0;
   const context = w.original ? uiText("Corriger {p0}", { p0: c.name || uiText("le personnage") }) : uiText("Créer un personnage{p0}", { p0: levelOf(c) > 1 ? uiText(" · Niveau {p0}", { p0: levelOf(c) }) : "" });
-  return `<div class="wizard-wrap creation-wizard ${reader ? "workflow-reader" : ""}">${renderWorkflowHeader({ context, steps: steps.map(([id, label], i) => [id, label, i > index && !w.visited?.includes(id)]), index, stepAction: "wizard-step", leaveAction: "leave-wizard", previousAction: "wizard-prev", nextAction: last ? "wizard-save" : "wizard-next", nextLabel: last ? w.aidedd ? uiText("aidedd.returnPreview") : w.original ? uiText("Valider les corrections") : uiText("Créer la fiche") : uiText("Étape suivante : {p0}", { p0: steps[index + 1][1] }) })}<div class="wizard-layout"><div class="wizard-main">${renderRepairConflict()}${renderWizardStep(w, c)}${w.error ? `<div class="wizard-error">${notice(esc(uiSystemText(w.error)), "error")}</div>` : ""}</div>${renderWorkflowPreview(preview, reader, true)}</div></div>`;
+  return `<div class="wizard-wrap creation-wizard ${isNextWizard(w) ? `creation-next ${w.step === "race" && ui.raceFamily === "all" ? "creation-next-families" : ""}` : ""} ${["race", "class", "background"].includes(w.step) ? "creation-catalogue" : ""} ${reader ? "workflow-reader" : ""}">${renderWorkflowHeader({ context, compact: !w.original, abandon: w.step === "race" && (!isNextWizard(w) || ui.raceFamily === "all"), steps: steps.map(([id, label], i) => [id, label, i > index && !w.visited?.includes(id)]), index, stepAction: "wizard-step", leaveAction: "leave-wizard", previousAction: "wizard-prev", previousDisabled: index === 0 && ui.raceFamily === "all" && !ui.raceQuery && !ui.creationRaceInspect, nextDisabled: creationNeedsSelection(w), nextAction: last ? "wizard-save" : "wizard-next", nextLabel: last ? w.aidedd ? uiText("aidedd.returnPreview") : w.original ? uiText("Valider les corrections") : uiText("Créer la fiche") : uiText("Étape suivante : {p0}", { p0: steps[index + 1][1] }) })}<div class="wizard-layout"><div class="wizard-main">${renderRepairConflict()}${renderWizardStep(w, c)}${w.error ? `<div class="wizard-error">${notice(esc(uiSystemText(w.error)), "error")}</div>` : ""}</div>${isNextWizard(w) && w.step === "race" ? renderCreationNextPreview(w) : renderWorkflowPreview(preview, reader, true)}</div></div>`;
 }
 
 const RACE_GROUP_ORDER = ["Humain", "Nain", "Elfe", "Halfelin", "Gnome", "Demi-elfe", "Demi-orc", "Drakéide", "Tieffelin"];
 function renderWizardStep(w, c) {
   switch (w.step) {
     case "race":
-      return renderRaceStep(w, c);
+      return isNextWizard(w) ? renderCreationNextRace(w, c) : renderRaceCorrectionStep(w, c);
     case "class":
-      return renderClassStep(w, c);
+      return isNextWizard(w) ? renderCreationNextClass(w, c) : renderClassStep(w, c);
     case "background":
-      return renderBackgroundStep(w, c);
+      return isNextWizard(w) ? renderCreationNextBackground(w, c) : renderBackgroundStep(w, c);
     case "abilities":
       return renderAbilitiesStep(w, c);
     case "skills":
-      return renderSkillsStep(w, c);
+      return isNextWizard(w) ? renderCreationNextChoices(w, c) : renderSkillsStep(w, c);
     case "gear":
       return renderGearStep(w, c);
     case "magic":
@@ -46764,6 +50777,7 @@ function askConfirm(title, description, action, key = null, { label = "Confirmer
 }
 function queueDraft() {
   if (!ui.wizard || ui.wizard.aidedd) return;
+  if (isNextWizard()) { try { localStorage.setItem(CREATION_NEXT_KEY, JSON.stringify({ wizard: ui.wizard, family: ui.raceFamily, inspect: ui.creationRaceInspect })); } catch (error) { reportError(error); } return; }
   clearTimeout(draftTimeout);
   const copy = clone(ui.wizard);
   draftTimeout = setTimeout(
@@ -46778,6 +50792,14 @@ function queueDraft() {
   );
 }
 async function clearDraft() {
+  if (isNextWizard()) {
+    localStorage.removeItem(CREATION_NEXT_KEY);
+    // Parcours terminé : l’adresse ne le rouvre plus quand la fiche est rechargée.
+    const creationUrl = new URL(location.href);
+    creationUrl.searchParams.delete("creation");
+    history.replaceState(null, "", creationUrl);
+    return;
+  }
   clearTimeout(draftTimeout);
   await mutateApp(
     (s) => {
@@ -46814,12 +50836,22 @@ function startWizard(character = null, classId = null) {
     rollPool: [],
     rollDetails: [],
   };
-  if (!character) ui.wizard = applyCreationIdentityDefaults(ui.wizard, { initialize: true });
+  if (!character) {
+    ui.wizard.flow = "next";
+    const creationUrl = new URL(location.href);
+    creationUrl.searchParams.set("creation", "next");
+    creationUrl.searchParams.delete("welcome");
+    history.replaceState(null, "", creationUrl);
+    // Rien n’est choisi avant un clic : ni compétence de classe ni sous-classe.
+    ui.wizard.draft.skills = [];
+    ui.wizard.draft.subclasses = {};
+    ui.wizard = applyCreationIdentityDefaults(ui.wizard, { initialize: true });
+  }
   ui.featQuery = "";
   ui.raceQuery = "";
   ui.raceFamily = "all";
   ui.creationClassQuery = ui.creationBackgroundQuery = "";
-  ui.creationClassInspect = ui.creationBackgroundInspect = null;
+  ui.creationRaceInspect = ui.creationClassInspect = ui.creationBackgroundInspect = ui.creationLine = null;
   resetEditorFilters();
   queueDraft();
   render();
@@ -46892,6 +50924,7 @@ function handleBinding(el, redraw) {
       if (i >= 0) list.splice(i, 1);
     }
     setBinding(path, list);
+    if (path.startsWith("wiz.") && isNextWizard()) creationNextReconcile();
     if (path === "wiz.picks.race|size") ui.wizard = applyCreationIdentityDefaults(ui.wizard);
     if (path.startsWith("wiz.")) queueDraft();
     render();
@@ -46931,7 +50964,14 @@ function handleBinding(el, redraw) {
     return;
   }
   if (path === "ui.wizard.startLevel") {
-    setStartLevel(ui.wizard.draft, value);
+    (isNextWizard() ? creationNextSetStartLevel : setStartLevel)(ui.wizard.draft, value);
+    queueDraft();
+    render();
+    return;
+  }
+  if (path.startsWith("wiz.subclasses.") && previous !== value) {
+    selectSubclass(ui.wizard.draft, path.split(".")[2], value);
+    creationNextReconcile();
     queueDraft();
     render();
     return;
@@ -46974,7 +51014,9 @@ function handleBinding(el, redraw) {
     clearPicks(draft, [`feat|L${level}|`]);
   }
   if (draft && path === "wiz.raceFeat" && previous !== value) clearPicks(draft, ["feat|race|"]);
+  if (path.startsWith("wiz.") && isNextWizard()) creationNextReconcile();
   if (path.startsWith("wiz.startKit.choices.")) ui.wizard.draft.startKit.picks = {};
+  if (ui.creationEquipmentProficient && ui.wizard && (path === "ui.creationEquipmentProficient" || path.startsWith("wiz.startKit.choices."))) { creationEquipmentKeepProficient(ui.wizard.draft); queueDraft(); }
   if (path.startsWith("wiz.")) queueDraft();
   if (["ui.libraryQuery", "ui.libraryType"].includes(path) || path.startsWith("ui.libraryFilters.")) ui.libraryPage = 0;
   if (path === "ui.libraryType") ui.libraryFilters = {};
@@ -46986,7 +51028,7 @@ function handleBinding(el, redraw) {
     if (gold) gold.textContent = uiText("Monnaie : {p0} → {p1} PO. L’objet reste dans le sac.", { p0: c.gold, p1: Math.round((c.gold - (requirement?.cost ?? Number(m.amount || 0))) * 100) / 100 });
     return;
   }
-  const live = ui.modal === "received-effect" && (path.startsWith("form.") || path === "ui.receivedQuery") || ["ui.sheetSlotQuery", "ui.copyQuery", "ui.creationClassQuery", "ui.creationBackgroundQuery", "ui.raceQuery", "ui.libraryQuery", "ui.spellQuery", "ui.editorQuery", "ui.featQuery", "ui.catalogQuery", "ui.beastQuery", "ui.featureQuery", "ui.inventoryQuery"].includes(path) || ui.modal === "druid-feature" && path === "form.amount" || ["fighter-feature", "monk-technique"].includes(ui.modal) && path === "form.roll";
+  const live = el.dataset.live === "1" || ui.modal === "received-effect" && (path.startsWith("form.") || path === "ui.receivedQuery") || ["ui.sheetSlotQuery", "ui.copyQuery", "ui.creationClassQuery", "ui.creationBackgroundQuery", "ui.creationChoiceQuery", "ui.raceQuery", "ui.libraryQuery", "ui.spellQuery", "ui.editorQuery", "ui.featQuery", "ui.catalogQuery", "ui.beastQuery", "ui.featureQuery", "ui.inventoryQuery"].includes(path) || ui.modal === "druid-feature" && path === "form.amount" || ["fighter-feature", "monk-technique"].includes(ui.modal) && path === "form.roll";
   if (live || (redraw && path.startsWith("ui.cast.material.")) || (redraw && ui.modal === "equipment-pack") || (redraw && path.startsWith("wiz.abilities.")) || (redraw && (path.startsWith("ui.rest.") || ["replace-choice", "replace-spell"].includes(ui.modal))) || (redraw && el.matches("select,[type=radio],[type=checkbox]"))) render();
 }
 function selectSpell(target, id, kind) {
@@ -47012,13 +51054,15 @@ function selectSpell(target, id, kind) {
 }
 
 function rollCheck(name, bonus, kind = "check", options = {}) {
+  const optionList = receivedRollOptions(activeCharacter(), [options.received || "check"]);
   prepareDiceDialog(name, { kind, bonus, reliable: !!options.reliable }, {
+    optionList, optionState: { on: Object.fromEntries(optionList.map((option) => [option.id, !!option.on])), choice: {}, spent: {} },
     note: options.note || "", reliableName: options.reliableName || "Savoir-faire", critThreshold: kind === "attack" ? options.critThreshold || uiDerive(activeCharacter()).critThreshold : 20, fxAbility: options.fxAbility || null, fxTotal: !!options.fxTotal,
   });
 }
 function prepareDiceDialog(name, request, options = {}) {
   ui.rollMode = "normal";
-  ui.roll = { name, request, phase: "ready", result: null, history: [], panel: null, extras: { support: "", bonus: 0 }, ...options, baseNote: options.note || "" };
+  ui.roll = { name, request, phase: "ready", result: null, history: [], panel: null, extras: { support: "", bonus: 0 }, optionList: [], optionState: { on: {}, choice: {}, spent: {} }, ...options, baseNote: options.note || "" };
   openModal("roll");
 }
 function diceRequestFormula(request) {
@@ -47032,34 +51076,65 @@ function diceRequestFormula(request) {
   return `${notation}${request.bonus ? signed(request.bonus) : ""}${added ? ` ${added}` : ""}${request.kind === "hit-dice" ? " par dé" : ""}${request.multiplier && request.multiplier !== 1 ? uiText(" × {p0}", { p0: request.multiplier }) : ""}${pair}`;
 }
 function currentDiceRequest(r) {
-  return conditionalDiceRequest(r.request, { ...r.extras, source: r.extras.support ? uiText("Dé de soutien") : uiText("Bonus ou malus") });
+  // Hors séquence d'attaque, les options du test (Assistance, Bénédiction…) s'ajoutent au jet.
+  const request = r.sequence ? r.request : { ...r.request, additions: [...(r.request.additions || []), ...optionAdditions(optionPieces(r.optionList, r.optionState, "check"))] };
+  return conditionalDiceRequest(request, { ...r.extras, source: r.extras.support ? uiText("Dé de soutien") : uiText("Bonus ou malus") });
+}
+function rollStep(r) {
+  return r.sequence ? r.sequence.step : "check";
+}
+function rollCritThreshold(r) {
+  return optionCritThreshold(r.critThreshold || 20, r.optionList, r.optionState);
 }
 // Séquence d'attaque : une arme ou un sort, du toucher aux dégâts dans la même fenêtre.
 // Le joueur choisit le verdict ; l'appli additionne et double les dés au critique.
-function sequenceRequest(seq) {
-  const p = seq.profile, active = (step) => p.options.filter((option) => option.step === step && seq.options[option.id]);
-  if (seq.step === "attack") return attackRollRequest(p.attack.bonus, active("attack"));
-  return attackDamageRequest([...p.parts.filter((_, i) => seq.parts[i]), ...active("damage")], { critical: seq.verdict === "critical" }) || { kind: "damage", notation: "0", bonus: 0 };
+function sequenceRequest(r) {
+  const seq = r.sequence, p = seq.profile, critical = seq.verdict === "critical";
+  if (seq.step === "attack") return attackRollRequest(p.attack.bonus, optionPieces(r.optionList, r.optionState, "attack"));
+  return attackDamageRequest([...p.parts.filter((_, i) => seq.parts[i]), ...optionPieces(r.optionList, r.optionState, "damage", { critical })], { critical }) || { kind: "damage", notation: "0", bonus: 0 };
 }
 function sequenceTitle(seq) {
   return uiText(seq.step === "attack" ? "Jet d’attaque · {p0}" : "Jet de dégâts · {p0}", { p0: seq.profile.name });
 }
+// Soins d'un sort : un seul jet, puis « Sur moi » ajoute les PV, « Sur un allié » referme.
+function openHealDialog(spell, heal) {
+  prepareDiceDialog(uiText("Soins · {p0}", { p0: spell.name }), { kind: "sum", count: heal.count, sides: heal.sides, bonus: heal.bonus }, {
+    acceptLabel: uiText("Sur moi"), cancelLabel: uiText("Sur un allié"),
+    apply: async (result) => { const c = activeCharacter(); await saveCharacter(healCharacter(c, result.total), uiText("Soins · {p0}", { p0: spell.name }), "session", c); },
+  });
+}
 function startAttackSequence(profile, step = "attack", options = {}) {
   if (!profile) return;
-  const seq = { profile, step: profile.attack && step === "attack" ? "attack" : "damage", verdict: profile.attack ? "hit" : null,
-    parts: Object.fromEntries(profile.parts.map((part, i) => [i, part.on !== false])), options: Object.fromEntries(profile.options.map((option) => [option.id, !!option.on])) };
-  prepareDiceDialog(sequenceTitle(seq), sequenceRequest(seq), { sequence: seq, critThreshold: profile.attack?.critThreshold || 20, ...options });
+  const sequence = { profile, step: profile.attack && step === "attack" ? "attack" : "damage", verdict: profile.attack ? "hit" : null, parts: Object.fromEntries(profile.parts.map((part, i) => [i, part.on !== false])) };
+  const optionList = [...profile.options, ...receivedRollOptions(activeCharacter(), ["attack", "damage"])];
+  const roll = { sequence, optionList, optionState: { on: Object.fromEntries(optionList.map((option) => [option.id, !!option.on])), choice: {}, spent: {} } };
+  prepareDiceDialog(sequenceTitle(sequence), sequenceRequest(roll), { ...roll, critThreshold: profile.attack?.critThreshold || 20, ...options });
 }
 // Un changement d'option garde le résultat précédent dans l'historique, puis prépare un nouveau jet.
 function refreshSequence(r, reason) {
   if (r.result) rememberDiceResult(r, reason);
-  r.request = sequenceRequest(r.sequence);
+  if (r.sequence) r.request = sequenceRequest(r);
   showPreparedDice();
+}
+// Dépense des options cochées à cette étape, une seule fois par jet ; corrigeable par l'annulation de session.
+async function spendRollOptions(r) {
+  const step = rollStep(r), own = r.sequence?.profile.cost ? [{ id: "__profile", label: r.sequence.profile.name, cost: r.sequence.profile.cost }] : [];
+  const costs = [...own, ...optionCosts(r.optionList, r.optionState, step, { critical: r.sequence?.verdict === "critical" })].filter((entry) => !r.optionState.spent[entry.id]);
+  if (!costs.length) return;
+  const original = activeCharacter();
+  let next = original;
+  for (const { cost } of costs) {
+    if (cost.slot) next = spendSpellSlot(next, cost.slot);
+    if (cost.resource) next = spendResources(next, [{ id: cost.resource, amount: 1 }]);
+    if (cost.received) next = setReceivedEffect(next, null, cost.received);
+  }
+  await saveCharacter(next, uiText("Jet : {p0}", { p0: costs.map((entry) => entry.label).join(", ") }), "session", original);
+  for (const { id } of costs) r.optionState.spent[id] = step;
 }
 // Choix laissés au joueur après le toucher : aucun sur un 1 naturel, le critique seul au seuil,
 // Raté ou Touché sinon ; les trois après un résultat saisi, dont le dé naturel est inconnu.
 function attackVerdictChoices(r) {
-  const natural = attackNaturalVerdict(r.result, r.critThreshold);
+  const natural = attackNaturalVerdict(r.result, rollCritThreshold(r));
   return r.result?.external ? ["miss", "hit", "critical"] : natural === "miss" ? [] : natural === "critical" ? ["critical"] : ["miss", "hit"];
 }
 function sequenceVerdict(r, value) {
@@ -47067,10 +51142,13 @@ function sequenceVerdict(r, value) {
   if (seq.step === "attack") {
     if (r.phase !== "result" || !attackVerdictChoices(r).includes(value)) return;
     if (value === "miss") { closeModal(); return; }
+    // L'effet de critique s'arrête avant de passer aux dégâts, sur une fenêtre neuve.
+    stopDiceFx(); r.critical = null;
     seq.locked = true;
     r.history.push({ ...r.result, reason: uiText("Attaque"), mode: ui.rollMode });
     Object.assign(seq, { step: "damage", verdict: value });
-    Object.assign(r, { result: null, phase: "ready", name: sequenceTitle(seq), request: sequenceRequest(seq), note: "", baseNote: "", panel: null });
+    Object.assign(r, { result: null, phase: "ready", name: sequenceTitle(seq), note: "", baseNote: "", panel: null });
+    r.request = sequenceRequest(r);
     ui.rollMode = "normal";
     rebuildDiceDialog();
     return;
@@ -47093,10 +51171,27 @@ function renderDiceSequence(r) {
   const parts = p.parts.length > 1 ? `<div class="dice-choices">${p.parts.map((part, i) => `<button class="dice-option ${seq.parts[i] ? "on" : ""}" data-action="dice-part" data-index="${i}" aria-pressed="${!!seq.parts[i]}" ${rolling ? "disabled" : ""}><span>${esc(part.label)}</span><strong>${esc(diceFormula(part))} ${esc(part.type)}</strong></button>`).join("")}</div>` : "";
   return `${verdict}${parts}${info.length ? `<p class="dice-sequence-info">${esc(info.join(" · "))}</p>` : ""}`;
 }
+// Montant d'une option à cette étape : dés et bonus, ou seuil de critique abaissé.
+function optionFormula(option, r, step) {
+  const piece = step === "attack" ? option.attack : step === "damage" ? option.damage : option.check;
+  if (!piece) return option.critThreshold ? uiText("critique {p0}-20", { p0: option.critThreshold }) : "";
+  const choice = option.choices?.find((entry) => entry.value === r.optionState.choice[option.id]) || option.choices?.[0];
+  const notation = choice?.notation || piece.notation || "";
+  return `${notation ? diceFormula({ notation, bonus: piece.bonus || 0 }) : signed(piece.bonus || 0)}${piece.type ? ` ${piece.type}` : ""}`;
+}
+function visibleRollOptions(r) {
+  return r.optionList.filter((option) => optionVisible(option, r.optionState, rollStep(r), { critical: r.sequence?.verdict === "critical" }));
+}
 function renderDiceOptions(r) {
-  const e = r.extras, seq = r.sequence, ready = r.phase === "ready", rolling = r.phase === "rolling";
-  const options = seq ? seq.profile.options.filter((option) => option.step === seq.step) : [];
-  return `${options.map((option) => `<button class="dice-option ${seq.options[option.id] ? "on" : ""}" data-action="dice-option" data-id="${esc(option.id)}" aria-pressed="${!!seq.options[option.id]}" ${rolling ? "disabled" : ""}><span>${esc(option.label)}${option.note ? `<small>${esc(option.note)}</small>` : ""}</span><strong>${esc(diceFormula(option))}${option.type ? ` ${esc(option.type)}` : ""}</strong></button>`).join("")}<label>${uiText("Dé de soutien ")}<select id="dice-extra-support" data-roll-extra="support" ${ready ? "" : "disabled"}>${[["", uiText("Aucun")], ...[4, 6, 8, 10, 12].map((n) => [String(n), `1d${n}`])].map(([value, label]) => `<option value="${value}" ${e.support === value ? "selected" : ""}>${label}</option>`).join("")}</select></label><label>${uiText("Bonus ou malus ")}<input type="number" min="-100" max="100" step="1" id="dice-extra-bonus" data-roll-extra="bonus" value="${esc(e.bonus)}" ${ready ? "" : "disabled"}></label>${["check", "attack"].includes(r.request.kind) ? `<p class="tiny muted">${uiText("Avantage et désavantage ensemble : choisis Normal.")}</p>` : ""}`;
+  const e = r.extras, ready = r.phase === "ready", rolling = r.phase === "rolling", step = rollStep(r), state = r.optionState;
+  const rows = visibleRollOptions(r).map((option) => {
+    const on = !!state.on[option.id], spent = state.spent[option.id];
+    const choices = option.choices?.length > 1 && on ? `<select class="dice-option-choice" data-roll-option-choice="${esc(option.id)}" aria-label="${esc(option.label)}" ${rolling || spent ? "disabled" : ""}>${option.choices.map((choice) => `<option value="${esc(choice.value)}" ${(state.choice[option.id] || option.choices[0].value) === choice.value ? "selected" : ""}>${esc(choice.label)}</option>`).join("")}</select>` : "";
+    // Le coût est annoncé dès que l'option est visible : seul emplacement possible, ou choix sous l'option cochée.
+    const note = [option.note, option.choices?.length === 1 && option.choices[0].label, spent && uiText("Dépensé pour ce jet")].filter(Boolean).join(" · ");
+    return `<div class="dice-option-row"><button class="dice-option ${on ? "on" : ""}" data-action="dice-option" data-id="${esc(option.id)}" aria-pressed="${on}" ${rolling ? "disabled" : ""}><span>${esc(option.label)}${note ? `<small>${esc(note)}</small>` : ""}</span><strong>${esc(optionFormula(option, r, step))}</strong></button>${choices}</div>`;
+  }).join("");
+  return `${rows}<label>${uiText("Dé de soutien ")}<select id="dice-extra-support" data-roll-extra="support" ${ready ? "" : "disabled"}>${[["", uiText("Aucun")], ...[4, 6, 8, 10, 12].map((n) => [String(n), `1d${n}`])].map(([value, label]) => `<option value="${value}" ${e.support === value ? "selected" : ""}>${label}</option>`).join("")}</select></label><label>${uiText("Bonus ou malus ")}<input type="number" min="-100" max="100" step="1" id="dice-extra-bonus" data-roll-extra="bonus" value="${esc(e.bonus)}" ${ready ? "" : "disabled"}></label>${["check", "attack"].includes(r.request.kind) ? `<p class="tiny muted">${uiText("Avantage et désavantage ensemble : choisis Normal.")}</p>` : ""}`;
 }
 function renderDiceParts(r, result) {
   const seq = r.sequence;
@@ -47145,17 +51240,17 @@ function renderDiceDialog() {
   const verdict = choices.length ? `<div class="dice-verdict" role="group" aria-label="${uiText("Verdict")}" style="--choices:${choices.length}">${choices.map((value) => `<button class="btn ${value === "miss" ? "ghost" : "primary"}" data-action="dice-verdict" data-value="${value}">${verdictLabels[value]}</button>`).join("")}</div>` : "";
   // Deux réglages repliés en tête : dés et bonus conditionnels, résultat saisi à la main.
   const editable = !r.apply && ["check", "attack", "damage", "sum"].includes(r.request.kind);
-  const active = (seq ? seq.profile.options.filter((option) => option.step === seq.step && seq.options[option.id]).length : 0) + (r.extras.support ? 1 : 0) + (Number(r.extras.bonus) ? 1 : 0);
+  const active = visibleRollOptions(r).filter((option) => r.optionState.on[option.id]).length + (r.extras.support ? 1 : 0) + (Number(r.extras.bonus) ? 1 : 0);
   const panelLabels = { options: uiText("Dés et bonus"), external: result ? uiText("Corriger le résultat") : uiText("Résultat externe") };
   const panels = editable ? [["options", "plus", active], ["external", "edit", 0]].map(([value, name, badge]) => `<button type="button" id="dice-panel-${value}" class="icon-btn dice-panel-toggle ${r.panel === value ? "active" : ""}" data-action="dice-panel" data-value="${value}" aria-pressed="${r.panel === value}" aria-controls="dice-panel-body" aria-label="${esc(panelLabels[value])}${badge ? ` (${badge})` : ""}" title="${esc(panelLabels[value])}" ${rolling ? "disabled" : ""}>${icon(name, 18)}${badge ? `<span class="dice-badge" aria-hidden="true">${badge}</span>` : ""}</button>`).join("") : "";
   const panelTitle = editable && r.panel && !(r.panel === "external" && rolling) ? `<p class="dice-panel-title">${esc(panelLabels[r.panel])}</p>` : "";
   const panelBody = panelTitle + (editable && r.panel === "options" ? renderDiceOptions(r)
     : editable && r.panel === "external" && !rolling ? `<label>${uiText("Total final ")}<input id="dice-external-total" type="number" step="1" value="${result?.total ?? ""}"></label><label>${uiText("Provenance ")}<input id="dice-external-source" maxlength="120" placeholder="${uiText("Dés physiques, correction du MJ…")}"></label>${button(uiText("Utiliser le total saisi"), "roll-external", "", "small-btn")}` : "");
   const history = r.history.length ? `<details class="dice-history"><summary>${uiText("Résultats précédents ({p0})", { p0: r.history.length })}</summary>${r.history.map((previous, i) => `<p class="small">${i + 1}. ${esc(previous.reason)} · ${esc(({ normal: "Normal", advantage: uiText("Avantage"), disadvantage: uiText("Désavantage") })[previous.mode])} : ${esc(previous.detail)}</p>`).join("")}</details>` : "";
-  const body = `<div class="dice-roll-content"><div class="dice-panel-body" id="dice-panel-body">${panelBody}</div><div class="dice-sequence">${renderDiceSequence(r)}</div>${modeHtml}${quantity}<button id="dice-tray" class="dice-tray" data-action="roll-start" aria-label="${uiText("Lancer les dés")}" ${!ready ? "disabled" : ""}><canvas class="dice-canvas" aria-hidden="true"></canvas><span class="dice-tray-hint">${hint}<span class="dice-roll-formula">${esc(diceRequestFormula(currentDiceRequest(r)))}</span></span></button><div class="dice-outcome" role="status" aria-live="polite" aria-atomic="true">${scoreHtml}${result && r.note ? `<p class="dice-roll-note">${esc(r.note)}</p>` : ""}${verdict}</div><div class="dice-roll-extra">${history}${ready && r.help ? `<p class="dice-roll-help">${esc(r.help)}</p>` : ""}</div></div>`;
+  const body = `<div class="dice-roll-content"><div class="dice-panel-body" id="dice-panel-body">${panelBody}</div><div class="dice-sequence">${renderDiceSequence(r)}</div>${modeHtml}${quantity}<button id="dice-tray" class="dice-tray" data-action="roll-start" aria-label="${uiText("Lancer les dés")}" ${!ready ? "disabled" : ""}><canvas class="dice-canvas" aria-hidden="true"></canvas><span class="dice-tray-hint">${hint}<span class="dice-roll-formula">${esc(diceRequestFormula(currentDiceRequest(r)))}</span></span></button><div class="dice-outcome" role="status" aria-live="polite" aria-atomic="true">${scoreHtml}${result && r.note ? `<p class="dice-roll-note">${esc(r.note)}</p>` : ""}</div><div class="dice-verdict-zone">${verdict}</div><div class="dice-roll-extra">${history}${ready && r.help ? `<p class="dice-roll-help">${esc(r.help)}</p>` : ""}</div></div>`;
   const footer = ready || rolling
     ? button(uiText("Annuler"), "close-modal", "", "ghost") + button(rolling ? uiText("Lancer en cours…") : uiText("Lancer les dés"), "roll-start", `id="dice-launch" ${rolling ? "disabled" : ""}`, "primary")
-    : r.apply ? button(uiText("Annuler"), "close-modal", "", "ghost") + button(r.acceptLabel || uiText("Utiliser ce résultat"), "roll-accept", 'id="dice-accept"', "primary")
+    : r.apply ? button(r.cancelLabel || uiText("Annuler"), "close-modal", "", "ghost") + button(r.acceptLabel || uiText("Utiliser ce résultat"), "roll-accept", 'id="dice-accept"', "primary")
       // Après le toucher, le verdict mène à la suite ; un 1 naturel termine l'attaque.
       : seq?.step === "attack" && choices.length ? button(uiText("{p0} Relancer", { p0: icon("dice", 16) }), "reroll", 'id="dice-reroll"', "ghost")
       : button(uiText("Terminer"), "close-modal", 'id="dice-finish"', "primary") + (r.request.kind !== "death" ? button(uiText("{p0} Relancer", { p0: icon("dice", 16) }), "reroll", 'id="dice-reroll"', "ghost") : "");
@@ -47182,7 +51277,7 @@ function updateDiceDialog() {
   }
   dialog.dataset.rollPhase = fresh.dataset.rollPhase;
   dialog.querySelector(".dice-tray").disabled = fresh.querySelector(".dice-tray").disabled;
-  for (const part of [".dice-head-actions", ".dice-panel-body", ".dice-sequence", ".dice-roll-modes", ".dice-quantity", ".dice-tray-hint", ".dice-outcome", ".dice-roll-extra", ".modal-footer"]) {
+  for (const part of [".dice-head-actions", ".dice-panel-body", ".dice-verdict-zone", ".dice-sequence", ".dice-roll-modes", ".dice-quantity", ".dice-tray-hint", ".dice-outcome", ".dice-roll-extra", ".modal-footer"]) {
     // Pendant un effet, le mot et son style appartiennent à l'effet.
     if (part === ".dice-outcome" && ui.roll.critical?.live) continue;
     const target = dialog.querySelector(part), source = fresh.querySelector(part);
@@ -47226,15 +51321,20 @@ function playCriticalFx(r, plan) {
 async function startDiceDialog() {
   const r = ui.roll;
   if (ui.modal !== "roll" || !r || r.phase !== "ready") return;
+  r.phase = "spending";
+  try { await spendRollOptions(r); } finally { r.phase = "ready"; }
+  if (ui.roll !== r || ui.modal !== "roll") return;
   r.result = resolveDiceRoll(currentDiceRequest(r), ui.rollMode);
   r.phase = "rolling";
   const result = r.result;
   r.note = r.baseNote;
   if (r.request.reliable && result.adjusted !== result.natural) r.note = [r.note, uiText("{p0} : le résultat du dé est traité comme 10.", { p0: r.reliableName || "Savoir-faire" })].filter(Boolean).join(" ");
-  if (r.request.kind === "attack") r.note = result.natural === 1 ? "1 naturel : l’attaque rate." : result.natural >= r.critThreshold && r.sequence ? uiText("Coup critique : les dés de dégâts seront doublés.") : result.natural >= r.critThreshold ? "Critique potentiel : vérifie les conditions et double les dés de dégâts concernés." : "Compare ce total à la classe d’armure de la cible.";
+  if (r.request.kind === "attack") r.note = result.natural === 1 ? "1 naturel : l’attaque rate." : result.natural >= rollCritThreshold(r) && r.sequence ? uiText("Coup critique : les dés de dégâts seront doublés.") : result.natural >= rollCritThreshold(r) ? "Critique potentiel : vérifie les conditions et double les dés de dégâts concernés." : "Compare ce total à la classe d’armure de la cible.";
   // 1 ou 20 naturel sur un test de caractéristique, une sauvegarde ou l'initiative : le mot remplace le total.
   // L'initiative garde son calcul sous le mot, car le MJ en a besoin pour l'ordre des tours.
-  r.critical = r.fxAbility && !result.parts ? diceFxVerdict(result, { total: r.fxTotal }) : null;
+  // Les attaques ont aussi leurs effets de critique et de fumble, même avec un dé ajouté (Bénédiction).
+  const attackFx = r.sequence?.step === "attack" && !result.external;
+  r.critical = attackFx || r.fxAbility && !result.parts ? diceFxVerdict(result, { total: r.fxTotal, critThreshold: attackFx ? rollCritThreshold(r) : 20 }) : null;
   const plan = r.critical && !matchMedia("(prefers-reduced-motion: reduce)").matches
     ? planDiceFx(r.critical.kind, { single: result.dice.length === 1, portrait: !!portraitUrl(activeCharacter()) }) : null;
   if (plan) r.critical.live = true;
@@ -47393,6 +51493,7 @@ async function openCatalogueReference(id, pin = {}) {
   modalRoot.querySelector(".modal-body").scrollTop = 0;
 }
 function requestAideddImport() {
+  if (!AIDEDD_IMPORT_ENABLED) return;
   const input = document.createElement("input");
   input.type = "file"; input.accept = ".xml,text/xml,application/xml";
   input.setAttribute("aria-label", uiText("aidedd.open"));
@@ -47522,6 +51623,7 @@ async function makeDemo() {
   toast(uiText("Exemple ajouté à tes personnages."));
 }
 async function perform(action, el) {
+  if (!AIDEDD_IMPORT_ENABLED && action.startsWith("aidedd-")) return;
   const c = activeCharacter(),
     data = el?.dataset || {},
     d = c ? uiDerive(c) : null;
@@ -47742,6 +51844,12 @@ async function perform(action, el) {
         if (selection.type === "class") ui.creationClassInspect = selection.id;
         if (selection.type === "background") ui.creationBackgroundInspect = selection.id;
         await perform(`choose-${selection.type}`, { dataset: { id: selection.id } });
+        ui.wizard.step = selection.type;
+        if (selection.type === "race") {
+          ui.raceFamily = RACES[selection.id]?.group || RACES[selection.id]?.name || "Maison";
+          ui.raceQuery = "";
+          ui.creationRaceInspect = selection.id;
+        }
         if (selection.type === "background" && (ui.wizard.draft.background.variantId || null) !== (selection.variantId || null)) { ui.wizard.draft.background.variantId = selection.variantId || null; clearPicks(ui.wizard.draft, ["bg|", "feat|bg|"]); }
         queueDraft(); render();
       }
@@ -47861,16 +51969,13 @@ async function perform(action, el) {
       }
       go(data.route);
       break;
-    case "new-character":
-      if (appData.draft)
-        askConfirm(
-          uiText("Créer un autre brouillon ?"),
-          uiText("Le brouillon précédent sera remplacé. Les fiches déjà validées ne changent pas."),
-          "new-wizard",
-          data.class || null,
-        );
-      else startWizard(null, data.class);
+    case "new-character": {
+      // Un brouillon de création en attente n'est jamais écrasé sans accord.
+      const saved = creationNextSavedDraft();
+      if (saved) { askConfirm(uiText("creation.draft.restartTitle"), uiText("creation.draft.restartText", { name: creationNextDraftName(saved) }), "restart-creation", data.class || null, { label: uiText("creation.draft.restart"), danger: true }); break; }
+      startWizard(null, data.class);
       break;
+    }
     case "edit-character":
       startWizard(c);
       break;
@@ -47887,35 +51992,67 @@ async function perform(action, el) {
       go("sheet");
       break;
     case "resume-draft":
+      if (data.kind === "creation") {
+        const saved = creationNextSavedDraft();
+        if (saved) { creationNextRestore(saved); resetEditorFilters(); }
+        render();
+        break;
+      }
       ui.wizard = clone(appData.draft);
+      if (isNextWizard()) {
+        ui.wizard.flow = "next";
+        ui.wizard.step = "race";
+        ui.wizard.nextRaceChosen = true;
+        ui.wizard.nextClassConfirmed = true;
+        ui.wizard.nextBackgroundConfirmed = true;
+        const creationUrl = new URL(location.href);
+        creationUrl.searchParams.set("creation", "next");
+        creationUrl.searchParams.delete("welcome");
+        history.replaceState(null, "", creationUrl);
+      }
+      ui.raceFamily = isNextWizard() ? (RACES[ui.wizard.draft.raceId]?.group || RACES[ui.wizard.draft.raceId]?.name || "Maison") : "all"; ui.raceQuery = "";
+      ui.creationRaceInspect = ui.creationClassInspect = ui.creationBackgroundInspect = null;
+      if (isNextWizard()) {
+        ui.creationRaceInspect = ui.wizard.draft.raceId;
+        queueDraft();
+      }
       resetEditorFilters();
       render();
       break;
     case "discard-draft":
-      askConfirm(uiText("Oublier ce brouillon ?"), uiText("Aucune fiche validée ne sera supprimée."), "discard-draft", null, {
+      askConfirm(uiText("Oublier ce brouillon ?"), uiText("Aucune fiche validée ne sera supprimée."), data.kind === "creation" ? "discard-creation-draft" : "discard-draft", null, {
         danger: true,
         label: uiText("Oublier le brouillon"),
       });
       break;
     case "leave-wizard":
+      if (isNextWizard()) { queueDraft(); location.href = `${location.pathname}?creation=next&welcome=1`; break; }
       if (ui.wizard?.aidedd) { ui.aidedd.character = clone(ui.wizard.draft); ui.aidedd.reviewed = false; ui.wizard = null; ui.route = "home"; openModal("aidedd"); break; }
-      queueDraft();
+      clearTimeout(draftTimeout);
+      if (ui.wizard) {
+        const savedDraft = clone(ui.wizard);
+        await mutateApp((state) => { state.draft = savedDraft; }, { redraw: false });
+      }
       ui.wizard = null;
       go(activeCharacter() ? "sheet" : "home");
       toast(uiText("Brouillon conservé. Tu peux le reprendre depuis Mes personnages."));
       break;
     case "progression-requirement": {
-      const level = Number(data.level) || (data.step === "magic" ? ui.levelFlow?.level : 1) || 1;
+      if (!ui.wizard && !ui.levelFlow) startWizard(c);
+      const level = Number(data.level) || (data.step === "magic" && data.class ? ui.levelFlow?.level : 1) || 1;
       if (ui.wizard?.original && data.step === "levels") {
         const wizard = ui.wizard;
         ui.levelFlow = { original: clone(wizard.original), draft: clone(wizard.draft), conflict: wizard.conflict, level, isNew: level > wizard.original.levels.length, step: 0, error: "" };
         ui.wizard = null;
       } else if (ui.wizard) {
-        ui.wizard.step = data.step;
-        ui.wizard.visited = [...new Set([...(ui.wizard.visited || []), data.step])];
+        // Création : les choix de niveau 1 se posent aux Caracs, sur l’écran Choix ou à la Magie.
+        const line = isNextWizard() && level === 1 ? creationLines(ui.wizard.draft).find((entry) => data.path && data.path === entry.path) : null;
+        if (line) ui.creationLine = { step: line.stage, id: line.id, pinned: true };
+        ui.wizard.step = line ? line.stage : data.step;
+        ui.wizard.visited = [...new Set([...(ui.wizard.visited || []), ui.wizard.step])];
         queueDraft();
       } else if (ui.levelFlow) {
-        if (["race", "background", "skills", "class"].includes(data.step) && level === 1) {
+        if ((["race", "background", "skills", "class"].includes(data.step) || data.step === "magic" && !data.class) && level === 1) {
           const flow = ui.levelFlow;
           startWizard(flow.draft);
           ui.wizard.original = clone(flow.original); ui.wizard.conflict = flow.conflict; ui.wizard.repairReturn = flow.level; ui.wizard.step = data.step;
@@ -47935,37 +52072,43 @@ async function perform(action, el) {
       else finishWorkflowNavigation();
       break;
     }
-    case "wizard-step":
-      ui.wizard.step = data.step;
+    case "wizard-step": {
+      // Création : aucune étape ne se franchit avec un choix obligatoire en attente.
+      const order = wizardSteps(ui.wizard).map(([id]) => id), blocked = isNextWizard() ? order.find((id) => creationNextIncomplete(ui.wizard, id)) : null;
+      const held = blocked && order.indexOf(data.step) > order.indexOf(blocked);
+      ui.wizard.step = held ? blocked : data.step;
+      ui.creationLine = null;
+      if (held) toast(uiText("creation.blocked"));
       render();
       finishWorkflowNavigation();
       break;
+    }
     case "wizard-prev": {
+      const step = ui.wizard.step;
+      const inspectionKey = { race: "creationRaceInspect", class: "creationClassInspect", background: "creationBackgroundInspect" }[step];
+      // Sur petit écran la fiche remplace la liste : « Précédent » y ramène, sauf pour une famille à une seule variante.
+      const backToList = !isNextWizard() || window.matchMedia("(max-width:1000px)").matches && !(step === "race" && creationNextFamilyRaces(ui.raceFamily).length < 2);
+      if (inspectionKey && ui[inspectionKey] && backToList) {
+        ui[inspectionKey] = null;
+        render(); finishWorkflowNavigation(); break;
+      }
+      if (step === "race" && (ui.raceFamily !== "all" || ui.raceQuery)) {
+        ui.raceFamily = "all"; ui.raceQuery = ""; if (isNextWizard()) ui.creationRaceInspect = null;
+        queueDraft(); render(); finishWorkflowNavigation(); break;
+      }
       const steps = wizardSteps(ui.wizard).map(([id]) => id),
         i = steps.indexOf(ui.wizard.step);
       if (i <= 0) break;
       ui.wizard.step = steps[i - 1];
+      ui.creationLine = null;
       queueDraft();
       render();
       finishWorkflowNavigation();
       break;
     }
-    case "wizard-next": {
-      const w = ui.wizard,
-        steps = wizardSteps(w).map(([id]) => id),
-        i = steps.indexOf(w.step);
-      if (w.step === "abilities" && w.draft.abilityMethod === "rolled" && !(w.rollPool || []).length) {
-        toast(uiText("Lance d’abord tes six valeurs, ou choisis une autre méthode."));
-        break;
-      }
-      w.step = steps[Math.min(steps.length - 1, i + 1)];
-      w.visited = [...new Set([...(w.visited || []), w.step])];
-      w.error = "";
-      queueDraft();
-      render();
-      finishWorkflowNavigation();
+    case "wizard-next":
+      advanceWizard();
       break;
-    }
     case "wizard-save": {
       const w = ui.wizard;
       let candidate = clone(w.draft);
@@ -47988,11 +52131,61 @@ async function perform(action, el) {
       toast(w.original ? uiText("Tes corrections sont enregistrées.") : uiText("Personnage enregistré."));
       break;
     }
-    case "choose-race-family":
-      ui.raceFamily = data.value || "all"; ui.raceQuery = ""; render(); break;
+    case "creation-line-toggle":
+    case "creation-line-open": {
+      const open = action === "creation-line-open" || ui.creationLine?.id !== data.id;
+      ui.creationLine = { step: ui.wizard.step, id: open ? data.id : null, pinned: open };
+      render();
+      if (action === "creation-line-open") creationNextFocusLine(true);
+      break;
+    }
+    case "creation-line-release": {
+      const path = `wiz.${data.path}`;
+      setBinding(path, (boundValue(path) || []).filter((value) => value !== data.value));
+      creationNextReconcile();
+      queueDraft();
+      render();
+      document.getElementById(data.focus)?.focus({ preventScroll: true });
+      break;
+    }
+    case "choose-race-family": {
+      ui.raceFamily = data.value || "all";
+      ui.raceQuery = "";
+      ui.creationRaceInspect = null;
+      if (isNextWizard()) {
+        const members = creationNextFamilyRaces(ui.raceFamily), firstRaceId = members[0];
+        // La race déjà choisie le reste si l’on revient dans sa famille ; ailleurs, rien n’est choisi sans clic.
+        if (!members.includes(ui.wizard.draft.raceId)) ui.wizard.nextRaceChosen = false;
+        const portraitId = firstRaceId && firstRaceId !== "custom" && creationNextPortraitId(firstRaceId);
+        if (portraitId && !ui.wizard.nextRaceChosen) {
+          ui.wizard.draft.portrait = { kind: "preset", id: portraitId };
+          const identity = ui.wizard.identityDefaults;
+          if (identity) {
+            identity.automatic.portrait = true;
+            identity.values.portrait = portraitId;
+            identity.portraits[firstRaceId] = portraitId;
+          }
+        }
+        // Une famille à une seule variante n’a rien à faire choisir dans une liste.
+        if (members.length === 1) creationNextSelectRace(members[0]);
+      }
+      queueDraft();
+      render();
+      finishWorkflowNavigation();
+      break;
+    }
+    case "creation-race-inspect":
+      if (!ui.wizard || (data.id !== "custom" && !uiRaces[data.id])) break;
+      if (isNextWizard()) creationNextSelectRace(data.id);
+      else ui.creationRaceInspect = data.id;
+      queueDraft(); render();
+      finishWorkflowNavigation();
+      break;
     case "choose-race": {
       const draft = ui.wizard.draft;
-      if (draft.raceId === data.id) break;
+      if (isNextWizard()) { creationNextSelectRace(data.id); queueDraft(); render(); break; }
+      ui.creationRaceInspect = data.id;
+      if (draft.raceId === data.id) { advanceWizard(); break; }
       Object.assign(draft, selectCharacterRace(draft, data.id, { replacing: !!ui.wizard.original }));
       if (!ui.wizard.original) refreshClassSkills(draft);
       if (uiRaces[data.id]?.dragonChoice) draft.picks["race|dragon"] = ["red"];
@@ -48001,36 +52194,10 @@ async function perform(action, el) {
       render();
       break;
     }
-    case "choose-class": {
-      const w = ui.wizard,
-        cc = w.draft,
-        id = data.id;
-      if (primaryClassId(cc) === id) break;
-      if (w.original) {
-        setProgressionClass(cc, 1, id, { repair: true });
-        queueDraft(); render();
-        toast(uiText("Classe du niveau 1 corrigée. Vérifie les choix et les accès magiques."));
-        break;
-      }
-      const n = levelOf(cc);
-      cc.classId = id;
-      cc.levels = [defaultLevel(id, 1)];
-      cc.subclasses = {};
-      cc.customSubclasses = {};
-      setStartLevel(cc, w.original ? 1 : n);
-      if (uiClasses[id].subLevel === 1) cc.subclasses[id] = DEFAULT_SUBCLASS[id];
-      cc.skills = [];
-      refreshClassSkills(cc);
-      clearPicks(cc, ["class|", "sub|", "feat|L", "inv|"]);
-      cc.spells = { known: [], prepared: [], sources: {}, arcana: {}, allowExceptions: cc.spells.allowExceptions };
-      cc.equipment = defaultEquipment(id);
-      cc.startKit = { mode: cc.startKit?.mode === "gold" ? "gold" : "kit", choices: {}, picks: {} };
-      if (!w.original && cc.abilityMethod === "standard") cc.abilities = recommendedAbilities(id);
-      queueDraft();
-      render();
-      toast(uiText("Classe changée : compétences, équipement et sorts réinitialisés pour ce brouillon."));
+    case "choose-class":
+      creationSelectClass(data.id);
+      if (isNextWizard()) { ui.creationClassInspect = data.id; queueDraft(); render(); }
       break;
-    }
     case "ability-method": {
       const w = ui.wizard;
       w.draft.abilityMethod = data.value;
@@ -48631,8 +52798,12 @@ async function perform(action, el) {
       const event = c.state.spellEvents.find((row) => row.id === ui.cast.eventId);
       openReceivedEffect(c, { spellId: ui.cast.id, level: event?.effectiveLevel }); break;
     }
-    case "received-save":
-      await saveCharacter(setReceivedEffect(c, ui.form, ui.form.id), "Effet reçu", "session", c); closeModal(); break;
+    case "received-save": {
+      const { diceDamage, ...entry } = ui.form;
+      // L'inspiration d'un barde de la Vaillance s'ajoute aussi aux dégâts.
+      if (RECEIVED_GUIDES[entry.spellId]?.dieChoice) entry.dice = { ...entry.dice, rolls: ["check", "attack", "save", ...((diceDamage ?? entry.dice.rolls.includes("damage")) ? ["damage"] : [])] };
+      await saveCharacter(setReceivedEffect(c, entry, entry.id), "Effet reçu", "session", c); closeModal(); break;
+    }
     case "received-remove":
       await saveCharacter(setReceivedEffect(c, null, data.id), "Retrait d’un effet reçu", "session", c); closeModal(); break;
     case "conditions":
@@ -48685,12 +52856,17 @@ async function perform(action, el) {
       const event = next.state.spellEvents.at(-1);
       // Concentration, Protection arcanique, récupération : cochées dans la fenêtre, validées avec le lancement.
       for (const action of spellPersonalActions(next, event.id)) if (ui.cast.actions[action.id] ?? true) next = applySpellPersonalAction(next, event.id, action.id);
+      // Un sort à dégâts qui dure sans concentration (Arme spirituelle) reste dans les attaques jusqu'au repos.
+      if (SPELL_DICE[s.id]?.rolls.length && !s.concentration && s.level > 0 && !/^instant/i.test(s.duration || "")) next.state.spellEvents.find((row) => row.id === event.id).ongoing = true;
       await saveCharacter(next, uiText("Sort : {p0}", { p0: s.name }), "session", c);
       ui.cast.eventId = event.id;
-      const after = activeCharacter(), profile = spellAttackProfile(s, event, castDiceModel(after, uiDerive(after), event), option?.spellAttack ?? null);
+      const after = activeCharacter(), afterD = uiDerive(after), model = castDiceModel(after, afterD, event);
+      const profile = spellAttackProfile(s, event, model, option?.spellAttack ?? null, model ? attackOptions(after, afterD, { spell: { id: s.id, school: s.school, attack: !!model.attack } }) : []);
       const item = after.inventory.find((entry) => entry.id === event.costs?.itemId), material = castMaterialText(event);
       const message = [uiText("Sort lancé : {p0}.", { p0: s.name }), material && `${material}.`, item?.instance?.lastUse?.decision === "pending" && uiText("Dernière charge à résoudre dans l’inventaire.")].filter(Boolean).join(" ");
+      const heal = spellHealRoll(s.id, { slotLevel: event.effectiveLevel, modifier: event.ability ? afterD.mods[event.ability] : 0 });
       if (profile) startAttackSequence(profile);
+      else if (heal) openHealDialog(s, heal);
       else if (RECEIVED_GUIDES[s.id]) openModal("cast-target");
       else closeModal();
       toast(message);
@@ -48704,10 +52880,19 @@ async function perform(action, el) {
       break;
     }
     case "roll-save":
-      rollCheck(uiText("Jet de sauvegarde de {p0}", { p0: uiAbilities[data.key].name }), d.saves[data.key], "check", { fxAbility: data.key });
+      rollCheck(uiText("Jet de sauvegarde de {p0}", { p0: uiAbilities[data.key].name }), d.saves[data.key], "check", { fxAbility: data.key, received: "save" });
       break;
     case "roll-skill":
       rollCheck(uiSkills[data.key][0], d.skills[data.key], "check", skillCheckOptions(c, data.key));
+      break;
+    case "roll-extra-attack": {
+      const entry = extraAttackEntries(c, d).find((row) => row.key === data.key);
+      if (entry) startAttackSequence(entry.profile, data.step === "attack" ? "attack" : "damage");
+      break;
+    }
+    case "end-ongoing-spell":
+      await saveCharacter(endOngoingSpell(c, data.id), uiText("Fin d’un sort actif"), "session", c);
+      render();
       break;
     case "roll-attack":
     case "roll-damage":
@@ -48720,9 +52905,9 @@ async function perform(action, el) {
       if (ui.roll?.sequence && ui.roll.phase !== "rolling" && ["miss", "hit", "critical"].includes(data.value)) sequenceVerdict(ui.roll, data.value);
       break;
     case "dice-option": {
-      const r = ui.roll, seq = r?.sequence;
-      if (!seq || r.phase === "rolling" || !seq.profile.options.some((option) => option.id === data.id)) break;
-      seq.options[data.id] = !seq.options[data.id];
+      const r = ui.roll;
+      if (!r || r.phase === "rolling" || !r.optionList.some((option) => option.id === data.id)) break;
+      r.optionState.on[data.id] = !r.optionState.on[data.id];
       refreshSequence(r, uiText("Options modifiées"));
       break;
     }
@@ -49234,21 +53419,31 @@ async function perform(action, el) {
         );
       break;
     }
-    case "delete-character":
+    case "delete-character": {
+      // Depuis « Mes personnages », la carte porte l'identifiant ; ailleurs, c'est le personnage ouvert.
+      const target = appData.characters.find((entry) => entry.id === data.id) || c;
+      if (!target) break;
       askConfirm(
-        uiText("Supprimer {p0} ?", { p0: c.name }),
+        uiText("Supprimer {p0} ?", { p0: target.name }),
         uiText("Sa fiche et ses versions précédentes seront supprimées de cet appareil. Fais un export avant de continuer."),
         "delete-character",
-        c.id,
+        target.id,
         { label: uiText("Supprimer définitivement"), danger: true },
       );
       break;
+    }
     case "confirm-action": {
       const f = ui.confirm;
       ui.modal = null;
       if (f.action === "discard-draft") {
         await clearDraft();
         render();
+      } else if (f.action === "discard-creation-draft") {
+        localStorage.removeItem(CREATION_NEXT_KEY);
+        render();
+      } else if (f.action === "restart-creation") {
+        localStorage.removeItem(CREATION_NEXT_KEY);
+        startWizard(null, f.key);
       } else if (f.action === "clear-content") {
         try { await contentStore.clear(); toast(uiText("Contenu téléchargé supprimé.")); }
         catch { toast(contentStore.state.error || uiText("Le nettoyage n’a pas pu être effectué.")); }
@@ -49497,15 +53692,11 @@ async function perform(action, el) {
       window.print();
       break;
     case "choose-background": {
-      const draft = ui.wizard.draft,
-        id = data.id;
-      if ((draft.background.id || "custom") === id) break;
-      draft.background =
-        id === "custom"
-          ? { ...draft.background, id: "custom", name: draft.background.name || "Historique personnalisé", skills: [] }
-          : { ...draft.background, id, name: "", skills: [], variantId: null };
-      clearPicks(draft, ["bg|", "feat|bg|"]);
-      if (!ui.wizard.original) refreshClassSkills(draft);
+      const draft = ui.wizard.draft, id = data.id, changed = creationSelectBackground(id);
+      if (isNextWizard()) { ui.creationBackgroundInspect = id; queueDraft(); render(); break; }
+      if (!changed) break;
+      const hasChoices = id === "custom" || uiBackgrounds[id]?.variants?.length || uiPickSpecs(draft).some((spec) => spec.source.key === "bg" || spec.source.key.startsWith("feat|bg|"));
+      if (!hasChoices) { advanceWizard(); break; }
       queueDraft();
       render();
       break;
@@ -49514,14 +53705,7 @@ async function perform(action, el) {
       const draft = levelDraft(data.prefix),
         classId = data.class;
       if (!draft || draft.subclasses[classId] === data.id) break;
-      const old = uiSubclasses[classId]?.[draft.subclasses[classId]];
-      draft.subclasses[classId] = data.id;
-      const keys = (old?.choices || []).map((ch) => ch.key).concat(old?.dragonChoice ? ["dragon"] : []);
-      if (!["barbarian", "fighter", "monk", "paladin", "ranger"].includes(classId)) {
-        clearPicks(draft, [`sub|${classId}|`]);
-        for (const l of draft.levels) if (l.classId === classId) for (const k of keys) delete l.choices[k];
-      }
-      if (data.id === "custom") draft.customSubclasses[classId] ||= { name: "", description: "" };
+      selectSubclass(draft, classId, data.id);
       if (data.prefix === "wiz") queueDraft();
       render();
       break;
@@ -49576,12 +53760,23 @@ async function perform(action, el) {
       render();
       break;
     }
+    case "creation-choice-back":
+      if (data.kind === "race") ui.creationRaceInspect = null;
+      else if (["class", "background"].includes(data.kind)) ui[data.kind === "class" ? "creationClassInspect" : "creationBackgroundInspect"] = null;
+      render();
+      finishWorkflowNavigation();
+      break;
     case "creation-choice-inspect": {
       const isClass = data.kind === "class";
       if (!ui.wizard || !["class", "background"].includes(data.kind) || !(isClass ? uiClasses[data.id] : uiBackgrounds[data.id] || data.id === "custom")) break;
       ui[isClass ? "creationClassInspect" : "creationBackgroundInspect"] = data.id;
+      if (isNextWizard()) {
+        if (isClass) creationSelectClass(data.id);
+        else creationSelectBackground(data.id);
+        queueDraft();
+      }
       render();
-      if (window.matchMedia("(max-width:700px)").matches) document.getElementById(`creation-${data.kind}-detail`)?.scrollIntoView({ block: "start" });
+      finishWorkflowNavigation();
       break;
     }
     case "creation-choice-clear":
@@ -49718,6 +53913,10 @@ document.addEventListener("change", (event) => {
     return;
   }
   if (captureRuleTableInput(event.target)) return;
+  if (event.target.matches("[data-roll-option-choice]") && ui.roll && ui.roll.phase !== "rolling") {
+    ui.roll.optionState.choice[event.target.dataset.rollOptionChoice] = event.target.value;
+    refreshSequence(ui.roll, uiText("Options modifiées")); return;
+  }
   if (event.target.matches("[data-roll-extra]") && ui.roll?.phase === "ready") {
     const el = event.target, key = el.dataset.rollExtra;
     ui.roll.extras[key] = el.type === "checkbox" ? el.checked : el.value;
@@ -49750,6 +53949,7 @@ document.addEventListener("change", (event) => {
   if (el.matches("[data-bind],[data-array]"))
     try {
       handleBinding(el, true);
+      if (el.closest(".choice-line")) creationNextFocusLine();
       if (ui.modal === "dawn-item" && el.dataset.bind === "form.itemId") void loadInventoryUseRule(activeCharacter().inventory.find((entry) => entry.id === ui.form.itemId), ui.form);
     } catch (error) {
       reportError(error);
@@ -49941,6 +54141,11 @@ async function setupServiceWorker() {
     if (!appData.characters.some((c) => c.id === appData.activeId))
       appData.activeId = appData.characters[0]?.id || null;
     ui.route = activeCharacter() ? "sheet" : "home";
+    if (creationNextActive() && !new URLSearchParams(location.search).has("welcome")) {
+      const saved = creationNextSavedDraft();
+      if (saved) creationNextRestore(saved);
+      else startWizard();
+    }
     render();
     await setupServiceWorker();
     void ensureContent();

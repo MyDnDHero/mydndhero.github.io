@@ -1,8 +1,8 @@
 {
-  "id": "8b4ff99b85f55a5a7e33ad4a04f659653694752109f855f7f3e284e417342fc6",
+  "id": "9e2abc852836acd8b07ddab144c0fa1c436f986131bda9aef52d87983fee8267",
   "schemaVersion": 1,
   "edition": "2014",
-  "appBuild": "856bda35c8259263c03829b4ce1567d4cbaa6defe9eb0d9fb76ac2d55a051ae5",
+  "appBuild": "99b7fe3344e813ab0427aa89aa370918948a80b1c42347d639023af5b9a400cd",
   "sourceVersion": "874dd65a9321be74f393534661c70ca80b896e95",
   "count": 18546,
   "sourceCount": 13386,
@@ -4454,19 +4454,19 @@
     {
       "url": "./index.html",
       "bytes": 1618,
-      "sha256": "59c9896b2c3b314cf6eb77f4fb2a2eb505c42a6dbf0de98aee226a3e47b2e5a6",
+      "sha256": "a84a63b2a8f75981f12eadcf776e30563a735150bcc67119e6ee57c41f6bd5dd",
       "kind": "application"
     },
     {
       "url": "./app.js",
-      "bytes": 16246899,
-      "sha256": "d9dd4ef5156389a905dedc85c5f79b9711cba51a24490a410a957e2c94375a1a",
+      "bytes": 16442105,
+      "sha256": "1432bb7bffea757b836c81892b690f4a593f338e4d0b524a8708b7fd0f4e20ad",
       "kind": "application"
     },
     {
       "url": "./styles.css",
-      "bytes": 235918,
-      "sha256": "7451a0674278c7c0b6eb0652a66a90b21c397073ad5592e783ecca5002c5680b",
+      "bytes": 256295,
+      "sha256": "41e0c04ae9e8a62f1d94c1e991efb7da14fbd5840936f0cdd4a9d3ed17085391",
       "kind": "application"
     },
     {
@@ -4614,9 +4614,447 @@
       "kind": "application"
     },
     {
+      "url": "./background-illustrations/acolyte.webp",
+      "bytes": 46034,
+      "sha256": "7aa9c1c1e1f132eb32996fab77168d9103014b97e41f300f0eb174ade0df578b",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/anthropologist.webp",
+      "bytes": 67368,
+      "sha256": "acc9abd32bc263edf6f3a4cd6ffa04bcd169fecf631a550b0e734838dcb439e5",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/archaeologist.webp",
+      "bytes": 77184,
+      "sha256": "69acdf5ae7da1e451337e09cc7a0ed07a3617ffd6fa8d6616176070efe13dcaf",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/astralDrifter.webp",
+      "bytes": 64446,
+      "sha256": "7b22520555104703ac4da1d8b845a8ed8c4f6f9f3585b4891527533f294ec238",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/athlete.webp",
+      "bytes": 40540,
+      "sha256": "867ed864cc70fa1825401e9db7d56a7114a8b5419ee17716ef1e6afc937cd03c",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/azoriusFunctionary.webp",
+      "bytes": 55014,
+      "sha256": "ee850fec9094e307d38e143d854ae0519970e3d1d9d4c798e353f8fdc4f65bde",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/borosLegionnaire.webp",
+      "bytes": 56470,
+      "sha256": "5230bd9845c8a72c48656dccf373395a5d3eba3ed83c62313d25b7e2b48612d2",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/celebrityAdventurersScion.webp",
+      "bytes": 55150,
+      "sha256": "65ccaeafa1908a3537913dad178a8f029df78f6ddc05ff2c63b4c0d0ff39ed8e",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/charlatan.webp",
+      "bytes": 48910,
+      "sha256": "769bb89dfcaec4e5e898159b24ecd20b9ec5e165167a61fa4dcf63ac9ddd84f5",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/cityWatch.webp",
+      "bytes": 55448,
+      "sha256": "d002d8989a80bea533239d6da50a8d9c82018990b950c7f2640ec532d631c56d",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/clanCrafter.webp",
+      "bytes": 56756,
+      "sha256": "3a941b3fb1a10e98b984ed79b6d3ed8010ed465f388ffd8a15980e91e39d0de3",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/cloisteredScholar.webp",
+      "bytes": 67084,
+      "sha256": "53e91cb962414ae3da09ed5a0d0d25496b282de8434b53e8584165782a7832a7",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/courtier.webp",
+      "bytes": 55778,
+      "sha256": "628a41c4bd67f04d0ab9ac96efa5632cf1b4a02db36a8e429dbf741f14412882",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/criminal.webp",
+      "bytes": 58202,
+      "sha256": "c854b56af994f35a4c566dc5a0b7a4389f64a8f0a74199840c7052f1ccdb1f4f",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/dimirOperative.webp",
+      "bytes": 59224,
+      "sha256": "d93aab6467514618af6eee23bbfbd576ee42964cfa14fa2f61eb7fc725f1a0ae",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/entertainer.webp",
+      "bytes": 51000,
+      "sha256": "3b520f181d6816e3fa9ad9e141d6306472f6b9be0809e2d6ce18c43fd19553fd",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/faceless.webp",
+      "bytes": 51972,
+      "sha256": "188e009a065cd9fb57acb13667a4e31cdf68ee65cac08dd70ac184ca43d6a416",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/factionAgent.webp",
+      "bytes": 47488,
+      "sha256": "a2ce88d7e6f7023f2be17bed68c28752c797ce12bf905ccb4e8b8edd357a45fd",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/failedMerchant.webp",
+      "bytes": 71068,
+      "sha256": "d1e4f4b632d49a1f6aeae37f5a3491b065b45ad32d07da2bc7856b1d644569fe",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/farTraveler.webp",
+      "bytes": 68394,
+      "sha256": "27b8598d9099c79950430744be246e5106eba77e3ac9f4c5b23eb1ed98d4068f",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/feylost.webp",
+      "bytes": 57910,
+      "sha256": "c836559979f1bf0785fc5f7eca2817184448859bcadcc5aa2a19d891d428b128",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/fisher.webp",
+      "bytes": 65758,
+      "sha256": "9e0a3107e04ca86d33d90b6c09f77cd36771958cddc298f5e5706a20624aad45",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/folkHero.webp",
+      "bytes": 49522,
+      "sha256": "d59a379c61e42bb380ab0f5bdf570eba97e10c74048f6aea94a1b18ab0e140b0",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/gambler.webp",
+      "bytes": 59734,
+      "sha256": "6c5bd8407dd26208af574bcc8a2bfecc02181e64f6f5a7c33bc187be8c2232ef",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/gateWarden.webp",
+      "bytes": 48674,
+      "sha256": "1513fd4f565cb1c4eb34eea272b790fce10cf2c4267943013efa23b754edb0e1",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/giantFoundling.webp",
+      "bytes": 62904,
+      "sha256": "8dcccc2077fdf883869e4e50d9952774f8362cfca229249d7140b23742436b25",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/golgariAgent.webp",
+      "bytes": 72520,
+      "sha256": "73ec0c0e5a46cc8fb8d0081ff130ac859e728904dcfa48b2f9e392ee514fb308",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/grinner.webp",
+      "bytes": 57866,
+      "sha256": "a02127c71c3ab3d202aa0db051881a8566b6f5911ae1fdc25b59ebbd8c1121c7",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/gruulAnarch.webp",
+      "bytes": 58256,
+      "sha256": "07f8805cd0a35aeb310baec56dfd8a23200fe88d264a9171443a614c02043213",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/guildArtisan.webp",
+      "bytes": 63956,
+      "sha256": "d198539e4eb28951126f37286f6a6e1ff506ea244d72d5b174f97b58ca5a54b5",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/hauntedOne.webp",
+      "bytes": 55552,
+      "sha256": "90da8b8a4012607c2ec8e4d99e91b868732f3a0b90184c3d43a448e7b9b56e56",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/hermit.webp",
+      "bytes": 59104,
+      "sha256": "52b694bff427c3431fe2fb55f650efe4a790604c6a9b4a2d1785140df9009648",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/houseAgent.webp",
+      "bytes": 52622,
+      "sha256": "fa8f0dd6832113d8249e9e4a188386b5df13fb84717fc989e7a5a54109bac422",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/inheritor.webp",
+      "bytes": 51252,
+      "sha256": "1b5b13935be802a56a75a2d32993943c3c9f004a6b8d1e433c81a64b00eb7eb4",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/initiate.webp",
+      "bytes": 63666,
+      "sha256": "55a8001155e525706a688e908e56be94abba2676ee8531b296a1024a5412db80",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/inquisitor.webp",
+      "bytes": 56386,
+      "sha256": "029dde076cf9f57761aad91e69eb5ba461688e10a37b6fa03985f5a96c6d66e3",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/investigator.webp",
+      "bytes": 67710,
+      "sha256": "236b99ccebe1af0091f91e71ab4877825bcc4e95454db76ad2fd8dcb44e45b58",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/izzetEngineer.webp",
+      "bytes": 60198,
+      "sha256": "aa0f54222ffcaf067bf6d4f9e753f67c0941bf99e250a9d717bca165be726cba",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/knightOfSolamnia.webp",
+      "bytes": 60104,
+      "sha256": "5be629fbde78c4900eed1730e6c8d3ee594b24be79902f3a16333e0943df5b16",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/knightOfTheOrder.webp",
+      "bytes": 52358,
+      "sha256": "5558376d606a4f436fa21794cf4d1366bef88508ceeff49b5068a7b39c68f5a8",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/loreholdStudent.webp",
+      "bytes": 53568,
+      "sha256": "47c04cbf508948c07578e649ea838bcd42aac35889cb9329fe8aa7804c21f30c",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/mageOfHighSorcery.webp",
+      "bytes": 61874,
+      "sha256": "17a85a8fad9f3024f51e2e4596b2ce50dd6b6cb7834265fe80253d8eb2ce09f0",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/marine.webp",
+      "bytes": 61832,
+      "sha256": "ca8f9ecdeb7a70be37c5510740108d1fb47f9a5346bc30a1eff6f2ba979cec1f",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/mercenaryVeteran.webp",
+      "bytes": 77494,
+      "sha256": "3230ed9263ffe49b22773a41637df449c335624b843f649cb793fc7e89842ce7",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/noble.webp",
+      "bytes": 48826,
+      "sha256": "52102e4b3f29bb9fe01b454de55e9bc7e7a54f2137c83ccbcf2ecf655bd812f8",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/orzhovRepresentative.webp",
+      "bytes": 53500,
+      "sha256": "b8c418b1549e2f84c7fa14e8dc73449fae302b99d0f9204e71a98d9654fb159a",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/outlander.webp",
+      "bytes": 61322,
+      "sha256": "dec95126deac80827e3b036c5b5736c85f97a4b1b4fdce8b53772a2689432dbb",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/plaintiff.webp",
+      "bytes": 54528,
+      "sha256": "c56e5b1bd80ce8dcc29aacb67ccc216d1cbc9bc68312b8271609b7dcf98b69bc",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/planarPhilosopher.webp",
+      "bytes": 59576,
+      "sha256": "d1310f55554d1c167a30d0cd2f19607000d57e09f731be1ea254464010e2c8ad",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/prismariStudent.webp",
+      "bytes": 67046,
+      "sha256": "409207309f877ef3e42bccde3e7fdbfc6fb8949e30d657dbfc240ff045055924",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/quandrixStudent.webp",
+      "bytes": 51380,
+      "sha256": "dd21766cbd6458c81b8f41d5e69eb334cd06c0319b164cf9eaeaa7e2c6b3da1b",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/rakdosCultist.webp",
+      "bytes": 74722,
+      "sha256": "3fd5028c2f16bda55b0e8d0ed4a557360e67e13c04dd36d276d47f501b96a870",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/rewarded.webp",
+      "bytes": 52004,
+      "sha256": "2559c1710e5d39d32f51f9a30c6a30ab263ff3c17a8e7d5b4d2e5203453aada5",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/rivalIntern.webp",
+      "bytes": 55290,
+      "sha256": "4adb811cba570d595a3dcd09889a2e15b84c359cce86a52a5c1d165b12b9d0e5",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/ruined.webp",
+      "bytes": 67584,
+      "sha256": "d3e1639cb796243459b5d10b7550c37e1e9c58e520138cbe6aa4f89f841ec32a",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/runeCarver.webp",
+      "bytes": 62244,
+      "sha256": "8792d7bed93d72ed323f984f0c0b7e8c1975c458bd452a05fa37fafa3de1888e",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/sage.webp",
+      "bytes": 68764,
+      "sha256": "ee4fc1fac7728fa8d9b6647dda539c68c1eb6f1aeef5c7add3ccf861183c9dc1",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/sailor.webp",
+      "bytes": 71200,
+      "sha256": "57d0886cdf59e2e67016358683f07ea219835525d41d13c46e3af2e37f8a107f",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/selesnyaInitiate.webp",
+      "bytes": 55310,
+      "sha256": "59f66a8d0f89a528c65e1939a9f5e21930bb6777ab6585e5279c213aae4e2e62",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/shipwright.webp",
+      "bytes": 81212,
+      "sha256": "c6c606a953a2130bb82ac8c93d53ff0d6fa8c3d8e4d96c0578284c985421b6c7",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/silverquillStudent.webp",
+      "bytes": 52438,
+      "sha256": "4cbeaadfafcd12687522ce866bd62d3514d205285f37d7f7d2de57fa615e6d00",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/simicScientist.webp",
+      "bytes": 69924,
+      "sha256": "33481d6acf56a0fd6d45002c738d15dbeec13f9e0713bc97e32c6c5ca9716da2",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/smuggler.webp",
+      "bytes": 50386,
+      "sha256": "549ac0de1afaa7fc3c00da8989a2c3fa9581c3a571739bae87b35194af944f4f",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/soldier.webp",
+      "bytes": 58792,
+      "sha256": "fabf706fdccdc7f7ed37a00f7f8f5ad5cb731f3a19dadb34427b3a194fd21249",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/urbanBountyHunter.webp",
+      "bytes": 51926,
+      "sha256": "e79f43cb5b5358e553ab1b490d2b18b81210c40c3e0e896c9d75b2fa770c851b",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/urchin.webp",
+      "bytes": 61310,
+      "sha256": "ddb8d4ed521c4da2744918e0fa100bf5628aad8b6653b5236ab442394601c612",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/uthgardtTribeMember.webp",
+      "bytes": 64598,
+      "sha256": "a3902621c9ac6e93802a413e95a36195c1d47b5ce0ba1d6385842c7c12dcc08e",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/vizier.webp",
+      "bytes": 59646,
+      "sha256": "0c2bdfb6b2292d742c8a98de716d92928befbd6b2ac6f80302ec799613ff0229",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/volstruckerAgent.webp",
+      "bytes": 44926,
+      "sha256": "dad70234482e19f147f81dc9bffef8cf05fd30aafe1b6c012d9117da4fc6efd7",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/waterdhavianNoble.webp",
+      "bytes": 53958,
+      "sha256": "f537a591cc434dbd407a5e9cfc4dcb7ff9f7f727dfcb6ef799b07adaafb784c7",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/wildspacer.webp",
+      "bytes": 53014,
+      "sha256": "24ec3d83c0ddc16940d9e8f46eab015ac0e7dec7160abec22859cc77c23fc219",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/witchlightHand.webp",
+      "bytes": 68904,
+      "sha256": "c05c71135558bb20118509be7fd3990b507c0649c57aa3c2314fdb15c5bf0e32",
+      "kind": "application"
+    },
+    {
+      "url": "./background-illustrations/witherbloomStudent.webp",
+      "bytes": 66740,
+      "sha256": "81dcd932ba77e2c87af5e0d84985fabe77e114dda3c6f15e689f94a41ee316a5",
+      "kind": "application"
+    },
+    {
       "url": "./sw.js",
-      "bytes": 60578,
-      "sha256": "3296847270e74561cc0bad16547d59a72ec12925e893d3358608b03d5bd453c6",
+      "bytes": 94265,
+      "sha256": "8fea591a10acb7facf1d0eb4d9069ec04d70396630fd986f28034a0f852687fa",
       "kind": "application"
     },
     {
@@ -7405,50 +7843,50 @@
     },
     {
       "url": "./portraits/shifter-female-1.webp",
-      "bytes": 53742,
-      "sha256": "4df3584b1bc91af618b279651476a79e5add71a066e9ec1ebfa3687254e7e7a6",
+      "bytes": 71548,
+      "sha256": "740dffbc3c0567dc5af1b0f5ed41dc65a70913844de976bd50425794bacf83c5",
       "kind": "application"
     },
     {
       "url": "./portraits/shifter-female-2.webp",
-      "bytes": 54158,
-      "sha256": "c449d6687926fc1ee5b4e69cc37efdf51045f54f78d9ba276e9ee1aab26da1dd",
+      "bytes": 78330,
+      "sha256": "7576f12d3df52f9fed15235f65f5945cc5521b7d9c10f2214e841513a76982f5",
       "kind": "application"
     },
     {
       "url": "./portraits/shifter-female-3.webp",
-      "bytes": 51112,
-      "sha256": "711e7039d67af292c68d8c6d35e146796045613a9ab1d02fef12e028985e5800",
+      "bytes": 78172,
+      "sha256": "c1d8d6e31ed28fdc34095c72ccf9d28f24b26f7f0fede068b34086ed1a6e5560",
       "kind": "application"
     },
     {
       "url": "./portraits/shifter-female-4.webp",
-      "bytes": 49858,
-      "sha256": "b033353baec095a7236be9ab78eeaf4da35b28177f8b420ed889559140d200fe",
+      "bytes": 72438,
+      "sha256": "f828283022d57a38ca9e377d02cbfee58af7ab6a74997099e175c89cc709ab7f",
       "kind": "application"
     },
     {
       "url": "./portraits/shifter-male-1.webp",
-      "bytes": 52796,
-      "sha256": "e0a42e8456803a56674c189d9b5e1e55033434f6176e4601a8f06639f8744c40",
+      "bytes": 69628,
+      "sha256": "a7e19cc0846d9fc80156c7a18a4511f17a4ab0b5524fa2d8efbed0d607051151",
       "kind": "application"
     },
     {
       "url": "./portraits/shifter-male-2.webp",
-      "bytes": 45792,
-      "sha256": "e0bd1ab6a7d76c9485f97c4855b45aa8a3db9949db178f09fc2e2422bc572ce5",
+      "bytes": 65676,
+      "sha256": "11634ed6d82d58fbf0dc5a822cb8b228267c4310a723a7d49497dd743f3d3e3b",
       "kind": "application"
     },
     {
       "url": "./portraits/shifter-male-3.webp",
-      "bytes": 49426,
-      "sha256": "0926fe9eeb3a4a0835093ba6f2684c73159c5ad2b8d7fbeb989e890b05e18d5d",
+      "bytes": 75420,
+      "sha256": "91c6df4aeddaee369e52ae8bbbdec274296c47fb2fbe75d3d4cd11e4ea7fe3b4",
       "kind": "application"
     },
     {
       "url": "./portraits/shifter-male-4.webp",
-      "bytes": 45602,
-      "sha256": "dd7c438c9621dcf3cab6d89c2669ad7071d225f9b459ce0da16fb62827897117",
+      "bytes": 67656,
+      "sha256": "6bfbc9e7872d96c273821f63fdb349fe995dbbffe0417707ab972ee01e2aec5a",
       "kind": "application"
     },
     {
@@ -7881,6 +8319,1668 @@
       "url": "./portraits/yuan-ti-male-4.webp",
       "bytes": 40690,
       "sha256": "19c7ee5eb90ca20b5995206755214d81d6f36b31679d7fcb65761cd1b19cd1e6",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/aasimar-fallen-female-1.webp",
+      "bytes": 68296,
+      "sha256": "08aa44d1e9a5f89289ffc382888ae08b0ea4a7f2e282117144f1f3923d0ae94c",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/aasimar-fallen-female-2.webp",
+      "bytes": 55138,
+      "sha256": "dd4b91e6a44562e224b646f24ee6870fe8db17e332620226eb83aa5ded6243f9",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/aasimar-fallen-female-3.webp",
+      "bytes": 64168,
+      "sha256": "f51d5f0b0c3ae7469b41681b26e5a0dca5c9540ec04dc105eaff29a73bee8ce5",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/aasimar-fallen-female-4.webp",
+      "bytes": 59572,
+      "sha256": "8cf6bcc54bf6d2da50e4aed37a9676112e1d3d2986b117edda28199a88ad874c",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/aasimar-fallen-male-1.webp",
+      "bytes": 55652,
+      "sha256": "83ec382b51cb024e666e72bc6675643c3963e88355b6c51326e95dd651bd733a",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/aasimar-fallen-male-2.webp",
+      "bytes": 59880,
+      "sha256": "5b3a5fc619ad41a64a54d351ef1b80295f4f28156dce5a549895fee189647e20",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/aasimar-fallen-male-3.webp",
+      "bytes": 55434,
+      "sha256": "430905cc7f71a6f4a416c32743bd235b625cfbbcfed852dac02df4c1765db9e8",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/aasimar-fallen-male-4.webp",
+      "bytes": 61184,
+      "sha256": "5d78268b9499b94a478b0f87ab747b33622ff4ab2df51d077a663b7b040c0903",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/aasimar-scourge-female-1.webp",
+      "bytes": 60062,
+      "sha256": "ec1af27cb06166397370ec0cdc0c219081edb2bd17e242285582507b236a41d7",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/aasimar-scourge-female-2.webp",
+      "bytes": 55242,
+      "sha256": "3d5eba21794a1c40f906bea8f52b3d5e2a5f05e0b3bf4be3d72eee57d7cb6af0",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/aasimar-scourge-female-3.webp",
+      "bytes": 61204,
+      "sha256": "d87593c1afca0b808f22bdb8e53fa8f0b8258faa05fd0a9230c5d22701b2b797",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/aasimar-scourge-female-4.webp",
+      "bytes": 62396,
+      "sha256": "dd6a83e9706316a88c36e4341d35198da8f484c65e0e6a118b1bcd096a8ffe5e",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/aasimar-scourge-male-1.webp",
+      "bytes": 59702,
+      "sha256": "18d36ed1dcead8a4f90df3050a7b3f259f46ae8d9638c0ad23306697186194f7",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/aasimar-scourge-male-2.webp",
+      "bytes": 57686,
+      "sha256": "396971cac58a1094e41e3b350d67df1b2bf65ea6fdc5f5b87b1ff0f6016ddcb1",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/aasimar-scourge-male-3.webp",
+      "bytes": 55532,
+      "sha256": "b788cf19406c45309abf4c1fac4948e84e035178b5c23766c2c37db2621ddb17",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/aasimar-scourge-male-4.webp",
+      "bytes": 62494,
+      "sha256": "40f0bd950b2d419295c6b96eca96fb800cbace451968302cc2d3b007c6587d7f",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-drow-female-1.webp",
+      "bytes": 55326,
+      "sha256": "029e3a37617490c7c4fbbb95403c63fffd81cfa6957284311c64a00afe5c6a09",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-drow-female-2.webp",
+      "bytes": 56184,
+      "sha256": "c67c7b82cff3e97c0a0807ae0b214b553cd1dd76012f676d07e2c5ff962f7462",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-drow-female-3.webp",
+      "bytes": 65544,
+      "sha256": "0b295cad29fb399d4945fa89b190f7a45cc166d126c840f0b528a53daca758ab",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-drow-female-4.webp",
+      "bytes": 69632,
+      "sha256": "e745a49d2d9469920833afbaa7590b09cb1ff576b1d3de7fe85c9ab591f93b21",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-drow-male-1.webp",
+      "bytes": 62186,
+      "sha256": "bd26d7c1b00a5220bd50ae9cfd89dc61d53ca51891225ca14d904486a58a2177",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-drow-male-2.webp",
+      "bytes": 57762,
+      "sha256": "bd733d2f6327c5d940170ea6ec90d7587d9834495f5f4f5f9244eff90dfbd483",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-drow-male-3.webp",
+      "bytes": 62918,
+      "sha256": "3e5ceee563e6224271928f55fe114e45c1a41e22c35d7874399f9d4b74628208",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-drow-male-4.webp",
+      "bytes": 58378,
+      "sha256": "4c4ab3a62b0db1b04f9115e458774b56349157ae86fd4f7ea6864ce8aaf1d963",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-aquatic-female-1.webp",
+      "bytes": 59468,
+      "sha256": "ff0a61b5e4b4a1c1fd94404deefaa0351a7ed374d3b78544346c5fa48857d76f",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-aquatic-female-2.webp",
+      "bytes": 60092,
+      "sha256": "700c21038b377896ced825f72aed84413c66b43e95c2a192103bf8888e87bed8",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-aquatic-female-3.webp",
+      "bytes": 63502,
+      "sha256": "135904c8efe5b2959c9b05675b3fc0d2e7379f4068f3cc6d7fcfe1c6c53a9fa6",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-aquatic-female-4.webp",
+      "bytes": 61126,
+      "sha256": "06a9d6c843a3bcfd05cdc7c773e090260044685606481ae247ecd0cf9048e898",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-aquatic-male-1.webp",
+      "bytes": 60478,
+      "sha256": "207d2f6739de9c7e7bc375d497d722e2146ddaccd87c90ec0cf549137e8774e4",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-aquatic-male-2.webp",
+      "bytes": 53244,
+      "sha256": "0748868b80842c21dac7ac288a89994636c31aa3793e04d8e116eb7b99dca48a",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-aquatic-male-3.webp",
+      "bytes": 60870,
+      "sha256": "1574154c8f7c668b56104c8f8d6fee7ae0b107ea64cba7cba7040fcd44b0e632",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-aquatic-male-4.webp",
+      "bytes": 65586,
+      "sha256": "b441416d380e2fa8549d856dea5e1994d1bd7e426167e87e6563cf6566073a61",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-chromatic-female-1.webp",
+      "bytes": 64538,
+      "sha256": "6d32edeeb99865ffb3804881f52e3a608b9e7c506d29aecab06b62947abbaff3",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-chromatic-female-2.webp",
+      "bytes": 60486,
+      "sha256": "513098671b39834e2cb4edf67aac500c195dbd23fc8c28a13dd6d259b58441d1",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-chromatic-female-3.webp",
+      "bytes": 64516,
+      "sha256": "12838bbdc6b555999ff4a7b3e9a2ddf2cc7e0ff7329c5c9348617661b8bba886",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-chromatic-female-4.webp",
+      "bytes": 62542,
+      "sha256": "ed64571bd8e0691604780a2144595031fb44dd9d2f82dd104742af1056ad1d52",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-chromatic-male-2.webp",
+      "bytes": 61688,
+      "sha256": "52dd3744a522edbed93e0454a9d26a3f25b0ab857df4b334c95ac1bab72c2a1a",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-chromatic-male-3.webp",
+      "bytes": 62284,
+      "sha256": "e034245d18da5ebe03d92fc345a6b4e8ce8ce0ef7a604e195ae654f06fe05e40",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-chromatic-male-4.webp",
+      "bytes": 66702,
+      "sha256": "3c521fb25ee76a31e3d05c952fc8439fcf585ecf5327c46c66ee8bf44a62aa00",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-metallic-female-1.webp",
+      "bytes": 60400,
+      "sha256": "db816953a80bb3877e7f6ddedda747516064f68f23ade3e832bca5d89663efe0",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-metallic-female-2.webp",
+      "bytes": 57826,
+      "sha256": "55fad261c87fd3c66b5e066ccfe8b33b354af4fc2c57842160dc69f04084eb54",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-metallic-female-3.webp",
+      "bytes": 58356,
+      "sha256": "3ce146cbc9d28a15c6c6566fb32782b92865c019982735eded688789dd6f17ad",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-metallic-female-4.webp",
+      "bytes": 65660,
+      "sha256": "26f02b4035cbc1ae115f4137dac406b16934894fc7e297676aa21e9dd6608b02",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-metallic-male-1.webp",
+      "bytes": 61170,
+      "sha256": "b6c615dc63ac6635bc8456d171f3496c364256ce28ee5018c4717a7d8e51de8a",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-metallic-male-2.webp",
+      "bytes": 61332,
+      "sha256": "3709c34b1e2b2f9ee456a53c32c6f5384731b0ff8db384e4bcce26f06f7663a8",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-metallic-male-3.webp",
+      "bytes": 61096,
+      "sha256": "12a358954e322ae59a7eab119a32707a3144702199ba2885c5686d1eef9975f7",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-metallic-male-4.webp",
+      "bytes": 64014,
+      "sha256": "1473379c59c69d61af94d157f77ce2d42c7e4adaf49c557906374367f18ee077",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-gem-female-1.webp",
+      "bytes": 69690,
+      "sha256": "bbf2b436878c357bd2243243635bc73ad80ed82d95def687c884df31d23af2c4",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-gem-female-2.webp",
+      "bytes": 57846,
+      "sha256": "99305e81b0cea3d7f99ab5345c28abb4d16f0ed0fb2034b9131f8e2990dc4e59",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-gem-female-3.webp",
+      "bytes": 62948,
+      "sha256": "96346654dd6bec30807304472d91388da978e5070a54cf05aabdf3e8b145a32f",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-gem-female-4.webp",
+      "bytes": 59422,
+      "sha256": "c4ef04a57cd9a5ee976bad08844f359b2ec7da13ceb608ae3827d2dbaefa5050",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-gem-male-1.webp",
+      "bytes": 61504,
+      "sha256": "d3b3778b8b2d8c9c336b41205bba10af9713f11ba8de68c5061b78cfe4ee293c",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-gem-male-2.webp",
+      "bytes": 61462,
+      "sha256": "5217b849dd19c3d2142bcbebca30cc2233c082bf6d9eea6a0ff9dd7e89f7d69c",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-gem-male-3.webp",
+      "bytes": 61970,
+      "sha256": "9d6a9ade40d113d2815fa37d13a691fe4056952d01e55aad09d5eedf01a7539b",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dragonborn-gem-male-4.webp",
+      "bytes": 56494,
+      "sha256": "250d3dd98572e447c30a1c46bb8968312fe36911c7cb985b3e0b9992e5eb8811",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/tiefling-winged-female-1.webp",
+      "bytes": 70892,
+      "sha256": "4f9d1c17832fcbb077d9988530c10e7a3eabc9fcb98133be2e844e138c13b2f9",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/tiefling-winged-female-2.webp",
+      "bytes": 63128,
+      "sha256": "799845d20562bdbbbf8f9182c51596ec4279fe123aaab43079ad836efc1f493e",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/tiefling-winged-female-3.webp",
+      "bytes": 70568,
+      "sha256": "24590e5a03957610c6f3202b0c6aa0cb741b09e3ea80a41bdf579e1fed12a00b",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/tiefling-winged-female-4.webp",
+      "bytes": 73344,
+      "sha256": "109994d817980dc372903ee2b00fafc2bc08f132070034612d05b7bf0b73a6fe",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/tiefling-winged-male-1.webp",
+      "bytes": 68972,
+      "sha256": "9d2bb93e91bdde944713454d3ddf9b64307c66aaa935d3994c0549eb11c484b8",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/tiefling-winged-male-2.webp",
+      "bytes": 65210,
+      "sha256": "10a429be45d6334a9decc7dae511912aed82814497476622191993a83114123d",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/tiefling-winged-male-3.webp",
+      "bytes": 67700,
+      "sha256": "d393e6c21d072650e2b9e98aaa034b61269e88fccd7868dcb53248be3ec25ee6",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/tiefling-winged-male-4.webp",
+      "bytes": 70172,
+      "sha256": "f69b72be0fd86d1e0ecdec9f589525cddf07cd6a0975ffc0c9382bf072b70f84",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-climber-female-1.webp",
+      "bytes": 66980,
+      "sha256": "6bd7cccd277f291559dfdb3b859f5bc1d8c626b29c7c9fc1fa68ab26480e07a4",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-climber-female-2.webp",
+      "bytes": 57658,
+      "sha256": "df1c727c9c3b894223a2e440eae249a64de69c89fe69c4475cacd3674efd5aa0",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-climber-female-3.webp",
+      "bytes": 65046,
+      "sha256": "f127b5d3d268f643e2c15e4ad346ae36cafff731fe5d40f83b9b4bfda2aea093",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-climber-female-4.webp",
+      "bytes": 71592,
+      "sha256": "1b934edf248008553de5dcd7895ac814fefa2828fd09fea9dc47c9615a2a699f",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-climber-male-1.webp",
+      "bytes": 66066,
+      "sha256": "30167a6d63796f65b4ad64afe5ae4b618de2b7bc09c86f4386b7d459d4a1cd14",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-climber-male-2.webp",
+      "bytes": 62694,
+      "sha256": "6a9576588648c0296650805049254284d3f7020933a0a70d2cad31b7dc627f4e",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-climber-male-3.webp",
+      "bytes": 59314,
+      "sha256": "61e3b93cd43bf8cd712515b2340c6ebd3d345e2c358c016dab845330a9ce04cf",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-climber-male-4.webp",
+      "bytes": 66888,
+      "sha256": "578f508e36121c4abe30148809a909a3811e7744ab8c034be5ac480b647f2d2f",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-glider-female-1.webp",
+      "bytes": 62604,
+      "sha256": "8de4a7cdbccc4cf5b11ab56e91b387762e0874896a51b7f68cbc22720ac633ee",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-glider-female-2.webp",
+      "bytes": 52288,
+      "sha256": "14a1ca17e0fd43df665b188f2aa0b54889b6a271964bacf720b5062ee16718f6",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-glider-female-3.webp",
+      "bytes": 61876,
+      "sha256": "58e12fe9aff526bb466e298762e8a037cbd447b6e285b62beca53bc154838b05",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-glider-female-4.webp",
+      "bytes": 61558,
+      "sha256": "1b9e35c46df83c797387c114d8e382a0d65d426a3c384a86c9e22c6a29ab8409",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-glider-male-1.webp",
+      "bytes": 46910,
+      "sha256": "fff36ff6fb54ec6830a36388750ee5e4bd3e8f680b572daf7c87f4028fd37634",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-glider-male-2.webp",
+      "bytes": 49686,
+      "sha256": "fa592ae3db97587d70919cc34b81a1bbaea325ca380217372497f3b7584bcf3b",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-glider-male-3.webp",
+      "bytes": 53002,
+      "sha256": "194d25021440eaa8c07f40c883fcc82a0731a17415883852794ec3dc86670909",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-glider-male-4.webp",
+      "bytes": 53996,
+      "sha256": "92092f8083e8566f79241beeeda45708538fcebc0122b94b2b807ce7318d2d0a",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-aquatic-female-2.webp",
+      "bytes": 56040,
+      "sha256": "5c485ad2ed041d2a2e0c72d37e44fc1dfc59aa3f5f393aa14098310cf24b1d47",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-aquatic-female-3.webp",
+      "bytes": 63034,
+      "sha256": "6e34ded00e465e0246d09ea89d60914f7ee8a64419537078f9293f04b17a1f03",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-aquatic-female-4.webp",
+      "bytes": 67168,
+      "sha256": "79440765a73f00a0a191cce3bfb5fb110c613d77233e23c79148342cb1791f39",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-aquatic-male-1.webp",
+      "bytes": 64366,
+      "sha256": "a36925cd132510d545b884c8411dd5c9e6a2df686d8554ce5a6f4cc1c2a94289",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-aquatic-male-2.webp",
+      "bytes": 58614,
+      "sha256": "1601cdbbe8e1443328cd4576f8e3966028cac78dd59b0d73f44602827f47f1ef",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-aquatic-male-3.webp",
+      "bytes": 58406,
+      "sha256": "fed82b2e3613542bba798d2a716d0918f401de5593239f04aebc02497e525079",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-aquatic-male-4.webp",
+      "bytes": 65080,
+      "sha256": "de9f10da39f8727e2a3039bfed3a95ed2c44d84d1a94781101e79129dfd3fc54",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-sentinel-female-1.webp",
+      "bytes": 66374,
+      "sha256": "e323e0b1b15fb3491ee12383215e30365e8b5d3203ef413dc09384d2b63d2f4d",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-sentinel-female-2.webp",
+      "bytes": 79462,
+      "sha256": "b76debca257d18ecc3560e92c7fbb8df2ad788790a218c4270725bfb399e4336",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-sentinel-female-3.webp",
+      "bytes": 62694,
+      "sha256": "d58b3d4b66b68f78f4c00afeccc5f0762a2147c0e8ad07c80387ba520a3d4d51",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-sentinel-female-4.webp",
+      "bytes": 70282,
+      "sha256": "04300b5c502b351a6e1bdf9a8a9f0936f9ec29697c2914913ee6d7dd47a36e6f",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-sentinel-male-1.webp",
+      "bytes": 68426,
+      "sha256": "13b28c84a89564c157fbefbfb096e4bd93700736f71510333dc9cfc65061bc2d",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-sentinel-male-2.webp",
+      "bytes": 71390,
+      "sha256": "773a664d9e6f666e3cf035cf50c8eb83a5fd82be78429debf18c4f781b232a7c",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-sentinel-male-3.webp",
+      "bytes": 72432,
+      "sha256": "991c4b11383c83913cc6c4c2a325cc5f4b9ca8f08b735d1b1dd39ec2f1550682",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-sentinel-male-4.webp",
+      "bytes": 69952,
+      "sha256": "ddbcafa98497ca1e4cabb73e1d7f2c9f25221da5163cf478f1ec37b14d8f1fff",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-finding-female-1.webp",
+      "bytes": 74592,
+      "sha256": "31367a8bce62f685e482c19091dea4d243cb02819a8d52e1f2c363f1786fdaaa",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-finding-female-2.webp",
+      "bytes": 74110,
+      "sha256": "04ff7f30847fa25c59cc85fe169de7e46a78f42c3909a450e613bb77332f0d1f",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-finding-female-3.webp",
+      "bytes": 64716,
+      "sha256": "d38e48f84cae12cb45685244553d73d72d03c31a371bf11d6bafb558ecbbf990",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-finding-female-4.webp",
+      "bytes": 70928,
+      "sha256": "50d494f6d7d8535c0a65ce609d0791dc46c3958e33580e31c185157164f5c2b6",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-finding-male-1.webp",
+      "bytes": 68154,
+      "sha256": "fcc43d40a50ae4f8f22f144eef17b9d1af35c9b9a6d4d578eab924d8a74d55e0",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-finding-male-2.webp",
+      "bytes": 75440,
+      "sha256": "8645c8baad9cf1b964cb18e3d83cfd2a536f9a570b622d9d6b5937fc82f12b86",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-finding-male-3.webp",
+      "bytes": 70756,
+      "sha256": "25fb984278b9c473475aa36deba1ecde731dc9fc1062237743e06f2f336591b3",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-finding-male-4.webp",
+      "bytes": 66962,
+      "sha256": "a609672f6455f304a6a0a32478f9dd745e84c817363cefba09dc17162d223a9d",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-beasthide-female-2.webp",
+      "bytes": 66948,
+      "sha256": "fb224ee6d81dd4e9ac67fe90f9a972e4063001a24bfb087ad9e05d42fb6d1fa8",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-beasthide-female-3.webp",
+      "bytes": 63450,
+      "sha256": "f50864417d1700fb5cbacdada8b9ccd6ca6b87c00da3bd1853de1cf8246f73c7",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-beasthide-female-4.webp",
+      "bytes": 69064,
+      "sha256": "18b684c71811199b0b743205270c9157054c7458d5cb73725f2632909efe563d",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-beasthide-male-2.webp",
+      "bytes": 66072,
+      "sha256": "391da271956cda5d61d451186245df4858190fe25a437cbdd22ac9eafdf4ab5e",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-beasthide-male-3.webp",
+      "bytes": 64626,
+      "sha256": "f91665b1891583ac92bcf804ea318e4ca5df0d620fc0ed70596540bb1a592ff3",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-beasthide-male-4.webp",
+      "bytes": 76428,
+      "sha256": "09fd7451ee001342f74d32aacfa78c5103ac65fce3622fe15552640ca2c10d2f",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-longtooth-female-2.webp",
+      "bytes": 71682,
+      "sha256": "2f3a02df58159c5e39be8d7e2a5cb1d57d48eede418fc6707ce2fb9074d4442a",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-longtooth-female-3.webp",
+      "bytes": 84382,
+      "sha256": "6c025f6a28fe8af3745ec34421a6dfe6ffea0678bc0da8b81b3a375059fd74d1",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-longtooth-female-4.webp",
+      "bytes": 84296,
+      "sha256": "a779a4cdda3d892bf02a0793260302bcb97c90915f5fc20060ce9cf14d4f383d",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-longtooth-male-2.webp",
+      "bytes": 68758,
+      "sha256": "ea8214c7d6a6cf71d81bb4e69dcca288d5c7df2229553df0c44d26746fd6549d",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-longtooth-male-3.webp",
+      "bytes": 67618,
+      "sha256": "17197c313c74ec8ac690e9b032575d068a6d834008d53a9b745421ec8db63741",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-longtooth-male-4.webp",
+      "bytes": 74504,
+      "sha256": "e75c45cc89a317abca01cb5e4852c80aed8e6165b9a189a749cf1d1a22655ba0",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-swiftstride-female-2.webp",
+      "bytes": 73962,
+      "sha256": "6f0f1dff438f43102b00dd30a5bb566ea7755a3875768cd6568a8c9f91ac6051",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-swiftstride-female-3.webp",
+      "bytes": 74302,
+      "sha256": "4de2186765a1ed029901504843dca8d05784f5b4713c416cc886024177160e51",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-swiftstride-female-4.webp",
+      "bytes": 79562,
+      "sha256": "3795c4e54a7a70cda604b0e56a40226cb6f244882156d1ef4f095d1d280aa4de",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-swiftstride-male-2.webp",
+      "bytes": 67590,
+      "sha256": "e4d2c12a6fa242ec0937934cbe757df34ca7c6b3dd8c9c301a837c2301967b83",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-swiftstride-male-3.webp",
+      "bytes": 71574,
+      "sha256": "a6d7fef2ac104c28c3bfb575c310bb7aabb9ddd0c2bff273e0bb35abbbfd73ff",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-swiftstride-male-4.webp",
+      "bytes": 71888,
+      "sha256": "e7d3353991bb5f04bbc744b035f04dbe568bb5d1e21aa2812d72443b5889189c",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-wildhunt-female-2.webp",
+      "bytes": 65992,
+      "sha256": "f4c7912b4787a66e0f9f73c891b07554603acf3553c58b2685e5fa4d2de8ea87",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-wildhunt-female-3.webp",
+      "bytes": 68082,
+      "sha256": "e09c461774a77fefb1b3d1906d7782895c4777e2cb2eeac46ec819a007ed2ddf",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-wildhunt-female-4.webp",
+      "bytes": 68928,
+      "sha256": "ab5c5189c5c200ff3d5e3bd6ce054a1af81fdf253f29feeb8fe57111e81129bf",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-wildhunt-male-2.webp",
+      "bytes": 64340,
+      "sha256": "d9df32b39e39e8a41fb691a7a65a542f43a1ed9169d7b1130db0e049a244d6b9",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-wildhunt-male-3.webp",
+      "bytes": 66702,
+      "sha256": "0894b9f010a6434b1a2439d58557d3a5c5427e456ff218b41adae3ab507f66c0",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/shifter-wildhunt-male-4.webp",
+      "bytes": 69608,
+      "sha256": "132223655f6535ab208034ad71b6adb7019f266bb321ec8519b1b68ef023628d",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/githyanki-female-3.webp",
+      "bytes": 67290,
+      "sha256": "a9572f13887810af4419ad1b287472a396292c27da8f257cbdcaa340276f1fdc",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/githyanki-female-4.webp",
+      "bytes": 76432,
+      "sha256": "605bc570c03112dc1d66279255182d06a9c4c50b5d744022520d4bc5209593b6",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/githyanki-male-3.webp",
+      "bytes": 63530,
+      "sha256": "01ce9613d4e23342839a2b8b42bd114d8c86f544a939f4b745875e1081d81e9e",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/githyanki-male-4.webp",
+      "bytes": 75784,
+      "sha256": "a05670a17a4dc959753f83ad5d5e768c60b34e6ba7fb1840ae88a001bbb32242",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/githzerai-female-3.webp",
+      "bytes": 67782,
+      "sha256": "367152b58f6b006d9643ef388c6a13e12ce0b98ed9893d4bc9ada7981e1f6bfe",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/githzerai-female-4.webp",
+      "bytes": 78156,
+      "sha256": "9373cdad52a164ba7fc6acaf71d9348a61fad33dab58d5f7c0e58e791f935e7e",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/githzerai-male-3.webp",
+      "bytes": 61506,
+      "sha256": "10713e0118037b03343a9df1c301d721137fa6275cdf34aa1d56b9af745ad90f",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/githzerai-male-4.webp",
+      "bytes": 68356,
+      "sha256": "6d8b14eebc3995b4949e519141882649483ce2c5ed63657df089ddc54396e5a9",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/pallid-elf-female-2.webp",
+      "bytes": 62222,
+      "sha256": "f761ee1128f77e5a05692c7c098388f8f09a0413322858915ce78af4dd0bc33d",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/pallid-elf-female-3.webp",
+      "bytes": 61450,
+      "sha256": "f95a21b6262fced7dc63e32143725fb6583638874610077f544909db57523cdc",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/pallid-elf-female-4.webp",
+      "bytes": 77150,
+      "sha256": "4dda05573acd694b8da3f5fd55864dd0e3dd2218edb2d67d7a14288b0d18c3c5",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/pallid-elf-male-1.webp",
+      "bytes": 72486,
+      "sha256": "9e684d8fcdb45dbc6c395631eac41891f13d8f57f9f07b94bb2473ab199b126c",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/pallid-elf-male-2.webp",
+      "bytes": 67678,
+      "sha256": "17b3ed0a21ec8d9cd61564eb9ee9da05397663cd95a89fc822dff820b17e9b27",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/pallid-elf-male-3.webp",
+      "bytes": 61698,
+      "sha256": "b2d8a05b1a6d92f12b36396c0802e07c879352cdd12e0b3d1b3049bcdbaa19be",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/pallid-elf-male-4.webp",
+      "bytes": 75620,
+      "sha256": "67989bace44bc26bad21251839507b3ab0a9eda47b10472f71fcdd838a79d432",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/kalashtar-female-1.webp",
+      "bytes": 73540,
+      "sha256": "52644c9ec136f72fe13ccf81955d889b854396fac4fdd9cb811576d603338af8",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/kalashtar-female-2.webp",
+      "bytes": 71610,
+      "sha256": "0e209f416060ddd9c09258bc6099f6daccb636ed0c77f32a29bb1751c5402e3a",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/kalashtar-female-3.webp",
+      "bytes": 68088,
+      "sha256": "19b5c6a38571235d4e2af212706068f83b4735235bf148d3f19c68138687f98f",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/kalashtar-female-4.webp",
+      "bytes": 71912,
+      "sha256": "539d42cb86fa501f4246da78230b85663aa70abb49f31c5093907246539a2102",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/kalashtar-male-1.webp",
+      "bytes": 71298,
+      "sha256": "3bbcd7a24f6a916c273be240eb28a38bbaff0f66580157f3415428f15bfcaaa3",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/kalashtar-male-2.webp",
+      "bytes": 77530,
+      "sha256": "ea47486c0513d034deb42a6440c4ed69ab3960cebead6a0f6324e9a1e809d5fd",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/kalashtar-male-3.webp",
+      "bytes": 70676,
+      "sha256": "fe957ce5211ca62cd01d16b0d85efccfaa49bd782a3b32211aaa2caf9689976c",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/kalashtar-male-4.webp",
+      "bytes": 71792,
+      "sha256": "be47844b5cec67015189e85734108172bf0834c1e46c2dfe1c4430f0617f81df",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-diversity-female-1.webp",
+      "bytes": 69326,
+      "sha256": "6ae962d392561651b3ab18163be474c5c9ed47c7886164acba2792bdfe10faf5",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-diversity-female-2.webp",
+      "bytes": 65592,
+      "sha256": "7fccfbb389495fda05d295b2f65b6e33fd27ada8441aa2d511da1d5fdf62c543",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-diversity-female-3.webp",
+      "bytes": 71578,
+      "sha256": "cf838cf9acf98c9517a21fdada56d89a369f5f511305a3c1aae036d88aecfd20",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-diversity-female-4.webp",
+      "bytes": 70908,
+      "sha256": "667518dae5dfbba9b52dd6b4aa85a8510e3fa986a48192b9f31a50aa85070e17",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-diversity-male-1.webp",
+      "bytes": 67744,
+      "sha256": "b1bce392e46ed24288c7ff86f2dcdf14f2bf3b3051146da1a37d3406d17fe3fe",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-diversity-male-2.webp",
+      "bytes": 70350,
+      "sha256": "518f3671d849816ac22110bc54f85c200147af7de6a549e4940c0f4c9bf26940",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-diversity-male-3.webp",
+      "bytes": 72874,
+      "sha256": "a2c9928dd3c7b7a67f5bc9a2733b7cfae746178b7c8ff1339ed4b2cefa153b10",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-diversity-male-4.webp",
+      "bytes": 72166,
+      "sha256": "57a056893000bca34428ff466755e26ae5d9222294954b60860712dd6beab73a",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-diversity-female-1.webp",
+      "bytes": 70338,
+      "sha256": "8b8b057da06d0fd1d8fec73bd5d2fb7c461689e8462c11dce4f220939ef0c887",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-diversity-female-2.webp",
+      "bytes": 72392,
+      "sha256": "1810c6d27a7e14bdbdafe36afb91cc65906b32f4ef12d7a3f01307f7727ad41e",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-diversity-female-3.webp",
+      "bytes": 67162,
+      "sha256": "05c866f45a13b90a33ea7250e62bd7117f2d7c1278cdf507cfd944d6bb0de01a",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-diversity-female-4.webp",
+      "bytes": 68758,
+      "sha256": "3979ef4ee3cfbc72aa264d1e18894ff6271869fda53353d44691c167b157fecc",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-diversity-male-1.webp",
+      "bytes": 68406,
+      "sha256": "2f0728789ee4e0aa8ba49c7c371a84ba1c60857d50fb07a47cf45073b5bb6414",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-diversity-male-2.webp",
+      "bytes": 65404,
+      "sha256": "8d6976a18215ee0872d17a27d1de787b6738f0064b5ade52cb51853b04920544",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-diversity-male-3.webp",
+      "bytes": 78386,
+      "sha256": "1d72438e5746747d5a513dd142bd8ccca59bf604767de0098de93857fba55b08",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-diversity-male-4.webp",
+      "bytes": 69402,
+      "sha256": "ba69a83a73a359cbdb5ff42c99273300a06c573e9e4be85152532dfedd7c029a",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-grappler-female-1.webp",
+      "bytes": 62790,
+      "sha256": "a8dae0934844b3edec72db920dd72c65e3d12ffb51cb6cfdefb6edc8ed73d79f",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-grappler-female-2.webp",
+      "bytes": 58302,
+      "sha256": "1348d0151fee8ccefe4d17938c1ce331dd63e6a4f4ca74ee8980d6c868e5841b",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-grappler-female-3.webp",
+      "bytes": 58262,
+      "sha256": "d6a84ed393f361250e4d607f957c2b2843343efc907d092186ecd31288e1c951",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-grappler-female-4.webp",
+      "bytes": 66780,
+      "sha256": "5472063790a6114bdb27f126282b339ef2d011a5a0ef083e813ef0ff3462a733",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-grappler-male-1.webp",
+      "bytes": 57636,
+      "sha256": "220f94630ef50de4402021a3e5303eea74ca9c4f707b7d4e66744d38ffa39ced",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-grappler-male-2.webp",
+      "bytes": 55488,
+      "sha256": "7f7ebd7ac95c4a7ae166877eff763b4ff2f0820c38cc80ec2ac1c15fb83396e6",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-grappler-male-3.webp",
+      "bytes": 64044,
+      "sha256": "75d3b4f8abbfff98e4070068d0af43473f1848e151ba7820a45637db128eec9f",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-grappler-male-4.webp",
+      "bytes": 66044,
+      "sha256": "a5596f16f15434aed3edcd54792fc064c07de9526051cf589d443accc71222d2",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-carapace-female-1.webp",
+      "bytes": 67976,
+      "sha256": "706dab2ef5ef094d139cbffb46d77c7e49742696b7938c0ecd831296097a14d2",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-carapace-female-2.webp",
+      "bytes": 57272,
+      "sha256": "5f3d6ef88326d1042dd8a339141fb443e5ee461a79dcd666280e8950fd04ed8f",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-carapace-female-3.webp",
+      "bytes": 61492,
+      "sha256": "ab17aab037bf79538f28d6004cf86ff186bf044321eef77684ea36e752f1d613",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-carapace-female-4.webp",
+      "bytes": 64024,
+      "sha256": "897597365b151fc48ddda5bae943ecd57f6df7833263191a030edd54dd1ad88a",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-carapace-male-1.webp",
+      "bytes": 68000,
+      "sha256": "5acd3fd26fd85922c4955467180900364d0d65cd020e9082cd293f29023a64c0",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-carapace-male-2.webp",
+      "bytes": 57612,
+      "sha256": "947067f0bbcd9b0b5eca9751a0421707def98b727894b661c8ea0acacacd473a",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-carapace-male-3.webp",
+      "bytes": 61368,
+      "sha256": "30e4a971d8f56a082cb492b59146987f218c6f1d84c91d605b80f4b6db476ca3",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-carapace-male-4.webp",
+      "bytes": 63590,
+      "sha256": "6dd099bd12ec06f75ab8fb6a4f271ccdc3593adbd5a0c46eea4c44ec4126debd",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-acid-female-1.webp",
+      "bytes": 64902,
+      "sha256": "ed34e084af9dddfa1b021b87a0b02dc461fbecf446494cb9df48df26eb6bfe92",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-acid-female-2.webp",
+      "bytes": 53474,
+      "sha256": "2912ed3c642079088cac37e56a1fc8db4bded0df56545b6a5fbfea60a9fbca1a",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-acid-female-3.webp",
+      "bytes": 57192,
+      "sha256": "d480cce0ce2ec177b3ce2bf065ea2da0aa8a0f15215d6ed643697fca2cbf4589",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-acid-female-4.webp",
+      "bytes": 66378,
+      "sha256": "fd881263e969c5210643bd984fb088998b06ac3f5f0bb233d7408f2100115070",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-acid-male-1.webp",
+      "bytes": 57890,
+      "sha256": "9588bce1763345377ea82016ede13910f673edb6f50e34e36bbbae9a8156d17e",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-acid-male-2.webp",
+      "bytes": 62470,
+      "sha256": "5fa1e7b43ba8cbeac2774b817885e68a2bd31189c25323d20b2600eea30ed42d",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-acid-male-3.webp",
+      "bytes": 56652,
+      "sha256": "e6cb91ad9948bec545e8a7e7d1fb43a1c324043e28df73183e2d8733619f41b3",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/simic-acid-male-4.webp",
+      "bytes": 62624,
+      "sha256": "4d3fdb453475b7bbb8c613649956646388eeea9109f5aaa765e09aaedcaac92e",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dwarf-warding-female-1.webp",
+      "bytes": 68278,
+      "sha256": "9ffa6b0cd441afcb6f4621f4608bfee2319fa0e74bd34c390ddb94586abd5ecd",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dwarf-warding-female-2.webp",
+      "bytes": 87028,
+      "sha256": "c76507793201f8f382de86e73077886ce46d9eb92c323cc0131653ae5b35766c",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dwarf-warding-female-3.webp",
+      "bytes": 94512,
+      "sha256": "e9bedf8abc90518e17b7af3f4259812f24a16de545e49842aee2aaa7cf7b7ade",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dwarf-warding-female-4.webp",
+      "bytes": 81356,
+      "sha256": "efb5f313ee808def197b0801d8a1e9d985eb466798bbebe74195662c11687208",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dwarf-warding-male-1.webp",
+      "bytes": 82090,
+      "sha256": "08f1dcfe676ba882fce783f2f9909eb5904ff656532ee3a07a8133d4b1a45c57",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dwarf-warding-male-2.webp",
+      "bytes": 76004,
+      "sha256": "7a65d0aa3cf7bc57465e7fbfd3911769907f291fce0c138aade383c035f90f2b",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dwarf-warding-male-3.webp",
+      "bytes": 78570,
+      "sha256": "16de384968335072a811f2a457fd60f1ced1c4589f21c18070e1eb9eb214c1e8",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/dwarf-warding-male-4.webp",
+      "bytes": 77680,
+      "sha256": "0fa34a519e85a3d01bd4cbb3bff30bfa3334ef6652d5218647015ad7cf3f51c2",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/elf-shadow-female-1.webp",
+      "bytes": 69466,
+      "sha256": "2eb094f8b6a962e7468152da089742512114c3ceafa6882217b65fbea2151b61",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/elf-shadow-female-2.webp",
+      "bytes": 63394,
+      "sha256": "9a3821574d1e62c50234dbbcfff5d96ae7e168826c88878e76b7a8117a881e1e",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/elf-shadow-female-3.webp",
+      "bytes": 70064,
+      "sha256": "9cec0ff09dc44034ac81e3ca17df51aed951797945ef342d82ee02f417c93fff",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/elf-shadow-female-4.webp",
+      "bytes": 67768,
+      "sha256": "f766f6a0e1e0766cc692169adf85e195fd8863ccf61bdeca491235355772721a",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/elf-shadow-male-1.webp",
+      "bytes": 67686,
+      "sha256": "930048d45c9ad48ee6e205387574656c66d3bba72056f4e4e5bf9435b470a36c",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/elf-shadow-male-2.webp",
+      "bytes": 62004,
+      "sha256": "45cdd1f31e1451cdfb0550ec02b25d7de5f7a8a64cfaf960917608bdcc4c6f3a",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/elf-shadow-male-3.webp",
+      "bytes": 69066,
+      "sha256": "817cd77b8fbe1e94db639f8a3e374cd0f8ca259894352af999e092bfb6cd4397",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/elf-shadow-male-4.webp",
+      "bytes": 67610,
+      "sha256": "f0a7e5370e8bf65a0008828f8a9b2eb67efab3036fa21d8eaed9253918aebc91",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/gnome-scribing-female-1.webp",
+      "bytes": 74260,
+      "sha256": "7055755b993590d680be3b1348ba426319f726e2f4f1ddacbb8e1c81723b1d27",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/gnome-scribing-female-2.webp",
+      "bytes": 79604,
+      "sha256": "1440fedbfbf64f7eda8e614ae4722b9b22d0158a6b1a9df96450de101624abcd",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/gnome-scribing-female-3.webp",
+      "bytes": 66334,
+      "sha256": "59be3216c3d90c5d906213cdf0207ef1967acab6dd4d10a1e0401dc5d085afde",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/gnome-scribing-female-4.webp",
+      "bytes": 81398,
+      "sha256": "e8fabd6ba71107c052c4382f64899f4379063435333459cfc66b5742f3748a45",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/gnome-scribing-male-1.webp",
+      "bytes": 65904,
+      "sha256": "091f181215bb90002032b449258fd99f7793c6f708a0d81e4be17fec09d4dff0",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/gnome-scribing-male-2.webp",
+      "bytes": 83070,
+      "sha256": "0a9684c87f4d1f3a3c21360d5cad23c5949a35ed366e29aef84509206447bc62",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/gnome-scribing-male-3.webp",
+      "bytes": 77494,
+      "sha256": "a18ec6606a3278c9d619422d7b614abcfcc4c68f352199dcd527164102f1f124",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/gnome-scribing-male-4.webp",
+      "bytes": 73372,
+      "sha256": "d3f3aa1b1d23a8a15f37c32a58e2e3019e23c7d46d8620b492a26926a3f27806",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-detection-female-1.webp",
+      "bytes": 65428,
+      "sha256": "94eceab7728c0cfcec9b6a1dc3b5d62542035cbb871287261c68e26e0b1273a1",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-detection-female-2.webp",
+      "bytes": 71464,
+      "sha256": "cf3301677aae098ee6d2dc6c67e5c58eca925da6cefa0743c969c1ededced73e",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-detection-female-3.webp",
+      "bytes": 69228,
+      "sha256": "f70a410563020b10f513a5c397001b5d57b908748ca4ac302cbd67d0c3b4a427",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-detection-female-4.webp",
+      "bytes": 67972,
+      "sha256": "fad1b7a3b44a7471777b9b8d6d354d927b8f0b8892face27533a9f56863d6580",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-detection-male-1.webp",
+      "bytes": 65626,
+      "sha256": "b32e5e4a6bd5b50c3f22473baee22ea429131c8dc292cd66ce24d4a41bb7a085",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-detection-male-2.webp",
+      "bytes": 81736,
+      "sha256": "3cec2b381c3b39fb7f6213b648a06693ce2073e4408ae853c06d16059c2ee5ff",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-detection-male-3.webp",
+      "bytes": 72748,
+      "sha256": "34e194e0f1976cbc5be1f4c5db9023c5142ccf8064150b9594a2726be8adffdc",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-detection-male-4.webp",
+      "bytes": 68262,
+      "sha256": "fd89cdfb2adea77d23f1bb78e4fe9302d6d729d4178417d73f094de21b98d2a6",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-storm-female-1.webp",
+      "bytes": 67632,
+      "sha256": "7b6887c680938179b200fb5b3c14d2b139cf5411eac0749ded3c696243fab44a",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-storm-female-2.webp",
+      "bytes": 71684,
+      "sha256": "9055c8c20c23ce28ea8905fde14de0c85e7879339b9c36f5b2855faf1f08b0b9",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-storm-female-3.webp",
+      "bytes": 69176,
+      "sha256": "5bf08e04eb8a491be14cede2cc955930526b3268f94fa40ed2be7085e6f98e61",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-storm-female-4.webp",
+      "bytes": 73648,
+      "sha256": "18050466ef826bbe3890c30170fb71afa0640254d2358c597eaccbaa5c01d876",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-storm-male-1.webp",
+      "bytes": 70844,
+      "sha256": "40f8327086d0f9a3e4cec800d77ee0753858e33b87ce786c12da35e4f938a9ce",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-storm-male-2.webp",
+      "bytes": 81224,
+      "sha256": "9c335d6a6fd40c363ba7119ef5ec4462045076b7df00b123679f947fcf4e7f34",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-storm-male-3.webp",
+      "bytes": 74034,
+      "sha256": "1815279e3126a1547e9ed2224492b1c92f108821e365e21cd94f062e67cf2ce2",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-elf-storm-male-4.webp",
+      "bytes": 69252,
+      "sha256": "50b79f251099a073f80cc9dbdb8daa33b0a182734395eef3486c1aff35f1135f",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-orc-finding-female-1.webp",
+      "bytes": 70386,
+      "sha256": "0358261ff4b36f3cad75b12c614035f87a1e09b9b85a22151dd7d1aee825b3a5",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-orc-finding-female-2.webp",
+      "bytes": 71632,
+      "sha256": "2fee50e42fa245063b68d2c9ea50198ce898c09f438bd11384a1d6e246501ef6",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-orc-finding-female-3.webp",
+      "bytes": 56700,
+      "sha256": "3c3468e5d915e9fef7713689dc55da516e583411e72dcca3763e0d000078c8f5",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-orc-finding-female-4.webp",
+      "bytes": 68066,
+      "sha256": "0b81489f823b7892756194eb944dabaf1832bc11ad04d036c07a56f52c300a67",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-orc-finding-male-1.webp",
+      "bytes": 70504,
+      "sha256": "3330ae4e1d8d0fda66e839dd0b12896d0e9875a8d8badfb98be2a9fb3daccfea",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-orc-finding-male-2.webp",
+      "bytes": 73664,
+      "sha256": "ed034d8b931ba084f215696cbc1aa6e42cb58bc0d03f875ba2877c56cf6de125",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-orc-finding-male-3.webp",
+      "bytes": 81022,
+      "sha256": "0efc0c8837208d39c76518e49ae66759eea8360396f52b5d2272b7ffb6a3e1c0",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/half-orc-finding-male-4.webp",
+      "bytes": 67844,
+      "sha256": "387b234a5b1aa6fc559bfc4858af24e54e5ccdf544ca38e89f0131d59b91ce90",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/halfling-healing-female-1.webp",
+      "bytes": 77876,
+      "sha256": "fc99fc57b5c21a40de4d67f061e42a91eb14de74e8dcc8966278d4c61c1a61db",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/halfling-healing-female-2.webp",
+      "bytes": 78176,
+      "sha256": "26b541189ca7bfa7059b1dd8005fbf0a93a3907c5139c751e8ccc1743acb999b",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/halfling-healing-female-3.webp",
+      "bytes": 78936,
+      "sha256": "80a774e99c80d4d10a16f8d2293c1f0beeed91422a62699dad4ee0accda71b99",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/halfling-healing-female-4.webp",
+      "bytes": 79892,
+      "sha256": "31672cd1a71b4ce14c631b9e44e54419a36f82cea13e579784fff44cc92775fa",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/halfling-healing-male-1.webp",
+      "bytes": 75214,
+      "sha256": "20cea36e5dc1934e9d4ef9bcc0d1508148eb9f72665ee92f22c30911c138d131",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/halfling-healing-male-2.webp",
+      "bytes": 70668,
+      "sha256": "d6ed6cb23c92ad1688a18f10edfb4967899f2a34842b379a2fa401226e91917e",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/halfling-healing-male-3.webp",
+      "bytes": 82056,
+      "sha256": "c9c8ef26767e3fc22a15d79dc8a01554b93b3e68cf85922bb4177a96d5d24476",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/halfling-healing-male-4.webp",
+      "bytes": 77330,
+      "sha256": "4016036137d2318a7e40689a956839eb53cd0a35f31fd94ab591d05af7b2c475",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/halfling-hospitality-female-1.webp",
+      "bytes": 75052,
+      "sha256": "19252c3b23d3f8ffccef2e42ab1f6b3c5f9d1bf3f0b6790f55ba5f4391cb847f",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/halfling-hospitality-female-2.webp",
+      "bytes": 85664,
+      "sha256": "12a6f839ad7f4f923674ad35fff878c17fe0fcf3a559525867a50db73c6c0c60",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/halfling-hospitality-female-3.webp",
+      "bytes": 78756,
+      "sha256": "732060ccca64978c2174db0d95020d579b5ddfa4d6090b0bc4ae29e497664bab",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/halfling-hospitality-female-4.webp",
+      "bytes": 77480,
+      "sha256": "3630de5c225be19363e55bd798f0c20969707ed3ff560aa2711839883c0b6f3d",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/halfling-hospitality-male-1.webp",
+      "bytes": 75842,
+      "sha256": "7fbce7612d8998bfb3e54a176c5fd8d2e4ed6348b3c2f59cb4b1a5da513380ff",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/halfling-hospitality-male-2.webp",
+      "bytes": 77532,
+      "sha256": "936ed79e246417cc333d1ceefd50f8e5e000c32beb7390ccdd21c179ed0e4ce1",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/halfling-hospitality-male-3.webp",
+      "bytes": 74738,
+      "sha256": "d2fee0050f606deeafc09f554d047ed59abd0d67ea912ac90ee61ae4b3dd43a4",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/halfling-hospitality-male-4.webp",
+      "bytes": 75702,
+      "sha256": "61138a20e916ddb14ebdf4ebd4a554b9b0aa6995a445d8743b78464c184aeb42",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-handling-female-1.webp",
+      "bytes": 72260,
+      "sha256": "5a0326a58e7ab69a81fc937513a6e2e313a790f644cc21f160cc039dc33da0e6",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-handling-female-2.webp",
+      "bytes": 80036,
+      "sha256": "7f0d0c7c32afc862640caac02957446d4d3ce3449181a0f5fd343f46ebd88579",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-handling-female-3.webp",
+      "bytes": 60960,
+      "sha256": "d45a6907003ac8b4f057683b3ccd3287a876b34be6e6aea59cf474ee1f50b2bb",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-handling-female-4.webp",
+      "bytes": 70330,
+      "sha256": "d0ed16aea94c22ec3851c3e66b5484227aca1fd8e81865608e20762ec24df125",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-handling-male-1.webp",
+      "bytes": 68544,
+      "sha256": "1910adb7a28a3c07bc888f30ef55e06d404dc5876b64d99f377a1d855e28b039",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-handling-male-2.webp",
+      "bytes": 72694,
+      "sha256": "48b6a0ef458e68bb572efa19c4c247e30647009ff2e75c564c97c94d0979e5de",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-handling-male-3.webp",
+      "bytes": 71910,
+      "sha256": "a637351b03d4ea34642d207128a824dd11f1f8bee2ffb3bef3416bf75d705fc7",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-handling-male-4.webp",
+      "bytes": 72202,
+      "sha256": "53bcac2bb75d7859cd31cf72b71571e12e9017a401c558d56c970c89f931400a",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-making-female-1.webp",
+      "bytes": 70184,
+      "sha256": "b670f4ecbc3e76901bcac4a775021b1727453b3cd14b4a11daceb5a440305c82",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-making-female-2.webp",
+      "bytes": 79590,
+      "sha256": "b8e99cae21c6eac6ffd5fe2cc562d3d866fee059da26498377af6a5eb1f6b5ee",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-making-female-3.webp",
+      "bytes": 62180,
+      "sha256": "9785726bd07965af0694b7f5997d14c001f7b4b1d2c66ae1235390522a086275",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-making-female-4.webp",
+      "bytes": 67592,
+      "sha256": "02dbc914768693f91d215e8255a0fd8bfed11211fcad8df4d5deac215564c261",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-making-male-1.webp",
+      "bytes": 70936,
+      "sha256": "3dd9cc95993964e32d497e6ff821e471f8353034e64b8a4e3fc51f4a01b778f0",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-making-male-2.webp",
+      "bytes": 72076,
+      "sha256": "f134ae6d95a006f9c174a3b52c5862465406cf11da6e49101b561b356fcf8d8e",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-making-male-3.webp",
+      "bytes": 70064,
+      "sha256": "27eea70cb38d759b07b335e5e715b083a0afcb5418d42688fd285faf35bbe501",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-making-male-4.webp",
+      "bytes": 71250,
+      "sha256": "73fee7f6bcf32d180e2c0bf9e1de6d119303a8c39d183e633c0be50a1ea2b4c3",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-passage-female-1.webp",
+      "bytes": 67578,
+      "sha256": "a720b23da016615c1a0fcb5239e19c4c249f284adea24e62fdb57f86d85838cf",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-passage-female-2.webp",
+      "bytes": 78600,
+      "sha256": "47df423a1f35fe6f8fcb24519cb94c7982f0a0c447e7e692745253753c60e151",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-passage-female-3.webp",
+      "bytes": 61862,
+      "sha256": "b33404b7242142a30f3175f689f8af225dae118085f8865d7e43df987c4e9b40",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-passage-female-4.webp",
+      "bytes": 70148,
+      "sha256": "6afcbb3656c0757bf6f46fd866e69a68a709bd1384847ef3dd461cb4e08f6121",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-passage-male-1.webp",
+      "bytes": 68144,
+      "sha256": "4278cd1bd670796f159e34e13d4aa26fbe7ed7d35a9e3cfcfc17eb1251914dc1",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-passage-male-2.webp",
+      "bytes": 70140,
+      "sha256": "b6d6e8abdf9438fe34a3759adf1593bb75559451489a99aac2e1f84b81febd4b",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-passage-male-3.webp",
+      "bytes": 69756,
+      "sha256": "f9c3108e644ab7ff6dd2aba3c6bdca76ddf8c8ac1a5e96ee1d21d7699f8da9d7",
+      "kind": "application"
+    },
+    {
+      "url": "./portraits/human-passage-male-4.webp",
+      "bytes": 71482,
+      "sha256": "455d8e55433b0cd50875795f741b143720d8ece395d07c5f7106ac818f241a04",
       "kind": "application"
     }
   ]
