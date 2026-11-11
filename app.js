@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-preview.17";
+const APP_VERSION = "2.0.0-preview.18";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -492,7 +492,7 @@ const UI_FR = Object.freeze({
   "Action bonus : dépense 1 Conduit divin et 1 utilisation pour récupérer l’emplacement choisi.": "Action bonus : dépense 1 Conduit divin et 1 utilisation pour récupérer l’emplacement choisi.",
   "Action bonus : dépense un emplacement pour récupérer 1d8 PV par niveau d’emplacement.": "Action bonus : dépense un emplacement pour récupérer 1d8 PV par niveau d’emplacement.",
   "Action bonus : vol égal à ta marche pendant 1 minute. Termine le vol quand sa durée est écoulée.": "Action bonus : vol égal à ta marche pendant 1 minute. Termine le vol quand sa durée est écoulée.",
-  "Action, au contact. Le bénéficiaire reporte les soins sur sa fiche.": "Action, au contact. Le bénéficiaire reporte les soins sur sa fiche.",
+  "Action, au contact. Un autre bénéficiaire reporte les soins sur sa fiche.": "Action, au contact. Un autre bénéficiaire reporte les soins sur sa fiche.",
   "Active uniquement les options acceptées par ta table. Une capacité de remplacement suspend celle qu’elle remplace ; les décisions antérieures restent dans l’historique.": "Active uniquement les options acceptées par ta table. Une capacité de remplacement suspend celle qu’elle remplace ; les décisions antérieures restent dans l’historique.",
   "Agrandir la photo": "Agrandir la photo",
   "Agrandis la photo, puis fais-la glisser pour lire les détails.": "Agrandis la photo, puis fais-la glisser pour lire les détails.",
@@ -4404,6 +4404,7 @@ const UI_FR = Object.freeze({
   "creation.shortage.release": "Libère une option prise ailleurs :",
   "creation.shortage.none": "Aucune option à libérer ici.",
   "creation.remaining": "Il reste {count} ligne{s} à compléter :",
+  "creation.remainingLevel": "Niveau {level} :",
   "creation.complete": "Tous les choix sont faits.",
   "creation.blocked": "Termine cette étape avant d’aller plus loin.",
   "creation.searchOption": "Rechercher une option",
@@ -4416,6 +4417,34 @@ const UI_FR = Object.freeze({
   "attack.giantStrike.hill": "Frappe des collines",
   "attack.giantStrike.stone": "Frappe des pierres",
   "attack.giantStrike.storm": "Frappe des tempêtes",
+  "creation.searchBackground": "Nom, compétence, aptitude…",
+  "equipment.weaponsHelp": "Seules les armes de ton inventaire peuvent être mises à portée de main. Pour une nouvelle arme, ajoute-la d’abord à l’inventaire.",
+  "equipment.outsideInventory": "{name} (hors inventaire)",
+  "equipment.armorHelp": "Seules les armures de ton inventaire sont proposées.",
+  "equipment.noShield": "Aucun bouclier dans ton inventaire.",
+  "equipment.shieldOutsideInventory": "Bouclier hors inventaire.",
+  "equipment.weaponConjured": "{name} (arme de pacte invoquée)",
+  "barbarian.rage.damage": "Dégâts de Force +{bonus}",
+  "barbarian.rage.advantage": "Avantage aux tests et sauvegardes de Force",
+  "barbarian.rage.resistance": "Résistance aux dégâts contondants, perforants et tranchants",
+  "barbarian.frenzy.tally": "Frénésies déclarées : {count}",
+  "resource.info.now": "En ce moment",
+  "resource.correct.title": "Corriger le compteur",
+  "resource.correct.help": "Pour rattraper une utilisation jouée à la table. Corriger ne déclenche ni jet ni effet.",
+  "resource.correct.spend": "Corriger {name} : retirer une utilisation",
+  "resource.correct.recover": "Corriger {name} : rendre une utilisation",
+  "attack.twoWeapon": "Attaque à deux armes : {name}",
+  "attack.twoWeapon.title": "Attaque à deux armes",
+  "attack.twoWeapon.main": "{name}",
+  "attack.twoWeapon.mainMany": "{name}, {count} attaques",
+  "attack.twoWeapon.second": "puis {name} en action bonus",
+  "attack.twoWeapon.rollLabel": "Attaque à deux armes : jets d’attaque des deux armes",
+  "attack.twoWeapon.damageLabel": "Attaque à deux armes : dégâts des deux armes",
+  "attack.chain.next": "Attaque suivante : {name}",
+  "attack.twoWeapon.bonusAction": "action bonus après l’autre arme",
+  "attack.twoWeapon.noModifier": "sans modificateur aux dégâts",
+  "attack.twoWeapon.style": "modificateur ajouté aux dégâts (style Combat à deux armes)",
+  "attack.twoWeapon.notLight": "Pas d’attaque à deux armes avec une arme non légère ({names}). Il faut deux armes légères, ou le don Combattant à deux armes.",
   "share.empty": "Aucun fichier de sauvegarde n’a été reçu.",
   "creation.draft.step": "Création en cours, étape {step}.",
   "creation.draft.restartTitle": "Recommencer une création ?",
@@ -4477,7 +4506,19 @@ const UI_FR = Object.freeze({
   "Halfelins, marque de l’Hospitalité": "Halfelins, marque de l’Hospitalité",
   "Humains, marque du dressage": "Humains, marque du dressage",
   "Humains, marque de la fabrication": "Humains, marque de la fabrication",
-  "Humains, marque du passage": "Humains, marque du passage"
+  "Humains, marque du passage": "Humains, marque du passage",
+  "Rage": "Rage",
+  "Rage et frénésie": "Rage et frénésie",
+  "Rage : avantage aux tests et sauvegardes de Force.": "Rage : avantage aux tests et sauvegardes de Force.",
+  "PV temporaires · {p0}": "PV temporaires · {p0}",
+  "Réduction de dégâts · {p0}": "Réduction de dégâts · {p0}",
+  "Retire ce total des dégâts subis avant de les saisir.": "Retire ce total des dégâts subis avant de les saisir.",
+  "Appliquer à ma fiche": "Appliquer à ma fiche",
+  "{p0} PV proposés : ta réserve actuelle, au moins égale, est conservée.": "{p0} PV proposés : ta réserve actuelle, au moins égale, est conservée.",
+  "Après validation, lance {p0}.": "Après validation, lance {p0}.",
+  "Tu tombes à 0 PV.": "Tu tombes à 0 PV.",
+  "Sur moi : ajouter ces PV à ma fiche": "Sur moi : ajouter ces PV à ma fiche",
+  "Les PV rendus s’ajoutent à ta fiche.": "Les PV rendus s’ajoutent à ta fiche."
 });
 
 
@@ -4607,7 +4648,7 @@ const UI_EN = Object.freeze({
   "Action bonus : dépense 1 Conduit divin et 1 utilisation pour récupérer l’emplacement choisi.": "Bonus action: expend 1 Channel Divinity and 1 use to recover the chosen slot.",
   "Action bonus : dépense un emplacement pour récupérer 1d8 PV par niveau d’emplacement.": "Bonus action: expend a spell slot to regain 1d8 HP per slot level.",
   "Action bonus : vol égal à ta marche pendant 1 minute. Termine le vol quand sa durée est écoulée.": "Bonus action: gain a flying speed equal to your walking speed for 1 minute. End the flight when its duration expires.",
-  "Action, au contact. Le bénéficiaire reporte les soins sur sa fiche.": "Action, touch. The recipient records the healing on their sheet.",
+  "Action, au contact. Un autre bénéficiaire reporte les soins sur sa fiche.": "Action, touch. Another recipient records the healing on their sheet.",
   "Active uniquement les options acceptées par ta table. Une capacité de remplacement suspend celle qu’elle remplace ; les décisions antérieures restent dans l’historique.": "Enable only options accepted by your table. A replacement feature suspends the one it replaces; previous decisions remain in the history.",
   "Agrandir la photo": "Enlarge photo",
   "Agrandis la photo, puis fais-la glisser pour lire les détails.": "Enlarge the photo, then drag it to read the details.",
@@ -8519,6 +8560,7 @@ const UI_EN = Object.freeze({
   "creation.shortage.release": "Free an option taken elsewhere:",
   "creation.shortage.none": "No option to free here.",
   "creation.remaining": "{count} line{s} left to complete:",
+  "creation.remainingLevel": "Level {level}:",
   "creation.complete": "All choices are made.",
   "creation.blocked": "Finish this step before going further.",
   "creation.searchOption": "Search options",
@@ -8531,6 +8573,34 @@ const UI_EN = Object.freeze({
   "attack.giantStrike.hill": "Hill Strike",
   "attack.giantStrike.stone": "Stone Strike",
   "attack.giantStrike.storm": "Storm Strike",
+  "creation.searchBackground": "Name, skill, feature…",
+  "equipment.weaponsHelp": "Only weapons from your inventory can be kept at hand. For a new weapon, add it to your inventory first.",
+  "equipment.outsideInventory": "{name} (not in inventory)",
+  "equipment.armorHelp": "Only armor from your inventory is listed.",
+  "equipment.noShield": "No shield in your inventory.",
+  "equipment.shieldOutsideInventory": "Shield not in inventory.",
+  "equipment.weaponConjured": "{name} (conjured pact weapon)",
+  "barbarian.rage.damage": "Strength damage +{bonus}",
+  "barbarian.rage.advantage": "Advantage on Strength checks and saving throws",
+  "barbarian.rage.resistance": "Resistance to bludgeoning, piercing and slashing damage",
+  "barbarian.frenzy.tally": "Frenzies declared: {count}",
+  "resource.info.now": "Right now",
+  "resource.correct.title": "Correct the counter",
+  "resource.correct.help": "To catch up on a use played at the table. Correcting triggers no roll or effect.",
+  "resource.correct.spend": "Correct {name}: remove one use",
+  "resource.correct.recover": "Correct {name}: give back one use",
+  "attack.twoWeapon": "Two-weapon attack: {name}",
+  "attack.twoWeapon.title": "Two-weapon attack",
+  "attack.twoWeapon.main": "{name}",
+  "attack.twoWeapon.mainMany": "{name}, {count} attacks",
+  "attack.twoWeapon.second": "then {name} as a bonus action",
+  "attack.twoWeapon.rollLabel": "Two-weapon attack: attack rolls for both weapons",
+  "attack.twoWeapon.damageLabel": "Two-weapon attack: damage for both weapons",
+  "attack.chain.next": "Next attack: {name}",
+  "attack.twoWeapon.bonusAction": "bonus action after the other weapon",
+  "attack.twoWeapon.noModifier": "no ability modifier to damage",
+  "attack.twoWeapon.style": "ability modifier added to damage (Two-Weapon Fighting style)",
+  "attack.twoWeapon.notLight": "No two-weapon attack with a weapon that is not light ({names}). You need two light weapons, or the Dual Wielder feat.",
   "share.empty": "No backup file was received.",
   "creation.draft.step": "Creation in progress, {step} step.",
   "creation.draft.restartTitle": "Start a new creation?",
@@ -8592,7 +8662,19 @@ const UI_EN = Object.freeze({
   "Halfelins, marque de l’Hospitalité": "Halflings, Mark of Hospitality",
   "Humains, marque du dressage": "Humans, Mark of Handling",
   "Humains, marque de la fabrication": "Humans, Mark of Making",
-  "Humains, marque du passage": "Humans, Mark of Passage"
+  "Humains, marque du passage": "Humans, Mark of Passage",
+  "Rage": "Rage",
+  "Rage et frénésie": "Rage and Frenzy",
+  "Rage : avantage aux tests et sauvegardes de Force.": "Rage: advantage on Strength checks and saving throws.",
+  "PV temporaires · {p0}": "Temporary HP · {p0}",
+  "Réduction de dégâts · {p0}": "Damage reduction · {p0}",
+  "Retire ce total des dégâts subis avant de les saisir.": "Subtract this total from the damage taken before entering it.",
+  "Appliquer à ma fiche": "Apply to my sheet",
+  "{p0} PV proposés : ta réserve actuelle, au moins égale, est conservée.": "{p0} HP offered: your current pool, at least as high, is kept.",
+  "Après validation, lance {p0}.": "After confirming, roll {p0}.",
+  "Tu tombes à 0 PV.": "You drop to 0 HP.",
+  "Sur moi : ajouter ces PV à ma fiche": "On me: add these HP to my sheet",
+  "Les PV rendus s’ajoutent à ta fiche.": "The restored HP are added to your sheet."
 });
 
 
@@ -10398,6 +10480,7 @@ const RACES = {
           max: 1,
           reset: "long",
           note: "À 0 PV sans mourir sur le coup : tu restes à 1 PV.",
+          onSpend: { fixed: 1, result: "hp", when: "zeroHp" },
         },
       ],
     },
@@ -10463,7 +10546,7 @@ Object.assign(RACES, {
     ],
     grants: {
       abilities: { str: 2, con: 1 }, skills: ["athletics"], carryMultiplier: 2, resistances: ["froid"], languages: ["common", "giant"],
-      resources: [{ id: "stones-endurance-vgm", name: "Endurance de la pierre · Volo", max: 1, reset: "short", note: ({ mods }) => `Réaction aux dégâts : réduction de 1d12 ${mods.con >= 0 ? "+" : "−"} ${Math.abs(mods.con)}. Un usage, récupéré au repos court ou long. Applique la réduction avant de saisir les dégâts.` }],
+      resources: [{ id: "stones-endurance-vgm", name: "Endurance de la pierre · Volo", max: 1, reset: "short", note: ({ mods }) => `Réaction aux dégâts : réduction de 1d12 ${mods.con >= 0 ? "+" : "−"} ${Math.abs(mods.con)}. Un usage, récupéré au repos court ou long. Applique la réduction avant de saisir les dégâts.`, onSpend: { dice: "1d12", bonus: ({ mods }) => mods.con, result: "reduction" } }],
     },
   },
   goliath: {
@@ -10478,7 +10561,7 @@ Object.assign(RACES, {
     ],
     grants: {
       ..._racesMultiverseGrants(), skills: ["athletics"], carryMultiplier: 2, resistances: ["froid"],
-      resources: [{ id: "stones-endurance", name: "Endurance de la pierre", max: ({ prof }) => prof, reset: "long", note: ({ mods }) => `Réaction aux dégâts : réduction de 1d12 ${mods.con >= 0 ? "+" : "−"} ${Math.abs(mods.con)}. Applique la réduction avant de saisir les dégâts.` }],
+      resources: [{ id: "stones-endurance", name: "Endurance de la pierre", max: ({ prof }) => prof, reset: "long", note: ({ mods }) => `Réaction aux dégâts : réduction de 1d12 ${mods.con >= 0 ? "+" : "−"} ${Math.abs(mods.con)}. Applique la réduction avant de saisir les dégâts.`, onSpend: { dice: "1d12", bonus: ({ mods }) => mods.con, result: "reduction" } }],
     },
   },
   kenku: {
@@ -10511,7 +10594,7 @@ Object.assign(RACES, {
         soul: ["Âme radiante", "Dégâts supplémentaires radiants. Pendant la transformation, ta vitesse de vol égale ta vitesse de marche."],
       } },
       resources: [
-        { id: "healing-hands", name: "Main guérisseuse", max: 1, reset: "long", note: ({ prof }) => `Action, au contact : rends ${prof}d4 PV à une créature.` },
+        { id: "healing-hands", name: "Main guérisseuse", max: 1, reset: "long", note: ({ prof }) => `Action, au contact : rends ${prof}d4 PV à une créature.`, onSpend: { dice: ({ prof }) => `${prof}d4`, result: "heal", others: true } },
         { id: "celestial-revelation", name: "Révélation céleste", minLevel: 3, max: 1, reset: "long", note: ({ prof, mods }) => `Action bonus, 1 minute. Dégâts supplémentaires : ${prof}, une fois par tour. DD du linceul : ${8 + prof + mods.cha}. Voir la révélation choisie dans les aptitudes.` },
       ],
     },
@@ -11950,6 +12033,7 @@ const FEATS = {
           reset: "short",
           note: (ctx) =>
             `10 minutes, jusqu’à six créatures : ${(ctx.charLevel ?? ctx.level) + ctx.mods.cha} PV temporaires chacune. Une créature n’en profite qu’une fois entre deux repos.`,
+          onSpend: { fixed: (ctx) => (ctx.charLevel ?? ctx.level) + ctx.mods.cha, result: "tempHp" },
         },
       ],
     },
@@ -12069,7 +12153,7 @@ for (const id of ["strixhavenInitiate", "initiateOfHighSorcery", "scionOfTheOute
 FEATS.squireOfSolamnia.grants.resources = [{ id: "squire-precise-strike", name: "Frappe précise", max: ({ prof }) => prof, reset: "long", note: "Dépense une utilisation quand l’attaque touche. Avantage et 1d8 supplémentaires à résoudre à la table." }];
 FEATS.strikeOfTheGiants.grants = {
   optionChoice: { key: "giantStrike", title: "Frappe des géants", count: 1, options: Object.fromEntries(BACKGROUND_FEAT_DATA.strikeOfTheGiants.options.map((entry, index) => [["cloud", "fire", "frost", "hill", "stone", "storm"][index], entry])) },
-  resources: [{ id: "strike-of-the-giants", name: "Frappe des géants", max: ({ prof }) => prof, reset: "long", note: "Dépense une utilisation après une attaque admissible qui touche. Résous les dégâts et la sauvegarde à la table." }],
+  resources: [{ id: "strike-of-the-giants", name: "Frappe des géants", max: ({ prof }) => prof, reset: "long", note: "Quand une attaque au corps à corps ou avec une arme de lancer touche, coche la frappe dans la fenêtre de dégâts : ses dés s’ajoutent et une utilisation est dépensée. La sauvegarde et l’effet secondaire se résolvent à la table." }],
 };
 
 /** Les références complètes sont accessibles depuis le sélecteur et les aptitudes. */
@@ -34851,6 +34935,11 @@ function itemRuntimeAdapter(item, character = null) {
   return { kind: "other", personal: itemPersonalDefinition(item), textual: !!raw?.rarity && raw.rarity !== "none" };
 }
 
+/** Exemplaires de l’inventaire qu’on peut équiper : portés, à l’unité, reconnus comme arme, armure ou bouclier (kind). */
+function inventoryEquipmentChoices(character, kind) {
+  return (character.inventory || []).filter((item) => item.qty === 1 && !!item.instance && inventoryItemCarried(character, item))
+    .map((item) => ({ item, adapter: itemRuntimeAdapter(item, character) })).filter(({ adapter }) => adapter.kind === kind);
+}
 function inventoryItemSlots(item) {
   if (item.instance?.infusionSlot) return [item.instance.infusionSlot];
   const adapter = itemRuntimeAdapter(item);
@@ -38112,6 +38201,19 @@ function heldWeapons(c) {
   const entries = weaponInstances(c), hands = c.equipment.hands || {};
   return Object.fromEntries(["main", "off"].map((hand) => [hand, entries.find((entry) => entry.instanceId === hands[hand] && entry.id !== "unarmed") || null]));
 }
+/**
+ * Combat à deux armes (2014) : une arme de corps à corps à une main dans chaque main, sans bouclier.
+ * L'attaque en action bonus demande deux armes légères, sauf avec le don Combattant à deux armes.
+ * null : les mains ne tiennent pas une telle paire.
+ */
+function twoWeaponStatus(c, acc = collect(c)) {
+  const held = heldWeapons(c);
+  if (c.equipment.shield || !held.main || !held.off || held.main.instanceId === held.off.instanceId) return null;
+  const pair = [held.main, held.off];
+  if (pair.some((entry) => weaponOf(entry.id)?.ranged || weaponOf(entry.id)?.two || entry.twoHands)) return null;
+  const notLight = pair.filter((entry) => !weaponOf(entry.id)?.light).map((entry) => entry.id);
+  return { pair: pair.map((entry) => entry.instanceId), main: held.main, entry: held.off, notLight, allowed: !notLight.length || acc.feats.includes("dualWielder") };
+}
 /** Affecte une arme à une main ; une arme à deux mains occupe les deux. */
 function setHeldWeapon(c, hand, instanceId) {
   if (!["main", "off"].includes(hand)) throw new Error(uiText("error.unknownHand"));
@@ -38126,6 +38228,10 @@ function setHeldWeapon(c, hand, instanceId) {
   else if (instanceId && next.equipment.hands[other] === instanceId) next.equipment.hands[other] = null;
   if (next.equipment.hands.off) next.equipment.shield = false;
   return next;
+}
+/** Formes que le Pacte de la lame peut donner à l’arme invoquée, qui n’est pas un objet de l’inventaire. */
+function pactWeaponForms(c) {
+  return Object.keys(WEAPONS).filter((id) => _warlockPactWeaponAllowed(c, { id }));
 }
 function _warlockPactWeaponAllowed(c, entry) {
   return !!entry && entry.id !== "unarmed" && (!weaponOf(entry.id)?.ranged || weaponIsMagical(entry, c) || allChoices(c, "invocations").includes("improvedPactWeapon") && ["shortbow", "longbow", "light-crossbow", "heavy-crossbow"].includes(entry.id));
@@ -38162,7 +38268,7 @@ function weaponProficiency(c, entry, acc = collect(c)) {
   const pactWeapon = !!entry.instanceId && entry.instanceId === c.equipment.pactWeaponId && allChoices(c, "pact")[0] === "blade" && classLevel(c, "warlock") >= 3 && _warlockPactWeaponAllowed(c, entry);
   return { pactWeapon, proficient: pactWeapon || id === "unarmed" || acc.weapons.has(id) || [...acc.weapons].some((group) => weaponInGroup(weapon, group)) };
 }
-function _attack(c, entry, ctx, profile = null) {
+function _attack(c, entry, ctx, profile = null, bonusAttack = false) {
   const id = entry.id,
     barbarian = barbarianStatus(c), beastWeapon = id === "barbarian-beast" && barbarian.active && barbarian.subclass === "beast" ? BARBARIAN_BEAST_WEAPONS[barbarian.choices.beastWeapon] : null,
     baseWeapon = profile || (id === "monk-astral" ? { ...weaponOf("unarmed"), name: "Bras du Moi astral", ability: "wis", type: "force" } : beastWeapon || (id === "unarmed" && ctx.acc.naturalWeapon ? { ...weaponOf(id), ...ctx.acc.naturalWeapon } : id === "double-bladed-scimitar" && ctx.acc.feats.includes("revenantBlade") ? { ...weaponOf(id), finesse: true } : weaponOf(id))),
@@ -38198,7 +38304,9 @@ function _attack(c, entry, ctx, profile = null) {
     const m = /^1d(\d+)$/.exec(dice);
     if (dice === "1" || (m && Number(m[1]) < martial)) dice = `1d${martial}`;
   }
-  const dueling = styles.includes("dueling") && !w.ranged && !w.two && !entry.twoHands && id !== "unarmed" ? 2 : 0;
+  // Duel : une seule arme en main. Une arme dans l'autre main retire le bonus.
+  const dueling = styles.includes("dueling") && !w.ranged && !w.two && !entry.twoHands && id !== "unarmed" && !ctx.twoWeapon?.pair.includes(entry.instanceId) ? 2 : 0;
+  const damageAbility = bonusAttack && !styles.includes("twoWeapon") ? Math.min(0, mods[ability]) : mods[ability];
   const archery = styles.includes("archery") && w.ranged ? 2 : 0;
   const effectContext = { modifiers: mods, proficiency: prof, totalLevel: levelOf(c), instanceId: entry.instanceId, magical: weaponIsMagical(entry, c), pactWeapon, melee: !w.ranged };
   const pactBonus = (target) => improvedPact ? [{ id: `improved-pact-${target}`, mode: "add", formula: 1, sourceKey: "feat|eldritchAdept|improvedPactWeapon", referenceId: FEAT_OPTION_DATA.invocations.improvedPactWeapon.referenceId }] : [];
@@ -38207,7 +38315,7 @@ function _attack(c, entry, ctx, profile = null) {
   const attackCalculation = resolveRuleEffects(mods[ability] + (proficient ? prof : 0) + magic - infusionWeaponBonus + Number(c.adjustments.attack || 0) + archery, [...infusionWeaponEffect, ...localEffects.filter((effect) => effect.target === "weaponAttack"), ...pactBonus("attack"), ...itemWeaponEffect(Number(entry.attackBonus || 0))], effectContext);
   const rageDamage = barbarian.benefits && ability === "str" && (!w.ranged || barbarian.subclass === "giant" && w.thrown)
     ? [{ id: "rage-damage", sourceKey: "barbarian|rage", referenceId: barbarianReference("Rage").referenceId, mode: "add", formula: barbarian.bonus }] : [];
-  const damageCalculation = resolveRuleEffects(mods[ability] + magic - infusionWeaponBonus + Number(c.adjustments.damage || 0) + dueling, [...infusionWeaponEffect, ...localEffects.filter((effect) => effect.target === "weaponDamage"), ...pactBonus("damage"), ...rageDamage, ...itemWeaponEffect(entry.bloodshed ? Math.max(1, mods.con) : 0)], effectContext);
+  const damageCalculation = resolveRuleEffects(damageAbility + magic - infusionWeaponBonus + Number(c.adjustments.damage || 0) + dueling, [...infusionWeaponEffect, ...localEffects.filter((effect) => effect.target === "weaponDamage"), ...pactBonus("damage"), ...rageDamage, ...itemWeaponEffect(entry.bloodshed ? Math.max(1, mods.con) : 0)], effectContext);
   const attack = attackCalculation.value, damageBonus = damageCalculation.value;
   const props = [
     battleReady && "INT (Prêt au combat)",
@@ -38316,8 +38424,7 @@ function _deriveBody(c, overrides = {}) {
     styleDefense = styles.includes("defense") && armor.type !== "none" ? 1 : 0;
   const replacedArmor = replacesArmor && c.inventory.find((item) => item.id === c.equipment.armorInventoryId);
   const instanceArmorBonus = Number(c.equipment.instanceArmorBonus || 0) - (replacedArmor ? itemRuntimeAdapter(replacedArmor, c).magic || 0 : 0);
-  const held = heldWeapons(c), dualWielder = acc.feats.includes("dualWielder") && !c.equipment.shield && held.main && held.off && held.main.instanceId !== held.off.instanceId &&
-    [held.main, held.off].every((entry) => !weaponOf(entry.id)?.ranged && !weaponOf(entry.id)?.two && !entry.twoHands) ? 1 : 0;
+  const held = heldWeapons(c), twoWeapon = twoWeaponStatus(c, acc), dualWielder = acc.feats.includes("dualWielder") && twoWeapon ? 1 : 0;
   const revenantBlade = acc.feats.includes("revenantBlade") && !c.equipment.shield && held.main?.id === "double-bladed-scimitar" && held.main.instanceId === held.off?.instanceId ? 1 : 0;
   const bladesong = hasSubclass(c, "wizard", "bladesinging") && classLevel(c, "wizard") >= 2 && c.state.wizard?.bladesong && !["medium", "heavy"].includes(armor.type) && !c.equipment.shield && ![held.main, held.off].some((w) => (w?.twoHands || weaponOf(w?.id)?.two));
   const bladesongBonus = bladesong ? Math.max(1, mods.int) : 0;
@@ -38387,13 +38494,20 @@ function _deriveBody(c, overrides = {}) {
     saveValues.str += mods.wis - mods.str;
     skillValues.athletics += mods.wis - mods.str;
   }
-  const ctx = { mods, prof, styles, acc };
+  const ctx = { mods, prof, styles, acc, twoWeapon };
   const weaponEntries = c.equipment.weapons?.length ? weaponInstances(c) : [{ id: "unarmed", magic: 0, twoHands: false }];
   const barbarian = barbarianStatus(c);
   if (barbarian.active && barbarian.subclass === "beast" && BARBARIAN_BEAST_WEAPONS[barbarian.choices.beastWeapon]) weaponEntries.push({ id: "barbarian-beast", instanceId: "barbarian|beast|weapon", magic: 0, twoHands: false });
   if ((acc.naturalWeapon || styles.includes("unarmedFighting")) && !weaponEntries.some((entry) => entry.id === "unarmed")) weaponEntries.push({ id: "unarmed", instanceId: `natural-${c.raceId}`, magic: 0, twoHands: false });
   if (monkSession(c).arms) weaponEntries.push({ id: "monk-astral", instanceId: "monk|astral", magic: 0, twoHands: false });
   const attacks = weaponEntries.map((e) => _attack(c, e, ctx)).filter(Boolean);
+  if (twoWeapon?.allowed) {
+    const second = _attack(c, twoWeapon.entry, ctx, null, true);
+    attacks.splice(attacks.findIndex((entry) => entry.instanceId === second.instanceId) + 1, 0, {
+      ...second, twoWeapon: true, weaponName: second.name, mainInstanceId: twoWeapon.main.instanceId, name: uiText("attack.twoWeapon", { name: second.name }), instanceId: `${second.instanceId}|two-weapon`, attacksPerAction: 1,
+      properties: [uiText("attack.twoWeapon.bonusAction"), uiText(styles.includes("twoWeapon") ? "attack.twoWeapon.style" : "attack.twoWeapon.noModifier"), ...second.properties],
+    });
+  }
   if (armorer.active) {
     const ranged = armorer.model === "infiltrator", normal = ranged ? "dex" : "str", ability = armorer.ability === "normal" ? normal : "int";
     const ref = artificerReference(ranged ? "Lightning Launcher" : "Thunder Gauntlets", "Armorer");
@@ -38487,6 +38601,7 @@ function _deriveBody(c, overrides = {}) {
     kiDC: 8 + prof + mods.wis,
     maneuverDC: 8 + prof + Math.max(mods.str, mods.dex),
     attacks,
+    twoWeapon,
     weapon: main.weapon,
     attack: main.attack,
     attackAbility: main.ability,
@@ -39292,9 +39407,10 @@ function setPaladinEffect(c, { effectId, action = "use", instanceId = "", paymen
   next.state.paladin.effects[effectId] = { ...option.stored, active: action !== "end", ...(effectId === "sacredWeapon" && action !== "end" && { instanceId }) };
   return next;
 }
-function spendPaladinHands(c, amount) {
+/** self : les PV rendus s'ajoutent à la fiche du paladin ; sinon le bénéficiaire les reporte sur la sienne. */
+function spendPaladinHands(c, amount, { self = false } = {}) {
   if (!Number.isInteger(amount) || amount < 1) throw new Error(uiText("Indique un nombre entier de points à dépenser."));
-  return spendResources(c, [{ id: "lay-hands", amount }]);
+  return spendResourceEffect(c, "lay-hands", { amount, self }).character;
 }
 function _paladinGrantSources(c, upTo) {
   const { level, active, effects } = paladinSession(c, upTo), out = [];
@@ -39562,6 +39678,10 @@ function barbarianStatus(c, upTo = levelOf(c)) {
     reachBonus: active && subclass === "giant" ? level >= 14 ? 3 : 1.5 : 0,
   };
 }
+/** Avantage qu'un état actif donne aux tests et sauvegardes d'une caractéristique : la phrase à afficher, ou "". Rage : Force, hors armure lourde. */
+function activeCheckAdvantage(c, ability) {
+  return ability === "str" && barbarianStatus(c).benefits ? uiText("Rage : avantage aux tests et sauvegardes de Force.") : "";
+}
 function _barbarianGrantSources(c, upTo, outside) {
   const status = barbarianStatus(c, upTo), { level, subclass, choices } = status, out = [];
   if (!level) return out;
@@ -39655,12 +39775,44 @@ const _evaluate = (value, ctx, fallback) => {
     return fallback;
   }
 };
+/*
+ * Effet d'une dépense, déclaré sur la définition d'une ressource (champ onSpend) :
+ *   { dice: "1d12", bonus: ({ mods }) => mods.con, result: "reduction" } : jet proposé une fois la dépense validée ;
+ *   { fixed: ({ charLevel, mods }) => charLevel + mods.cha, result: "tempHp" } : valeur par utilisation, appliquée avec la dépense.
+ * result : "heal" (soins), "tempHp" (PV temporaires), "hp" (PV fixés à cette valeur) ou "reduction" (dégâts réduits, total à annoncer).
+ * others : le total peut aller à une autre créature. when: "zeroHp" : dépense proposée quand des dégâts amènent à 0 PV.
+ * resources() l'évalue pour la fiche ; spendResourceEffect et zeroHpSpend sont ses seuls lecteurs.
+ */
+function _spendEffect(effect, ctx = {}) {
+  if (!effect) return {};
+  const dice = /^(\d+)d(\d+)$/.exec(_evaluate(effect.dice, ctx, ""));
+  return { onSpend: { result: effect.result, ...(effect.others && { others: true }), ...(effect.when && { when: effect.when }), ...(dice ? { count: Number(dice[1]), sides: Number(dice[2]), bonus: _evaluate(effect.bonus, ctx, 0) } : { value: _evaluate(effect.fixed, ctx, 0) }) } };
+}
+/**
+ * Ligne « Rages » : un état, dans lequel on entre et dont on sort.
+ * action « state », libellés du bouton et de la pastille, effets en cours et détails pour la fenêtre d'information.
+ */
+function _rageRow(c) {
+  const rage = barbarianStatus(c);
+  return {
+    infoReferenceId: barbarianReference("Rage").referenceId, action: "state", active: rage.active,
+    actionLabel: uiText(rage.active ? "Terminer" : "Entrer en rage"), activeLabel: rage.active ? uiText(rage.frenzy ? "Rage et frénésie" : "Rage active") : "",
+    effects: !rage.active ? [] : rage.benefits
+      ? [uiText("barbarian.rage.damage", { bonus: rage.bonus }), uiText("barbarian.rage.advantage"), uiText("barbarian.rage.resistance"), ...(rage.frenzy ? [uiText("Frénésie : +1 épuisement à la fin")] : [])]
+      : [uiText("Armure lourde : les bénéfices de base de rage sont suspendus")],
+    ...(rage.subclass === "berserker" && { details: [uiText("barbarian.frenzy.tally", { count: c.state.resourcesUsed.frenzy || 0 })] }),
+  };
+}
+/**
+ * Ressources suivies. Une ligne porte une action au lieu de « − » et « + » quand la ressource le déclare :
+ * action « use » (déclenchement, posée d'office par onSpend) ou « state » (état). mergedInto : pas de ligne à part.
+ */
 function resources(c) {
   const d = derive(c),
     items = [],
     add = (id, name, max, reset, note = "", provenance = {}) => {
       if (items.some((r) => r.id === id)) return;
-      items.push({ id, name: id.startsWith("custom-") ? name : uiCatalogueName(name, provenance.referenceId), max, reset, note, spent: Math.max(0, c.state.resourcesUsed[id] ?? (id === "wizard-power-surge" ? Math.max(0, max - 1) : 0)), used: clamp(c.state.resourcesUsed[id] ?? (id === "wizard-power-surge" ? Math.max(0, max - 1) : 0), 0, max === null ? 99999 : max), remaining: max === null ? null : Math.max(0, max - (c.state.resourcesUsed[id] ?? (id === "wizard-power-surge" ? Math.max(0, max - 1) : 0))), sourceKey: id === "channel" ? "shared|channel" : `resource|${id}`, ...provenance });
+      items.push({ id, name: id.startsWith("custom-") ? name : uiCatalogueName(name, provenance.referenceId), max, reset, note, spent: Math.max(0, c.state.resourcesUsed[id] ?? (id === "wizard-power-surge" ? Math.max(0, max - 1) : 0)), used: clamp(c.state.resourcesUsed[id] ?? (id === "wizard-power-surge" ? Math.max(0, max - 1) : 0), 0, max === null ? 99999 : max), remaining: max === null ? null : Math.max(0, max - (c.state.resourcesUsed[id] ?? (id === "wizard-power-surge" ? Math.max(0, max - 1) : 0))), sourceKey: id === "channel" ? "shared|channel" : `resource|${id}`, ...provenance, ...(provenance.onSpend && !provenance.action && { action: "use" }) });
     },
     lv = (id) => classLevel(c, id),
     referenceNote = (ref) => uiLanguage() === "en" && ref.englishEntries?.length ? referenceEntries(ref.englishEntries, "en") : ref.description;
@@ -39694,9 +39846,10 @@ function resources(c) {
           level >= 20 ? null : level >= 17 ? 6 : level >= 12 ? 5 : level >= 6 ? 4 : level >= 3 ? 3 : 2,
           "long",
           uiText("Bonus aux dégâts de mêlée à la FOR : +{bonus}. Résistance aux dégâts contondants, perforants et tranchants. Avantage aux tests et sauvegardes de FOR.", { bonus: level >= 16 ? 4 : level >= 9 ? 3 : 2 }),
+          _rageRow(c),
         );
         if (level >= 11) add("relentless-rage", uiText("Rage implacable"), null, "short", uiText("Prochaine sauvegarde de CON : DD {dc}. Ajoute une tentative après chaque utilisation ; corrige avec −. Les PV restent à confirmer avec la table.", { dc: barbarianStatus(c).relentlessDC }), { counter: true, referenceId: barbarianReference("Relentless Rage").referenceId });
-        if (hasSubclass(c, "barbarian", "berserker")) add("frenzy", uiText("Frénésies déclarées"), null, "long", uiText("Décompte des frénésies déclarées, sans limite distincte de la rage. Chaque fin de frénésie ajoute un niveau d’épuisement, après confirmation."), { counter: true, referenceId: barbarianReference("Frenzy", "Berserker", 3).referenceId });
+        if (hasSubclass(c, "barbarian", "berserker")) add("frenzy", uiText("Frénésies déclarées"), null, "long", uiText("Décompte des frénésies déclarées, sans limite distincte de la rage. Chaque fin de frénésie ajoute un niveau d’épuisement, après confirmation."), { counter: true, mergedInto: "rage", referenceId: barbarianReference("Frenzy", "Berserker", 3).referenceId });
         break;
       case "bard":
         add(
@@ -39726,7 +39879,7 @@ function resources(c) {
         }
         break;
       case "fighter":
-        add("second-wind", uiText("Second souffle"), 1, "short", uiText("Action bonus : récupère 1d10 + {level} PV.", { level }), { referenceId: fighterReference("Second Wind").referenceId });
+        add("second-wind", uiText("Second souffle"), 1, "short", uiText("Action bonus : récupère 1d10 + {level} PV.", { level }), { referenceId: fighterReference("Second Wind").referenceId, ..._spendEffect({ dice: "1d10", bonus: level, result: "heal" }) });
         if (level >= 2) add("action-surge", uiText("Fougue"), level >= 17 ? 2 : 1, "short", uiText("Une action supplémentaire pendant ton tour (une seule fois par tour)."), { referenceId: fighterReference("Action Surge").referenceId });
         if (level >= 9) add("indomitable", uiText("Inflexible"), level >= 17 ? 3 : level >= 13 ? 2 : 1, "long", uiText("Relance une sauvegarde ratée ; tu dois garder le nouveau résultat."), { referenceId: fighterReference("Indomitable").referenceId });
         break;
@@ -39734,7 +39887,7 @@ function resources(c) {
         if (level >= 2) add("ki", uiText("Points de ki"), level, "short", uiText("DD des techniques : {dc}. Déluge de coups, Défense patiente, Pas du vent : 1 ki chacun. Repos avec au moins 30 minutes de méditation.", { dc: d.kiDC }), { referenceId: monkReference("Ki").referenceId });
         break;
       case "paladin":
-        add("lay-hands", uiText("Imposition des mains"), 5 * level, "long", uiText("Rends des PV en puisant dans la réserve, ou dépense 5 points pour guérir une maladie ou neutraliser un poison."), { referenceId: paladinReference("Lay on Hands").referenceId });
+        add("lay-hands", uiText("Imposition des mains"), 5 * level, "long", uiText("Rends des PV en puisant dans la réserve, ou dépense 5 points pour guérir une maladie ou neutraliser un poison."), { referenceId: paladinReference("Lay on Hands").referenceId, ..._spendEffect({ fixed: 1, result: "heal", others: true }) });
         add("divine-sense", uiText("Sens divin"), Math.max(0, 1 + d.mods.cha), "long", uiText("Action : détecte célestes, fiélons et morts-vivants à 18 m jusqu’à la fin de ton prochain tour."), { referenceId: paladinReference("Divine Sense").referenceId });
         if (level >= 3) channel = Math.max(channel, 1);
         if (activeRuleVariants(c).some((entry) => entry.id === "paladinHarness")) {
@@ -39771,7 +39924,7 @@ function resources(c) {
       const ctx = _resourceCtx(c, d, level);
       const max = _evaluate(r.max, ctx, 1);
       if (max === 0) continue;
-      add(r.id, _evaluate(r.name, ctx, r.id), max, r.reset || "long", _evaluate(r.note, ctx, ""), r.referenceId ? { referenceId: r.referenceId, sourceKey: `sub|${classId}|${r.minLevel || 1}` } : {});
+      add(r.id, _evaluate(r.name, ctx, r.id), max, r.reset || "long", _evaluate(r.note, ctx, ""), { ...(r.referenceId && { referenceId: r.referenceId, sourceKey: `sub|${classId}|${r.minLevel || 1}` }), ..._spendEffect(r.onSpend, ctx) });
     }
   }
   for (const [variant, id, name, minimum] of [["favoredFoe", "favored-foe", "Favored Foe", 1], ["deftExplorer", "ranger-tireless", "Deft Explorer Improvement", 10], ["naturesVeil", "ranger-veil", "Nature's Veil", 10]]) if (lv("ranger") >= minimum && c.variants?.includes(variant)) {
@@ -39785,7 +39938,7 @@ function resources(c) {
     const ctx = _resourceCtx(c, d, r.ctxLevel || d.level);
     const max = _evaluate(r.max, ctx, 1);
     if (max === 0) continue;
-    add(r.id, _evaluate(r.name, ctx, r.id), max, r.reset || "long", _evaluate(r.note, ctx, ""), { sourceKey: r.sourceKey, referenceId: r.referenceId });
+    add(r.id, _evaluate(r.name, ctx, r.id), max, r.reset || "long", _evaluate(r.note, ctx, ""), { sourceKey: r.sourceKey, referenceId: r.referenceId, ..._spendEffect(r.onSpend, ctx) });
   }
   if (c.raceId === "dragonborn") {
     const dragon = DRAGONS[picksOf(c, "race", "dragon")[0]] || DRAGONS.red;
@@ -40501,7 +40654,7 @@ function characterIssues(c, { strict = false } = {}) {
   }
   if (!d.armorProficient) warnings.push(uiText("Armure ou bouclier non maîtrisé : désavantage aux tests, attaques et sauvegardes de FOR et DEX, et aucun sort possible."));
   if (d.strTooLow) warnings.push(uiText("Force insuffisante pour cette armure : vitesse réduite de 3 m."));
-  for (const a of d.attacks) if (!a.proficient) warnings.push(uiText("{name} non maîtrisée : pas de bonus de maîtrise à l’attaque.", { name: a.weapon.name }));
+  for (const a of d.attacks) if (!a.proficient && !a.twoWeapon) warnings.push(uiText("{name} non maîtrisée : pas de bonus de maîtrise à l’attaque.", { name: a.weapon.name }));
   if (c.equipment.shield && d.attacks[0] && (d.attacks[0].weapon.two || d.attacks[0].twoHands))
     warnings.push(uiText("Ton arme principale se tient à deux mains : elle ne s’utilise pas en même temps qu’un bouclier."));
   const held = heldWeapons(c), hands = c.equipment.hands || {}, instances = weaponInstances(c);
@@ -41803,6 +41956,33 @@ function spendResources(c, costs) {
   for (const [id, amount] of combined) next.state.resourcesUsed[id] = (available.find((entry) => entry.id === id)?.spent || 0) + amount;
   return next;
 }
+/** Applique à la fiche le total d'un effet de dépense. Une réduction de dégâts s'annonce à la table : rien n'est écrit. */
+function applySpendResult(c, result, total) {
+  const amount = Math.max(0, Math.floor(Number(total) || 0));
+  if (result === "heal") return healCharacter(c, amount);
+  // Les PV temporaires ne s'additionnent pas : la réserve la plus élevée reste, comme pour Infatigable.
+  if (result === "tempHp") return amount > c.state.tempHp ? setTemporaryHitPoints(c, amount) : clone(c);
+  if (result === "hp") { const next = clone(c); next.state.hp = 0; return healCharacter(next, amount, "body"); }
+  return clone(c);
+}
+/**
+ * Dépense une ressource et applique ce qu'elle déclare (onSpend).
+ * Valeur fixe : multipliée par les utilisations dépensées et appliquée à la fiche rendue ; self: false la laisse au bénéficiaire.
+ * Jet : rendu dans roll, à lancer une fois la dépense validée ; applySpendResult applique ensuite son total.
+ */
+function spendResourceEffect(c, id, { amount = 1, self = true } = {}) {
+  const effect = resources(c).find((entry) => entry.id === id)?.onSpend, next = spendResources(c, [{ id, amount }]);
+  if (!effect) return { character: next };
+  const { result, others = false } = effect;
+  if (effect.sides) return { character: next, roll: { count: effect.count, sides: effect.sides, bonus: effect.bonus, result, others } };
+  const value = effect.value * amount;
+  return { character: self ? applySpendResult(next, result, value) : next, fixed: { result, value } };
+}
+/** Ressource à proposer quand des dégâts viennent d'amener le corps à 0 PV : celle qui le déclare et garde une utilisation. */
+function zeroHpSpend(before, after) {
+  if (!(before.state.hp > 0) || after.state.hp !== 0) return null;
+  return resources(after).find((entry) => entry.onSpend?.when === "zeroHp" && entry.remaining !== 0) || null;
+}
 function _recoverResourceEvent(c, { kind, amount = null, resourceId = null, days = 0 } = {}, stateOnly = false) {
   if (!["dawn", "dusk", "initiative", "spell", "days", "manual"].includes(kind)) throw new Error(uiText("Déclencheur de récupération inconnu."));
   if (amount !== null && (!Number.isInteger(amount) || amount < 0)) throw new Error(uiText("Récupération invalide."));
@@ -42707,7 +42887,8 @@ function resourceDie(resource) {
 }
 /**
  * Options de jet d'une attaque, d'après la fiche : aptitudes de classe, sorts actifs et dons.
- * Une option : { id, label, note, on, attack?, damage?, critThreshold?, criticalOnly?, doubled?, requires?, cost?, choices? }.
+ * Une option : { id, label, note, on, attack?, damage?, critThreshold?, criticalOnly?, doubled?, requires?, cost?, choices?, oncePerTurn? }.
+ * oncePerTurn : une fois entrée dans un jet de dégâts, l'option n'est plus proposée aux attaques suivantes d'un enchaînement.
  * attack et damage sont les pièces ajoutées au toucher et aux dégâts ; cost est dépensé au lancer des dés.
  */
 function attackOptions(c, d, { weapon = null, spell = null } = {}) {
@@ -42720,7 +42901,7 @@ function attackOptions(c, d, { weapon = null, spell = null } = {}) {
     if (weapon.divineDamageDice) options.push({ id: "improved-smite", label: uiText("Châtiment divin amélioré"), damage: { notation: weapon.divineDamageDice, type: damageTypeLabel(["radiant"]) }, on: true });
     if (weapon.additionalDamageDice) options.push({ id: "elemental-cleaver", label: uiText("Fendoir élémentaire"), damage: { notation: weapon.additionalDamageDice, type }, on: true });
     if (d.sneakAttack && (weapon.weapon?.finesse || ranged)) {
-      options.push({ id: "sneak-attack", label: uiText("Attaque sournoise"), note: uiText("Une fois par tour, conditions vérifiées à la table"), damage: { notation: rogueSneakAttack(c).notation, type } });
+      options.push({ id: "sneak-attack", oncePerTurn: true, label: uiText("Attaque sournoise"), note: uiText("Une fois par tour, conditions vérifiées à la table"), damage: { notation: rogueSneakAttack(c).notation, type } });
       if (hasSubclass(c, "rogue", "inquisitive") && classLevel(c, "rogue") >= 17) options.push({ id: "eye-for-weakness", label: uiText("Œil pour la faiblesse"), note: uiText("Combat intuitif contre cette cible"), damage: { notation: "3d6", type }, requires: "sneak-attack" });
     }
     const slots = melee && classLevel(c, "paladin") >= 2 ? availableSpellSlots(c, d) : [];
@@ -42730,7 +42911,7 @@ function attackOptions(c, d, { weapon = null, spell = null } = {}) {
       options.push({ id: "divine-smite-undead", label: uiText("Cible mort-vivant ou fiélon"), damage: { notation: "1d8", type: damageTypeLabel(["radiant"]) }, requires: "divine-smite" });
     }
     const domain = Object.keys(DIVINE_STRIKE_TYPES).find((id) => hasSubclass(c, "cleric", id));
-    if (domain && classLevel(c, "cleric") >= 8) options.push({ id: "divine-strike", label: uiText("Frappe divine"), note: uiText("Une fois par tour"), damage: { notation: classLevel(c, "cleric") >= 14 ? "2d8" : "1d8", type: DIVINE_STRIKE_TYPES[domain] ? damageTypeLabel(DIVINE_STRIKE_TYPES[domain]) : type } });
+    if (domain && classLevel(c, "cleric") >= 8) options.push({ id: "divine-strike", oncePerTurn: true, label: uiText("Frappe divine"), note: uiText("Une fois par tour"), damage: { notation: classLevel(c, "cleric") >= 14 ? "2d8" : "1d8", type: DIVINE_STRIKE_TYPES[domain] ? damageTypeLabel(DIVINE_STRIKE_TYPES[domain]) : type } });
     const superiority = resource("superiorityDice");
     if (superiority) {
       const die = `1d${resourceDie(superiority) || 8}`;
@@ -42738,29 +42919,29 @@ function attackOptions(c, d, { weapon = null, spell = null } = {}) {
       options.push({ id: "maneuver", label: uiText("Manœuvre : dé de supériorité"), note: left(superiority), damage: { notation: die, type }, cost: { resource: "superiorityDice" } });
     }
     const psi = resource("fighter-psi-dice");
-    if (psi && hasSubclass(c, "fighter", "psiWarrior")) options.push({ id: "psionic-strike", label: uiText("Frappe psionique"), note: `${uiText("Une fois par tour")} · ${left(psi)}`, damage: { notation: `1d${resourceDie(psi) || 6}`, bonus: Math.max(1, d.mods.int), type: damageTypeLabel(["force"]) }, cost: { resource: "fighter-psi-dice" } });
+    if (psi && hasSubclass(c, "fighter", "psiWarrior")) options.push({ id: "psionic-strike", oncePerTurn: true, label: uiText("Frappe psionique"), note: `${uiText("Une fois par tour")} · ${left(psi)}`, damage: { notation: `1d${resourceDie(psi) || 6}`, bonus: Math.max(1, d.mods.int), type: damageTypeLabel(["force"]) }, cost: { resource: "fighter-psi-dice" } });
     // Frappe des géants : attaque d'arme au corps à corps ou arme de lancer. La sauvegarde et l'effet secondaire se résolvent à la table.
     const strike = resource("strike-of-the-giants"), giant = strike && GIANT_STRIKES[picksOf(c, strike.sourceKey, "giantStrike")[0]];
-    if (giant && (melee || weapon.weapon?.thrown)) options.push({ id: "giant-strike", label: uiText(giant.label), note: `${uiText("Une fois par tour")} · ${left(strike)}`, damage: { notation: giant.notation, type: giant.types ? damageTypeLabel(giant.types) : type }, cost: { resource: "strike-of-the-giants" } });
+    if (giant && (melee || weapon.weapon?.thrown)) options.push({ id: "giant-strike", oncePerTurn: true, label: uiText(giant.label), note: `${uiText("Une fois par tour")} · ${left(strike)}`, damage: { notation: giant.notation, type: giant.types ? damageTypeLabel(giant.types) : type }, cost: { resource: "strike-of-the-giants" } });
     const blades = resource("rogue-psi-dice");
-    if (blades && String(weapon.id || "").startsWith("rogue-psychic")) options.push({ id: "homing-strikes", label: uiText("Frappes guidées"), note: left(blades), attack: { notation: `1d${resourceDie(blades) || 6}` }, cost: { resource: "rogue-psi-dice" } });
+    if (blades && classLevel(c, "rogue") >= 9 && String(weapon.id || "").startsWith("rogue-psychic")) options.push({ id: "homing-strikes", label: uiText("Frappes guidées"), note: left(blades), attack: { notation: `1d${resourceDie(blades) || 6}` }, cost: { resource: "rogue-psi-dice" } });
     if (concentrating("hunters-mark")) options.push({ id: "hunters-mark", label: uiText("Marque du chasseur"), damage: { notation: "1d6", type }, on: true });
-    if (hasSubclass(c, "ranger", "hunter") && allChoices(c, "hunter3").includes("colossus")) options.push({ id: "colossus-slayer", label: uiText("Tueur de colosses"), note: uiText("Une fois par tour, cible déjà blessée"), damage: { notation: "1d8", type } });
-    if (hasSubclass(c, "barbarian", "zealot") && barbarianStatus(c).active) options.push({ id: "divine-fury", label: uiText("Fureur divine"), note: uiText("Une fois par tour"), damage: { notation: "1d6", bonus: Math.floor(classLevel(c, "barbarian") / 2), type: damageTypeLabel([allChoices(c, "divineFury")[0] || "radiant"]) } });
+    if (hasSubclass(c, "ranger", "hunter") && allChoices(c, "hunter3").includes("colossus")) options.push({ id: "colossus-slayer", oncePerTurn: true, label: uiText("Tueur de colosses"), note: uiText("Une fois par tour, cible déjà blessée"), damage: { notation: "1d8", type } });
+    if (hasSubclass(c, "barbarian", "zealot") && barbarianStatus(c).active) options.push({ id: "divine-fury", oncePerTurn: true, label: uiText("Fureur divine"), note: uiText("Une fois par tour"), damage: { notation: "1d6", bonus: Math.floor(classLevel(c, "barbarian") / 2), type: damageTypeLabel([allChoices(c, "divineFury")[0] || "radiant"]) } });
     if (melee && weapon.weapon?.heavy && feats.includes("greatWeaponMaster")) options.push({ id: "great-weapon-master", label: uiText("Maître des armes à deux mains"), attack: { bonus: -5 }, damage: { bonus: 10, type } });
     if (ranged && feats.includes("sharpshooter")) options.push({ id: "sharpshooter", label: uiText("Tireur d’élite"), attack: { bonus: -5 }, damage: { bonus: 10, type } });
     // Dés supplémentaires d'un critique au corps à corps : ajoutés une fois, sans être doublés.
     const weaponDie = /d(\d+)$/.exec(weapon.damageDice || "")?.[1];
     const brutal = classLevel(c, "barbarian") >= 17 ? 3 : classLevel(c, "barbarian") >= 13 ? 2 : classLevel(c, "barbarian") >= 9 ? 1 : 0;
     if (melee && weaponDie && brutal) options.push({ id: "brutal-critical", label: uiText("Critique brutal"), damage: { notation: `${brutal}d${weaponDie}`, type }, criticalOnly: true, doubled: false, on: true });
-    if (melee && weaponDie && raceOf(c)?.id === "halfOrc") options.push({ id: "savage-attacks", label: uiText("Attaques sauvages"), damage: { notation: `1d${weaponDie}`, type }, criticalOnly: true, doubled: false, on: true });
+    if (melee && weaponDie && c.raceId === "halfOrc") options.push({ id: "savage-attacks", label: uiText("Attaques sauvages"), damage: { notation: `1d${weaponDie}`, type }, criticalOnly: true, doubled: false, on: true });
   }
   if (attackRoll && concentrating("hex")) options.push({ id: "hex", label: uiText("Maléfice"), damage: { notation: "1d6", type: damageTypeLabel(["necrotic"]) }, on: true });
   if (attackRoll && hasSubclass(c, "warlock", "hexblade")) options.push({ id: "hexblade-curse", label: uiText("Malédiction du Magelame"), note: uiText("Cible maudite : critique sur 19-20"), critThreshold: 19, damage: { bonus: d.prof, type } });
   const foe = available.find((entry) => entry.id === "favored-foe");
   if (attackRoll && foe) {
     const level = classLevel(c, "ranger"), die = level >= 14 ? "1d8" : level >= 6 ? "1d6" : "1d4";
-    options.push({ id: "favored-foe", label: uiText("Ennemi juré"), note: uiText("Une fois par tour"), damage: { notation: die, type },
+    options.push({ id: "favored-foe", oncePerTurn: true, label: uiText("Ennemi juré"), note: uiText("Une fois par tour"), damage: { notation: die, type },
       choices: [{ value: "marked", label: uiText("Cible déjà marquée") }, ...(foe.remaining > 0 ? [{ value: "mark", label: uiText("Marquer la cible · {p0} restant(s)", { p0: foe.remaining }), cost: { resource: "favored-foe" } }] : [])] });
   }
   if (spell?.id === "eldritch-blast" && allChoices(c, "invocations").includes("agonizing")) options.push({ id: "agonizing-blast", label: uiText("Décharge déchirante"), damage: { bonus: d.mods.cha }, on: true });
@@ -43074,8 +43255,11 @@ function progressionClassOptions(c, level) {
   return multiclassOptions(before).map((entry) => ({ ...entry, classLevel: classLevel(before, entry.classId) + 1 }));
 }
 
-/** Construction du brouillon seulement : les compteurs et l’équipement ne sont pas touchés. */
-function setStartLevel(c, count) {
+/**
+ * Construction du brouillon seulement : les compteurs et l’équipement ne sont pas touchés.
+ * Avec `subclass: false`, la sous-classe d’une classe qui atteint son niveau reste à choisir par le joueur ; sinon celle du SRD est posée (fiches d’essai, import).
+ */
+function setStartLevel(c, count, { subclass = true } = {}) {
   const n = Math.trunc(clamp(count, 1, 20));
   c.levels = c.levels.slice(0, n);
   while (c.levels.length < n) {
@@ -43083,14 +43267,14 @@ function setStartLevel(c, count) {
     c.levels.push(defaultLevel(classId, c.levels.length + 1, classLevel(c, classId) + 1));
   }
   for (const classId of Object.keys(CLASSES)) {
-    if (classLevel(c, classId) >= CLASSES[classId].subLevel && !c.subclasses[classId]) c.subclasses[classId] = DEFAULT_SUBCLASS[classId];
+    if (subclass && classLevel(c, classId) >= CLASSES[classId].subLevel && !c.subclasses[classId]) c.subclasses[classId] = DEFAULT_SUBCLASS[classId];
     if (classLevel(c, classId) < CLASSES[classId].subLevel && classId !== "artificer") delete c.subclasses[classId];
   }
   return c;
 }
 
 /** Changement de classe d’un niveau non validé ; les autres niveaux gardent leurs PV. */
-function setProgressionClass(c, level, classId, { repair = false } = {}) {
+function setProgressionClass(c, level, classId, { repair = false, subclass = true } = {}) {
   if (!Number.isInteger(level) || level < (repair ? 1 : 2) || level > levelOf(c) || !CLASSES[classId]) throw new Error(uiText("Choisis une classe et un niveau du personnage."));
   const option = repair ? { ok: true, classLevel: classLevel(c, classId, level - 1) + 1 } : progressionClassOptions(c, level).find((entry) => entry.classId === classId);
   if (!option?.ok) throw new Error(option?.reasons.join(" ; ") || uiText("Classe inconnue."));
@@ -43108,7 +43292,7 @@ function setProgressionClass(c, level, classId, { repair = false } = {}) {
       for (const key of Object.keys(c.picks)) if (key.startsWith(`feat|L${entry.level}|`)) delete c.picks[key];
     }
   }
-  return setStartLevel(c, levelOf(c));
+  return setStartLevel(c, levelOf(c), { subclass });
 }
 
 /** Liste de classe et sorts accordés par un don. Ceux du don d’origine se choisissent à l’étape Magie. */
@@ -43147,8 +43331,8 @@ function progressionRequirements(c) {
   requirements.push(...pickRequirements(c, pickSpecs(c)));
   for (const entry of c.levels) {
     const cls = CLASSES[entry.classId], k = classLevelAt(c, entry.level), step = entry.level === 1 ? "class" : "levels";
-    if (k === cls.subLevel && !c.subclasses[entry.classId]) add(uiText("{name} {level} : choisir {subclass}", { name: cls.name, level: k, subclass: cls.subLabel.toLowerCase() }), step, entry.level);
-    if (entry.asi?.mode === "feat" && !entry.asi.featId) add(uiText("Niveau {level} : choisir un don", { level: entry.level }), step, entry.level);
+    if (k === cls.subLevel && !c.subclasses[entry.classId]) add(uiText("{name} {level} : choisir {subclass}", { name: cls.name, level: k, subclass: cls.subLabel.toLowerCase() }), step, entry.level, `subclasses.${entry.classId}`);
+    if (entry.asi?.mode === "feat" && !entry.asi.featId) add(uiText("Niveau {level} : choisir un don", { level: entry.level }), step, entry.level, `levels.${entry.level - 1}.asi.featId`);
     for (const choice of choicesFor(c, entry.level)) {
       const value = entry.choices[choice.key], selected = Array.isArray(value) ? value : value ? [value] : [];
       const count = choice.type === "text" ? Number(!!String(value || "").trim()) : new Set(selected.filter((id) => Object.hasOwn(choice.options, id))).size;
@@ -46477,8 +46661,9 @@ function uiDerive(c) {
     attacks: values.attacks.map((entry) => {
       if (!WEAPONS[entry.id]) return entry;
       const base = entry.weapon?.name || WEAPONS[entry.id].name;
-      const suffix = entry.name.startsWith(base) ? entry.name.slice(base.length) : "";
-      return uiCatalogueEntry(entry, uiCatalogueName(base, WEAPONS[entry.id].referenceId) + suffix);
+      const own = entry.weaponName || entry.name, suffix = own.startsWith(base) ? own.slice(base.length) : "";
+      const name = uiCatalogueName(base, WEAPONS[entry.id].referenceId) + suffix;
+      return uiCatalogueEntry(entry, entry.twoWeapon ? uiText("attack.twoWeapon", { name }) : name);
     }) };
 }
 
@@ -46568,7 +46753,7 @@ function creationLineSource(c, source) {
   const classId = source.classId || primaryClassId(c);
   if (source.kind === "race") return { kind: "race", origin: "race", name: uiRaceOf(c).name };
   if (source.kind === "background") return { kind: "background", origin: "background", name: uiBackgroundOf(c).name };
-  if (source.kind === "feat") return { kind: "feat", origin: source.key === "feat|race" ? "race" : "background", name: uiFeats[source.featId]?.name || uiCatalogueName(source.label, source.referenceId) };
+  if (source.kind === "feat") return { kind: "feat", origin: source.key === "feat|race" ? "race" : source.key.startsWith("feat|bg") ? "background" : "class", name: uiFeats[source.featId]?.name || uiCatalogueName(source.label, source.referenceId) };
   if (source.kind === "subclass") return { kind: "subclass", origin: "class", name: uiSubclassOf(c, classId)?.name || uiClasses[classId].subLabel };
   // Une aptitude de classe garde son nom (Ennemi juré, Technique supérieure) ; la classe elle-même affiche le sien.
   return { kind: "class", origin: "class", name: source.key === `class|${classId}` ? uiClasses[classId].name : uiCatalogueName(source.label, source.referenceId) };
@@ -46599,72 +46784,58 @@ function creationFixedProficiencies(c) {
   return fixed;
 }
 
-/**
- * Lignes de choix du niveau 1 d’un brouillon de création, dans l’ordre d’affichage.
- * Chaque ligne porte son étape (abilities, skills, magic), son groupe, sa liaison et l’état de ses options.
- */
-function creationLines(c) {
-  const classId = primaryClassId(c), cls = uiClasses[classId], race = uiRaceOf(c), background = uiBackgroundOf(c), backgroundId = c.background?.id || "custom";
+/** Liste de lignes en construction : valeurs par défaut et ordre d’insertion. */
+function creationLineList() {
   const lines = [];
-  const push = (line) => lines.push({ stage: "skills", count: 1, required: true, bind: "array", hint: "", help: "", owned: [], pool: false, plain: false, kind: "option", order: lines.length, ...line });
-  const option = ([id, entry]) => Array.isArray(entry) ? { id, name: entry[0], desc: entry[1] || "" } : { id, name: String(entry), desc: "" };
+  return { lines, push: (line) => lines.push({ stage: "skills", count: 1, required: true, bind: "array", hint: "", help: "", owned: [], pool: false, plain: false, kind: "option", order: lines.length, ...line }) };
+}
+const creationLineOption = ([id, entry]) => Array.isArray(entry) ? { id, name: entry[0], desc: entry[1] || "" } : { id, name: String(entry), desc: "" };
 
-  if (cls.subLevel === 1) push({
-    id: "subclass", group: "class", rank: CREATION_LINE_RANKS.subclassChoice, origin: "class", source: cls.name, label: cls.subLabel, plain: true, kind: "subclass",
+/** Sous-classe d’une classe ; les aptitudes du niveau où elle se choisit sont dépliables. */
+function creationSubclassLine(c, classId) {
+  const cls = uiClasses[classId];
+  return {
+    group: "class", rank: CREATION_LINE_RANKS.subclassChoice, origin: "class", source: cls.name, label: cls.subLabel, plain: true, kind: "subclass", classId,
     path: `subclasses.${classId}`, bind: "value", raw: [c.subclasses?.[classId]],
-    options: [...Object.entries(uiSubclasses[classId] || {}).map(([id, sub]) => ({ id, name: sub.name, desc: sub.desc || "", source: sub.source, more: (sub.features || []).filter(([level]) => level === 1).map(([, name, text]) => [name, text]) })),
+    options: [...Object.entries(uiSubclasses[classId] || {}).map(([id, sub]) => ({ id, name: sub.name, desc: sub.desc || "", source: sub.source, more: (sub.features || []).filter(([level]) => level === cls.subLevel).map(([, name, text]) => [name, text]) })),
       { id: "custom", name: uiText("Sous-classe maison"), desc: uiText("Création de ta table, effets manuels.") }],
+  };
+}
+/** Choix de classe d’un niveau : style de combat, manœuvres, expertise. */
+function creationChoiceLine(c, level, choice) {
+  const entry = c.levels[level - 1], value = entry.choices?.[choice.key], expertise = choice.key === "expertise", text = choice.type === "text";
+  return {
+    group: expertise ? "skills" : "class", rank: expertise ? CREATION_LINE_RANKS.expertise : CREATION_LINE_RANKS.class, origin: "class", source: uiClasses[entry.classId].name, label: choice.title, plain: true, help: choice.help || "",
+    path: `levels.${level - 1}.choices.${choice.key}`, bind: text ? "text" : choice.type === "one" ? "value" : "array", count: choice.count || 1,
+    raw: text ? [] : Array.isArray(value) ? value : [value], text: text ? String(value || "") : "", options: Object.entries(choice.options || {}).map(creationLineOption),
+  };
+}
+/** Spec de `uiPickSpecs` : maîtrises, options d’aptitude, sorts d’un don ou d’une origine. */
+function creationPickLine(c, spec) {
+  const source = creationLineSource(c, spec.source), options = Object.entries(spec.options || {}).map(creationLineOption);
+  const replacement = { compensateSkill: "skill", compensateTool: "tool" }[spec.field], expertise = spec.field === "expertiseChoice";
+  const type = replacement || (CREATION_LINE_PROFICIENCIES[spec.type] && !creationKitField(spec.field) ? spec.type : null);
+  let text = { label: creationLineTitle(c, spec), hint: "" }, group = spec.field === "featChoice" ? "feat" : source.origin === "class" ? "class" : "options";
+  if (replacement) text = { label: uiText(replacement === "skill" ? "creation.line.replacementSkills" : "creation.line.replacementTools", { count: spec.count, s: spec.count > 1 ? "s" : "" }), hint: "" };
+  else if (type && !expertise) text = creationProficiencyLabel(type, spec.count, options.length, spec.source.grants?.skillChoice?.expertise && spec.field === "skillChoice" ? uiText("creation.line.withExpertise") : "");
+  else if (spec.field === "abilityChoice") text = { label: uiText("creation.line.abilityBonus", { count: spec.count, amount: spec.source.grants?.abilityChoice?.amount ?? 1 }), hint: options.length < 6 ? uiText("creation.line.among", { count: options.length }) : "" };
+  if (type) group = CREATION_LINE_PROFICIENCIES[type][2];
+  return {
+    stage: creationLineStage(spec), group, rank: expertise ? CREATION_LINE_RANKS.expertise : CREATION_LINE_RANKS[source.kind], origin: source.origin, source: source.name, ...text, kind: replacement || spec.type,
+    help: replacement ? uiText("creation.line.replacementHelp") : spec.help || "", path: `picks.${spec.path}`, count: spec.count, required: !spec.optional, raw: spec.selected || [], owned: spec.owned || [], options, pool: !!type && !expertise,
+  };
+}
+/** Dons proposés à un niveau, prérequis vérifiés sur la fiche telle qu’elle était avant ce don. Un don indisponible reste listé avec sa raison. */
+function creationFeatOptions(before, level, current) {
+  const context = { ...collect(before), prerequisiteLevel: level };
+  return Object.entries(uiFeats).filter(([id, feat]) => !feat.backgroundOnly || id === current).sort((a, b) => a[1].name.localeCompare(b[1].name, uiLocale())).map(([id, feat]) => {
+    const met = feat.prereq ? meetsPrereq(before, feat.prereq, undefined, context) : { ok: true };
+    return { id, name: feat.name, desc: feat.summary || "", source: feat.source, keywords: `${feat.englishName || ""} ${feat.source || ""}`, campaign: feat.campaign || "", ...(met.ok ? {} : { off: true, why: uiText("creation.reason.prereq", { reasons: feat.prereqLabel || met.reasons.join(", ") }) }) };
   });
-  for (const choice of uiChoicesFor(c, 1)) {
-    const value = c.levels[0].choices?.[choice.key], expertise = choice.key === "expertise";
-    push({
-      id: `choice:${choice.key}`, group: expertise ? "skills" : "class", rank: expertise ? CREATION_LINE_RANKS.expertise : CREATION_LINE_RANKS.class, origin: "class", source: cls.name, label: choice.title, plain: true, help: choice.help || "",
-      path: `levels.0.choices.${choice.key}`, bind: choice.type === "text" ? "text" : choice.type === "one" ? "value" : "array", count: choice.count || 1,
-      raw: choice.type === "text" ? [] : Array.isArray(value) ? value : [value], text: choice.type === "text" ? String(value || "") : "", options: Object.entries(choice.options || {}).map(option),
-    });
-  }
-  push({
-    id: "skills", group: "skills", rank: CREATION_LINE_RANKS.class, origin: "class", source: cls.name, ...creationProficiencyLabel("skill", cls.pick, cls.skills.length), kind: "skill",
-    path: "skills", count: cls.pick, raw: c.skills || [], options: cls.skills.map((id) => ({ id, name: uiSkills[id][0], desc: "" })), pool: true,
-  });
-  if (backgroundId === "custom") push({
-    id: "background-skills", group: "skills", rank: CREATION_LINE_RANKS.background, origin: "background", source: background.name, ...creationProficiencyLabel("skill", 2, Object.keys(SKILLS).length), kind: "skill",
-    path: "background.skills", count: 2, raw: c.background?.skills || [], options: Object.keys(SKILLS).map((id) => ({ id, name: uiSkills[id][0], desc: "" })), pool: true,
-  });
-  if (uiBackgrounds[backgroundId]?.variants?.length) push({
-    id: "variant", group: "options", rank: CREATION_LINE_RANKS.background, origin: "background", source: uiBackgrounds[backgroundId].name, label: uiText("background.variant"), plain: true, required: false,
-    path: "background.variantId", bind: "value", raw: [c.background.variantId || ""],
-    options: [{ id: "", name: uiText("background.base"), desc: "" }, ...uiBackgrounds[backgroundId].variants.map((variant) => ({ id: variant.id, name: variant.name, desc: variant.note || "" }))],
-  });
-
-  const firstLevel = new Set(grantSources(c, 1).map((source) => source.key));
-  for (const spec of uiPickSpecs(c)) {
-    if (!firstLevel.has(spec.source.key) || spec.minLevel > 1) continue;
-    const source = creationLineSource(c, spec.source), stage = creationLineStage(spec), options = Object.entries(spec.options || {}).map(option);
-    const replacement = { compensateSkill: "skill", compensateTool: "tool" }[spec.field], expertise = spec.field === "expertiseChoice";
-    const type = replacement || (CREATION_LINE_PROFICIENCIES[spec.type] && !creationKitField(spec.field) ? spec.type : null);
-    let text = { label: creationLineTitle(c, spec), hint: "" }, group = spec.field === "featChoice" ? "feat" : source.origin === "class" ? "class" : "options";
-    if (replacement) text = { label: uiText(replacement === "skill" ? "creation.line.replacementSkills" : "creation.line.replacementTools", { count: spec.count, s: spec.count > 1 ? "s" : "" }), hint: "" };
-    else if (type && !expertise) text = creationProficiencyLabel(type, spec.count, options.length, spec.source.grants?.skillChoice?.expertise && spec.field === "skillChoice" ? uiText("creation.line.withExpertise") : "");
-    else if (spec.field === "abilityChoice") text = { label: uiText("creation.line.abilityBonus", { count: spec.count, amount: spec.source.grants?.abilityChoice?.amount ?? 1 }), hint: options.length < 6 ? uiText("creation.line.among", { count: options.length }) : "" };
-    if (type) group = CREATION_LINE_PROFICIENCIES[type][2];
-    push({
-      id: `pick:${spec.path}`, stage, group, rank: expertise ? CREATION_LINE_RANKS.expertise : CREATION_LINE_RANKS[source.kind], origin: source.origin, source: source.name, ...text, kind: replacement || spec.type,
-      help: replacement ? uiText("creation.line.replacementHelp") : spec.help || "", path: `picks.${spec.path}`, count: spec.count, required: !spec.optional, raw: spec.selected || [], owned: spec.owned || [], options, pool: !!type && !expertise,
-    });
-  }
-  if (race.grants?.feat) {
-    const before = { ...c, raceFeat: null }, context = { ...collect(before), prerequisiteLevel: 1 };
-    push({
-      id: "feat", group: "feat", rank: CREATION_LINE_RANKS.race, origin: "race", source: race.name, label: uiText("Don de départ"), plain: true, kind: "feat", path: "raceFeat", bind: "value", raw: [c.raceFeat],
-      options: Object.entries(uiFeats).filter(([, feat]) => !feat.backgroundOnly).sort((a, b) => a[1].name.localeCompare(b[1].name, uiLocale())).map(([id, feat]) => {
-        const met = feat.prereq ? meetsPrereq(before, feat.prereq, undefined, context) : { ok: true };
-        return { id, name: feat.name, desc: feat.summary || "", source: feat.source, ...(met.ok ? {} : { off: true, why: uiText("creation.reason.prereq", { reasons: feat.prereqLabel || met.reasons.join(", ") }) }) };
-      }),
-    });
-  }
-
-  const fixed = creationFixedProficiencies(c), pools = lines.filter((line) => line.pool);
+}
+/** État des options et des lignes : sélection valide, raison de chaque option grisée, manque et pénurie. */
+function creationLinesFinish(lines, fixed) {
+  const pools = lines.filter((line) => line.pool);
   for (const line of lines) {
     const known = new Set(line.options.map((entry) => entry.id)), raw = line.raw.filter((id) => id != null && (id !== "" || known.has("")));
     line.selected = [...new Set(raw.filter((id) => known.has(id)))];
@@ -46688,10 +46859,97 @@ function creationLines(c) {
     line.blockers = line.short ? line.options.filter((entry) => entry.holder) : [];
     line.done = !line.required || (line.bind === "text" ? !!line.text.trim() : line.selected.length >= Math.min(line.count, reachable));
     line.name = line.plain ? line.label : `${line.source}, ${line.label}`;
-    // Une ligne avec saisie (texte libre, sous-classe maison) ne se replie pas d’elle-même.
-    line.typing = line.bind === "text" || line.kind === "subclass" && line.selected.includes("custom");
+    // Une ligne avec saisie (texte libre, sous-classe ou don maison) ne se replie pas d’elle-même.
+    line.typing = line.bind === "text" || ["subclass", "feat"].includes(line.kind) && line.selected.includes("custom");
   }
   return lines.sort((a, b) => CREATION_LINE_GROUPS.indexOf(a.group) - CREATION_LINE_GROUPS.indexOf(b.group) || a.rank - b.rank || a.order - b.order);
+}
+
+/**
+ * Lignes de choix du niveau 1 d’un brouillon de création, dans l’ordre d’affichage.
+ * Chaque ligne porte son étape (abilities, skills, magic), son groupe, sa liaison et l’état de ses options.
+ */
+function creationLines(c) {
+  const classId = primaryClassId(c), cls = uiClasses[classId], race = uiRaceOf(c), background = uiBackgroundOf(c), backgroundId = c.background?.id || "custom";
+  const { lines, push } = creationLineList();
+
+  if (cls.subLevel === 1) push({ id: "subclass", ...creationSubclassLine(c, classId) });
+  for (const choice of uiChoicesFor(c, 1)) push({ id: `choice:${choice.key}`, ...creationChoiceLine(c, 1, choice) });
+  push({
+    id: "skills", group: "skills", rank: CREATION_LINE_RANKS.class, origin: "class", source: cls.name, ...creationProficiencyLabel("skill", cls.pick, cls.skills.length), kind: "skill",
+    path: "skills", count: cls.pick, raw: c.skills || [], options: cls.skills.map((id) => ({ id, name: uiSkills[id][0], desc: "" })), pool: true,
+  });
+  if (backgroundId === "custom") push({
+    id: "background-skills", group: "skills", rank: CREATION_LINE_RANKS.background, origin: "background", source: background.name, ...creationProficiencyLabel("skill", 2, Object.keys(SKILLS).length), kind: "skill",
+    path: "background.skills", count: 2, raw: c.background?.skills || [], options: Object.keys(SKILLS).map((id) => ({ id, name: uiSkills[id][0], desc: "" })), pool: true,
+  });
+  if (uiBackgrounds[backgroundId]?.variants?.length) push({
+    id: "variant", group: "options", rank: CREATION_LINE_RANKS.background, origin: "background", source: uiBackgrounds[backgroundId].name, label: uiText("background.variant"), plain: true, required: false,
+    path: "background.variantId", bind: "value", raw: [c.background.variantId || ""],
+    options: [{ id: "", name: uiText("background.base"), desc: "" }, ...uiBackgrounds[backgroundId].variants.map((variant) => ({ id: variant.id, name: variant.name, desc: variant.note || "" }))],
+  });
+
+  const firstLevel = new Set(grantSources(c, 1).map((source) => source.key));
+  for (const spec of uiPickSpecs(c)) if (firstLevel.has(spec.source.key) && !(spec.minLevel > 1)) push({ id: `pick:${spec.path}`, ...creationPickLine(c, spec) });
+  if (race.grants?.feat) push({
+    id: "feat", group: "feat", rank: CREATION_LINE_RANKS.race, origin: "race", source: race.name, label: uiText("Don de départ"), plain: true, kind: "feat", path: "raceFeat", bind: "value", raw: [c.raceFeat],
+    options: creationFeatOptions({ ...c, raceFeat: null }, 1, c.raceFeat),
+  });
+  return creationLinesFinish(lines, creationFixedProficiencies(c));
+}
+
+/** Specs posées dans l’éditeur d’un niveau : sous-classe et aptitudes acquises à ce niveau, maîtrises de multiclassage, traits d’origine qui s’ouvrent à ce niveau. */
+function creationLevelSpec(c, level) {
+  const entry = c.levels[level - 1], classId = entry.classId, k = classLevelAt(c, level);
+  const replaced = (to, keys) => (c.replacements || []).some((row) => row.totalLevel === level && row.to === to && (keys ? keys.includes(row.choiceKey) : row.classId === classId));
+  const keys = [`sub|${classId}|${k}`, `ranger|enemy|L${level}`];
+  if (k === 1 && level > 1) keys.push(`class|${classId}`);
+  if (classId === "artificer" && k >= 2) keys.push("artificer|recipes");
+  if (classId === "warlock" && k === 3) keys.push("pact|tome");
+  if (classId === "warlock" && (entry.choices?.invocations?.includes("book") || replaced("book", ["invocations"]))) keys.push("inv|book");
+  if (classId === "warlock" && k === 10) keys.push("warlock|fiend-resistance");
+  if (classId === "fighter" && k === 3) keys.push("fighter|training");
+  if (classId === "fighter" && k === 7) keys.push("fighter|royalEnvoy", "fighter|elegantCourtier");
+  if (classId === "fighter" && ([entry.choices?.style, entry.choices?.secondStyle].flat().includes("superiorTechnique") || replaced("superiorTechnique", ["style", "secondStyle"]))) keys.push("fighter|superiorTechnique");
+  if (classId === "ranger" && (k === 2 || replaced("druidicWarrior"))) keys.push("ranger|druidicWarrior");
+  if (classId === "paladin" && (k === 2 || replaced("blessedWarrior"))) keys.push("paladin|blessedWarrior");
+  return (spec) => {
+    const source = spec.source;
+    return keys.includes(source.key) || ["barbarian|", "ranger|", "rogue|"].some((prefix) => source.key.startsWith(prefix)) && source.acquiredLevel === level
+      || spec.field === "revelation" && level === 3 || source.key === "race" && spec.minLevel === level && level > 1 || spec.field === "runes" && source.key !== `feat|L${level}`;
+  };
+}
+
+/**
+ * Lignes de choix d’un niveau, pour l’étape Niveaux de la création et la montée de niveau : sous-classe quand elle se choisit à ce niveau,
+ * choix de classe, specs rattachées au niveau, puis le don pris à la place de l’amélioration de caractéristiques et ses propres choix (groupe feat).
+ */
+function creationLevelLines(c, level, specs = uiPickSpecs(c)) {
+  const entry = c.levels[level - 1], classId = entry.classId, cls = uiClasses[classId], own = creationLevelSpec(c, level);
+  const { lines, push } = creationLineList(), add = (id, line, group = "class") => push({ ...line, id: `L${level}:${id}`, level, stage: "level", group, pool: false });
+
+  if (classLevelAt(c, level) === cls.subLevel) add("subclass", creationSubclassLine(c, classId));
+  for (const choice of uiChoicesFor(c, level)) add(`choice:${choice.key}`, creationChoiceLine(c, level, choice));
+  // Runes d’un don et révélation d’origine : rappelées à chaque montée de niveau, mais posées ailleurs quand le personnage est créé d’un coup.
+  for (const spec of specs.filter(own)) add(`pick:${spec.path}`, { ...creationPickLine(c, spec), elsewhere: ["runes", "revelation"].includes(spec.field) });
+  if (entry.asi?.mode === "feat") {
+    const current = entry.asi.featId || "";
+    add("feat", {
+      rank: CREATION_LINE_RANKS.subclassChoice, origin: "class", source: cls.name, label: uiText("Don"), plain: true, kind: "feat", path: `levels.${level - 1}.asi.featId`, bind: "value", raw: [current],
+      options: [...creationFeatOptions({ ...c, levels: c.levels.filter((row) => row.level < level) }, level, current), { id: "custom", name: uiText("Don maison ou d’un autre livre"), desc: uiText("Nom et effets libres ; les bonus chiffrés se règlent dans Maison.") }],
+    }, "feat");
+    for (const spec of specs.filter((spec) => spec.source.key === `feat|L${level}`)) add(`pick:${spec.path}`, creationPickLine(c, spec), "feat");
+  }
+  creationLinesFinish(lines, new Map());
+  // Un don maison se nomme : la validation finale le refuse sans nom.
+  for (const line of lines) if (line.kind === "feat" && line.selected.includes("custom") && !entry.asi.featName?.trim()) line.done = false;
+  return lines;
+}
+
+/** Lignes des niveaux 2 et suivants d’un brouillon créé au-delà du niveau 1. Un choix déjà demandé sur l’écran Choix, ou avec son don, n’y est pas répété. */
+function creationStartLevelLines(c) {
+  const specs = uiPickSpecs(c);
+  return c.levels.slice(1).flatMap((entry) => creationLevelLines(c, entry.level, specs)).filter((line) => !line.elsewhere);
 }
 
 /** Retire les choix de niveau 1 devenus inadmissibles et renvoie leur nombre ; un retrait peut en entraîner d’autres. */
@@ -47104,17 +47362,12 @@ function creationNextSelectRace(id) {
   ui.wizard.nextRaceChosen = true;
   ui.creationRaceInspect = id;
 }
-/** Le niveau de départ ne choisit pas la sous-classe de niveau 1 à la place du joueur. */
-function creationNextSetStartLevel(c, level) {
-  const classId = primaryClassId(c), chosen = c.subclasses[classId];
-  setStartLevel(c, level);
-  if (!chosen && uiClasses[classId].subLevel === 1) delete c.subclasses[classId];
-}
 /** Étape dont un choix obligatoire reste à faire. */
 function creationNextIncomplete(w, step) {
   if (step === "race") return !w.nextRaceChosen;
   if (step === "class") return !w.nextClassConfirmed;
   if (step === "background") return !w.nextBackgroundConfirmed;
+  if (step === "levels") return creationStartLevelLines(w.draft).some((line) => !line.done);
   return ["abilities", "skills"].includes(step) && creationLines(w.draft).some((line) => line.stage === step && !line.done);
 }
 function creationNextReconcile() {
@@ -47193,6 +47446,11 @@ function creationNextBackgroundDescription(id, background) {
   if (id === "custom") return "Deux compétences et une aptitude à définir.";
   return background.desc || CREATION_BACKGROUND_DESCRIPTIONS[id] || "";
 }
+/** Tout ce que la fiche d’un historique affiche : la recherche le trouve par n’importe lequel de ces mots. */
+function creationNextBackgroundSearchText(id, background) {
+  return [creationNextBackgroundDescription(id, background), creationNextBackgroundBenefits(background), ...(background.feature || []),
+    ...(background.grants?.feats || []).flatMap((featId) => [uiFeats[featId]?.name, uiFeats[featId]?.summary])].filter(Boolean).join(" ");
+}
 function creationNextBackgroundBenefits(background) {
   const grants = background.grants || {};
   const benefits = (background.skills || []).map((id) => uiSkills[id]?.[0] || id);
@@ -47220,6 +47478,8 @@ function renderCreationNextBackground(w, c) {
 
 /* ---------------------------------------------------------- lignes de choix */
 function creationNextSlug(id) { return String(id).replace(/[^a-zA-Z0-9_-]+/g, "-"); }
+/** Écran qui porte les lignes : étape du parcours de création, ou niveau en cours dans Évolution. */
+function creationNextLineScope() { return ui.levelFlow ? `lvl:${ui.levelFlow.level}` : ui.wizard.step; }
 /** Ligne ouverte de l’écran : la première incomplète, puis la suivante dès qu’une ligne vient d’être complétée. Une ligne rouverte à la main, ou avec une saisie, reste ouverte. */
 function creationNextOpenLine(lines, step) {
   let state = ui.creationLine;
@@ -47252,40 +47512,58 @@ function renderCreationNextSpellDetails(c, spell, path) {
     ${renderSpellDescription(spell, c, { omitFacts: ["level", "school", "casting time", "range", "duration", "components"], fallbackNotice: false })}
   </details>`;
 }
-/** Composant unique des choix de création : en-tête repliable, puis options natives liées au brouillon. */
-function renderCreationNextLine(c, line, open) {
+/** Saisies d’une sous-classe ou d’un don maison, sous les options de leur ligne. */
+function renderCreationNextCustom(c, line, prefix) {
+  if (line.kind === "subclass") {
+    const path = `${prefix}.customSubclasses.${line.classId}`, custom = c.customSubclasses?.[line.classId];
+    return `<div class="choice-line-fields"><div class="form-grid">${field(uiText("Nom de la sous-classe"), `${path}.name`, custom?.name || "", "text", "", 'maxlength="100"')}</div>${field(uiText("Aptitudes et niveaux"), `${path}.description`, custom?.description || "", "textarea", uiText("Effets descriptifs. Les bonus chiffrés et compteurs s’ajoutent dans Maison."), 'maxlength="10000"')}</div>`;
+  }
+  // Le nom se lit à chaque frappe : sans lui, la ligne du don reste à compléter.
+  const path = `${prefix}.levels.${line.level - 1}.asi`, asi = c.levels[line.level - 1].asi;
+  return `<div class="choice-line-fields"><div class="form-grid">${field(uiText("Nom du don"), `${path}.featName`, asi.featName || "", "text", "", 'maxlength="120" data-live="1"')}</div>${field(uiText("Effets et prérequis"), `${path}.featDescription`, asi.featDescription || "", "textarea", uiText("Les bonus chiffrés éventuels se définissent dans Maison."), 'maxlength="6000"')}</div>`;
+}
+/** Composant unique des choix de création et de niveau : en-tête repliable, puis options natives liées au brouillon (`wiz`) ou au niveau en cours (`lvl`). */
+function renderCreationNextLine(c, line, open, prefix = "wiz") {
   const slug = creationNextSlug(line.id), chosen = line.options.filter((entry) => entry.on).map((entry) => entry.name);
   const selection = line.bind === "text" && line.text.trim() ? line.text : chosen.length ? chosen.join(", ") : line.required ? uiText("creation.line.toChoose") : uiText("creation.line.optional");
   const made = line.bind === "text" ? Number(!!line.text.trim()) : line.selected.length;
   const head = `<button type="button" class="choice-line-head" id="choice-line-${slug}" data-action="creation-line-toggle" data-id="${esc(line.id)}" aria-expanded="${open}" ${open ? `aria-controls="choice-body-${slug}"` : ""}><span class="choice-line-main"><span class="choice-line-source">${esc(line.source)}</span><span class="choice-line-what"><strong>${esc(line.label)}</strong>${line.hint ? ` <small>${esc(line.hint)}</small>` : ""}</span><span class="choice-line-selection">${esc(selection)}</span></span><span class="pill outline choice-line-count">${made} / ${line.count}</span><span class="choice-line-arrow" aria-hidden="true">${icon("chevron", 14)}</span></button>`;
-  const state = `${open ? "open" : ""} ${line.done && made ? "done" : ""} ${line.short ? "short" : ""}`;
-  if (!open) return `<div class="choice-line ${state}" data-line="${esc(line.id)}">${head}</div>`;
-  const path = `wiz.${line.path}`, help = line.help ? `<p class="choice-line-help">${esc(line.help)}</p>` : "";
-  if (line.bind === "text") return `<div class="choice-line ${state}" data-line="${esc(line.id)}">${head}<div class="choice-line-body" id="choice-body-${slug}">${help}<label class="field" for="choice-${slug}-text"><span class="sr-only">${esc(line.label)}</span><input id="choice-${slug}-text" type="text" data-bind="${esc(path)}" data-live="1" value="${esc(line.text)}" maxlength="300"></label></div></div>`;
+  const tag = `<div class="choice-line ${open ? "open" : ""} ${line.done && made ? "done" : ""} ${line.short ? "short" : ""}" data-line="${esc(line.id)}" data-kind="${esc(line.kind)}">`;
+  if (!open) return `${tag}${head}</div>`;
+  const path = `${prefix}.${line.path}`, help = line.help ? `<p class="choice-line-help">${esc(line.help)}</p>` : "";
+  if (line.bind === "text") return `${tag}${head}<div class="choice-line-body" id="choice-body-${slug}">${help}<label class="field" for="choice-${slug}-text"><span class="sr-only">${esc(line.label)}</span><input id="choice-${slug}-text" type="text" data-bind="${esc(path)}" data-live="1" value="${esc(line.text)}" maxlength="300"></label></div></div>`;
   const single = line.count === 1, type = single && line.required || line.bind === "value" ? "radio" : "checkbox", full = !single && line.selected.length >= line.count;
   const binding = line.bind === "value" ? `data-bind="${esc(path)}"` : `data-array="${esc(path)}" data-limit="${line.count}"`;
-  const query = creationChoiceNormalize(ui.creationChoiceQuery), languages = ["language", "toolOrLanguage"].includes(line.kind) && line.options.some((entry) => uiLanguages[entry.id]?.type === "standard");
-  const visible = line.options.map((entry, index) => ({ entry, index })).filter(({ entry }) => entry.on || (!query || creationChoiceNormalize(entry.name).includes(query)) && !(languages && !ui.creationLanguageExotic && uiLanguages[entry.id]?.type === "exotic"));
+  // Le filtre des langues exotiques n’existe que sur l’écran Choix, qui porte sa case.
+  const query = creationChoiceNormalize(ui.creationChoiceQuery), languages = line.stage === "skills" && ["language", "toolOrLanguage"].includes(line.kind) && line.options.some((entry) => uiLanguages[entry.id]?.type === "standard");
+  const visible = line.options.map((entry, index) => ({ entry, index })).filter(({ entry }) => entry.on || (!query || creationChoiceNormalize(`${entry.name} ${entry.keywords || ""}`).includes(query)) && !(languages && !ui.creationLanguageExotic && uiLanguages[entry.id]?.type === "exotic"));
+  // Un don de campagne se débloque ici : sa campagne se coche quand il est choisi ou recherché.
+  const campaigns = line.kind === "feat" ? [...new Set(visible.filter(({ entry }) => entry.campaign && (entry.on || query)).map(({ entry }) => entry.campaign))] : [];
+  const campaign = campaigns.map((name, index) => backgroundCampaign(c) === name ? `<p class="choice-line-help">${uiText("Campagne {p0} : historique choisi.", { p0: esc(name) })}</p>` : `<label class="choice-group-toggle" for="choice-${slug}-campaign-${index}"><input id="choice-${slug}-campaign-${index}" type="checkbox" data-array="${prefix}.rulesContext.campaignOptions" value="${esc(name)}" ${(c.rulesContext?.campaignOptions || []).includes(name) ? "checked" : ""}>${uiText("Campagne {p3}", { p3: esc(name) })}</label>`).join("");
+  // Éditeur de niveau : un choix enregistré qui n’est plus proposé reste visible, à décocher pour le retirer. Au niveau 1 de la création, il est retiré d’office.
+  const stale = !line.level || ["subclass", "feat"].includes(line.kind) ? "" : line.stale.map((id, index) => `<div class="choice-option selected"><label class="choice-option-pick" for="choice-${slug}-stale-${index}"><input type="checkbox" id="choice-${slug}-stale-${index}" data-array="${esc(path)}" value="${esc(id)}" checked><span class="choice-option-name">${esc(invalidSelectionLabel(c, path, id, line.path.match(/\.choices\.(.+)$/)?.[1]))}<small>${uiText("Choix conservé, devenu inadmissible. Décoche-le pour le retirer du brouillon ; il restera dans l’historique après validation.")}</small></span></label></div>`).join("");
   const warning = line.short ? `<div class="choice-line-warning" role="status"><strong>${uiText("creation.shortage", { need: line.missing, free: line.free, s: line.free > 1 ? "s" : "" })}</strong> ${line.blockers.length ? uiText("creation.shortage.release") : uiText("creation.shortage.none")}${line.blockers.length ? `<div class="choice-line-release">${line.blockers.map((entry) => button(esc(`${entry.name}, ${entry.why}`), "creation-line-release", `data-path="${esc(entry.holder.path)}" data-value="${esc(entry.id)}" data-focus="choice-${slug}-${line.options.indexOf(entry)}"`, "small-btn")).join("")}</div>` : ""}</div>` : "";
   const search = line.options.length > 8 ? `<label class="search-wrap choice-line-search">${icon("search", 17)}<span class="sr-only">${uiText("creation.searchOption")}</span><input id="choice-search-${slug}" type="search" class="search-input" data-bind="ui.creationChoiceQuery" value="${esc(ui.creationChoiceQuery || "")}" placeholder="${uiText("creation.searchPlaceholder")}"></label>` : "";
   const rows = visible.map(({ entry, index }) => {
     const id = `choice-${slug}-${index}`, off = entry.off && !entry.on, spell = line.kind === "spell" ? uiSpellById(c, entry.id) : null;
+    const reference = spell ? spell.referenceId : line.kind === "feat" && uiFeats[entry.id] ? uiFeats[entry.id].referenceId || libraryRuntimeReference("feat", entry.id) : null;
     const brief = !spell && entry.desc && entry.desc.length <= 160;
     const tags = spell ? [spell.school, spell.casting?.split(",")[0], spell.concentration ? uiText("Concentration") : "", spell.ritual ? uiText("Rituel") : ""].filter(Boolean) : [];
     const more = spell ? renderCreationNextSpellDetails(c, spell, line.path)
       : entry.desc && !brief || entry.more?.length ? `<details class="choice-option-details" data-detail="${id}"><summary>${uiText("Détails")}</summary>${entry.desc && !brief ? `<p>${esc(entry.desc)}</p>` : ""}${(entry.more || []).map(([name, text]) => `<p><strong>${esc(name)}</strong><br>${esc(text)}</p>`).join("")}</details>` : "";
-    return `<div class="choice-option ${off ? "off" : ""} ${entry.on ? "selected" : ""}"><label class="choice-option-pick" for="${id}"><input type="${type}" id="${id}" name="choice-${slug}" ${binding} value="${esc(entry.id)}" ${entry.on ? "checked" : ""} ${off || full && !entry.on ? "disabled" : ""}><span class="choice-option-name">${esc(entry.name)}${brief ? `<small>${esc(entry.desc)}</small>` : ""}</span></label>${off ? `<span class="choice-option-why">${esc(entry.why)}</span>` : ""}${tags.length ? `<span class="choice-option-tags">${tags.map((tag) => `<span class="pill outline">${esc(tag)}</span>`).join("")}</span>` : ""}${spell?.referenceId && !window.COMPANION_STANDALONE ? smallIcon("info", "open-reference", uiText("creation.sourceRead", { name: entry.name }), `data-id="${esc(spell.referenceId)}"`) : ""}${more}</div>`;
+    return `<div class="choice-option ${off ? "off" : ""} ${entry.on ? "selected" : ""}"><label class="choice-option-pick" for="${id}"><input type="${type}" id="${id}" name="choice-${slug}" ${binding} value="${esc(entry.id)}" ${entry.on ? "checked" : ""} ${off || full && !entry.on ? "disabled" : ""}><span class="choice-option-name">${esc(entry.name)}${brief ? `<small>${esc(entry.desc)}</small>` : ""}</span></label>${off ? `<span class="choice-option-why">${esc(entry.why)}</span>` : ""}${tags.length ? `<span class="choice-option-tags">${tags.map((tag) => `<span class="pill outline">${esc(tag)}</span>`).join("")}</span>` : ""}${reference && !window.COMPANION_STANDALONE ? smallIcon("info", "open-reference", uiText("creation.sourceRead", { name: entry.name }), `data-id="${esc(reference)}"`) : ""}${more}</div>`;
   }).join("");
-  const fields = line.kind === "subclass" && line.typing ? `<div class="choice-line-fields"><div class="form-grid">${field(uiText("Nom de la sous-classe"), `${path.replace("subclasses", "customSubclasses")}.name`, c.customSubclasses?.[primaryClassId(c)]?.name || "", "text", "", 'maxlength="100"')}</div>${field(uiText("Aptitudes et niveaux"), `${path.replace("subclasses", "customSubclasses")}.description`, c.customSubclasses?.[primaryClassId(c)]?.description || "", "textarea", uiText("Effets descriptifs. Les bonus chiffrés et compteurs s’ajoutent dans Maison."), 'maxlength="10000"')}</div>` : "";
+  const fields = line.typing ? renderCreationNextCustom(c, line, prefix) : "";
   const columns = line.pool && visible.length > 8 ? "columns" : "";
-  return `<div class="choice-line ${state}" data-line="${esc(line.id)}">${head}<div class="choice-line-body" id="choice-body-${slug}">${warning}${help}${search}<div class="choice-line-options ${columns}" role="group" aria-label="${esc(line.name)}">${rows || `<p class="creation-choice-empty">${uiText("creation.noOption")}</p>`}</div>${fields}</div></div>`;
+  return `${tag}${head}<div class="choice-line-body" id="choice-body-${slug}">${warning}${help}${search}${campaign}<div class="choice-line-options ${columns}" role="group" aria-label="${esc(line.name)}">${stale}${rows || (stale ? "" : `<p class="creation-choice-empty">${uiText("creation.noOption")}</p>`)}</div>${fields}</div></div>`;
 }
-/** Ce qui manque, chaque manque ouvrant sa ligne. */
-function renderCreationNextRemaining(lines) {
+/** Ce qui manque, chaque manque ouvrant sa ligne ; regroupé par niveau quand l’écran en couvre plusieurs. */
+function renderCreationNextRemaining(lines, byLevel = false) {
   const missing = lines.filter((line) => !line.done);
-  return missing.length
-    ? `<p class="choice-remaining" role="status">${uiText("creation.remaining", { count: missing.length, s: missing.length > 1 ? "s" : "" })} ${missing.map((line, index) => `<button type="button" class="choice-remaining-link" id="choice-missing-${creationNextSlug(line.id)}" data-action="creation-line-open" data-id="${esc(line.id)}"><span>${esc(line.name)}</span>${index < missing.length - 1 ? "," : "."}</button>`).join(" ")}</p>`
-    : `<p class="choice-remaining complete" role="status">${uiText("creation.complete")}</p>`;
+  if (!missing.length) return `<p class="choice-remaining complete" role="status">${uiText("creation.complete")}</p>`;
+  const links = (rows) => rows.map((line, index) => `<button type="button" class="choice-remaining-link" id="choice-missing-${creationNextSlug(line.id)}" data-action="creation-line-open" data-id="${esc(line.id)}"><span>${esc(line.name)}</span>${index < rows.length - 1 ? "," : "."}</button>`).join(" ");
+  const levels = byLevel ? [...new Set(missing.map((line) => line.level))].map((level) => `<span class="choice-remaining-level"><strong>${uiText("creation.remainingLevel", { level })}</strong> ${links(missing.filter((line) => line.level === level))}</span>`).join("") : "";
+  return `<p class="choice-remaining" role="status">${uiText("creation.remaining", { count: missing.length, s: missing.length > 1 ? "s" : "" })} ${levels || links(missing)}</p>`;
 }
 /** Maîtrises fixes d’une famille (compétences, langues, outils), regroupées par source. */
 function creationNextAcquired(c, family, key) {
@@ -47836,6 +48114,7 @@ function renderSheet(c) {
     issues = characterIssues(c),
     effectiveConditions = d.wildShape?.conditions || receivedConditions(c),
     effectiveExhaustion = d.wildShape?.conditionImmunities.includes("exhaustion") ? 0 : c.state.exhaustion,
+    rage = barbarianStatus(c),
     subs = subclassSummary(c);
   const classes = classLevels(c), sheetClass = classes.length === 1 ? uiText("{p0} · Niveau {p1}", { p0: uiClasses[classes[0].classId].name, p1: d.level }) : uiText("{p0} · Niveau {p1}", { p0: classSummary(c), p1: d.level });
   return `<section class="hero sheet-hero"><div class="hero-identity">${characterPortrait(c, { editable: true })}<div class="hero-summary"><h1>${esc(c.name)}</h1><p class="hero-origin">${esc(d.race.name)}</p><p class="subtitle">${esc(sheetClass)}</p><section class="identity-hp hp-panel"><div class="hp-line"><div class="hp-reading"><strong class="hp-current">${d.currentHp}</strong><span class="hp-max">/ ${d.maxHp} <span class="hp-unit">${uiText("PV")}</span></span></div><button class="link-btn hp-temp${c.state.tempHp ? " has-value" : ""}" data-action="temporary-hp" aria-label="${c.state.tempHp ? uiText("{p0} points de vie temporaires. Modifier la réserve", { p0: c.state.tempHp }) : uiText("Ajouter des points de vie temporaires")}">${c.state.tempHp ? `<span><strong>+${c.state.tempHp}</strong>${uiText("PV temporaires")}</span>` : `<span>${uiText("{p0} PV temporaires", { p0: icon("plus", 13) })}</span>`}</button><button class="icon-btn hp-details" data-action="hp-details" aria-label="${uiText("Détails des points de vie et dés de vie")}">${icon("info", 18)}</button></div>${d.currentHp < d.maxHp / 2 ? `<span class="pill ${d.currentHp === 0 ? "red" : ""}">${d.currentHp === 0 ? uiText("À 0 PV") : uiText("Blessé")}</span>` : ""}${effectiveExhaustion >= 4 ? ("<p class=\"small hp-warning\">" + uiText("Maximum réduit par l’épuisement.") + "</p>") : ""}</section><p class="hero-context">${esc(d.background.name)}${subs ? ` · ${esc(subs)}` : ""}</p></div></div><div class="hp-actions sheet-health-actions">${button(uiText("{p0} Dégâts", { p0: icon("sun", 18) }), "damage", "", "primary")}${button(uiText("{p0} Soins", { p0: icon("plus", 18) }), "heal", "", "ghost")}</div>${d.currentHp === 0 ? `<div class="sheet-death-saves">${renderDeathSaves(c)}</div>` : ""}</section>${renderActiveForm(c, d)}${renderSheetCarryWarning(c, d)}<div class="split sheet-panels${sheetSpellIds(c).size ? " has-magic" : ""}"><div class="stack"><div class="stats-strip sheet-stats">${[
@@ -47872,7 +48151,7 @@ function renderSheet(c) {
     )
     .join("")}</div><div class="tiny muted section-gap">${uiText("Point plein : maîtrise. Point cerclé : expertise.")}</div></details>${renderProficiencies(d)}</div><div class="stack"><section class="panel resource-panel"><div class="panel-head"><h2 class="panel-title">${uiText("{p35} Ressources", { p35: icon("sun", 19) })}</h2><span class="tiny muted">${uiText("Restantes")}</span></div><div class="resources">${
     renderResourceGroups(c, res)
-  }</div>${renderArcaneWard(c)}${wildShapeRules(c) ? `<button type="button" class="link-btn beast-link" data-action="navigate" data-route="wildshape">${uiText("{p0} Voir les formes animales disponibles", { p0: icon("paw", 15) })}</button>` : ""}<div class="rest-actions">${button(uiText("{p0} Repos court", { p0: icon("coffee", 18) }), "rest-short")}${button(uiText("{p0} Repos long", { p0: icon("bed", 18) }), "rest-long")}</div>${renderResourceSessionTools(c)}</section>${renderSheetMagic(c, d)}<section class="panel conditions-panel"><div class="panel-head"><h2 class="panel-title">${uiText("États et effets")}</h2><details class="sheet-condition-actions"><summary>${uiText("Ajouter")}</summary><div>${button(uiText("États et épuisement"), "conditions", "", "ghost")}${button(uiText("Ajouter un effet"), "received-add", "", "ghost")}${button(uiText("Ajouter une affection"), "affection-add", "", "ghost")}</div></details></div>${effectiveConditions.length ? `<div class="condition-chips">${effectiveConditions.map((s) => `<button class="condition-chip" data-action="conditions">${esc(uiSystemText(s))}</button>`).join("")}</div>` : ("<p class=\"small muted\">" + uiText("Aucun état actif.") + "</p>")}${effectiveExhaustion ? `<button class="link-btn exhaustion-summary" data-action="conditions">${uiText("Épuisement")} ${effectiveExhaustion} / 6</button>` : ""}${effectiveExhaustion ? `<p class="tiny muted">${uiText("Effets cumulés : {p0}.", { p0: EXHAUSTION.slice(1, effectiveExhaustion + 1).join(" ; ") })}</p>` : ""}${Object.keys(conditionAnnotationsOf(c)).length ? `<details class="feature-item"><summary>${uiText("Annotations des états")}</summary>${conditionAnnotationSummary(c)}</details>` : ""}${renderReceivedEffects(c, true)}</section><section class="panel features-panel"><div class="panel-head"><h2 class="panel-title">${uiText("{p52} Aptitudes", { p52: icon("book", 18) })}</h2><button class="link-btn" data-action="navigate" data-route="features">${uiText("Tout voir {p53}", { p53: icon("chevron", 13) })}</button></div>${featureGroups(c, d)
+  }</div>${renderArcaneWard(c)}${wildShapeRules(c) ? `<button type="button" class="link-btn beast-link" data-action="navigate" data-route="wildshape">${uiText("{p0} Voir les formes animales disponibles", { p0: icon("paw", 15) })}</button>` : ""}<div class="rest-actions">${button(uiText("{p0} Repos court", { p0: icon("coffee", 18) }), "rest-short")}${button(uiText("{p0} Repos long", { p0: icon("bed", 18) }), "rest-long")}</div>${renderResourceSessionTools(c)}</section>${renderSheetMagic(c, d)}<section class="panel conditions-panel"><div class="panel-head"><h2 class="panel-title">${uiText("États et effets")}</h2><details class="sheet-condition-actions"><summary>${uiText("Ajouter")}</summary><div>${button(uiText("États et épuisement"), "conditions", "", "ghost")}${button(uiText("Ajouter un effet"), "received-add", "", "ghost")}${button(uiText("Ajouter une affection"), "affection-add", "", "ghost")}</div></details></div>${effectiveConditions.length || rage.active ? `<div class="condition-chips">${effectiveConditions.map((s) => `<button class="condition-chip" data-action="conditions">${esc(uiSystemText(s))}</button>`).join("")}${rage.active ? `<button class="condition-chip" data-action="barbarian-session" data-kind="end" data-active-state="rage">${rage.frenzy ? uiText("Rage et frénésie") : uiText("Rage")}</button>` : ""}</div>` : ("<p class=\"small muted\">" + uiText("Aucun état actif.") + "</p>")}${effectiveExhaustion ? `<button class="link-btn exhaustion-summary" data-action="conditions">${uiText("Épuisement")} ${effectiveExhaustion} / 6</button>` : ""}${effectiveExhaustion ? `<p class="tiny muted">${uiText("Effets cumulés : {p0}.", { p0: EXHAUSTION.slice(1, effectiveExhaustion + 1).join(" ; ") })}</p>` : ""}${Object.keys(conditionAnnotationsOf(c)).length ? `<details class="feature-item"><summary>${uiText("Annotations des états")}</summary>${conditionAnnotationSummary(c)}</details>` : ""}${renderReceivedEffects(c, true)}</section><section class="panel features-panel"><div class="panel-head"><h2 class="panel-title">${uiText("{p52} Aptitudes", { p52: icon("book", 18) })}</h2><button class="link-btn" data-action="navigate" data-route="features">${uiText("Tout voir {p53}", { p53: icon("chevron", 13) })}</button></div>${featureGroups(c, d)
     .map(
       ([title, items], g) =>
         `<div class="feature-group-title">${esc(title)}</div>${items
@@ -47969,14 +48248,16 @@ function renderResourceGroups(c, entries) {
   if (!entries.length) return ("<p class=\"small muted\">" + uiText("Pas de ressource à suivre à ce niveau.") + "</p>");
   const groups = new Map();
   for (const entry of entries) {
+    if (entry.mergedInto) continue;
     const reset = resourceResetLabel(entry.reset);
     if (!groups.has(reset)) groups.set(reset, []);
     groups.get(reset).push(entry);
   }
   return [...groups].map(([reset, rows]) => `<div class="resource-family"><h3 class="resource-family-heading">${esc(reset)}</h3><div class="resource-family-rows">${rows.map((r) => {
     const cooldown = c.state.resourceCooldowns?.[r.id] || 0;
-    const counter = r.counter ? `${smallIcon("minus", "resource-use", uiText("Corriger {p0}", { p0: r.name }), `data-key="${esc(r.id)}" data-delta="-1" ${r.spent <= 0 ? "disabled" : ""}`)}<span class="counter-value">${r.spent}</span>${smallIcon("plus", "resource-use", uiText("Ajouter une utilisation de {p0}", { p0: r.name }), `data-key="${esc(r.id)}" data-delta="1"`)}` : r.max === null ? ("<span class=\"counter-value\" aria-label=\"" + uiText("À volonté") + "\">∞</span>") : `${smallIcon("minus", "resource-use", uiText("Dépenser {p0}", { p0: r.name }), `data-key="${esc(r.id)}" data-delta="1" ${r.remaining <= 0 ? "disabled" : ""}`)}<span class="counter-value">${r.remaining}<small> / ${r.max}</small></span>${smallIcon("plus", "resource-use", uiText("Corriger la dépense de {p0} : récupérer un usage", { p0: r.name }), `data-key="${esc(r.id)}" data-delta="-1" ${r.spent <= 0 ? "disabled" : ""}`)}`;
-    return `<div class="resource-row"><div><button class="link-btn resource-name" data-action="resource-info" data-key="${esc(r.id)}">${esc(r.name)} ${icon("info", 13)}</button>${(BARD_SLOT_FEATURES[r.id] || CLERIC_SLOT_FEATURES[r.id] || PALADIN_SLOT_FEATURES[r.id] || RANGER_SLOT_FEATURES[r.id] || FIGHTER_PSI_PAYMENTS.includes(r.id) || ROGUE_PSI_PAYMENTS[r.id] || ["rogue-wails", "rogue-ghost-walk"].includes(r.id)) ? `<div>${button(ROGUE_PSI_PAYMENTS[r.id] || ["rogue-wails", "rogue-ghost-walk"].includes(r.id) ? uiText("Choisir la dépense") : FIGHTER_PSI_PAYMENTS.includes(r.id) ? uiText("Utiliser avec un dé psionique") : uiText("Utiliser avec un emplacement"), "bard-feature-payment", `data-key="${esc(r.id)}"`, "small-btn ghost")}</div>` : ""}${r.id === "portent" ? `<div class="actions">${Array.from({ length: r.max }, (_, i) => `<label>${uiText("Dé {p0} ", { p0: i + 1 })}<input type="number" min="1" max="20" data-wizard-portent="${i}" value="${c.state.wizard?.portent?.[i] ?? ""}" style="width:4em"></label>`).join("")}</div>` : ""}${r.id === "wizard-bladesong" ? `<div>${button(c.state.wizard?.bladesong ? uiText("Terminer le Chant des lames") : uiText("Activer le Chant des lames"), "wizard-bladesong", "", "small-btn ghost")}</div><div class="tiny muted">${uiText("Armure légère ou aucune, sans bouclier. Le chant cesse si tu attaques à deux mains. Avantage aux tests d’Acrobaties et bonus d’INT aux sauvegardes de concentration.")}</div>` : ""}${r.id === "wizard-scrivener-scroll" ? `<label>${uiText("Sort du parchemin ")}<select data-wizard-scribe><option value="">${uiText("Choisis un sort")}</option>${spellAcquisitions(c).filter((e) => e.classId === "wizard" && e.known && !e.always).map((e) => uiSpellById(c, e.spellId)).filter((s) => s && [1, 2].includes(s.level) && /^1 action(?:$|[ ,(])/.test(s.casting)).map((s) => `<option value="${esc(s.id)}" ${c.state.wizard?.scribeSpell === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></label>` : ""}${r.id === "relentless-rage" ? `<div class="tiny muted">${uiText("Prochaine sauvegarde : DD {p0}", { p0: barbarianStatus(c).relentlessDC })}</div>` : ""}${cooldown ? `<div class="resource-cooldown">${uiText("Délai de règle : {p0} jour{p1}. Correction disponible.", { p0: cooldown, p1: cooldown > 1 ? "s" : "" })}</div>` : ""}</div><div class="counter">${counter}</div></div>`;
+    const counter = r.action ? `<span class="counter-value">${r.max === null ? "∞" : `${r.remaining}<small> / ${r.max}</small>`}</span>${button(esc(r.actionLabel || uiText("Utiliser")), "resource-use", `data-key="${esc(r.id)}" data-delta="1" aria-label="${esc(`${r.actionLabel || uiText("Utiliser")} : ${r.name}`)}" ${!r.active && r.max !== null && r.remaining <= 0 ? "disabled" : ""}`, "small-btn resource-action")}`
+      : r.counter ? `${smallIcon("minus", "resource-use", uiText("Corriger {p0}", { p0: r.name }), `data-key="${esc(r.id)}" data-delta="-1" ${r.spent <= 0 ? "disabled" : ""}`)}<span class="counter-value">${r.spent}</span>${smallIcon("plus", "resource-use", uiText("Ajouter une utilisation de {p0}", { p0: r.name }), `data-key="${esc(r.id)}" data-delta="1"`)}` : r.max === null ? ("<span class=\"counter-value\" aria-label=\"" + uiText("À volonté") + "\">∞</span>") : `${smallIcon("minus", "resource-use", uiText("Dépenser {p0}", { p0: r.name }), `data-key="${esc(r.id)}" data-delta="1" ${r.remaining <= 0 ? "disabled" : ""}`)}<span class="counter-value">${r.remaining}<small> / ${r.max}</small></span>${smallIcon("plus", "resource-use", uiText("Corriger la dépense de {p0} : récupérer un usage", { p0: r.name }), `data-key="${esc(r.id)}" data-delta="-1" ${r.spent <= 0 ? "disabled" : ""}`)}`;
+    return `<div class="resource-row${r.action ? " action-row" : ""}"><div><button class="link-btn resource-name" data-action="resource-info" data-key="${esc(r.id)}">${esc(r.name)} ${icon("info", 13)}</button>${r.activeLabel ? `<span class="pill state-active">${esc(r.activeLabel)}</span>` : ""}${(BARD_SLOT_FEATURES[r.id] || CLERIC_SLOT_FEATURES[r.id] || PALADIN_SLOT_FEATURES[r.id] || RANGER_SLOT_FEATURES[r.id] || FIGHTER_PSI_PAYMENTS.includes(r.id) || ROGUE_PSI_PAYMENTS[r.id] || ["rogue-wails", "rogue-ghost-walk"].includes(r.id)) ? `<div>${button(ROGUE_PSI_PAYMENTS[r.id] || ["rogue-wails", "rogue-ghost-walk"].includes(r.id) ? uiText("Choisir la dépense") : FIGHTER_PSI_PAYMENTS.includes(r.id) ? uiText("Utiliser avec un dé psionique") : uiText("Utiliser avec un emplacement"), "bard-feature-payment", `data-key="${esc(r.id)}"`, "small-btn ghost")}</div>` : ""}${r.id === "portent" ? `<div class="actions">${Array.from({ length: r.max }, (_, i) => `<label>${uiText("Dé {p0} ", { p0: i + 1 })}<input type="number" min="1" max="20" data-wizard-portent="${i}" value="${c.state.wizard?.portent?.[i] ?? ""}" style="width:4em"></label>`).join("")}</div>` : ""}${r.id === "wizard-bladesong" ? `<div>${button(c.state.wizard?.bladesong ? uiText("Terminer le Chant des lames") : uiText("Activer le Chant des lames"), "wizard-bladesong", "", "small-btn ghost")}</div><div class="tiny muted">${uiText("Armure légère ou aucune, sans bouclier. Le chant cesse si tu attaques à deux mains. Avantage aux tests d’Acrobaties et bonus d’INT aux sauvegardes de concentration.")}</div>` : ""}${r.id === "wizard-scrivener-scroll" ? `<label>${uiText("Sort du parchemin ")}<select data-wizard-scribe><option value="">${uiText("Choisis un sort")}</option>${spellAcquisitions(c).filter((e) => e.classId === "wizard" && e.known && !e.always).map((e) => uiSpellById(c, e.spellId)).filter((s) => s && [1, 2].includes(s.level) && /^1 action(?:$|[ ,(])/.test(s.casting)).map((s) => `<option value="${esc(s.id)}" ${c.state.wizard?.scribeSpell === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></label>` : ""}${r.id === "relentless-rage" ? `<div class="tiny muted">${uiText("Prochaine sauvegarde : DD {p0}", { p0: barbarianStatus(c).relentlessDC })}</div>` : ""}${cooldown ? `<div class="resource-cooldown">${uiText("Délai de règle : {p0} jour{p1}. Correction disponible.", { p0: cooldown, p1: cooldown > 1 ? "s" : "" })}</div>` : ""}</div><div class="counter">${counter}</div></div>`;
   }).join("")}</div></div>`).join("");
 }
 function fighterImpactRows(c, next) {
@@ -48044,6 +48325,7 @@ function paladinImpactRows(c, next, source) {
     rows.push({ label: uiText("Emplacements niveau {p0} restants", { p0: level }), before: capacity - (c.state.slotsUsed[level] || 0), after: capacity - (next.state.slotsUsed[level] || 0), source });
   }
   if (c.state.pactUsed !== next.state.pactUsed) rows.push({ label: "Emplacements de pacte restants", before: pactMagic(c).count - c.state.pactUsed, after: pactMagic(next).count - next.state.pactUsed, source });
+  if (c.state.hp !== next.state.hp) rows.push({ label: uiText("PV actuels"), before: c.state.hp, after: next.state.hp, source });
   const oldEffects = paladinSession(c), newEffects = paladinSession(next);
   for (const effect of paladinEffectOptions(next)) if (oldEffects.active[effect.id] !== newEffects.active[effect.id]) rows.push({ label: effect.name, before: oldEffects.active[effect.id] ? "Appliqué" : "Inactif", after: newEffects.active[effect.id] ? "Appliqué" : "Inactif", source: effect.name });
   return rows;
@@ -48143,12 +48425,13 @@ function renderClericSession(c) {
 }
 const activeClericHarness = (c) => ruleVariantOptions(c).some((entry) => entry.id === "harnessDivinePower" && entry.active && entry.eligible);
 const clericResourceImpact = (c, ids) => resources(c).filter((entry) => ids.includes(entry.id)).map((entry) => ({ label: `${entry.name} : utilisations restantes`, before: entry.remaining, after: entry.remaining - 1, source: entry.name }));
+/** L'état, le bouton et la référence de la rage sont sur la ligne « Rages ». Ce bloc ne garde que les choix de rage de trois voies. */
 function renderBarbarianSession(c) {
   const status = barbarianStatus(c);
-  if (!status.level) return "";
+  if (!["beast", "giant", "wildMagic"].includes(status.subclass)) return "";
   const choice = (key) => uiSubclasses.barbarian[status.subclass]?.choices.find((spec) => spec.key === key)?.options[status.choices[key]]?.[0];
-  const notes = [status.frenzy && uiText("Frénésie : +1 épuisement à la fin"), status.active && status.heavyArmor && uiText("Armure lourde : les bénéfices de base de rage sont suspendus"), status.active && status.subclass === "beast" && choice("beastWeapon"), status.subclass === "beast" && choice("beastAdaptation") && uiText("Adaptation : {p0}", { p0: choice("beastAdaptation") }), status.size && uiText("Taille {p0}", { p0: status.size === "TG" ? uiText("très grande") : "grande" }), status.reachBonus && uiText("Allonge +{p0}", { p0: uiMeters(status.reachBonus) }), status.wildSurge && uiText("Magie sauvage : résultat {p0}", { p0: status.wildSurge })].filter(Boolean);
-  return `<div class="session-tools" data-barbarian-session><div class="summary-row"><strong>${status.active ? uiText("Rage active") : uiText("Rage inactive")}</strong>${renderReference(barbarianReference("Rage").referenceId)}</div>${notes.length ? `<p class="small">${esc(notes.join(" · "))}</p>` : ""}<div class="actions">${button(status.active ? uiText("Terminer ma rage") : uiText("Entrer en rage"), "barbarian-session", `data-kind="${status.active ? "end" : "start"}"`, "small-btn")}${["beast", "giant", "wildMagic"].includes(status.subclass) ? button(uiText("Choix de rage"), "barbarian-session", 'data-kind="update"', "small-btn ghost") : ""}</div></div>`;
+  const notes = [status.active && status.subclass === "beast" && choice("beastWeapon"), status.subclass === "beast" && choice("beastAdaptation") && uiText("Adaptation : {p0}", { p0: choice("beastAdaptation") }), status.size && uiText("Taille {p0}", { p0: status.size === "TG" ? uiText("très grande") : "grande" }), status.reachBonus && uiText("Allonge +{p0}", { p0: uiMeters(status.reachBonus) }), status.wildSurge && uiText("Magie sauvage : résultat {p0}", { p0: status.wildSurge })].filter(Boolean);
+  return `<div class="session-tools" data-barbarian-session>${notes.length ? `<p class="small">${esc(notes.join(" · "))}</p>` : ""}<div class="actions">${button(uiText("Choix de rage"), "barbarian-session", 'data-kind="update"', "small-btn ghost")}</div></div>`;
 }
 function renderFeaturesPage(c) {
   const all = uiCharacterFeatures(c),
@@ -48487,10 +48770,10 @@ function renderInventory(c) {
     armor = uiArmors[c.equipment.armor] || uiArmors.none,
     hands = heldWeapons(c),
     items = c.inventory.filter((item) => `${item.name} ${item.description || ""}`.toLocaleLowerCase().includes(ui.inventoryQuery.trim().toLocaleLowerCase()));
-  return `<div class="page-head mobile-stack carnet-inventory-head"><div><h1>${uiText("nav.inventory")}</h1></div><div class="actions">${classLevel(c, "artificer") >= 2 || infusionStatus(c).active.length ? button(uiText("Infusions"), "infusions", "", "ghost") : ""}<details class="carnet-add"><summary aria-label="${uiText("Ajouter un objet")}" title="${uiText("Ajouter un objet")}">${icon("plus", 18)}</summary>${button(uiText("Objet du catalogue"), "catalog-item", "", "primary")}${button(uiText("Objet libre"), "new-item", "", "ghost")}</details></div></div><div class="grid-2 desktop-inventory-layout"><div class="desktop-inventory-summary">${renderInventoryCarrySummary(c, d)}<div class="carnet-inventory-disclosures"><details class="panel carnet-equipment" data-detail="inventory-equipment"><summary><strong>${uiText("Équipement")}</strong><span>${uiText("CA {p10}", { p10: d.ac })}</span></summary><div class="panel-head"><button class="link-btn" data-action="equipment">${uiText("Modifier {p6}", { p6: icon("edit", 14) })}</button></div><div class="equipment-summary"><div><div class="item-label">${uiText("Armure")}</div><div class="item-name">${esc(armor.name)}${c.equipment.shield ? uiText(" + bouclier") : ""}</div></div><span class="pill">${uiText("CA {p10}", { p10: d.ac })}</span></div>${d.attacks
+  return `<div class="page-head mobile-stack carnet-inventory-head"><div><h1>${uiText("nav.inventory")}</h1></div><div class="actions">${classLevel(c, "artificer") >= 2 || infusionStatus(c).active.length ? button(uiText("Infusions"), "infusions", "", "ghost") : ""}<details class="carnet-add"><summary aria-label="${uiText("Ajouter un objet")}" title="${uiText("Ajouter un objet")}">${icon("plus", 18)}</summary>${button(uiText("Objet du catalogue"), "catalog-item", "", "primary")}${button(uiText("Objet libre"), "new-item", "", "ghost")}</details></div></div><div class="grid-2 desktop-inventory-layout"><div class="desktop-inventory-summary">${renderInventoryCarrySummary(c, d)}<div class="carnet-inventory-disclosures"><details class="panel carnet-equipment" data-detail="inventory-equipment"><summary><strong>${uiText("Équipement")}</strong><span>${uiText("CA {p10}", { p10: d.ac })}</span></summary><div class="panel-head"><button class="link-btn" data-action="equipment">${uiText("Modifier {p6}", { p6: icon("edit", 14) })}</button></div><div class="equipment-summary"><div><div class="item-label">${uiText("Armure")}</div><div class="item-name">${esc(armor.name)}${c.equipment.shield ? uiText(" + bouclier") : ""}</div></div><span class="pill">${uiText("CA {p10}", { p10: d.ac })}</span></div>${attackGroups(d.attacks)
     .map(
-      (a) =>
-        `<div class="equipment-summary"><div><div class="item-label">${uiText("Arme")}</div><div class="item-name">${esc(a.name)}</div></div><span class="pill">${signed(a.attack)} · ${esc(a.damageDice)} ${signed(a.damageBonus)}</span></div>`,
+      ({ attack: a, count }) =>
+        `<div class="equipment-summary"><div><div class="item-label">${uiText("Arme")}</div><div class="item-name">${esc(attackGroupName({ attack: a, count }))}</div></div><span class="pill">${signed(a.attack)} · ${esc(a.damageDice)} ${signed(a.damageBonus)}</span></div>`,
     )
     .join("")}<p class="small section-gap">${esc(uiText("equipment.mainHand"))} : ${esc(hands.main ? weaponOf(hands.main.id)?.name : uiText("equipment.free"))} · ${esc(uiText("equipment.offHand"))} : ${esc(c.equipment.shield ? uiText("equipment.shield") : hands.off ? weaponOf(hands.off.id)?.name : uiText("equipment.free"))}</p><p class="tiny muted section-gap">${uiText("CA : {p16}.", { p16: esc(d.acExplanation) })}</p>${armor.stealth ? notice(armorerStatus(c).active && armorerStatus(c).model === "infiltrator" ? uiText("Discrétion : l’avantage du champ d’amortissement annule le désavantage de cette armure.") : uiText("Cette armure impose le désavantage aux tests de Discrétion."), "warning") : ""}${!d.armorProficient ? notice(uiText("Armure ou bouclier non maîtrisé : tu ne peux pas lancer de sorts avec cet équipement."), "warning") : ""}${d.strTooLow ? notice(uiText("Force insuffisante pour {p0} : vitesse réduite de 3 m.", { p0: esc(armor.name) }), "warning") : ""}<section class="panel"><h2 class="panel-title">${uiText("Harmonisations : {p25}/{p26}", { p25: inventoryAttunementStatus(c).count, p26: inventoryAttunementStatus(c).limit })}</h2>${button(uiText("Corriger les harmonisations"), "attunements", "", "small-btn ghost")}</section></details><div class="stack"><details class="carnet-coins" data-detail="inventory-coins"><summary><strong>${uiText("Bourse")}</strong><span>${c.gold.toLocaleString(uiLocale())} PO</span></summary><div class="coins">${icon("gem", 28)}<div><strong>${c.gold.toLocaleString(uiLocale())}</strong><span>${uiText(" pièces d’or")}</span></div><button class="link-btn" style="margin-left:auto;color:inherit" data-action="gold">${uiText("Ajuster")}</button></div></details></div></div>${renderRunePanel(c)}</div><section class="section-gap carnet-inventory-list">${
     c.inventory.length
@@ -49032,6 +49315,53 @@ function clearPicks(c, prefixes) {
 function hitDiceLabel(d) {
   return d.hitDice.map((h) => uiText("{p0}/{p1} d{p2}", { p0: h.total - h.spent, p1: h.total, p2: h.die })).join(" · ");
 }
+/**
+ * Regroupe les exemplaires qui s’utilisent à l’identique : une seule ligne « Hachette ×2 ».
+ * index désigne la première attaque du groupe dans d.attacks, pour les jets ; l’attaque à deux armes reste seule.
+ */
+function attackGroups(attacks) {
+  const groups = new Map();
+  attacks.forEach((attack, index) => {
+    const key = attack.twoWeapon ? `two-weapon|${index}` : JSON.stringify([attack.id, attack.name, attack.attack, attack.damageDice, attack.damageBonus, attack.type, attack.properties, attack.proficient, !!attack.pactWeapon, attack.attacksPerAction, attack.additionalDamageDice || "", attack.divineDamageDice || "", attack.critThreshold || 0, attack.context || ""]);
+    if (groups.has(key)) groups.get(key).count++;
+    else groups.set(key, { attack, index, count: 1 });
+  });
+  return [...groups.values()];
+}
+/**
+ * Attaque à deux armes : les attaques de l’action Attaquer avec l’arme de la main principale, puis l’attaque bonus de la seconde main.
+ * Rend les index de d.attacks à enchaîner, ou null si l’arme principale n’a pas de ligne.
+ */
+function twoWeaponRoutine(d, index) {
+  const second = d.attacks[index], main = second?.twoWeapon ? d.attacks.findIndex((attack) => !attack.twoWeapon && attack.instanceId === second.mainInstanceId) : -1;
+  return main < 0 ? null : [...Array(d.attacks[main].attacksPerAction || 1).fill(main), index];
+}
+/** Ouvre la première attaque de l’enchaînement ; les suivantes attendent dans la fenêtre de dés. */
+function startAttackChain(c, d, indexes, step) {
+  const [first, ...rest] = indexes.map((index) => weaponAttackProfile(c, d, index));
+  startAttackSequence(first, step, { chain: rest, chainStep: step });
+}
+/** Passe à l’attaque suivante de l’enchaînement ; false s’il n’en reste pas. */
+function nextChainedAttack(r) {
+  const [next, ...rest] = r?.chain || [];
+  if (!next) return false;
+  // Une option « une fois par tour » entrée dans un jet de dégâts lancé ne se repropose pas aux attaques suivantes.
+  const rolled = r.sequence?.step === "damage" && !!r.result;
+  const chainUsed = [...(r.chainUsed || []), ...(rolled ? r.optionList.filter((option) => option.oncePerTurn && r.optionState.on[option.id]).map((option) => option.id) : [])];
+  stopDiceFx();
+  startAttackSequence(next, r.chainStep, { chain: rest, chainStep: r.chainStep, chainUsed }, true);
+  return true;
+}
+/** « Hachette », ou « Hachette ×2 » pour deux exemplaires regroupés. */
+function attackGroupName({ attack, count }) {
+  return count > 1 ? `${attack.name} ×${count}` : attack.name;
+}
+/** Carte « Attaque à deux armes » : un bouton enchaîne les deux armes, la seconde sans modificateur aux dégâts sauf avec le style. */
+function renderTwoWeaponCard(d, index) {
+  const routine = twoWeaponRoutine(d, index), second = d.attacks[index], main = d.attacks[routine[0]], strikes = routine.length - 1;
+  const line = (attack) => `${esc(attack.damageDice)} ${signed(attack.damageBonus)} ${esc(attack.type)}`;
+  return `<div class="attack-card attack-two-weapon" data-two-weapon><div class="attack-main"><div class="attack-title">${esc(uiText("attack.twoWeapon.title"))}</div><div class="attack-meta">${esc(uiText(strikes > 1 ? "attack.twoWeapon.mainMany" : "attack.twoWeapon.main", { name: main.name, count: strikes }))} : ${line(main)}<br>${esc(uiText("attack.twoWeapon.second", { name: second.weaponName }))} : ${line(second)} · ${esc(second.properties[1])}</div></div><button class="attack-roll" data-action="roll-two-weapon" data-step="attack" data-index="${index}" aria-label="${esc(uiText("attack.twoWeapon.rollLabel"))}"><strong>${signed(main.attack)}${second.attack === main.attack ? "" : ` / ${signed(second.attack)}`}</strong><small>${uiText("toucher")}</small></button><button class="attack-roll ghost" data-action="roll-two-weapon" data-step="damage" data-index="${index}" aria-label="${esc(uiText("attack.twoWeapon.damageLabel"))}">${icon("dice", 18)}<small>${uiText("dégâts")}</small></button></div>`;
+}
 function renderAttacks(c, d) {
   const extras = [
     d.extraAttacks > 1 ? uiText("{p0} attaques avec l’action Attaquer", { p0: d.extraAttacks }) : "",
@@ -49040,12 +49370,12 @@ function renderAttacks(c, d) {
     d.critThreshold < 20 ? uiText("Critique sur {p0}-20", { p0: d.critThreshold }) : "",
     d.sneakAttack ? uiText("Attaque sournoise +{p0}d6", { p0: d.sneakAttack }) : "",
   ].filter(Boolean);
-  return `<div class="section-title section-gap"><h3>${uiText("Attaques")}</h3><button class="link-btn" data-action="equipment">${uiText("Équiper {p1}", { p1: icon("chevron", 13) })}</button></div>${d.attacks
+  return `<div class="section-title section-gap"><h3>${uiText("Attaques")}</h3><button class="link-btn" data-action="equipment">${uiText("Équiper {p1}", { p1: icon("chevron", 13) })}</button></div>${attackGroups(d.attacks)
     .map(
-      (a, i) =>
-        `<div class="attack-card"><div class="attack-main"><div class="attack-title">${esc(a.name)}${a.proficient ? "" : (" <span class=\"pill red\">" + uiText("non maîtrisée") + "</span>")}</div><div class="attack-meta">${esc(a.damageDice)} ${signed(a.damageBonus)} ${esc(a.type)}${a.additionalDamageDice ? uiText(" + {p0} (fendoir)", { p0: a.additionalDamageDice }) : ""}${a.divineDamageDice ? uiText(" + {p0} radiants (châtiment amélioré)", { p0: a.divineDamageDice }) : ""}${a.properties.length ? ` · ${esc(a.properties.join(", "))}` : ""}${a.pactWeapon ? uiText(" · arme de pacte") : ""}${a.attacksPerAction > 1 ? uiText(" · {p0} attaques par action", { p0: a.attacksPerAction }) : ""}</div></div><button class="attack-roll" data-action="roll-attack" data-index="${i}" aria-label="${uiText("Jet d’attaque {p11}", { p11: esc(a.name) })}"><strong>${signed(a.attack)}</strong><small>${uiText("toucher")}</small></button><button class="attack-roll ghost" data-action="roll-damage" data-index="${i}" aria-label="${uiText("Dégâts {p15}", { p15: esc(a.name) })}">${icon("dice", 18)}<small>${uiText("dégâts")}</small></button></div>`,
+      ({ attack: a, index: i, count }) => twoWeaponRoutine(d, i) ? renderTwoWeaponCard(d, i) :
+        `<div class="attack-card"><div class="attack-main"><div class="attack-title">${esc(attackGroupName({ attack: a, count }))}${a.proficient ? "" : (" <span class=\"pill red\">" + uiText("non maîtrisée") + "</span>")}</div><div class="attack-meta">${esc(a.damageDice)} ${signed(a.damageBonus)} ${esc(a.type)}${a.additionalDamageDice ? uiText(" + {p0} (fendoir)", { p0: a.additionalDamageDice }) : ""}${a.divineDamageDice ? uiText(" + {p0} radiants (châtiment amélioré)", { p0: a.divineDamageDice }) : ""}${a.properties.length ? ` · ${esc(a.properties.join(", "))}` : ""}${a.pactWeapon ? uiText(" · arme de pacte") : ""}${a.attacksPerAction > 1 ? uiText(" · {p0} attaques par action", { p0: a.attacksPerAction }) : ""}</div></div><button class="attack-roll" data-action="roll-attack" data-index="${i}" aria-label="${uiText("Jet d’attaque {p11}", { p11: esc(a.name) })}"><strong>${signed(a.attack)}</strong><small>${uiText("toucher")}</small></button><button class="attack-roll ghost" data-action="roll-damage" data-index="${i}" aria-label="${uiText("Dégâts {p15}", { p15: esc(a.name) })}">${icon("dice", 18)}<small>${uiText("dégâts")}</small></button></div>`,
     )
-    .join("")}${extraAttackEntries(c, d).map(renderExtraAttack).join("")}${extras.length ? `<p class="tiny muted attack-extras">${extras.map(esc).join(" · ")}</p>` : ""}`;
+    .join("")}${extraAttackEntries(c, d).map(renderExtraAttack).join("")}${extras.length ? `<p class="tiny muted attack-extras">${extras.map(esc).join(" · ")}</p>` : ""}${d.twoWeapon && !d.twoWeapon.allowed ? `<p class="tiny muted attack-extras" data-two-weapon-refused>${esc(uiText("attack.twoWeapon.notLight", { names: d.twoWeapon.notLight.map((id) => uiWeapons[id]?.name || id).join(", ") }))}</p>` : ""}`;
 }
 function renderProficiencies(d) {
   const armorNames = { light: uiText("Légères"), medium: uiText("Intermédiaires"), heavy: uiText("Lourdes"), shield: uiText("Boucliers") };
@@ -49065,10 +49395,13 @@ function renderProficiencies(d) {
   if (d.climbSpeed) rows.push([uiText("Escalade"), uiMeters(d.climbSpeed)]);
   if (d.burrowSpeed) rows.push([uiText("Fouissement"), uiMeters(d.burrowSpeed)]);
   if (d.wildShape?.senses.length) rows.push([uiText("Sens de la forme (source EN)"), d.wildShape.senses.join(" ; ")]);
-  if (d.resistances.length) rows.push([uiText("Résistances"), d.resistances.join(", ")]);
-  if (d.immunities.length) rows.push([uiText("Immunités"), d.immunities.join(", ")]);
-  if (d.vulnerabilities?.length) rows.push([uiText("Vulnérabilités"), d.vulnerabilities.join(", ")]);
+  rows.push(...defenseRows(d));
   return `<section class="panel prof-panel"><div class="panel-head"><h2 class="panel-title">${uiText("{p0} Maîtrises & sens", { p0: icon("compass", 19) })}</h2>${d.tools.length ? button(uiText("Test d’outil"), "tool-check", "", "small-btn ghost") : ""}</div>${rows.map(([k, v]) => `<div class="summary-row"><span>${esc(k)}</span><strong>${esc(v)}</strong></div>`).join("")}</section>`;
+}
+// Résistances, immunités et vulnérabilités que le personnage a : un rappel, sur la fiche comme à la saisie des dégâts.
+// Le type des dégâts reçus et ce qu'il change se décident à la table.
+function defenseRows(d) {
+  return [[uiText("Résistances"), d.resistances], [uiText("Immunités"), d.immunities], [uiText("Vulnérabilités"), d.vulnerabilities || []]].filter(([, list]) => list.length).map(([label, list]) => [label, list.join(", ")]);
 }
 function featureGroups(c) {
   const groups = new Map();
@@ -49136,8 +49469,12 @@ function prereqText(prereq) {
   if (prereq.spellcaster) out.push("savoir lancer au moins un sort");
   return out.join(" ; ");
 }
+/** Nom d’un choix enregistré qui n’est plus proposé, d’après son chemin de liaison. */
+function invalidSelectionLabel(c, path, id, choiceKey = null) {
+  return acquisitionLabel(c, { kind: choiceKey ? "choice" : "pick", choiceKey, value: id, sourceKey: path.split(".picks.")[1], totalLevel: Number(path.split(".")[2]) + 1 || 1 });
+}
 function renderInvalidSelections(c, selected, options, path, choiceKey = null) {
-  return selected.filter((id) => !Object.hasOwn(options, id)).map((id) => `<label class="option-row selected"><input type="checkbox" data-array="${esc(path)}" value="${esc(id)}" checked><span><strong>${esc(acquisitionLabel(c, { kind: choiceKey ? "choice" : "pick", choiceKey, value: id, sourceKey: path.split(".picks.")[1], totalLevel: Number(path.split(".")[2]) + 1 || 1 }))}</strong><p>${uiText("Choix conservé, devenu inadmissible. Décoche-le pour le retirer du brouillon ; il restera dans l’historique après validation.")}</p></span></label>`).join("");
+  return selected.filter((id) => !Object.hasOwn(options, id)).map((id) => `<label class="option-row selected"><input type="checkbox" data-array="${esc(path)}" value="${esc(id)}" checked><span><strong>${esc(invalidSelectionLabel(c, path, id, choiceKey))}</strong><p>${uiText("Choix conservé, devenu inadmissible. Décoche-le pour le retirer du brouillon ; il restera dans l’historique après validation.")}</p></span></label>`).join("");
 }
 function renderPickSpecs(c, specs, prefix, { empty = "" } = {}) {
   if (!specs.length) return empty;
@@ -49221,51 +49558,31 @@ function renderFeatPicker(c, path, current, level) {
   const custom = `<label class="option-row ${current === "custom" ? "selected" : ""}"><input type="radio" name="${esc(path)}" data-bind="${esc(path)}" value="custom" ${current === "custom" ? "checked" : ""}><span><strong>${uiText("Don maison ou d’un autre livre")}</strong><p>${uiText("Nom et effets libres ; les bonus chiffrés se règlent dans Maison.")}</p></span></label>`;
   return `<div class="feat-picker"><div class="search-wrap">${icon("search", 18)}<input id="feat-search-${esc(String(level))}" class="search-input" data-bind="ui.featQuery" value="${esc(ui.featQuery || "")}" placeholder="${uiText("Chercher un don…")}" aria-label="${uiText("Chercher un don")}"></div>${campaign}<div class="option-scroll tall">${rows || ("<p class=\"small muted\">" + uiText("Aucun don ne correspond.") + "</p>")}${custom}</div></div>`;
 }
-function renderAsiEditor(c, level, prefix) {
-  const l = c.levels[level - 1],
-    i = level - 1,
-    path = `${prefix}.levels.${i}.asi`;
-  let body = "";
-  if (l.asi.mode === "ability")
-    body = `<div class="form-grid">${selectField(uiText("Premier +1"), `${path}.a`, l.asi.a, Object.fromEntries(Object.entries(uiAbilities).map(([k, v]) => [k, v.name])))}${selectField(uiText("Deuxième +1"), `${path}.b`, l.asi.b, Object.fromEntries(Object.entries(uiAbilities).map(([k, v]) => [k, v.name])))}</div><p class="tiny muted">${uiText("Choisis deux fois la même caractéristique pour +2. Maximum 20.")}</p>`;
-  else {
-    body = renderFeatPicker(c, `${path}.featId`, l.asi.featId, level);
-    if (l.asi.featId === "custom")
-      body += `${field(uiText("Nom du don"), `${path}.featName`, l.asi.featName || "", "text", "", 'maxlength="120"')}${field(uiText("Effets et prérequis"), `${path}.featDescription`, l.asi.featDescription || "", "textarea", uiText("Les bonus chiffrés éventuels se définissent dans Maison."), 'maxlength="6000"')}`;
-    body += renderPickSpecs(c, uiPickSpecs(c, (src) => src.key === `feat|L${level}`), prefix);
-  }
-  return `<section class="choice-spec"><h3>${uiText("Amélioration ou don")}</h3><div class="segmented"><button type="button" data-action="asi-mode" data-prefix="${prefix}" data-level="${level}" data-value="ability" class="${l.asi.mode === "ability" ? "active" : ""}">${uiText("+2 ou +1/+1")}</button><button type="button" data-action="asi-mode" data-prefix="${prefix}" data-level="${level}" data-value="feat" class="${l.asi.mode === "feat" ? "active" : ""}">${uiText("Prendre un don")}</button></div>${body}</section>`;
-}
-function renderLevelEditor(c, level, prefix) {
+/**
+ * Éditeur d’un niveau, commun à l’étape Niveaux de la création (`wiz`) et à la montée de niveau (`lvl`) :
+ * points de vie, lignes de choix du niveau, amélioration de caractéristiques ou don, puis ce que le niveau apporte.
+ * `lines` vient de `creationLevelLines`, `open` est l’identifiant de la ligne ouverte.
+ */
+function renderLevelEditor(c, level, prefix, lines, open) {
   const l = c.levels[level - 1],
     classId = l.classId,
     cls = uiClasses[classId],
     k = classLevelAt(c, level),
     d = uiDerive(c);
+  // Les lignes du don vivent sous le commutateur « Amélioration ou don » ; les autres le précèdent.
+  const rows = (feat) => lines.filter((line) => (line.group === "feat") === feat).map((line) => renderCreationNextLine(c, line, line.id === open, prefix)).join(""), own = rows(false);
   let html = "";
   if (level === 1) html += notice(uiText("Niveau 1 : dé de vie maximal ({p0}), plus ton modificateur de Constitution.", { p0: cls.die }));
   else
     html += `<section class="choice-spec"><h3>${uiText("Points de vie")}</h3><div class="hp-editor">${field(uiText("Résultat du d{p0}", { p0: cls.die }), `${prefix}.levels.${level - 1}.hpDie`, l.hpDie, "number", uiText("Moyenne fixe : {p0}. Constitution {p1} ajoutée automatiquement.", { p0: cls.die / 2 + 1, p1: signed(d.mods.con) }), `min="1" max="${cls.die}" step="1"`)}<div class="actions">${button(uiText("Moyenne ({p0})", { p0: cls.die / 2 + 1 }), "level-hp-average", `data-prefix="${prefix}" data-level="${level}"`, "small-btn")}${button(uiText("{p0} Lancer le d{p1}", { p0: icon("dice", 15), p1: cls.die }), "level-hp-roll", `data-prefix="${prefix}" data-level="${level}"`, "small-btn ghost")}</div></div></section>`;
   if (classId === "artificer") html += renderArtificerSummary(c);
-  if (k === cls.subLevel) html += renderSubclassPicker(c, classId, prefix);
-  if (l.asi) html += renderAsiEditor(c, level, prefix);
-  html += renderChoiceSpecs(c, level, prefix);
-  const keys = [`sub|${classId}|${k}`, `ranger|enemy|L${level}`];
-  if (k === 1 && level > 1) keys.push(`class|${classId}`);
-  if (classId === "artificer" && k >= 2) keys.push("artificer|recipes");
-  if (classId === "warlock" && k === 3) keys.push("pact|tome");
-  if (classId === "warlock" && (l.choices?.invocations?.includes("book") || c.replacements?.some((entry) => entry.choiceKey === "invocations" && entry.totalLevel === level && entry.to === "book"))) keys.push("inv|book");
-  if (classId === "warlock" && k === 10) keys.push("warlock|fiend-resistance");
-  if (classId === "fighter") {
-    if (k === 3) keys.push("fighter|training");
-    if (k === 7) keys.push("fighter|royalEnvoy", "fighter|elegantCourtier");
-    if ([l.choices?.style, l.choices?.secondStyle].flat().includes("superiorTechnique") || (c.replacements || []).some((row) => row.totalLevel === level && ["style", "secondStyle"].includes(row.choiceKey) && row.to === "superiorTechnique")) keys.push("fighter|superiorTechnique");
+  if (own) html += `<section class="choice-group level-lines">${own}</section>`;
+  if (l.asi) {
+    // La répartition des deux +1 reste une saisie : la même caractéristique peut être prise deux fois.
+    const path = `${prefix}.levels.${level - 1}.asi`, abilities = Object.fromEntries(Object.entries(uiAbilities).map(([key, ability]) => [key, ability.name]));
+    const mode = (value, label) => `<button type="button" data-action="asi-mode" data-prefix="${prefix}" data-level="${level}" data-value="${value}" class="${l.asi.mode === value ? "active" : ""}" aria-pressed="${l.asi.mode === value}">${label}</button>`;
+    html += `<section class="choice-spec"><h3>${uiText("Amélioration ou don")}</h3><div class="segmented">${mode("ability", uiText("+2 ou +1/+1"))}${mode("feat", uiText("Prendre un don"))}</div>${l.asi.mode === "ability" ? `<div class="form-grid">${selectField(uiText("Premier +1"), `${path}.a`, l.asi.a, abilities)}${selectField(uiText("Deuxième +1"), `${path}.b`, l.asi.b, abilities)}</div><p class="tiny muted">${uiText("Choisis deux fois la même caractéristique pour +2. Maximum 20.")}</p>` : `<div class="choice-group level-lines">${rows(true)}</div>`}</section>`;
   }
-  if (classId === "ranger" && (k === 2 || (c.replacements || []).some((row) => row.classId === "ranger" && row.totalLevel === level && row.to === "druidicWarrior"))) keys.push("ranger|druidicWarrior");
-  if (classId === "paladin" && (k === 2 || (c.replacements || []).some((row) => row.classId === "paladin" && row.totalLevel === level && row.to === "blessedWarrior"))) keys.push("paladin|blessedWarrior");
-  html += renderPickSpecs(c, uiPickSpecs(c, (src) => keys.includes(src.key) || ["barbarian|", "ranger|", "rogue|"].some((prefix) => src.key.startsWith(prefix)) && src.acquiredLevel === level), prefix);
-  const originSpecs = uiPickSpecs(c).filter((s) => (s.field === "revelation" && level === 3) || (s.source.key === "race" && s.minLevel === level && level > 1) || (s.field === "runes" && s.source.key !== `feat|L${level}`));
-  if (originSpecs.length) html += renderPickSpecs(c, originSpecs, prefix);
   const fs = uiFeatures(c, level).filter((f) => f.kind !== "asi" && f.kind !== "feat");
   html += `<div class="section-title section-gap"><h3>${uiText("Gagné à ce niveau")}</h3><span class="pill outline">${esc(cls.name)} ${k}</span></div>${
     fs
@@ -49386,9 +49703,12 @@ function creationChoiceDirectory(kind, items, current, inspected) {
   const classList = kind === "class",
     queryKey = classList ? "creationClassQuery" : "creationBackgroundQuery",
     query = ui[queryKey] || "",
-    visible = items.filter(([, item]) => creationChoiceNormalize(`${item.name} ${item.role || ""} ${(item.skills || []).map((skill) => uiSkills[skill]?.[0] || skill).join(" ")} ${(item.aliases || []).join(" ")}`).includes(creationChoiceNormalize(query))),
+    needle = creationChoiceNormalize(query),
+    // Le nom, le rôle, les compétences et les alias d’abord ; puis, pour un historique, tout ce que sa fiche affiche.
+    named = items.filter(([, item]) => creationChoiceNormalize(`${item.name} ${item.role || ""} ${(item.skills || []).map((skill) => uiSkills[skill]?.[0] || skill).join(" ")} ${(item.aliases || []).join(" ")}`).includes(needle)),
+    visible = classList || !needle ? named : [...named, ...items.filter((entry) => !named.includes(entry) && creationChoiceNormalize(creationNextBackgroundSearchText(...entry)).includes(needle))],
     title = classList ? "Classes" : uiText("Historiques");
-  return `<aside class="creation-choice-directory" aria-label="${uiText("Liste des {p0}", { p0: title.toLocaleLowerCase("fr-FR") })}"><div class="creation-choice-search"><div class="search-wrap">${icon("search", 17)}<input id="creation-${kind}-search" type="search" class="search-input" data-bind="ui.${queryKey}" value="${esc(query)}" placeholder="${classList ? uiText("Nom, rôle…") : uiText("Nom, compétence…")}" aria-label="${uiText("Rechercher {p7}", { p7: classList ? uiText("une classe") : uiText("un historique") })}">${query ? `<button type="button" class="creation-choice-clear" data-action="creation-choice-clear" data-kind="${kind}" aria-label="${uiText("Effacer la recherche")}">${icon("x", 15)}</button>` : ""}</div><span class="creation-choice-count" role="status">${visible.length} ${classList ? `classe${visible.length > 1 ? "s" : ""}` : `historique${visible.length > 1 ? "s" : ""}`}</span></div><div class="creation-choice-list" data-scroll-key="${esc(`${kind}:${query}`)}">${visible.map(([id, item]) => `<button type="button" id="creation-${kind}-${id}" class="creation-choice-row ${id === inspected ? "inspected" : ""}" data-action="creation-choice-inspect" data-kind="${kind}" data-id="${id}" aria-pressed="${id === inspected}" aria-controls="creation-${kind}-detail">${classList ? classIllustration(id, "creation-choice-image") || `<span class="creation-choice-icon" aria-hidden="true">${icon(item.icon, 21)}</span>` : backgroundIllustration(id, "creation-choice-image")}<span class="creation-choice-name"><strong>${esc(item.name)}</strong>${!classList && isNextWizard() ? `<span class="creation-choice-description">${esc(creationNextBackgroundDescription(id, item))}</span>${id === "custom" ? `<span class="creation-background-warning">${uiText("Avec l’accord du MJ")}</span>` : ""}` : ""}<small class="${!classList && isNextWizard() ? "creation-background-benefits" : ""}">${esc(classList ? item.role : isNextWizard() ? creationNextBackgroundBenefits(item) : (item.skills || []).map((skill) => uiSkills[skill]?.[0] || skill).join(" · ") || uiText("Avec l’accord du MJ"))}</small>${classList && isNextWizard() ? `<small class="creation-class-facts">Dé de vie d${item.die} · ${esc(uiAbilities[item.primary?.[0]]?.name || "")}</small>` : ""}${!classList && !isNextWizard() && item.desc ? `<span class="creation-choice-description">${esc(item.desc)}</span>` : ""}</span>${id === current ? `<span class="creation-choice-adopted" aria-label="${uiText("Choix adopté")}">${icon("check", 16)}</span>` : ""}</button>`).join("") || ("<p class=\"creation-choice-empty\" role=\"status\">" + uiText("Aucun résultat.") + "</p>")}</div></aside>`;
+  return `<aside class="creation-choice-directory" aria-label="${uiText("Liste des {p0}", { p0: title.toLocaleLowerCase("fr-FR") })}"><div class="creation-choice-search"><div class="search-wrap">${icon("search", 17)}<input id="creation-${kind}-search" type="search" class="search-input" data-bind="ui.${queryKey}" value="${esc(query)}" placeholder="${classList ? uiText("Nom, rôle…") : uiText("creation.searchBackground")}" aria-label="${uiText("Rechercher {p7}", { p7: classList ? uiText("une classe") : uiText("un historique") })}">${query ? `<button type="button" class="creation-choice-clear" data-action="creation-choice-clear" data-kind="${kind}" aria-label="${uiText("Effacer la recherche")}">${icon("x", 15)}</button>` : ""}</div><span class="creation-choice-count" role="status">${visible.length} ${classList ? `classe${visible.length > 1 ? "s" : ""}` : `historique${visible.length > 1 ? "s" : ""}`}</span></div><div class="creation-choice-list" data-scroll-key="${esc(`${kind}:${query}`)}">${visible.map(([id, item]) => `<button type="button" id="creation-${kind}-${id}" class="creation-choice-row ${id === inspected ? "inspected" : ""}" data-action="creation-choice-inspect" data-kind="${kind}" data-id="${id}" aria-pressed="${id === inspected}" aria-controls="creation-${kind}-detail">${classList ? classIllustration(id, "creation-choice-image") || `<span class="creation-choice-icon" aria-hidden="true">${icon(item.icon, 21)}</span>` : backgroundIllustration(id, "creation-choice-image")}<span class="creation-choice-name"><strong>${esc(item.name)}</strong>${!classList && isNextWizard() ? `<span class="creation-choice-description">${esc(creationNextBackgroundDescription(id, item))}</span>${id === "custom" ? `<span class="creation-background-warning">${uiText("Avec l’accord du MJ")}</span>` : ""}` : ""}<small class="${!classList && isNextWizard() ? "creation-background-benefits" : ""}">${esc(classList ? item.role : isNextWizard() ? creationNextBackgroundBenefits(item) : (item.skills || []).map((skill) => uiSkills[skill]?.[0] || skill).join(" · ") || uiText("Avec l’accord du MJ"))}</small>${classList && isNextWizard() ? `<small class="creation-class-facts">Dé de vie d${item.die} · ${esc(uiAbilities[item.primary?.[0]]?.name || "")}</small>` : ""}${!classList && !isNextWizard() && item.desc ? `<span class="creation-choice-description">${esc(item.desc)}</span>` : ""}</span>${id === current ? `<span class="creation-choice-adopted" aria-label="${uiText("Choix adopté")}">${icon("check", 16)}</span>` : ""}</button>`).join("") || ("<p class=\"creation-choice-empty\" role=\"status\">" + uiText("Aucun résultat.") + "</p>")}</div></aside>`;
 }
 /** Un fait trop long pour une demi-colonne, ou marqué « wide », occupe toute la largeur de la fiche. */
 function creationFactWide([, value, span]) {
@@ -49661,12 +49981,12 @@ function renderProgressionBalance(before, draft) {
   return `${gains.length ? `<section class="review-section" data-progression-gains><h3>${uiText("Gains et sources")}</h3>${gains.map((gain) => `<p class="small">${esc(gain)}</p>`).join("")}<p class="tiny muted">${uiText("CA : {p2}.", { p2: esc(review.acExplanation) })}</p></section>` : ""}<section class="review-section" data-progression-spending><h3>${uiText("Compteurs après validation")}</h3>${review.rows.map((row) => `<div class="summary-row" data-counter-label="${esc(row.label)}"><span>${esc(row.label)}<br><small class="small muted">${esc(row.source)}</small></span><strong>${esc(row.before.toLocaleString(uiLocale()))} → ${esc(row.after.toLocaleString(uiLocale()))}</strong></div>`).join("")}<p class="small">${uiText("Les objets, leurs quantités et leurs charges sont conservés.")}</p></section>`;
 }
 function renderLevelsStep(w, c) {
-  const n = levelOf(c);
-  return `<h2>${uiText("Niveaux de départ")}</h2><p class="wizard-intro">${uiText("Ton personnage commence au niveau {p1}. Renseigne les PV et les choix de chaque niveau.", { p1: n })}</p>${c.levels
+  const n = levelOf(c), lines = creationStartLevelLines(c), open = creationNextOpenLine(lines, "levels"), openLevel = lines.find((line) => line.id === open)?.level;
+  return `<h2>${uiText("Niveaux de départ")}</h2><p class="wizard-intro">${uiText("Ton personnage commence au niveau {p1}. Renseigne les PV et les choix de chaque niveau.", { p1: n })}</p>${lines.length ? renderCreationNextRemaining(lines, true) : ""}${c.levels
     .slice(1)
     .map((l) => {
-      const issues = uiChoicesFor(c, l.level).length + (l.asi ? 1 : 0);
-      return `<details class="level-block" data-detail="wiz-level-${l.level}" ${l.level === 2 ? "open" : ""}><summary><span class="level-marker small">${l.level}</span><span><strong>${uiText("Niveau {p3}", { p3: l.level })}</strong><small>${esc(uiClasses[l.classId].name)} ${classLevelAt(c, l.level)}${issues ? uiText(" · {p0} choix", { p0: issues }) : ""}</small></span><span class="feature-arrow">${icon("chevron", 14)}</span></summary><div class="level-block-body">${renderStartingClassPicker(c, l.level)}${renderLevelEditor(c, l.level, "wiz")}</div></details>`;
+      const own = lines.filter((line) => line.level === l.level), issues = own.length + (l.asi?.mode === "ability" ? 1 : 0);
+      return `<details class="level-block" data-detail="wiz-level-${l.level}" ${l.level === 2 || l.level === openLevel ? "open" : ""}><summary><span class="level-marker small">${l.level}</span><span><strong>${uiText("Niveau {p3}", { p3: l.level })}</strong><small>${esc(uiClasses[l.classId].name)} ${classLevelAt(c, l.level)}${issues ? uiText(" · {p0} choix", { p0: issues }) : ""}</small></span><span class="feature-arrow">${icon("chevron", 14)}</span></summary><div class="level-block-body">${renderStartingClassPicker(c, l.level)}${renderLevelEditor(c, l.level, "wiz", own, open)}</div></details>`;
     })
     .join("")}`;
 }
@@ -49740,7 +50060,7 @@ function creationSelectClass(id) {
   cc.skills = [];
   if (next) {
     // Création : ni sous-classe ni compétence posée d’office, et plus aucun choix de l’ancienne classe.
-    creationNextSetStartLevel(cc, n);
+    setStartLevel(cc, n, { subclass: false });
     clearPicks(cc, classSources);
   } else {
     setStartLevel(cc, n);
@@ -49914,6 +50234,7 @@ function renderLevelFlow() {
     issues = characterIssues(c);
   let content = "";
   if (f.step === 0) {
+    const lines = creationLevelLines(c, level), open = creationNextOpenLine(lines, creationNextLineScope());
     let classPicker = "";
     if (!f.isNew) classPicker = selectField(uiText("Classe du niveau {p0}", { p0: level }), "lvl.repairClass", l.classId, Object.fromEntries(Object.entries(uiClasses).map(([id, cls]) => [id, cls.name])), uiText("Les choix touchés restent dans l’historique. Vérifie les niveaux suivants."));
     if (f.isNew) {
@@ -49926,7 +50247,7 @@ function renderLevelFlow() {
       };
       classPicker = `<section class="choice-spec"><h3>${uiText("Dans quelle classe progresser ?")}</h3><div class="choice-grid compact">${current.map(card).join("")}</div>${others.length ? `<details class="feature-item" data-detail="multiclass" ${current.some((o) => o.classId === l.classId) ? "" : "open"}><summary><span>${uiText("Multiclasser vers une autre classe")}</span><span class="feature-arrow">${icon("chevron", 14)}</span></summary><p class="small muted">${uiText("Les prérequis de chaque classe sont vérifiés au niveau précédent. Une nouvelle classe apporte seulement ses maîtrises de multiclassage.")}</p><div class="choice-grid compact">${others.map(card).join("")}</div></details>` : ""}</section>`;
     }
-    content = `<h2>${f.isNew ? uiText("Choix du niveau") : uiText("Corriger le niveau")}</h2><p class="wizard-intro">${f.isNew ? uiText("Prépare le niveau {p0}. Rien n’est appliqué avant validation.", { p0: level }) : uiText("Tu corriges le niveau {p0}. Les niveaux suivants sont conservés et recalculés ; les choix devenus invalides seront signalés.", { p0: level })}</p>${classPicker}${renderLevelEditor(c, level, "lvl")}${sorcererReplacementAvailable(c, level) ? button(uiText("Remplacements d’ensorceleur"), "sorcerer-replacement", "", "small-btn") : ""}${monkDisciplineReplacement(c, level) ? button(uiText("Remplacer une discipline"), "monk-replacement", "", "small-btn") : ""}${Object.keys(rangerReplacementChoices(c, level)).length ? button(uiText("Remplacer un choix de rôdeur"), "ranger-replacement", "", "small-btn") : ""}${Object.keys(paladinReplacementChoices(c, level)).length ? button(uiText("Remplacer un choix de paladin"), "paladin-replacement", "", "small-btn") : ""}${Object.keys(fighterReplacementChoices(c, level)).length ? button(uiText("Remplacer un choix de guerrier"), "fighter-replacement", "", "small-btn") : ""}${bardVersatilityAvailable(c, level) ? button(uiText("Échanger une expertise de barde"), "bard-expertise", "", "small-btn") : ""}${classLevel(c, "warlock") > 2 && allChoices(c, "invocations").length ? button(uiText("Remplacer une manifestation occulte"), "replace-choice", "", "small-btn") : ""}`;
+    content = `<h2>${f.isNew ? uiText("Choix du niveau") : uiText("Corriger le niveau")}</h2><p class="wizard-intro">${f.isNew ? uiText("Prépare le niveau {p0}. Rien n’est appliqué avant validation.", { p0: level }) : uiText("Tu corriges le niveau {p0}. Les niveaux suivants sont conservés et recalculés ; les choix devenus invalides seront signalés.", { p0: level })}</p>${lines.length ? renderCreationNextRemaining(lines) : ""}${classPicker}${renderLevelEditor(c, level, "lvl", lines, open)}${sorcererReplacementAvailable(c, level) ? button(uiText("Remplacements d’ensorceleur"), "sorcerer-replacement", "", "small-btn") : ""}${monkDisciplineReplacement(c, level) ? button(uiText("Remplacer une discipline"), "monk-replacement", "", "small-btn") : ""}${Object.keys(rangerReplacementChoices(c, level)).length ? button(uiText("Remplacer un choix de rôdeur"), "ranger-replacement", "", "small-btn") : ""}${Object.keys(paladinReplacementChoices(c, level)).length ? button(uiText("Remplacer un choix de paladin"), "paladin-replacement", "", "small-btn") : ""}${Object.keys(fighterReplacementChoices(c, level)).length ? button(uiText("Remplacer un choix de guerrier"), "fighter-replacement", "", "small-btn") : ""}${bardVersatilityAvailable(c, level) ? button(uiText("Échanger une expertise de barde"), "bard-expertise", "", "small-btn") : ""}${classLevel(c, "warlock") > 2 && allChoices(c, "invocations").length ? button(uiText("Remplacer une manifestation occulte"), "replace-choice", "", "small-btn") : ""}`;
   } else if (f.step === 1)
     content = `<h2>${uiText("Sorts")}</h2>${spellcasters(c).length ? renderMagicEditor(c, "level") : notice(uiText("Aucune classe de lanceur de sorts à ce niveau. Passe à la vérification."))}`;
   else
@@ -49942,20 +50263,58 @@ function modalShell(title, body, footer = "", wide = false, eyebrow = "", classN
 function renderEquipmentFields(c) {
   const f = ui.form;
   const weaponCharacter = { ...c, equipment: f }, weaponTraining = collect(c);
-  const weaponOptions = { unarmed: uiText("Frappe à mains nues"), ...Object.fromEntries(Object.entries(uiWeapons).filter(([id]) => id !== "unarmed").sort((a, b) => compareUnitLabels(a[1].name, b[1].name, uiLanguage())).map(([id, w]) => [id, w.name])) };
-  const armorOptions = Object.fromEntries(Object.entries(uiArmors).filter(([, a]) => a.type !== "shield").map(([id, a]) => [id, a.type === "none" ? a.name : uiText("{p0} · CA {p1}{p2}", { p0: a.name, p1: a.base, p2: a.type === "light" ? " + DEX" : a.type === "medium" ? " + DEX (max 2)" : "" })]));
+  // L’armure et le bouclier viennent aussi du sac ; une armure enregistrée avant l’inventaire reste affichée telle quelle.
+  const armorLabel = (a, name = a.name) => a.type === "none" ? name : uiText("{p0} · CA {p1}{p2}", { p0: name, p1: a.base, p2: a.type === "light" ? " + DEX" : a.type === "medium" ? " + DEX (max 2)" : "" });
+  const carriedArmors = inventoryEquipmentChoices(c, "armor"), carriedShields = inventoryEquipmentChoices(c, "shield");
+  const armorCurrent = f.armor === "none" ? "none" : carriedArmors.some(({ item }) => item.id === f.armorInventoryId) ? f.armorInventoryId : "kept";
+  const armorOptions = { none: armorLabel(uiArmors.none), ...Object.fromEntries(carriedArmors.map(({ item, adapter }) => [item.id, armorLabel(uiArmors[adapter.id], item.name)])), ...(armorCurrent === "kept" ? { kept: uiText("equipment.outsideInventory", { name: armorLabel(uiArmors[f.armor] || { type: "none", name: f.armor }) }) } : {}) };
+  const shieldKept = f.shield && !carriedShields.some(({ item }) => item.id === f.shieldInventoryId);
+  const shieldField = carriedShields.length || f.shield ? checkField(uiText("Bouclier équipé (+2 CA)"), "form.shield", f.shield, shieldKept && !carriedShields.length ? esc(uiText("equipment.shieldOutsideInventory")) : "") : `<p class="small muted" data-shield-missing>${esc(uiText("equipment.noShield"))}</p>`;
   const instanceOptions = { "": uiText("equipment.freeHand"), ...Object.fromEntries(f.weapons.filter((w) => w.id !== "unarmed").map((w, i) => [w.instanceId, `${weaponOf(w.id)?.name || w.id} · ${uiText("equipment.instance").replace("{number}", i + 1)}`])) };
   const pactAvailable = allChoices(c, "pact").includes("blade") && classLevel(c, "warlock") >= 3;
+  // Une arme à portée de main est un exemplaire de l’inventaire : la liste ne propose que ce que le personnage porte.
+  const carried = inventoryEquipmentChoices(c, "weapon"), taken = new Set(f.weapons.map((w) => w.inventoryId).filter(Boolean)), conjured = pactAvailable ? pactWeaponForms(c) : [];
+  const carriedLabel = ({ item }) => {
+    const twins = carried.filter((entry) => entry.item.name === item.name);
+    return twins.length > 1 ? `${item.name} · ${uiText("equipment.instance").replace("{number}", twins.findIndex((entry) => entry.item.id === item.id) + 1)}` : item.name;
+  };
   const rows = f.weapons
     .map((w, i) => {
-      const info = weaponOf(w.id);
-      const options = Object.fromEntries(Object.entries(weaponOptions).filter(([id]) => !ui.equipmentProficientOnly || weaponProficiency(weaponCharacter, { ...w, id }, weaponTraining).proficient));
-      // Le filtre ne remplace jamais une arme déjà choisie, même non maîtrisée.
-      if (!Object.hasOwn(options, w.id)) options[w.id] = uiText("{p0} (équipée, non maîtrisée)", { p0: info?.name || w.id });
-      return `<div class="weapon-row"><div class="form-grid">${selectField(i === 0 ? uiText("Arme principale") : uiText("Arme {p0}", { p0: i + 1 }), `form.weapons.${i}.id`, w.id, options)}${field(uiText("Bonus magique"), `form.weapons.${i}.magic`, w.magic || 0, "number", "", 'min="-5" max="10" step="1"')}</div>${checkField(uiText("Autre propriété magique"), `form.weapons.${i}.isMagical`, !!w.isMagical, uiText("Pour une arme magique sans bonus chiffré, notamment lors du lien de pacte."))}${info?.versatile ? checkField(uiText("Tenue à deux mains ({p0})", { p0: info.versatile }), `form.weapons.${i}.twoHands`, w.twoHands) : ""}${f.weapons.length > 1 ? button(uiText("{p0} Retirer", { p0: icon("trash", 14) }), "equip-remove-weapon", `data-index="${i}"`, "small-btn ghost") : ""}</div>`;
+      const info = weaponOf(w.id), current = w.inventoryId || (w.id === "unarmed" ? "unarmed" : "kept");
+      const options = { unarmed: uiText("Frappe à mains nues") };
+      for (const entry of carried) {
+        // Le filtre ne retire jamais l’arme de la rangée ; un exemplaire ne sert qu’à une rangée.
+        if (entry.item.id !== w.inventoryId && (taken.has(entry.item.id) || ui.equipmentProficientOnly && !weaponProficiency(weaponCharacter, { id: entry.adapter.id, instanceId: entry.item.id }, weaponTraining).proficient)) continue;
+        options[entry.item.id] = carriedLabel(entry);
+      }
+      // Une arme enregistrée avant l’inventaire, ou qui n’est plus portée, reste affichée telle quelle.
+      if (!Object.hasOwn(options, current)) options[current] = uiText("equipment.outsideInventory", { name: uiWeapons[w.id]?.name || info?.name || w.id });
+      for (const id of conjured) options[`pact:${id}`] = uiText("equipment.weaponConjured", { name: uiWeapons[id]?.name || id });
+      const free = !w.inventoryId;
+      return `<div class="weapon-row"><div class="form-grid">${selectField(i === 0 ? uiText("Arme principale") : uiText("Arme {p0}", { p0: i + 1 }), `form.weapons.${i}.source`, current, options)}${free ? field(uiText("Bonus magique"), `form.weapons.${i}.magic`, w.magic || 0, "number", "", 'min="-5" max="10" step="1"') : ""}</div>${free ? checkField(uiText("Autre propriété magique"), `form.weapons.${i}.isMagical`, !!w.isMagical, uiText("Pour une arme magique sans bonus chiffré, notamment lors du lien de pacte.")) : ""}${info?.versatile ? checkField(uiText("Tenue à deux mains ({p0})", { p0: info.versatile }), `form.weapons.${i}.twoHands`, w.twoHands) : ""}${f.weapons.length > 1 ? button(uiText("{p0} Retirer", { p0: icon("trash", 14) }), "equip-remove-weapon", `data-index="${i}"`, "small-btn ghost") : ""}</div>`;
     })
     .join("");
-  return `<div class="form-grid">${selectField(uiText("Armure"), "form.armor", f.armor, armorOptions)}${field(uiText("Bonus magique de CA"), "form.armorBonus", f.armorBonus, "number", uiText("Armure, bouclier ou objets magiques."), 'min="-5" max="20" step="1"')}</div>${checkField(uiText("Bouclier équipé (+2 CA)"), "form.shield", f.shield)}${checkField(uiText("Armure de mage active"), "form.mageArmor", f.mageArmor, uiText("Sans armure : CA de 13 + DEX. Les formules de défense ne s’additionnent pas."))}<h3 style="margin:14px 0 8px">${uiText("Armes à portée de main")}</h3>${checkField(uiText("Maîtrisées uniquement"), "ui.equipmentProficientOnly", ui.equipmentProficientOnly)}${rows}${f.weapons.length < 6 ? button(uiText("{p0} Ajouter une arme", { p0: icon("plus", 15) }), "equip-add-weapon", "", "small-btn") : ""}<h3 class="section-gap">${esc(uiText("equipment.heldWeapons"))}</h3><p class="small muted">${esc(uiText("equipment.handsHelp"))}</p><div class="form-grid">${selectField(uiText("equipment.mainHand"), "form.hands.main", f.hands?.main || "", instanceOptions)}${selectField(uiText("equipment.offHand"), "form.hands.off", f.hands?.off || "", instanceOptions)}</div>${hasSubclass(c, "warlock", "hexblade") ? selectField(uiText("Guerrier maudit : arme choisie"), "form.hexWeaponId", f.hexWeaponId || "", { "": uiText("Aucune"), ...Object.fromEntries(f.weapons.filter((w) => w.id !== "unarmed" && !weaponOf(w.id)?.two && weaponProficiency(c, w, weaponTraining).proficient).map((w, index) => [w.instanceId, `${weaponOf(w.id).name} · ${uiText("equipment.instance").replace("{number}", index + 1)}`])) }, uiText("Une arme maîtrisée sans propriété à deux mains, choisie après le repos long. CHA est utilisé s’il est plus avantageux, y compris pour l’arme de pacte.")) : ""}${classLevel(c, "warlock") ? [ ["pactBook", uiText("Livre des ombres : nom et notes")], ["pactFamiliar", uiText("Familier : nom, forme et notes")], ["pactTalisman", uiText("Talisman : porteur et notes")], ["genieVessel", uiText("Réceptacle du génie : objet et notes")] ].filter(([key]) => f[key] || key === "pactBook" && allChoices(c, "pact").includes("tome") || key === "pactFamiliar" && allChoices(c, "pact").includes("chain") || key === "pactTalisman" && allChoices(c, "pact").includes("talisman") || key === "genieVessel" && hasSubclass(c, "warlock", "genie")).map(([key, label]) => field(label, `form.${key}`, f[key] || "")).join("") : ""}${pactAvailable ? selectField(uiText("Arme de pacte"), "form.pactWeaponId", f.pactWeaponId || "", { ...instanceOptions, "": uiText("Aucune arme liée") }, uiText("Après l’acquisition ou le rituel de lien prévu par le Pacte de la lame.")) : ""}`;
+  return `<div class="form-grid">${selectField(uiText("Armure"), "form.armorSource", armorCurrent, armorOptions, esc(uiText("equipment.armorHelp")))}${field(uiText("Bonus magique de CA"), "form.armorBonus", f.armorBonus, "number", uiText("Armure, bouclier ou objets magiques."), 'min="-5" max="20" step="1"')}</div>${shieldField}${checkField(uiText("Armure de mage active"), "form.mageArmor", f.mageArmor, uiText("Sans armure : CA de 13 + DEX. Les formules de défense ne s’additionnent pas."))}<h3 style="margin:14px 0 8px">${uiText("Armes à portée de main")}</h3><p class="small muted" data-weapons-help>${esc(uiText("equipment.weaponsHelp"))}</p>${checkField(uiText("Maîtrisées uniquement"), "ui.equipmentProficientOnly", ui.equipmentProficientOnly)}${rows}${f.weapons.length < 6 && carried.some(({ item }) => !taken.has(item.id)) ? button(uiText("{p0} Ajouter une arme", { p0: icon("plus", 15) }), "equip-add-weapon", "", "small-btn") : ""}<h3 class="section-gap">${esc(uiText("equipment.heldWeapons"))}</h3><p class="small muted">${esc(uiText("equipment.handsHelp"))}</p><div class="form-grid">${selectField(uiText("equipment.mainHand"), "form.hands.main", f.hands?.main || "", instanceOptions)}${selectField(uiText("equipment.offHand"), "form.hands.off", f.hands?.off || "", instanceOptions)}</div>${hasSubclass(c, "warlock", "hexblade") ? selectField(uiText("Guerrier maudit : arme choisie"), "form.hexWeaponId", f.hexWeaponId || "", { "": uiText("Aucune"), ...Object.fromEntries(f.weapons.filter((w) => w.id !== "unarmed" && !weaponOf(w.id)?.two && weaponProficiency(c, w, weaponTraining).proficient).map((w, index) => [w.instanceId, `${weaponOf(w.id).name} · ${uiText("equipment.instance").replace("{number}", index + 1)}`])) }, uiText("Une arme maîtrisée sans propriété à deux mains, choisie après le repos long. CHA est utilisé s’il est plus avantageux, y compris pour l’arme de pacte.")) : ""}${classLevel(c, "warlock") ? [ ["pactBook", uiText("Livre des ombres : nom et notes")], ["pactFamiliar", uiText("Familier : nom, forme et notes")], ["pactTalisman", uiText("Talisman : porteur et notes")], ["genieVessel", uiText("Réceptacle du génie : objet et notes")] ].filter(([key]) => f[key] || key === "pactBook" && allChoices(c, "pact").includes("tome") || key === "pactFamiliar" && allChoices(c, "pact").includes("chain") || key === "pactTalisman" && allChoices(c, "pact").includes("talisman") || key === "genieVessel" && hasSubclass(c, "warlock", "genie")).map(([key, label]) => field(label, `form.${key}`, f[key] || "")).join("") : ""}${pactAvailable ? selectField(uiText("Arme de pacte"), "form.pactWeaponId", f.pactWeaponId || "", { ...instanceOptions, "": uiText("Aucune arme liée") }, uiText("Après l’acquisition ou le rituel de lien prévu par le Pacte de la lame.")) : ""}`;
+}
+/** Rangée du formulaire pour un exemplaire de l’inventaire. */
+function equipmentInventoryWeapon({ item, adapter }) {
+  return { id: adapter.id, instanceId: item.id, inventoryId: item.id, magic: adapter.magic || 0, isMagical: !!adapter.isMagical, twoHands: !!item.instance.twoHands && !!weaponOf(adapter.id)?.versatile };
+}
+/** Une rangée pointe un exemplaire de l’inventaire, la frappe à mains nues ou une arme de pacte invoquée. */
+function equipmentWeaponSource(c, index, value) {
+  const row = ui.form.weapons[index], choice = inventoryEquipmentChoices(c, "weapon").find(({ item }) => item.id === value);
+  const conjured = value.startsWith("pact:") && pactWeaponForms(c).includes(value.slice(5)) ? value.slice(5) : null;
+  if (!row || !choice && !conjured && value !== "unarmed") return;
+  const previous = row.instanceId;
+  ui.form.weapons[index] = choice ? equipmentInventoryWeapon(choice) : { id: conjured || "unarmed", instanceId: uid(), magic: 0, isMagical: false, twoHands: false };
+  for (const hand of ["main", "off"]) if (ui.form.hands?.[hand] === previous) ui.form.hands[hand] = null;
+  for (const key of ["pactWeaponId", "hexWeaponId"]) if (ui.form[key] === previous) ui.form[key] = null;
+}
+/** L’armure du formulaire pointe un exemplaire du sac, ou aucune armure. */
+function equipmentArmorSource(c, value) {
+  const choice = inventoryEquipmentChoices(c, "armor").find(({ item }) => item.id === value);
+  if (choice) Object.assign(ui.form, { armor: choice.adapter.id, armorInventoryId: choice.item.id });
+  else if (value === "none") Object.assign(ui.form, { armor: "none", armorInventoryId: null });
 }
 function candidateEquipment() {
   const c = clone(activeCharacter());
@@ -49966,6 +50325,21 @@ function candidateEquipment() {
   c.equipment.pactWeaponId = ids.has(ui.form.pactWeaponId) ? ui.form.pactWeaponId : null;
   c.equipment.hexWeaponId = ids.has(ui.form.hexWeaponId) ? ui.form.hexWeaponId : null;
   c.equipment.armorBonus = Number(c.equipment.armorBonus) || 0;
+  // Un exemplaire choisi dans le formulaire passe à portée de main ; la synchronisation règle ensuite la main tenue.
+  for (const weapon of c.equipment.weapons) {
+    const item = weapon.inventoryId && c.inventory.find((entry) => entry.id === weapon.inventoryId);
+    if (item?.instance && !["ready", "main", "off"].includes(item.instance.equippedSlot)) item.instance.equippedSlot = "ready";
+  }
+  // Le bouclier coché est celui du sac ; l’armure et le bouclier choisis sont portés.
+  const shields = inventoryEquipmentChoices(c, "shield");
+  if (!c.equipment.shield) c.equipment.shieldInventoryId = null;
+  else if (shields.length && !shields.some(({ item }) => item.id === c.equipment.shieldInventoryId)) c.equipment.shieldInventoryId = shields[0].item.id;
+  // L’ancien exemplaire est rangé ici : la synchronisation, elle, effacerait le lien du nouveau en le rangeant.
+  for (const [slot, id] of [["armor", c.equipment.armorInventoryId], ["shield", c.equipment.shieldInventoryId]]) {
+    for (const item of c.inventory) if (item.instance?.equippedSlot === slot) item.instance.equippedSlot = item.id === id ? slot : null;
+    const item = id && c.inventory.find((entry) => entry.id === id);
+    if (item?.instance) item.instance.equippedSlot = slot;
+  }
   return syncInventoryEquipmentChoices(c);
 }
 function traitCandidate() {
@@ -50123,7 +50497,7 @@ function renderModal() {
     const value = damagePreview && ({ body: damagePreview.state.hp, form: damagePreview.state.wildShape?.hp, temporary: damagePreview.state.tempHp, ward: damagePreview.state.arcaneWard?.hp })[ui.form.reserve];
     const healed = ui.modal === "heal" && ui.form.reserve ? healCharacter(c, Number(ui.amount || 0), ui.form.reserve) : null;
     const projectedHp = healed && (ui.form.reserve === "form" ? healed.state.wildShape.hp : ui.form.reserve === "ward" ? healed.state.arcaneWard.hp : healed.state.hp);
-    return modalShell(details[0], `<p class="modal-copy">${details[1]}</p>${["damage", "heal"].includes(ui.modal) ? selectField(uiText("Réserve concernée"), "form.reserve", ui.form.reserve, { "": uiText("Choisis une réserve"), ...(ui.modal === "damage" ? reserves : { body: reserves.body, ...(c.state.wildShape ? { form: reserves.form } : {}), ...(d.arcaneWard?.created ? { ward: reserves.ward } : {}) }) }) : ""}<label for="amount" class="sr-only">${uiText("Montant")}</label><input id="amount" class="big-number-input" type="number" inputmode="decimal" min="0" max="${ui.modal === "xp" ? 99999999 : 999999}" step="${ui.modal === "gold" ? "0.01" : "1"}" data-bind="ui.amount" value="${ui.amount}">${["damage", "heal"].includes(ui.modal) ? `<div class="quick-values">${[1, 5, 10, 20].map((n) => button(String(n), "quick-amount", `data-value="${n}"`, "small-btn")).join("")}</div>${ui.modal === "damage" && damagePreview ? `<div class="summary-row"><span>${uiText("Réserve après application")}</span><strong data-hp-preview>${uiText("{p1} PV", { p1: value })}</strong></div><div data-hp-zero ${value === 0 && ["body", "form"].includes(ui.form.reserve) ? "" : "hidden"}>${notice(uiText("À 0 PV, décide des conséquences avec la table."), "warning")}</div>` : healed ? `<div class="summary-row"><span>${uiText("PV après application")}</span><strong data-hp-preview>${projectedHp}</strong></div>` : ""}` : ""}${ui.modal === "temporary" && c.state.tempHp > 0 ? selectField(uiText("Réserve à conserver"), "form.tempChoice", ui.form.tempChoice, { keep: uiText("Conserver {p0} PV", { p0: c.state.tempHp }), replace: uiText("Utiliser le montant indiqué") }) : ""}`, cancel + button(details[2], "apply-amount", ["damage", "heal"].includes(ui.modal) && !ui.form.reserve ? "disabled" : "", "primary"));
+    return modalShell(details[0], `<p class="modal-copy">${details[1]}</p>${ui.modal === "damage" ? defenseRows(d).map(([label, list]) => `<div class="summary-row" data-damage-defense><span>${esc(label)}</span><strong>${esc(list)}</strong></div>`).join("") : ""}${["damage", "heal"].includes(ui.modal) ? selectField(uiText("Réserve concernée"), "form.reserve", ui.form.reserve, { "": uiText("Choisis une réserve"), ...(ui.modal === "damage" ? reserves : { body: reserves.body, ...(c.state.wildShape ? { form: reserves.form } : {}), ...(d.arcaneWard?.created ? { ward: reserves.ward } : {}) }) }) : ""}<label for="amount" class="sr-only">${uiText("Montant")}</label><input id="amount" class="big-number-input" type="number" inputmode="decimal" min="0" max="${ui.modal === "xp" ? 99999999 : 999999}" step="${ui.modal === "gold" ? "0.01" : "1"}" data-bind="ui.amount" value="${ui.amount}">${["damage", "heal"].includes(ui.modal) ? `<div class="quick-values">${[1, 5, 10, 20].map((n) => button(String(n), "quick-amount", `data-value="${n}"`, "small-btn")).join("")}</div>${ui.modal === "damage" && damagePreview ? `<div class="summary-row"><span>${uiText("Réserve après application")}</span><strong data-hp-preview>${uiText("{p1} PV", { p1: value })}</strong></div><div data-hp-zero ${value === 0 && ["body", "form"].includes(ui.form.reserve) ? "" : "hidden"}>${notice(uiText("À 0 PV, décide des conséquences avec la table."), "warning")}</div>` : healed ? `<div class="summary-row"><span>${uiText("PV après application")}</span><strong data-hp-preview>${projectedHp}</strong></div>` : ""}` : ""}${ui.modal === "temporary" && c.state.tempHp > 0 ? selectField(uiText("Réserve à conserver"), "form.tempChoice", ui.form.tempChoice, { keep: uiText("Conserver {p0} PV", { p0: c.state.tempHp }), replace: uiText("Utiliser le montant indiqué") }) : ""}`, cancel + button(details[2], "apply-amount", ["damage", "heal"].includes(ui.modal) && !ui.form.reserve ? "disabled" : "", "primary"));
   }
   if (ui.modal === "rune-inscriptions") {
     let error = "";
@@ -50278,8 +50652,8 @@ function renderModal() {
   }
   if (ui.modal === "paladin-hands") {
     const ref = paladinReference("Lay on Hands"), reserve = resources(c).find((entry) => entry.id === "lay-hands"); let next = c, error = "";
-    try { next = spendPaladinHands(c, Number(ui.form.amount)); } catch (problem) { error = problem.message; }
-    return modalShell(ref.name, `${field(uiText("Points dépensés"), "form.amount", ui.form.amount, "number", uiText("{p0}/{p1} points · repos long. 1 point par PV rendu, ou 5 par maladie ou poison.", { p0: reserve.remaining, p1: reserve.max }), 'min="1" step="1"')}<p class="small">${uiText("Action, au contact. Le bénéficiaire reporte les soins sur sa fiche.")}</p>${renderReference(ref.referenceId)}${error ? notice(esc(error), "warning") : impactHtml(c, next, paladinImpactRows(c, next, ref.name))}`, cancel + button(uiText("Comparer les conséquences"), "review-paladin-hands", error ? "disabled" : "", "primary"));
+    try { next = spendPaladinHands(c, Number(ui.form.amount), { self: !!ui.form.self }); } catch (problem) { error = problem.message; }
+    return modalShell(ref.name, `${field(uiText("Points dépensés"), "form.amount", ui.form.amount, "number", uiText("{p0}/{p1} points · repos long. 1 point par PV rendu, ou 5 par maladie ou poison.", { p0: reserve.remaining, p1: reserve.max }), 'min="1" step="1"')}${checkField(uiText("Sur moi : ajouter ces PV à ma fiche"), "form.self", ui.form.self)}<p class="small">${uiText("Action, au contact. Un autre bénéficiaire reporte les soins sur sa fiche.")}</p>${renderReference(ref.referenceId)}${error ? notice(esc(error), "warning") : impactHtml(c, next, paladinImpactRows(c, next, ref.name))}`, cancel + button(uiText("Comparer les conséquences"), "review-paladin-hands", error ? "disabled" : "", "primary"));
   }
   if (ui.modal === "paladin-effect") {
     const f = ui.form, effects = paladinEffectOptions(c), effect = effects.find((entry) => entry.id === f.effectId); let next = c, error = "";
@@ -50531,12 +50905,15 @@ function renderModal() {
       `<p class="modal-copy">${uiText("Colle ici le texte d’une sauvegarde Compagnon. Les fiches sont ajoutées en copie, jamais écrasées.")}</p><label class="sr-only" for="import-json">${uiText("Sauvegarde JSON")}</label><textarea id="import-json" class="json-box" rows="8" data-bind="ui.importText" placeholder="{&quot;format&quot;:&quot;compagnon-srd51&quot;…}">${esc(ui.importText || "")}</textarea>`,
       button(uiText("Annuler"), "close-modal", "", "ghost") + button(uiText("Vérifier la sauvegarde"), "parse-import-text", "", "primary"),
     );
-  if (ui.modal === "info")
+  if (ui.modal === "info") {
+    const tracked = ui.info.resourceId ? resources(c).find((entry) => entry.id === ui.info.resourceId) : null;
+    if (tracked) return modalShell(esc(tracked.name), renderResourceInfo(c, tracked), button(uiText("Compris"), "close-modal", "", "green"), false, "", "resource-info-dialog");
     return modalShell(
       esc(ui.info.title),
       `<p class="modal-copy preserve">${esc(ui.info.text)}</p>${renderReference(ui.info.referenceId)}`,
       (ui.info.link ? button(esc(ui.info.link.label), "navigate", `data-route="${esc(ui.info.link.route)}"`, "ghost") : "") + button(uiText("Compris"), "close-modal", "", "green"),
     );
+  }
   return "";
 }
 // Chaque section fournit le même identifiant pour le choix et le contenu papier.
@@ -50545,7 +50922,7 @@ const PRINT_SECTIONS = [
   { id: "combat", label: "Combat", render: (c, d) => `<p>${uiText("units.printCombat", { p0: d.currentHp, p1: d.maxHp, p2: d.ac, p3: signed(d.initiative), p4: uiMeters(d.speed), p5: signed(d.prof), p6: hitDiceLabel(d), p7: d.passivePerception })}</p>` },
   { id: "abilities", label: "Caractéristiques & sauvegardes", column: "details", render: (c, d) => `<table>${Object.entries(uiAbilities).map(([a, v]) => `<tr><td>${v.name}</td><td>${d.scores[a]} (${signed(d.mods[a])})</td><td>${uiText("JS {p3}{p4}", { p3: signed(d.saves[a]), p4: d.saveProficiencies.includes(a) ? " ●" : "" })}</td></tr>`).join("")}</table>` },
   { id: "skills", label: "Compétences", column: "skills", render: (c, d) => `<table>${Object.entries(uiSkills).map(([k, v]) => `<tr><td>${v[0]}</td><td>${signed(d.skills[k])}</td><td>${d.ranks[k] === 2 ? "Expertise" : d.ranks[k] ? "Maîtrise" : ""}</td></tr>`).join("")}</table>` },
-  { id: "attacks", label: "Attaques", column: "details", render: (c, d) => d.attacks.map((a) => `<p>${esc(a.name)} : ${signed(a.attack)}, ${esc(a.damageDice)} ${signed(a.damageBonus)} ${esc(a.type)}</p>`).join("") },
+  { id: "attacks", label: "Attaques", column: "details", render: (c, d) => attackGroups(d.attacks).map(({ attack: a, count }) => `<p>${esc(attackGroupName({ attack: a, count }))} : ${signed(a.attack)}, ${esc(a.damageDice)} ${signed(a.damageBonus)} ${esc(a.type)}</p>`).join("") },
   { id: "proficiencies", label: "Maîtrises", column: "details", render: (c, d) => `<p>${uiText("Langues : {p0}", { p0: esc(d.languages.map((l) => l.name).join(", ")) })}</p><p>${uiText("Outils : {p1}", { p1: esc(d.tools.map((t) => t.name).join(", ") || "aucun") })}</p>` },
   { id: "equipment", label: "Équipement", column: "details", render: (c) => `<p>${uiText("{p0}{p1} · {p2} po", { p0: esc((uiArmors[c.equipment.armor] || uiArmors.none).name), p1: c.equipment.shield ? " + bouclier" : "", p2: c.gold })}</p>${c.inventory.map((i) => `<p>${esc(i.name)} ×${i.qty}${i.weightUnknown ? "" : ` · ${uiText("units.perItem", { value: formatCarriedWeight(i.weight) })}`}</p>`).join("")}` },
   { id: "resources", label: "Ressources", render: (c) => resources(c).map((r) => `<p>${esc(r.name)} : ${r.max === null ? "à volonté" : `${r.max - r.used}/${r.max}`} · ${r.reset === "short" ? "repos court ou long" : r.reset === "long" ? "repos long" : "manuel"}</p>`).join("") },
@@ -50761,6 +51138,18 @@ function closeModal() {
   const origin = lastFocus?.id ? document.getElementById(lastFocus.id) : lastFocus?.dataset.action ? [...document.querySelectorAll("[data-action]")].find((node) => Object.entries(lastFocus.dataset).every(([key, value]) => node.dataset[key] === value) && node.getClientRects().length) : null;
   (origin || document.getElementById("main-content"))?.focus({ preventScroll: true });
 }
+/** Texte d’une ressource : sa note, sa récupération, ses utilisations. */
+function resourceInfoText(c, r) {
+  return uiText("{p0}\n\nRécupération : {p1}. Utilisations : {p2}.{p3}{p4}", { p0: r.note || "Compteur de la capacité.", p1: resourceResetLabel(r.reset).toLocaleLowerCase("fr"), p2: r.counter ? uiText("{p0} déclarée(s)", { p0: r.spent }) : r.max === null ? "à volonté" : r.remaining + " / " + r.max, p3: c.state.resourceCooldowns?.[r.id] > 0 ? uiText("\nDélai restant : {p0} jour(s).", { p0: c.state.resourceCooldowns[r.id] }) : "", p4: r.id === "ki" && classLevel(c, "monk") >= 20 ? "\nÀ l’initiative, si ta réserve est vide, tu récupères 4 ki." : r.id === "inspiration" && classLevel(c, "bard") >= 20 ? "\nÀ l’initiative, si ta réserve est vide, tu récupères une inspiration bardique." : "" });
+}
+/**
+ * Fenêtre d’une ligne action : ce que la ressource change en ce moment, son texte, la correction du compteur à la main
+ * (la ligne n’a ni « − » ni « + ») et la source.
+ */
+function renderResourceInfo(c, r) {
+  const count = r.max === null ? "∞" : `${r.remaining}<small> / ${r.max}</small>`;
+  return `${r.effects?.length ? `<section class="info-block" data-info-effects><h3>${esc(uiText("resource.info.now"))}</h3><ul>${r.effects.map((text) => `<li>${esc(text)}</li>`).join("")}</ul></section>` : ""}<p class="modal-copy preserve">${esc(resourceInfoText(c, r))}${(r.details || []).map((text) => `\n${esc(text)}`).join("")}</p><section class="info-block" data-resource-correction><h3>${esc(uiText("resource.correct.title"))}</h3><div class="counter">${smallIcon("minus", "resource-correct", uiText("resource.correct.spend", { name: r.name }), `data-key="${esc(r.id)}" data-delta="1" ${r.max !== null && r.remaining <= 0 ? "disabled" : ""}`)}<span class="counter-value">${count}</span>${smallIcon("plus", "resource-correct", uiText("resource.correct.recover", { name: r.name }), `data-key="${esc(r.id)}" data-delta="-1" ${r.spent <= 0 ? "disabled" : ""}`)}</div><p class="tiny muted">${esc(uiText("resource.correct.help"))}</p></section>${creationNextSource(r.name, [], r.referenceId || r.infoReferenceId)}`;
+}
 function openInfo(title, text, referenceId = null) {
   ui.info = { title, text, referenceId };
   openModal("info");
@@ -50886,11 +51275,10 @@ function startWizard(character = null, classId = null) {
 function startLevel(level, isNew) {
   const original = clone(activeCharacter()),
     draft = clone(original);
-  if (isNew) {
-    setStartLevel(draft, level);
-  }
+  // Le niveau gagné ne choisit rien à la place du joueur : sa sous-classe se pose sur sa ligne.
+  if (isNew) setStartLevel(draft, level, { subclass: false });
   ui.wizard = null;
-  ui.featQuery = "";
+  ui.creationLine = null;
   ui.levelFlow = { original, draft, level, isNew, step: 0, error: "" };
   resetEditorFilters();
   render();
@@ -50958,6 +51346,16 @@ function handleBinding(el, redraw) {
   }
   const path = el.dataset.bind;
   if (!path || (el.type === "radio" && !el.checked)) return;
+  if (path === "form.armorSource") {
+    equipmentArmorSource(activeCharacter(), el.value);
+    render();
+    return;
+  }
+  if (/^form\.weapons\.\d+\.source$/.test(path)) {
+    equipmentWeaponSource(activeCharacter(), Number(path.split(".")[2]), el.value);
+    render();
+    return;
+  }
   if (path === "form.hands.main" || path === "form.hands.off") {
     ui.form = setHeldWeapon(candidateEquipment(), path.split(".").at(-1), el.value || null).equipment;
     render();
@@ -50978,11 +51376,11 @@ function handleBinding(el, redraw) {
     if (other) ui.wizard.draft.abilities[other] = Number(previous);
   }
   if (path === "lvl.repairClass") {
-    setProgressionClass(ui.levelFlow.draft, ui.levelFlow.level, value, { repair: true });
+    setProgressionClass(ui.levelFlow.draft, ui.levelFlow.level, value, { repair: true, subclass: false });
     resetEditorFilters(); render(); return;
   }
   if (path.startsWith("wiz.progressionClass.")) {
-    setProgressionClass(ui.wizard.draft, Number(path.split(".")[2]), value);
+    setProgressionClass(ui.wizard.draft, Number(path.split(".")[2]), value, { subclass: false });
     resetEditorFilters();
     queueDraft();
     render();
@@ -50990,15 +51388,15 @@ function handleBinding(el, redraw) {
     return;
   }
   if (path === "ui.wizard.startLevel") {
-    (isNextWizard() ? creationNextSetStartLevel : setStartLevel)(ui.wizard.draft, value);
+    setStartLevel(ui.wizard.draft, value, { subclass: !isNextWizard() });
     queueDraft();
     render();
     return;
   }
-  if (path.startsWith("wiz.subclasses.") && previous !== value) {
-    selectSubclass(ui.wizard.draft, path.split(".")[2], value);
-    creationNextReconcile();
-    queueDraft();
+  if (/^(wiz|lvl)\.subclasses\./.test(path) && previous !== value) {
+    const [prefix, , classId] = path.split(".");
+    selectSubclass(levelDraft(prefix), classId, value);
+    if (prefix === "wiz") { creationNextReconcile(); queueDraft(); }
     render();
     return;
   }
@@ -51081,15 +51479,20 @@ function selectSpell(target, id, kind) {
 
 function rollCheck(name, bonus, kind = "check", options = {}) {
   const optionList = receivedRollOptions(activeCharacter(), [options.received || "check"]);
+  // Un état actif (la rage, pour la Force) présélectionne l'avantage et le dit ; le joueur peut revenir à Normal.
+  const advantage = options.ability ? activeCheckAdvantage(activeCharacter(), options.ability) : "";
   prepareDiceDialog(name, { kind, bonus, reliable: !!options.reliable }, {
     optionList, optionState: { on: Object.fromEntries(optionList.map((option) => [option.id, !!option.on])), choice: {}, spent: {} },
-    note: options.note || "", reliableName: options.reliableName || "Savoir-faire", critThreshold: kind === "attack" ? options.critThreshold || uiDerive(activeCharacter()).critThreshold : 20, fxAbility: options.fxAbility || null, fxTotal: !!options.fxTotal,
+    ...(advantage && { mode: "advantage", help: advantage }),
+    note: [options.note, advantage].filter(Boolean).join(" "), reliableName: options.reliableName || "Savoir-faire", critThreshold: kind === "attack" ? options.critThreshold || uiDerive(activeCharacter()).critThreshold : 20, fxAbility: options.fxAbility || null, fxTotal: !!options.fxTotal,
   });
 }
-function prepareDiceDialog(name, request, options = {}) {
-  ui.rollMode = "normal";
+/** inPlace : la fenêtre de dés est déjà ouverte, elle est reconstruite sur place pour le jet suivant. options.mode : mode présélectionné. */
+function prepareDiceDialog(name, request, options = {}, inPlace = false) {
+  ui.rollMode = options.mode || "normal";
   ui.roll = { name, request, phase: "ready", result: null, history: [], panel: null, extras: { support: "", bonus: 0 }, optionList: [], optionState: { on: {}, choice: {}, spent: {} }, ...options, baseNote: options.note || "" };
-  openModal("roll");
+  if (inPlace) rebuildDiceDialog();
+  else openModal("roll");
 }
 function diceRequestFormula(request) {
   if (request.kind === "abilities") return "6 valeurs · 4d6, les 3 meilleurs de chaque groupe";
@@ -51129,12 +51532,29 @@ function openHealDialog(spell, heal) {
     apply: async (result) => { const c = activeCharacter(); await saveCharacter(healCharacter(c, result.total), uiText("Soins · {p0}", { p0: spell.name }), "session", c); },
   });
 }
-function startAttackSequence(profile, step = "attack", options = {}) {
+// Jet déclaré par une ressource, une fois sa dépense validée : soins et PV temporaires s'appliquent à la fiche, une réduction s'annonce.
+function openSpendRoll(roll) {
+  const title = { heal: uiText("Soins · {p0}", { p0: roll.name }), tempHp: uiText("PV temporaires · {p0}", { p0: roll.name }), reduction: uiText("Réduction de dégâts · {p0}", { p0: roll.name }) }[roll.result];
+  prepareDiceDialog(title, { kind: "sum", count: roll.count, sides: roll.sides, bonus: roll.bonus }, roll.result === "reduction" ? { note: uiText("Retire ce total des dégâts subis avant de les saisir.") } : {
+    acceptLabel: roll.others ? uiText("Sur moi") : uiText("Appliquer à ma fiche"), cancelLabel: roll.others ? uiText("Sur un allié") : uiText("Fermer"),
+    apply: async (result) => { const c = activeCharacter(); await saveCharacter(applySpendResult(c, roll.result, result.total), title, "session", c); },
+  });
+}
+// Revue d'une dépense depuis la ligne de la ressource. Le moteur lit l'effet déclaré (spendResourceEffect) :
+// une valeur fixe est déjà dans la fiche à valider, un jet s'ouvre après la validation.
+function reviewResourceSpend(c, resource, { classRows = null, lead = "" } = {}) {
+  const { character: next, roll, fixed } = spendResourceEffect(c, resource.id);
+  const rows = [["hp", uiText("PV actuels")], ["tempHp", uiText("PV temporaires")]].filter(([key]) => c.state[key] !== next.state[key]).map(([key, label]) => ({ label, before: c.state[key], after: next.state[key], source: resource.name }));
+  if (fixed?.result === "tempHp" && !rows.length) rows.push({ label: uiText("PV temporaires"), before: c.state.tempHp, after: next.state.tempHp, source: uiText("{p0} PV proposés : ta réserve actuelle, au moins égale, est conservée.", { p0: fixed.value }) });
+  const spent = classRows ? "Confirme l’utilisation de cette aptitude." : resource.counter ? uiText("Utilisations déclarées : {p0} → {p1}.", { p0: resource.spent, p1: resource.spent + 1 }) : uiText("Dépenser 1 utilisation : {p0} → {p1}.", { p0: resource.remaining, p1: resource.remaining - 1 });
+  openReview(next, resource.name, [lead, spent, roll && uiText("Après validation, lance {p0}.", { p0: diceFormula({ notation: `${roll.count}d${roll.sides}`, bonus: roll.bonus }) })].filter(Boolean).join(" "), "session", { impactRows: [...(classRows ? classRows(next) : []), ...rows], ...(roll && { spendRoll: { ...roll, name: resource.name } }) });
+}
+function startAttackSequence(profile, step = "attack", options = {}, inPlace = false) {
   if (!profile) return;
   const sequence = { profile, step: profile.attack && step === "attack" ? "attack" : "damage", verdict: profile.attack ? "hit" : null, parts: Object.fromEntries(profile.parts.map((part, i) => [i, part.on !== false])) };
-  const optionList = [...profile.options, ...receivedRollOptions(activeCharacter(), ["attack", "damage"])];
+  const optionList = [...profile.options, ...receivedRollOptions(activeCharacter(), ["attack", "damage"])].filter((option) => !options.chainUsed?.includes(option.id));
   const roll = { sequence, optionList, optionState: { on: Object.fromEntries(optionList.map((option) => [option.id, !!option.on])), choice: {}, spent: {} } };
-  prepareDiceDialog(sequenceTitle(sequence), sequenceRequest(roll), { ...roll, critThreshold: profile.attack?.critThreshold || 20, ...options });
+  prepareDiceDialog(sequenceTitle(sequence), sequenceRequest(roll), { ...roll, critThreshold: profile.attack?.critThreshold || 20, ...options }, inPlace);
 }
 // Un changement d'option garde le résultat précédent dans l'historique, puis prépare un nouveau jet.
 function refreshSequence(r, reason) {
@@ -51167,7 +51587,7 @@ function sequenceVerdict(r, value) {
   const seq = r.sequence;
   if (seq.step === "attack") {
     if (r.phase !== "result" || !attackVerdictChoices(r).includes(value)) return;
-    if (value === "miss") { closeModal(); return; }
+    if (value === "miss") { if (!nextChainedAttack(r)) closeModal(); return; }
     // L'effet de critique s'arrête avant de passer aux dégâts, sur une fenêtre neuve.
     stopDiceFx(); r.critical = null;
     seq.locked = true;
@@ -51281,7 +51701,7 @@ function renderDiceDialog() {
     : r.apply ? button(r.cancelLabel || uiText("Annuler"), "close-modal", "", "ghost") + button(r.acceptLabel || uiText("Utiliser ce résultat"), "roll-accept", 'id="dice-accept"', "primary")
       // Après le toucher, le verdict mène à la suite ; un 1 naturel termine l'attaque.
       : seq?.step === "attack" && choices.length ? button(uiText("{p0} Relancer", { p0: icon("dice", 16) }), "reroll", 'id="dice-reroll"', "ghost")
-      : button(uiText("Terminer"), "close-modal", 'id="dice-finish"', "primary") + (r.request.kind !== "death" ? button(uiText("{p0} Relancer", { p0: icon("dice", 16) }), "reroll", 'id="dice-reroll"', "ghost") : "");
+      : (r.chain?.length ? button(uiText("attack.chain.next", { name: r.chain[0].name }), "dice-chain-next", 'id="dice-finish"', "primary") : button(uiText("Terminer"), "close-modal", 'id="dice-finish"', "primary")) + (r.request.kind !== "death" ? button(uiText("{p0} Relancer", { p0: icon("dice", 16) }), "reroll", 'id="dice-reroll"', "ghost") : "");
   return modalShell(esc(title), body, footer, false, "", "", `<span class="dice-head-actions">${panels}</span>`).replace('class="modal ', `data-roll-phase="${r.phase}" class="modal dice-roll-dialog `);
 }
 function mountDiceTray() {
@@ -52104,6 +52524,10 @@ async function perform(action, el) {
           ui.levelFlow.step = data.step === "magic" ? 1 : 0;
         }
       }
+      // Niveau visé : sa ligne s’ouvre, sinon le champ du choix n’existe pas dans la page.
+      const edited = ui.levelFlow?.step === 0 ? ui.levelFlow.draft : ui.wizard?.step === "levels" ? ui.wizard.draft : null;
+      const levelLine = edited && data.path && level <= levelOf(edited) ? creationLevelLines(edited, level).find((entry) => entry.path === data.path) : null;
+      if (levelLine) ui.creationLine = { step: creationNextLineScope(), id: levelLine.id, pinned: true };
       resetEditorFilters();
       if (data.class) ui.editorClass = data.class;
       render();
@@ -52176,7 +52600,7 @@ async function perform(action, el) {
     case "creation-line-toggle":
     case "creation-line-open": {
       const open = action === "creation-line-open" || ui.creationLine?.id !== data.id;
-      ui.creationLine = { step: ui.wizard.step, id: open ? data.id : null, pinned: open };
+      ui.creationLine = { step: creationNextLineScope(), id: open ? data.id : null, pinned: open };
       render();
       if (action === "creation-line-open") creationNextFocusLine(true);
       break;
@@ -52309,17 +52733,17 @@ async function perform(action, el) {
       const pending = ui.pending;
       ui.modal = null;
       ui.levelFlow = { original: clone(pending.original), draft: clone(pending.character), conflict: pending.conflict, level: 1, isNew: false, step: 0, error: "" };
-      ui.pending = null; render(); break;
+      ui.pending = null; ui.creationLine = null; render(); break;
     }
     case "repair-level":
-      ui.levelFlow.level = Number(data.level); ui.levelFlow.isNew = ui.levelFlow.level > ui.levelFlow.original.levels.length; ui.levelFlow.step = 0; ui.levelFlow.error = ""; resetEditorFilters(); render(); break;
+      ui.levelFlow.level = Number(data.level); ui.levelFlow.isNew = ui.levelFlow.level > ui.levelFlow.original.levels.length; ui.levelFlow.step = 0; ui.levelFlow.error = ""; ui.creationLine = null; resetEditorFilters(); render(); break;
     case "repair-identity": {
       const flow = ui.levelFlow; startWizard(flow.draft); ui.wizard.original = clone(flow.original); ui.wizard.conflict = flow.conflict; ui.wizard.repairReturn = flow.level; queueDraft(); render(); break;
     }
     case "repair-return-level": {
       const wizard = ui.wizard;
       ui.levelFlow = { original: clone(wizard.original), draft: clone(wizard.draft), conflict: wizard.conflict, level: wizard.repairReturn || 1, isNew: false, step: 0, error: "" };
-      ui.wizard = null; render(); break;
+      ui.wizard = null; ui.creationLine = null; render(); break;
     }
     case "level-step":
       ui.levelFlow.step = Number(data.step);
@@ -52377,7 +52801,9 @@ async function perform(action, el) {
       const draft = levelDraft(data.prefix),
         a = draft.levels[Number(data.level) - 1].asi;
       a.mode = data.value;
+      // Retour à l’amélioration : les choix du don tombent. « Prendre un don » ouvre aussitôt sa ligne.
       if (data.value === "ability") clearPicks(draft, [`feat|L${data.level}|`]);
+      else ui.creationLine = { step: creationNextLineScope(), id: `L${data.level}:feat`, pinned: false };
       if (data.prefix === "wiz") queueDraft();
       render();
       break;
@@ -52465,7 +52891,7 @@ async function perform(action, el) {
         toast(uiText("Saisis un montant positif et raisonnable."));
         break;
       }
-      const type = ui.modal;
+      const type = ui.modal, reserve = ui.form.reserve;
       if (type !== "gold") amount = Math.floor(amount);
       let next = clone(c),
         message = "Modification enregistrée.";
@@ -52490,7 +52916,10 @@ async function perform(action, el) {
         { description: uiText("Montant : {p0}{p1}", { p0: amount, p1: ui.form.reserve ? uiText(" · réserve : {p0}", { p0: ui.form.reserve === "body" ? "corps" : ui.form.reserve === "form" ? "forme sauvage" : "protection" }) : "" }) },
       );
       closeModal();
-      toast(message);
+      // Acharnement et ses semblables : à 0 PV, la dépense est proposée dans la revue habituelle, que le joueur valide ou annule.
+      const standing = type === "damage" && reserve === "body" ? zeroHpSpend(c, next) : null;
+      if (standing) reviewResourceSpend(activeCharacter(), standing, { lead: uiText("Tu tombes à 0 PV.") });
+      else toast(message);
       break;
     }
     case "bard-spirit-session": {
@@ -52573,10 +53002,10 @@ async function perform(action, el) {
       const next = setPaladinEffect(c, ui.form), effect = paladinEffectOptions(c).find((entry) => entry.id === ui.form.effectId);
       openReview(next, effect.name, "Confirme l’effet personnel et la dépense affichés.", "session", { impactRows: paladinImpactRows(c, next, effect.name) }); break;
     }
-    case "paladin-hands": ui.form = { amount: 1 }; openModal("paladin-hands"); break;
+    case "paladin-hands": ui.form = { amount: 1, self: false }; openModal("paladin-hands"); break;
     case "review-paladin-hands": {
-      const next = spendPaladinHands(c, Number(ui.form.amount)), ref = paladinReference("Lay on Hands");
-      openReview(next, ref.name, "Le bénéficiaire reporte les soins ou la guérison sur sa fiche.", "session", { impactRows: paladinImpactRows(c, next, ref.name) }); break;
+      const self = !!ui.form.self, next = spendPaladinHands(c, Number(ui.form.amount), { self }), ref = paladinReference("Lay on Hands");
+      openReview(next, ref.name, self ? uiText("Les PV rendus s’ajoutent à ta fiche.") : "Le bénéficiaire reporte les soins ou la guérison sur sa fiche.", "session", { impactRows: paladinImpactRows(c, next, ref.name) }); break;
     }
     case "paladin-replacement": ui.form = { choiceKey: Object.keys(paladinReplacementChoices(ui.levelFlow.draft, ui.levelFlow.level))[0], from: "", to: "" }; openModal("paladin-replacement"); break;
     case "apply-paladin-replacement": Object.assign(ui.levelFlow.draft, replacePaladinChoice(ui.levelFlow.draft, ui.form.choiceKey, ui.form.from, ui.form.to, ui.levelFlow.level)); queueDraft(); closeModal(); break;
@@ -52594,7 +53023,7 @@ async function perform(action, el) {
     }
     case "review-bard-spirit": openReview(setBardSpiritSession(c, ui.form), bardReference("Spirit Session", "Spirits", 6).name, ui.form.action === "conduct" ? "Rituel d’une heure terminé : une utilisation dépensée et un sort appris jusqu’au début du repos long." : "Correction du sort temporaire ; les dépenses restent conservées.", "session"); break;
     case "tool-check": ui.form = { toolId: d.tools[0]?.id || "", ability: "dex" }; openModal("tool-check"); break;
-    case "prepare-tool-check": { const roll = toolCheckOptions(c, ui.form.toolId, ui.form.ability); rollCheck(roll.name, roll.bonus, "check", roll); break; }
+    case "prepare-tool-check": { const roll = toolCheckOptions(c, ui.form.toolId, ui.form.ability); rollCheck(roll.name, roll.bonus, "check", { ...roll, ability: ui.form.ability }); break; }
     case "rogue-state": openRogueState(c, data.kind); break;
     case "review-rogue-state": { const next = setRogueState(c, { ...ui.form, amount: Number(ui.form.amount) }); openReview(next, "Suivi du Phantôme", "Confirme les valeurs et la dépense affichées.", "session", { impactRows: rogueImpactRows(c, next) }); break; }
     case "bard-feature-payment": {
@@ -52625,7 +53054,7 @@ async function perform(action, el) {
     case "apply-bard-expertise": Object.assign(ui.levelFlow.draft, replaceCharacterChoice(ui.levelFlow.draft, "expertise", ui.form.from, ui.form.to, { totalLevel: ui.levelFlow.level })); queueDraft(); closeModal(); break;
     case "barbarian-session": {
       const status = barbarianStatus(c), specs = uiSubclasses.barbarian[status.subclass]?.choices || [];
-      ui.form = { action: data.kind, choices: Object.fromEntries(specs.filter((spec) => ["beastWeapon", "beastAdaptation", "giantElement", "giantSize"].includes(spec.key) && Object.keys(spec.levels).some((level) => Number(level) <= status.level)).map((spec) => [spec.key, status.choices[spec.key] || Object.keys(spec.options)[0]])), frenzy: false,
+      ui.form = { action: data.kind, choices: Object.fromEntries(specs.filter((spec) => ["beastWeapon", "beastAdaptation", "giantElement", "giantSize"].includes(spec.key) && Object.keys(spec.levels).some((level) => Number(level) <= status.level)).map((spec) => [spec.key, status.choices[spec.key] || Object.keys(spec.options)[0]])), frenzy: data.kind === "start" && data.frenzy === "1" && status.subclass === "berserker",
         ...(status.subclass === "wildMagic" && { wildSurge: data.kind === "start" ? 0 : c.state.barbarian?.wildSurge || 0 }),
         ...(status.subclass === "giant" && { grow: data.kind === "start" ? true : !!c.state.barbarian?.grow, ...(status.level >= 6 && { giantWeapon: data.kind === "start" ? "" : status.giantWeapon }) }) };
       openModal("barbarian-session"); break;
@@ -52663,7 +53092,7 @@ async function perform(action, el) {
         }
         if (Number(data.delta) > 0 && rangerActionOptions(c).some((entry) => entry.resource === resource.id)) { openRangerAction(c, rangerActionOptions(c).find((entry) => entry.resource === resource.id).id); break; }
         if (Number(data.delta) > 0 && ["cleric-harness", "paladin-harness"].includes(resource.id)) { const classId = resource.id.split("-")[0]; ui.form = { classId, slot: clericHarnessOptions(c, classId)[0]?.id || "" }; openModal("cleric-harness"); break; }
-        if (Number(data.delta) > 0 && resource.id === "lay-hands") { ui.form = { amount: 1 }; openModal("paladin-hands"); break; }
+        if (Number(data.delta) > 0 && resource.id === "lay-hands") { ui.form = { amount: 1, self: false }; openModal("paladin-hands"); break; }
         if (Number(data.delta) > 0 && paladinEffectOptions(c).some((entry) => entry.kind === resource.id && entry.kind !== "channel")) { openPaladinEffect(c, paladinEffectOptions(c).find((entry) => entry.kind === resource.id).id, "use"); break; }
         if (Number(data.delta) > 0 && resource.id === "cleric-forge-blessing") { ui.form = { action: "bless", itemId: clericForgeBlessing(c).stored?.itemId || "", restConfirmed: false }; openModal("cleric-forge"); break; }
         if (Number(data.delta) > 0 && resource.id === "cleric-steps-night") { ui.form = { action: "start", darknessConfirmed: false }; openModal("cleric-flight"); break; }
@@ -52671,12 +53100,16 @@ async function perform(action, el) {
         if (Number(data.delta) > 0 && ["druid-balm", "druid-totem", "druid-walker"].includes(resource.id)) { openDruidFeature(c, resource.id.slice(6)); break; }
         if (Number(data.delta) > 0 && resource.id === "druid-omen" && !druidSession(c).omenActive) { openDruidFeature(c, "omen"); break; }
         if (Number(data.delta) > 0 && resource.id === "druid-guiding-bolt" && !druidSession(c).starMapHeld) throw new Error(uiText("Tiens ta carte du ciel pour lancer son sort."));
-        const next = Number(data.delta) > 0 ? spendResources(c, [{ id: resource.id, amount: 1 }]) : recoverResourceEvent(c, { kind: "manual", resourceId: resource.id, amount: 1 });
-        if (Number(data.delta) > 0 && (resource.id.startsWith("ranger-") || resource.id === "favored-foe")) { openReview(next, resource.name, "Confirme l’utilisation de cette aptitude.", "session", { impactRows: rangerImpactRows(c, next, resource.name) }); break; }
-        if (Number(data.delta) > 0 && (resource.id.startsWith("paladin-") || classLevel(c, "paladin") && ["channel", "divine-sense", "cleansing-touch", "undyingSentinel"].includes(resource.id))) { openReview(next, resource.name, "Confirme l’utilisation de cette aptitude.", "session", { impactRows: paladinImpactRows(c, next, resource.name) }); break; }
-        if (Number(data.delta) > 0 && resource.id.startsWith("druid-")) { openReview(next, resource.name, "Confirme l’utilisation de cette aptitude.", "session", { impactRows: druidImpactRows(c, next) }); break; }
-        if (Number(data.delta) > 0 && (resource.id.startsWith("cleric-") || classLevel(c, "cleric") && ["channel", "divine-intervention", "wardingFlare", "wrathOfTheStorm", "warPriest", "visionsOfThePast"].includes(resource.id))) { openReview(next, resource.name, "Confirme l’utilisation de cette aptitude.", "session", { impactRows: clericResourceImpact(c, [resource.id]) }); break; }
-        if (Number(data.delta) > 0) { openReview(next, resource.name, resource.counter ? uiText("Utilisations déclarées : {p0} → {p1}.", { p0: resource.spent, p1: resource.spent + 1 }) : uiText("Dépenser 1 utilisation : {p0} → {p1}.", { p0: resource.remaining, p1: resource.remaining - 1 }), "session"); break; }
+        // Une rage ou une frénésie ne se dépense pas sans s'activer : la ligne ouvre la fenêtre de rage, comme le bouton de séance.
+        if (Number(data.delta) > 0 && ["rage", "frenzy"].includes(resource.id)) { await perform("barbarian-session", { dataset: { kind: barbarianStatus(c).active ? "end" : "start", ...(resource.id === "frenzy" && { frenzy: "1" }) } }); break; }
+        if (Number(data.delta) > 0) {
+          const classRows = resource.id.startsWith("ranger-") || resource.id === "favored-foe" ? (next) => rangerImpactRows(c, next, resource.name)
+            : resource.id.startsWith("paladin-") || classLevel(c, "paladin") && ["channel", "divine-sense", "cleansing-touch", "undyingSentinel"].includes(resource.id) ? (next) => paladinImpactRows(c, next, resource.name)
+            : resource.id.startsWith("druid-") ? (next) => druidImpactRows(c, next)
+            : resource.id.startsWith("cleric-") || classLevel(c, "cleric") && ["channel", "divine-intervention", "wardingFlare", "wrathOfTheStorm", "warPriest", "visionsOfThePast"].includes(resource.id) ? () => clericResourceImpact(c, [resource.id]) : null;
+          reviewResourceSpend(c, resource, { classRows }); break;
+        }
+        const next = recoverResourceEvent(c, { kind: "manual", resourceId: resource.id, amount: 1 });
         await saveCharacter(next, uiText("Compteur : {p0}", { p0: resource.name }), "session", c);
         const restoreFocus = document.activeElement === el;
         render();
@@ -52730,14 +53163,20 @@ async function perform(action, el) {
       if (!option) { toast(uiText("Cette récupération n’a plus d’effet utile.")); render(); break; }
       openReview(recoverResourceEvent(c, option.event), "Récupération de ressources", uiText("Événement réellement survenu dans la campagne : {p0}.\n{p1}", { p0: option.kind === "days" ? uiText("{p0} jour(s) écoulé(s)", { p0: days }) : RESOURCE_EVENT_LABELS[option.kind].toLocaleLowerCase("fr"), p1: resourceRecoverySummary(option) }), "session"); break;
     }
+    case "resource-correct": {
+      const resource = resources(c).find((entry) => entry.id === data.key);
+      if (!resource?.action) break;
+      const next = Number(data.delta) > 0 ? spendResources(c, [{ id: resource.id, amount: 1 }]) : recoverResourceEvent(c, { kind: "manual", resourceId: resource.id, amount: 1 });
+      await saveCharacter(next, uiText("Compteur : {p0}", { p0: resource.name }), "session", c);
+      render();
+      break;
+    }
     case "resource-info": {
       const r = resources(c).find((r) => r.id === data.key);
       if (r) {
-        openInfo(
-          r.name,
-          uiText("{p0}\n\nRécupération : {p1}. Utilisations : {p2}.{p3}{p4}", { p0: r.note || "Compteur de la capacité.", p1: resourceResetLabel(r.reset).toLocaleLowerCase("fr"), p2: r.counter ? uiText("{p0} déclarée(s)", { p0: r.spent }) : r.max === null ? "à volonté" : r.remaining + " / " + r.max, p3: c.state.resourceCooldowns?.[r.id] > 0 ? uiText("\nDélai restant : {p0} jour(s).", { p0: c.state.resourceCooldowns[r.id] }) : "", p4: r.id === "ki" && classLevel(c, "monk") >= 20 ? "\nÀ l’initiative, si ta réserve est vide, tu récupères 4 ki." : r.id === "inspiration" && classLevel(c, "bard") >= 20 ? "\nÀ l’initiative, si ta réserve est vide, tu récupères une inspiration bardique." : "" }),
-          r.referenceId || null,
-        );
+        openInfo(r.name, resourceInfoText(c, r), r.referenceId || null);
+        // Une ligne action se lit et se corrige dans cette fenêtre : elle suit la ressource, pas un texte figé.
+        if (r.action) { ui.info.resourceId = r.id; render(); }
         if (r.id === "wildshape") {
           ui.info.link = { label: "Voir les formes animales", route: "wildshape" };
           render();
@@ -52918,14 +53357,14 @@ async function perform(action, el) {
       ui.cast.language = data.value === "en" ? "en" : "fr"; render(); break;
     case "roll-ability": {
       const astral = data.key === "str" && monkSession(c).arms && d.mods.wis > d.mods.str;
-      rollCheck(uiText("Test de {p0}", { p0: uiAbilities[data.key].name }), (astral ? d.mods.wis : d.mods[data.key]) + (data.key === "cha" ? d.rangerCharismaBonus : 0) + (uiRaceOf(c).grants.halfProficiencyAbilities?.includes(data.key) ? Math.floor(d.prof / 2) : 0), "check", { fxAbility: data.key, note: astral ? "Bras du Moi astral : ton modificateur de SAG remplace celui de FOR." : data.key === "cha" && d.rangerCharismaBonus ? uiText("Charme surnaturel : +{p0} aux tests de CHA.", { p0: d.rangerCharismaBonus }) : "" });
+      rollCheck(uiText("Test de {p0}", { p0: uiAbilities[data.key].name }), (astral ? d.mods.wis : d.mods[data.key]) + (data.key === "cha" ? d.rangerCharismaBonus : 0) + (uiRaceOf(c).grants.halfProficiencyAbilities?.includes(data.key) ? Math.floor(d.prof / 2) : 0), "check", { fxAbility: data.key, ability: data.key, note: astral ? "Bras du Moi astral : ton modificateur de SAG remplace celui de FOR." : data.key === "cha" && d.rangerCharismaBonus ? uiText("Charme surnaturel : +{p0} aux tests de CHA.", { p0: d.rangerCharismaBonus }) : "" });
       break;
     }
     case "roll-save":
-      rollCheck(uiText("Jet de sauvegarde de {p0}", { p0: uiAbilities[data.key].name }), d.saves[data.key], "check", { fxAbility: data.key, received: "save" });
+      rollCheck(uiText("Jet de sauvegarde de {p0}", { p0: uiAbilities[data.key].name }), d.saves[data.key], "check", { fxAbility: data.key, ability: data.key, received: "save" });
       break;
     case "roll-skill":
-      rollCheck(uiSkills[data.key][0], d.skills[data.key], "check", skillCheckOptions(c, data.key));
+      rollCheck(uiSkills[data.key][0], d.skills[data.key], "check", { ...skillCheckOptions(c, data.key), ability: SKILLS[data.key][1] });
       break;
     case "roll-extra-attack": {
       const entry = extraAttackEntries(c, d).find((row) => row.key === data.key);
@@ -52939,6 +53378,14 @@ async function perform(action, el) {
     case "roll-attack":
     case "roll-damage":
       startAttackSequence(weaponAttackProfile(c, d, Number(data.index) || 0), action === "roll-attack" ? "attack" : "damage");
+      break;
+    case "roll-two-weapon": {
+      const routine = twoWeaponRoutine(d, Number(data.index));
+      if (routine) startAttackChain(c, d, routine, data.step === "damage" ? "damage" : "attack");
+      break;
+    }
+    case "dice-chain-next":
+      if (ui.roll && ui.roll.phase !== "rolling") nextChainedAttack(ui.roll);
       break;
     case "dice-panel":
       if (ui.roll && ui.roll.phase !== "rolling" && ["options", "external"].includes(data.value)) { ui.roll.panel = ui.roll.panel === data.value ? null : data.value; updateDiceDialog(); }
@@ -53415,7 +53862,9 @@ async function perform(action, el) {
       const announcement = resourceChangeAnnouncement(p.original, p.character);
       await saveCharacter(p.character, p.label, p.mode || "settings", p.original, { description: p.description, impactRows: p.impactRows, undoSnapshotId: p.undoSnapshotId });
       closeModal();
-      toast(announcement || uiText("Changements enregistrés. Une version précédente reste dans les réglages."));
+      // Le jet déclaré par la ressource suit la validation : sa fenêtre tient lieu de confirmation, sans message par-dessus.
+      if (p.spendRoll) openSpendRoll(p.spendRoll);
+      else toast(announcement || uiText("Changements enregistrés. Une version précédente reste dans les réglages."));
       break;
     }
     case "correct-session-undo": {
@@ -53797,7 +54246,7 @@ async function perform(action, el) {
     case "level-class": {
       const f = ui.levelFlow;
       if (!f?.isNew) break;
-      setProgressionClass(f.draft, f.level, data.id);
+      setProgressionClass(f.draft, f.level, data.id, { subclass: false });
       resetEditorFilters();
       render();
       break;
@@ -53868,10 +54317,12 @@ async function perform(action, el) {
     case "ac-info":
       openInfo("Classe d’armure", `${d.ac} = ${d.acExplanation}.`);
       break;
-    case "equip-add-weapon":
-      ui.form.weapons.push({ id: "dagger", instanceId: uid(), magic: 0, twoHands: false });
+    case "equip-add-weapon": {
+      const spare = inventoryEquipmentChoices(c, "weapon").find(({ item }) => !ui.form.weapons.some((weapon) => weapon.inventoryId === item.id));
+      if (spare) ui.form.weapons.push(equipmentInventoryWeapon(spare));
       render();
       break;
+    }
     case "equip-remove-weapon":
       const [removedWeapon] = ui.form.weapons.splice(Number(data.index), 1);
       for (const hand of ["main", "off"]) if (ui.form.hands?.[hand] === removedWeapon?.instanceId) ui.form.hands[hand] = null;

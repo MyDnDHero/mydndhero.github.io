@@ -842,6 +842,13 @@ button.stat-box:hover{background:var(--surface)}
 .rest-actions{display:flex;gap:8px;margin-top:20px}
 .rest-actions .btn{flex:1;font-size:12px;padding:10px 7px}
 .session-tools{margin-top:12px;border-top:1px solid var(--line)}
+.resource-row.action-row .counter{gap:10px}
+.resource-row .btn.resource-action{margin:0;white-space:nowrap;color:var(--accent);border-color:var(--accent)}
+.resource-row .state-active{margin-left:6px;background:var(--accent);color:var(--accent-contrast);vertical-align:middle}
+.info-block{border-top:1px solid var(--line);padding:12px 0}
+.info-block h3{margin:0 0 6px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.info-block ul{margin:0;padding-left:18px}.info-block .counter{justify-content:flex-start}
+.resource-info-dialog .creation-source{margin-top:4px}
 .session-tools>summary{display:flex;align-items:center;gap:8px;cursor:pointer;min-height:44px;color:var(--muted);font-size:13px;list-style:none}
 .session-tools>summary::-webkit-details-marker{display:none}
 .session-tools>summary:before{content:"+";font-size:18px}
@@ -1326,10 +1333,18 @@ button.creation-source:focus-visible { outline: 2px solid var(--accent); outline
 .choice-option-details summary { color: var(--muted); cursor: pointer; }
 .choice-option-details p { margin: 6px 0 0; color: var(--muted); line-height: 1.6; }
 .choice-line-fields { margin-top: 14px; }
+/* Éditeur de niveau : lignes d’un niveau, et ce qui manque regroupé par niveau à l’étape Niveaux. */
+.choice-remaining-level { display: block; }
+.choice-remaining-level strong { color: var(--ink); font-weight: 650; }
+.choice-remaining + .level-block { margin-top: 14px; }
+.choice-group.level-lines { margin-top: 14px; border-top: 1px solid var(--line); }
 @media (max-width: 700px) {
   .choice-line-head { scroll-margin-top: 110px; }
   .choice-line-options.columns { columns: 1; }
   .choice-group-head h3 { font-size: 20px; }
+  /* Don grisé : le bouton de référence reste sur la ligne du nom, la raison passe dessous. */
+  .choice-line[data-kind="feat"] .choice-option-why { order: 1; flex-basis: 100%; margin-left: 27px; text-align: left; }
+  .choice-line[data-kind="feat"] .choice-option-details { order: 2; }
 }
 
 /* Listes sur une colonne : même vignette que les familles de race pour les variantes, les classes et les historiques. */
