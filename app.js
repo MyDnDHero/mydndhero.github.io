@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-preview.23";
+const APP_VERSION = "2.0.0-preview.24";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -51278,7 +51278,8 @@ const diceFxInternals = (() => {
 
   function verdictOf(result, { total = false, critThreshold = 20 } = {}) {
     // Une attaque critique dès son seuil (19 pour un champion) ; un test, seulement sur 20.
-    const kind = result.natural >= critThreshold ? "crit" : result.natural === 1 ? "fumble" : null;
+    // Un 1 relevé (Savoir-faire, Langue d'argent, plancher d'un don) n'est plus un échec : pas de fumble.
+    const kind = result.natural >= critThreshold ? "crit" : result.natural === 1 && (result.adjusted ?? 1) === 1 ? "fumble" : null;
     if (!kind) return null;
     const discarded = result.dice.filter((die) => !die.kept).map((die) => die.value);
     // À l'initiative, le MJ a besoin du total pour placer le tour : le calcul complet reste sous le mot.
@@ -58200,7 +58201,7 @@ function rollCheck(name, bonus, kind = "check", options = {}) {
   };
   prepareDiceDialog(name, { kind, bonus, reliable: !!options.reliable }, {
     read,
-    note: options.note || "", reliableName: options.reliableName || "Savoir-faire", critThreshold: kind === "attack" ? options.critThreshold || uiDerive(c).critThreshold : 20, fxAbility: options.fxAbility || null, fxTotal: !!options.fxTotal,
+    note: options.note || "", reliableName: options.reliableName || "Savoir-faire", critThreshold: kind === "attack" ? options.critThreshold || uiDerive(c).critThreshold : 20, fxAbility: options.fxAbility || (options.modeRoll?.skill ? options.modeRoll.ability : null), fxTotal: !!options.fxTotal,
     // Sauvegarde de caractéristique : ce que la fiche possède et qui dépend de l'effet subi, rappelé sous les dés sans rien cocher.
     reminders: options.modeRoll?.kind === "save" ? saveReminders(c, options.modeRoll.ability, { concentration: !!options.modeRoll.concentration }, uiDerive(c)) : [],
     ...(options.dc && { dc: options.dc }), ...(options.launchLabel && { launchLabel: options.launchLabel }), ...(options.failRoll && { failRoll: options.failRoll }),
@@ -58779,7 +58780,7 @@ async function startDiceDialog() {
   r.phase = "rolling";
   const result = r.result;
   r.note = rollResultNote(r);
-  // 1 ou 20 naturel sur un test de caractéristique, une sauvegarde ou l'initiative : le mot remplace le total.
+  // 1 ou 20 naturel sur un test de caractéristique ou de compétence, une sauvegarde ou l'initiative : le mot remplace le total.
   // L'initiative garde son calcul sous le mot, car le MJ en a besoin pour l'ordre des tours.
   // Les attaques ont aussi leurs effets de critique et de fumble, même avec un dé ajouté (Bénédiction).
   r.critical = rollCriticalWord(r);
