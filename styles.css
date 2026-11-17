@@ -185,6 +185,8 @@ label.field{display:flex;flex-direction:column;gap:7px;margin-bottom:17px;font-s
 .summary-row{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid var(--line);font-size:12px}
 .summary-row span:first-child{color:var(--muted)}
 .summary-row strong{text-align:right;font-weight:550}
+/* Effets reçus : le nom sur sa ligne, le détail dessous (ils se collaient : « …collines1 heure »). */
+.received-effect-list .summary-row strong{display:block;text-align:left}
 .summary-row:last-child{border:0}
 .damage-reminder{padding:8px 0}
 .damage-reminder span:first-child{flex:0 0 auto;max-width:42%}
@@ -1499,17 +1501,31 @@ button.state-active::after{content:"";position:absolute;inset:-11px 0}
 .dice-score-grid strong{font:700 30px/1.1 var(--serif);color:var(--accent)}
 .dice-score-grid small{font-size:10px;line-height:1.3}
 .dice-roll-dialog[data-roll-phase="rolling"] .dice-tray-hint{color:var(--accent)}
-/* Réglages en tête, à côté de la croix : dés et bonus conditionnels, résultat saisi à la main. */
+/* Réglages en tête, à côté de la croix : dés et bonus conditionnels, situation de l’attaque avant le lancer, correction du résultat après. */
 .modal-head-actions,.dice-head-actions{display:flex;align-items:center;gap:8px}
 .dice-panel-toggle{position:relative}
 .dice-panel-toggle.active{border-color:var(--accent);background:var(--selection-bg);color:var(--accent)}
 .dice-badge{position:absolute;top:-7px;right:-7px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--accent);color:var(--accent-contrast);font:700 11px/18px var(--sans)}
+/* Situation de l'attaque : bouton d'avertissement avant le lancer, ses cases rangées par thème. */
+.dice-situation-toggle,.dice-situation-toggle:hover,.dice-situation-toggle.active{border-color:var(--warning);background:var(--warning-bg);color:var(--warning)}
+.dice-situation-toggle.active{box-shadow:inset 0 0 0 1px var(--warning)}
+.dice-situation-toggle .dice-badge{background:var(--warning);color:var(--panel)}
+.dice-situation+.dice-situation{margin-top:12px}
+.dice-situation-theme{margin:0 0 6px;font-size:13px;font-weight:700}
 .dice-panel-body:empty,.dice-sequence:empty{display:none}
 .dice-panel-body{margin:0 0 14px;padding:14px;border-radius:8px;background:var(--surface);text-align:left}
 .dice-panel-title{margin:0 0 10px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
 .dice-panel-body>label{display:block;margin:10px 0 0;font-size:14px}
 .dice-panel-body input:not([type=checkbox]),.dice-panel-body select{display:block;width:100%;min-height:44px;margin-top:5px;padding:9px;border:1px solid var(--line);border-radius:4px;background:var(--panel);color:var(--ink);font:inherit}
 .dice-panel-body .btn{margin-top:12px}
+/* Cadenas de « Dés et bonus » : les cases gardées reviennent aux jets suivants, dites aussi sous le plateau. */
+.dice-panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px}
+.dice-panel-head .dice-panel-title{margin:0}
+.dice-panel-body .dice-keep{flex:none;gap:6px;margin:0}
+.dice-keep.on{border-color:var(--accent);color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.dice-keep-note{margin:0 0 10px;font-size:13px;line-height:1.5;color:var(--muted)}
+.dice-roll-kept{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;line-height:1.5;color:var(--muted);margin:10px auto 0;max-width:45ch}
+.dice-roll-kept svg{flex:none}
 /* Options de jet et dégâts au choix : une ligne par ajout, activée ou non. */
 .dice-option{display:flex;width:100%;justify-content:space-between;align-items:center;gap:10px;min-height:44px;margin:0 0 6px;padding:7px 11px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);font:14px var(--sans);text-align:left}
 .dice-option small{display:block;font-size:12px;color:var(--muted)}

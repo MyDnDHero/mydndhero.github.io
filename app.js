@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-preview.21";
+const APP_VERSION = "2.0.0-preview.22";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -1469,6 +1469,11 @@ const UI_FR = Object.freeze({
   "Résistances": "Résistances",
   "spell.material.table": "Fournie par la table",
   "spell.material.tableNote": "Note (facultative)",
+  "spell.cast.weaponId": "Arme touchée par le sort",
+  "spell.cast.weaponAlly": "Arme d’un allié",
+  "spell.cast.form": "Forme",
+  "spell.cast.form.beast": "Bête primitive",
+  "spell.cast.form.tree": "Grand arbre",
   "spell.material.error.gold": "PO insuffisantes : choisis un objet ou « Fournie par la table ».",
   "spell.material.error.stock": "Stock insuffisant : choisis un autre exemplaire ou « Fournie par la table ».",
   "spell.material.error.special": "Cet exemplaire équipé ou spécial ne peut pas être consommé ici. Choisis une composante ordinaire ou « Fournie par la table ».",
@@ -4021,6 +4026,10 @@ const UI_FR = Object.freeze({
   "units.overCapacity": "Sac trop lourd : {p0} / {p1}.",
   "units.perItem": "{value} / unité",
   "units.speedFloor": "Marche au moins {value}, sans pénalité de force pour l’armure lourde",
+  "items.bonus.raise": "{ability} +{amount}, jusqu’à {max}",
+  "items.bonus.proficiency": "Bonus de maîtrise +{amount}",
+  "items.bonus.bows": "Dégâts à l’arc long et à l’arc court +{amount}, et maîtrise de ces arcs",
+  "items.bonus.unarmed": "Frappes à mains nues +{amount} au toucher et aux dégâts",
   "units.itemReview": "{quantity} exemplaire(s), {weight} par unité. Les bonus suivent le port et l’harmonisation de cet exemplaire.",
   "units.printCombat": "PV {p0}/{p1} · CA {p2} · Initiative {p3} · Vitesse {p4} · Maîtrise {p5} · Dés de vie {p6} · Perception passive {p7}",
   "{hours} h au plus (prolongée)": "{hours} h au plus (prolongée)",
@@ -4219,7 +4228,6 @@ const UI_FR = Object.freeze({
   "Critique": "Critique",
   "Fléchette {p0}": "Fléchette {p0}",
   "Raté": "Raté",
-  "Résultat externe": "Résultat externe",
   "Sort lancé : {p0}.": "Sort lancé : {p0}.",
   "Dernière charge à résoudre dans l’inventaire.": "Dernière charge à résoudre dans l’inventaire.",
   "Options modifiées": "Options modifiées",
@@ -4281,6 +4289,7 @@ const UI_FR = Object.freeze({
   "Effet reçu actif": "Effet reçu actif",
   "+1d4 aux jets d’attaque et de sauvegarde · Concentration du lanceur": "+1d4 aux jets d’attaque et de sauvegarde · Concentration du lanceur",
   "+1d4 à un test de caractéristique, une fois": "+1d4 à un test de caractéristique, une fois",
+  "Avantage à ta prochaine attaque contre la cible touchée, avant la fin du prochain tour du lanceur": "Avantage à ta prochaine attaque contre la cible touchée, avant la fin du prochain tour du lanceur",
   "+1d4 à un jet de sauvegarde, une fois": "+1d4 à un jet de sauvegarde, une fois",
   "Soins · {p0}": "Soins · {p0}",
   "Fin d’un sort actif": "Fin d’un sort actif",
@@ -4377,6 +4386,8 @@ const UI_FR = Object.freeze({
   "attack.alterSelf": "Armes naturelles",
   "attack.alterSelf.type": "contondants, perforants ou tranchants",
   "attack.alterSelf.note": "magique, forme « armes naturelles » de Modification d’apparence",
+  "attack.spellWeapon": "magique ({name})",
+  "attack.shadowBlade.note": "magique ; lâchée ou lancée, elle se dissipe à la fin du tour",
   "attack.naga.bite": "cible : sauvegarde de Constitution DD {dc}, 1d4 poison en cas d’échec",
   "attack.naga.constrict": "cible agrippée et entravée (évasion DD {dc}), une seule cible à la fois",
   "share.empty": "Aucun fichier de sauvegarde n’a été reçu.",
@@ -4500,7 +4511,29 @@ const UI_FR = Object.freeze({
   "attack.spell.cantrip": "Attaque portée en lançant le sort",
   "attack.spell.boomingRest": "Si la cible se déplace de son plein gré avant ton prochain tour",
   "attack.spell.greenFlameRest": "Seconde créature, voisine de la cible",
+  "attack.spell.holyWeaponRest": "Action bonus : fin du sort, éclat autour de l’arme",
+  "attack.spell.spiritShroud": "Cible à {distance} ou moins",
+  "attack.spell.ownCard": "Ses dés se lancent à part, sur la carte du sort",
+  "attack.spell.absorbElements": "À ton prochain tour",
+  "attack.type.absorbed": "du type absorbé",
   "attack.note.glimmering": "Prochaine attaque contre la cible luisante",
+  "attack.note.giantMight": "Une fois par tour, aptitude activée",
+  "attack.note.fireRune": "Sauvegarde de Force DD {dc} ou entravée",
+  "attack.note.arcaneShot": "Une fois par tour, flèche qui touche, DD {dc}",
+  "attack.note.kenseiShot": "Action bonus, jusqu’à la fin du tour",
+  "attack.harm.flurry": "Gratuite dans un Déluge de coups payé",
+  "attack.note.fangsFireSnake": "Frappe qui touche pendant la discipline",
+  "attack.note.empoweredArms": "Bras renforcés, une fois par tour",
+  "attack.note.foeSlayer": "Une fois par tour, contre ton ennemi juré",
+  "attack.focusedAim.ki": "{count} ki · {left} restant(s)",
+  "attack.note.alchemicalSavant": "Sort lancé avec ton matériel d’alchimiste",
+  "attack.note.arcaneFirearm": "Sort lancé à travers ton arme à feu arcanique",
+  "attack.note.arcaneJolt": "Une fois par tour, arme magique",
+  "attack.note.eldritchSmite": "Une fois par tour ; une cible de taille TG ou moins tombe à terre",
+  "attack.note.overchannel": "Tes dégâts nécrotiques se lancent depuis la ligne {name}",
+  "attack.note.poisoner": "Arme enduite : sauvegarde de CON DD 14, sinon ces dégâts et l’état empoisonné",
+  "attack.note.piercer": "Une fois par tour : le plus bas des dés sous la moyenne est relancé",
+  "attack.flourish.master": "{name} : 1d6 sans dépense",
   "Résistance des robustes": "Résistance des robustes",
   "reminder.line": "{name} : {text}.",
   "reminder.damage.uncannyDodge": "réaction : moitié des dégâts d’une attaque, si tu vois l’assaillant",
@@ -4536,6 +4569,8 @@ const UI_FR = Object.freeze({
   "dice.adjust.floor.one": "{source} : un dé est traité comme {value}.",
   "dice.adjust.floor.many": "{source} : {count} dés sont traités comme {value}.",
   "dice.adjust.best": "{source} : dés lancés deux fois, {kept} gardé, {dropped} écarté.",
+  "dice.adjust.triple": "{source} : un troisième d20 lancé avec l’avantage.",
+  "dice.adjust.explode": "{source} : un dé au maximum, un dé de plus ({value}).",
   "checkOption.naturalExplorer": "Test lié à ton terrain de prédilection{terrains} : maîtrise doublée",
   "checkOption.dragonAncestor": "Face à un dragon : maîtrise doublée",
   "checkOption.stonecunning": "Origine d’un ouvrage en pierre : maîtrise doublée",
@@ -4544,11 +4579,70 @@ const UI_FR = Object.freeze({
   "checkOption.earForDeceit": "Déceler un mensonge",
   "checkOption.earForDeceit.note": "{source} : un d20 de 7 ou moins compte 8",
   "attack.note.savageAttacker": "Une fois par tour : dés de l’arme lancés deux fois, meilleur total gardé",
+  "attack.item.vs.dragon": "Contre un dragon",
+  "attack.item.vs.giantProne": "Contre un géant, qui fait une sauvegarde de Force DD 15 ou tombe à terre",
+  "attack.item.vs.fiendUndead": "Contre un fiélon ou un mort-vivant",
+  "attack.item.vs.undead": "Contre un mort-vivant",
+  "attack.item.vs.undeadGlowing": "Contre un mort-vivant, masse lumineuse",
+  "attack.item.vs.aberration": "Contre une aberration",
+  "attack.item.vs.plant": "Contre une plante",
+  "attack.item.vs.construct": "Contre un artificiel",
+  "attack.item.vs.object": "Contre un objet : le coup est critique",
+  "attack.item.vs.wounded": "Cible qui n’a plus tous ses points de vie",
+  "attack.item.vs.demon": "contre un démon",
+  "attack.item.notConstructUndead": "Sauf contre un artificiel ou un mort-vivant",
+  "attack.item.thrown": "Arme lancée",
+  "attack.item.thrownGiant": "Arme lancée contre un géant",
+  "attack.item.nat20": "Sur un 20 naturel",
+  "attack.item.smitingConstruct": "Sur un 20 naturel contre un artificiel, détruit s’il lui reste 25 points de vie ou moins",
+  "attack.item.sharpness": "Sur un 20 naturel contre une créature ; lance un autre d20 : sur 20, un membre est tranché",
+  "attack.item.lifeStealing": "Sur un 20 naturel, sauf artificiel ou mort-vivant ; tu gagnes 10 points de vie temporaires",
+  "attack.item.vorpal": "Sur un 20 naturel, la tête est tranchée ; ces dés seulement si la créature y échappe",
+  "attack.item.withering": "La cible fait une sauvegarde de Constitution DD 15",
+  "attack.item.bloodFury": "Tu regagnes autant de points de vie que ces dégâts nécrotiques",
+  "attack.item.charges": "{count} charge(s) sur {left}",
+  "attack.item.sworn": "contre ton ennemi juré",
+  "attack.item.swornAlive": "tant que ton ennemi juré vit",
+  "attack.item.daySky": "sous le ciel du jour",
+  "attack.item.nineLives": "{name} : sur un critique contre une créature de moins de 100 points de vie, sauvegarde de Constitution DD 15 ou mort.",
+  "attack.item.wave": "{name} : sur un critique, dégâts nécrotiques égaux à la moitié des points de vie maximum de la cible.",
+  "attack.item.giantBane": "{name} : sur un 20 naturel contre un géant, sauvegarde de Constitution DD 17 ou mort.",
   "ac.floor": ", portée à {value} par {source}",
   "+5 CA jusqu’au début de ton prochain tour": "+5 CA jusqu’au début de ton prochain tour",
   "+1 CA et +1 aux jets de sauvegarde · Résistance à tous les dégâts": "+1 CA et +1 aux jets de sauvegarde · Résistance à tous les dégâts",
   "CA de 16 au moins · Concentration du lanceur": "CA de 16 au moins · Concentration du lanceur",
   "+2 CA, vitesse doublée, avantage aux sauvegardes de Dextérité, une action de plus par tour · Concentration du lanceur": "+2 CA, vitesse doublée, avantage aux sauvegardes de Dextérité, une action de plus par tour · Concentration du lanceur",
+  "État Invisible, sans fin à l’attaque · Concentration du lanceur": "État Invisible, sans fin à l’attaque · Concentration du lanceur",
+  "Avantage aux jets d’attaque, tests et sauvegardes ; les attaques contre toi ont le désavantage": "Avantage aux jets d’attaque, tests et sauvegardes ; les attaques contre toi ont le désavantage",
+  "−1d4 aux jets d’attaque et de sauvegarde · Concentration du lanceur": "−1d4 aux jets d’attaque et de sauvegarde · Concentration du lanceur",
+  "−1d6 aux jets d’attaque et aux tests, et aux sauvegardes de Constitution pour la concentration · Sauvegarde d’Intelligence à la fin de chacun de tes tours": "−1d6 aux jets d’attaque et aux tests, et aux sauvegardes de Constitution pour la concentration · Sauvegarde d’Intelligence à la fin de chacun de tes tours",
+  "Désavantage aux jets d’attaque et aux tests tant que tu gardes l’objet brûlant · Concentration du lanceur": "Désavantage aux jets d’attaque et aux tests tant que tu gardes l’objet brûlant · Concentration du lanceur",
+  "Désavantage aux jets d’attaque, tests et sauvegardes, sauf de Constitution · Vitesse de 3 m au plus": "Désavantage aux jets d’attaque, tests et sauvegardes, sauf de Constitution · Vitesse de 3 m au plus",
+  "Désavantage aux jets d’attaque et aux sauvegardes de Dextérité ; les attaques contre toi ont l’avantage · Concentration du lanceur": "Désavantage aux jets d’attaque et aux sauvegardes de Dextérité ; les attaques contre toi ont l’avantage · Concentration du lanceur",
+  "Effet choisi par le lanceur · Concentration du lanceur": "Effet choisi par le lanceur · Concentration du lanceur",
+  "Maladie choisie par le lanceur, pour 7 jours": "Maladie choisie par le lanceur, pour 7 jours",
+  "Effet du glyphe choisi par le lanceur, pour 1 minute": "Effet du glyphe choisi par le lanceur, pour 1 minute",
+  "Désavantage à ta prochaine attaque d’arme, avant la fin de ton prochain tour": "Désavantage à ta prochaine attaque d’arme, avant la fin de ton prochain tour",
+  "Désavantage à ta prochaine attaque, avant la fin de ton prochain tour": "Désavantage à ta prochaine attaque, avant la fin de ton prochain tour",
+  "Désavantage aux jets d’attaque contre toute autre créature que le lanceur · Concentration du lanceur": "Désavantage aux jets d’attaque contre toute autre créature que le lanceur · Concentration du lanceur",
+  "Tes attaques d’arme de Force ne font que la moitié des dégâts · Sauvegarde de Constitution à la fin de chacun de tes tours": "Tes attaques d’arme de Force ne font que la moitié des dégâts · Sauvegarde de Constitution à la fin de chacun de tes tours",
+  "Agrandi": "Agrandi",
+  "Rapetissé": "Rapetissé",
+  "Nauséeux": "Nauséeux",
+  "Endormi": "Endormi",
+  "Paniqué": "Paniqué",
+  "Empoisonné, avant la maladie": "Empoisonné, avant la maladie",
+  "Mal aveuglant": "Mal aveuglant",
+  "Fièvre répugnante": "Fièvre répugnante",
+  "Chair putréfiée": "Chair putréfiée",
+  "Esprit brûlant": "Esprit brûlant",
+  "Convulsions": "Convulsions",
+  "Fatalité visqueuse": "Fatalité visqueuse",
+  "Discorde": "Discorde",
+  "Peur": "Peur",
+  "Douleur": "Douleur",
+  "Sommeil": "Sommeil",
+  "Étourdissement": "Étourdissement",
   "Avantage aux sauvegardes de Sagesse et aux jets contre la mort, soins reçus au maximum de leurs dés · Concentration du lanceur": "Avantage aux sauvegardes de Sagesse et aux jets contre la mort, soins reçus au maximum de leurs dés · Concentration du lanceur",
   "État Invisible, jusqu’à ta prochaine attaque ou ton prochain sort · Concentration du lanceur": "État Invisible, jusqu’à ta prochaine attaque ou ton prochain sort · Concentration du lanceur",
   "+10 aux tests de Dextérité (Discrétion) · Concentration du lanceur": "+10 aux tests de Dextérité (Discrétion) · Concentration du lanceur",
@@ -4563,6 +4657,20 @@ const UI_FR = Object.freeze({
   "rollMode.recklessAttack": "Les attaques contre toi ont l’avantage jusqu’à ton prochain tour",
   "rollMode.assassinate": "Cible qui n’a pas encore joué dans ce combat",
   "rollMode.steadyAim": "Action bonus, sans t’être déplacé ce tour ; ta vitesse passe à 0",
+  "rollMode.ambushMaster": "Premier round : contre la première créature touchée, jusqu’à ton prochain tour",
+  "rollMode.versatileTrickster": "Action bonus : créature près de ta main de mage, jusqu’à la fin du tour",
+  "rollMode.masterDuelist": "Après un échec, au jet relancé · {left} restant(s)",
+  "rollMode.fightingSpirit": "Action bonus : attaques d’arme jusqu’à la fin du tour, PV temporaires à l’activation",
+  "rollMode.fightingSpirit.active": "Déjà activé ce tour",
+  "rollMode.fightingSpirit.use": "Activer · {left} restant(s)",
+  "rollMode.unwaveringMark": "Action bonus, contre ta cible marquée qui a blessé un autre que toi · {left} restant(s)",
+  "rollMode.vowOfEnmity": "Contre la créature vouée, pendant 1 minute",
+  "rollMode.vowOfEnmity.vowed": "Créature déjà vouée",
+  "rollMode.vowOfEnmity.vow": "Prononcer le vœu · {left} restant(s)",
+  "rollMode.mortalBulwark": "Contre une aberration, un céleste, un élémentaire, une fée ou un fiélon",
+  "rollMode.avengingAngel": "Contre une créature effrayée par ton aura",
+  "rollMode.umbralSight": "Dans l’obscurité, contre une créature qui compte sur sa vision dans le noir",
+  "rollMode.shadowStep": "Première attaque au corps à corps après ta téléportation, ce tour",
   "rollMode.mountedCombatant": "Sur ta monture, contre une créature non montée plus petite qu’elle",
   "rollMode.grappler": "Contre une créature que tu agrippes",
   "rollMode.actor": "Pour te faire passer pour quelqu’un d’autre",
@@ -4574,6 +4682,33 @@ const UI_FR = Object.freeze({
   "rollMode.spell.true-strike": "Première attaque contre la créature ciblée",
   "rollMode.spell.faerie-fire": "Contre une créature illuminée que tu vois",
   "rollMode.spell.hunters-mark": "Pour trouver la créature marquée",
+  "rollMode.spell.shadow-blade": "Cible en lumière faible ou dans les ténèbres",
+  "rollMode.spell.zephyr-strike": "Une attaque d’arme, une fois par lancement",
+  "rollMode.spell.mislead": "Invisible jusqu’à ta première attaque ou ton premier sort",
+  "rollMode.spell.soul-cage": "Emprunter l’expérience : action bonus, une utilisation de l’âme",
+  "rollMode.armorProficiency": "Armure ou bouclier non maîtrisé",
+  "rollMode.heavySmall": "Arme lourde, petite taille",
+  "rollMode.hawkSpirit": "Réaction du druide, cible dans l’aura de l’esprit",
+  "rollMode.crusher": "Cible de ton coup critique contondant, jusqu’à ton prochain tour",
+  "rollMode.closeRange": "Ennemi à 1,50 m",
+  "rollMode.closeRange.text": "Attaque à distance, ennemi qui te voit et peut agir",
+  "rollMode.longRange": "Portée longue",
+  "rollMode.longRange.text": "Cible au-delà de la portée normale",
+  "rollMode.unseenTarget": "Cible que tu ne vois pas",
+  "rollMode.unseenAttacker": "La cible ne te voit pas",
+  "rollMode.targetProne": "Cible à terre",
+  "rollMode.targetProne.near": "Tu es à 1,50 m",
+  "rollMode.targetProne.far": "Tu es à plus de 1,50 m",
+  "rollMode.targetHelpless": "Cible paralysée ou inconsciente",
+  "rollMode.targetHelpless.text": "À 1,50 m, le toucher devient un coup critique",
+  "rollMode.targetHindered": "Cible aveuglée, entravée, étourdie ou pétrifiée",
+  "rollMode.underwater": "Sous l’eau",
+  "rollMode.underwater.ranged": "Au-delà de la portée normale, l’attaque rate",
+  "rollMode.situation": "Situation de l’attaque",
+  "rollMode.situation.distance": "Distance",
+  "rollMode.situation.visibility": "Visibilité",
+  "rollMode.situation.target": "État de la cible",
+  "rollMode.situation.environment": "Milieu",
   "artillerist.freeCannon": "Canon occulte",
   "artillerist.freeCannon.note": "Une création gratuite par repos long, puis un emplacement de niveau 1 ou supérieur par canon. « Utiliser » crée le canon.",
   "rest.event.dawn": "Aube",
@@ -4806,6 +4941,7 @@ const UI_FR = Object.freeze({
   "dice.lucky.keep": "{name} : choisis le d20 à garder",
   "dice.lucky.keepDie": "Garder le {value}",
   "dice.after.add": "{label} : ajouter {formula} ({note})",
+  "dice.after.hit": "{label} : l’attaque touche ({note})",
   "dice.amend.invalid": "Ce jet ne peut pas être retouché.",
   "rangedNote.sharpshooter": "pas de désavantage à longue portée",
   "rangedNote.crossbowExpert": "pas de désavantage avec un ennemi au contact",
@@ -4876,6 +5012,23 @@ const UI_FR = Object.freeze({
   "received.gone": "{name} : utilisé, retiré de la fiche.",
   "received.counter.invalidList": "Liste de compteurs reçus invalide.",
   "received.counter.invalid": "Compteur reçu invalide.",
+  "received.duration.hour": "1 heure",
+  "received.duration.minute": "1 minute",
+  "received.duration.hours1d4": "1d4 heures",
+  "received.item.chooseWeapon": "Équipe d’abord une arme tranchante ou perforante, ou des munitions, à enduire.",
+  "received.item.effect": "Ajouté à « États et effets », d’où tu l’arrêtes : {changes}.",
+  "received.item.tempHp": "{value} PV temporaires",
+  "received.effect.rolls": "{amount} : {rolls}",
+  "received.effect.ability": "{ability} {score} au moins",
+  "received.effect.weapon": "Arme : {name}",
+  "received.effect.ends": "Prend fin à ta prochaine attaque",
+  "received.effect.ammunition": "Munitions",
+  "received.field.variant": "Effet subi",
+  "received.field.weapon": "Arme",
+  "received.toggle.light.on": "Allumer",
+  "received.toggle.light.off": "Éteindre",
+  "received.toggle.soul.on": "Âme dévorée",
+  "received.toggle.soul.off": "PV temporaires épuisés",
   "history.impact": "{label} : {before} → {after}",
   "Monnaie": "Monnaie",
   "Correction d’un résultat de table": "Correction d’un résultat de table",
@@ -4951,6 +5104,15 @@ const UI_FR = Object.freeze({
   "roll.portent.other": "Sur une autre créature",
   "roll.portent.option": "{name} : le d20 vaut {value}",
   "roll.portent.normal": "Ni avantage ni désavantage : le présage remplace le jet.",
+  "roll.lock.save": "Garder",
+  "roll.lock.kept": "Gardé",
+  "roll.lock.saveLabel": "Garder les cases cochées pour les jets suivants",
+  "roll.lock.keptLabel": "Gardé : les cases cochées reviennent à chaque jet",
+  "roll.lock.resumed": "Cases reprises de ton jet précédent.",
+  "roll.lock.line": "Cases gardées : {names}",
+  "roll.lock.history.on": "Cases gardées pour les jets suivants",
+  "roll.lock.history.off": "Cases plus gardées",
+  "roll.lock.invalid": "Cases gardées de la fenêtre de dés invalides.",
   "roll.reclaim.tempHp": "Récupérer le potentiel demande de n’avoir aucun PV temporaire.",
   "roll.jolt.outcome": "Choisis des dégâts de force ou des soins.",
   "roll.jolt.cost": "{name} : 1 utilisation, une fois par tour après ton attaque magique ou celle du défenseur réussie.",
@@ -6132,6 +6294,11 @@ const UI_EN = Object.freeze({
   "Résistances": "Resistances",
   "spell.material.table": "Provided by the table",
   "spell.material.tableNote": "Note (optional)",
+  "spell.cast.weaponId": "Weapon touched by the spell",
+  "spell.cast.weaponAlly": "An ally’s weapon",
+  "spell.cast.form": "Form",
+  "spell.cast.form.beast": "Primal Beast",
+  "spell.cast.form.tree": "Great Tree",
   "spell.material.error.gold": "Not enough GP: choose an item or “Provided by the table”.",
   "spell.material.error.stock": "Insufficient stock: choose another item or “Provided by the table”.",
   "spell.material.error.special": "This equipped or special item cannot be consumed here. Choose an ordinary component or “Provided by the table”.",
@@ -8684,6 +8851,10 @@ const UI_EN = Object.freeze({
   "units.overCapacity": "Bag too heavy: {p0} / {p1}.",
   "units.perItem": "{value} / item",
   "units.speedFloor": "Walking speed at least {value}, without the heavy armor Strength penalty",
+  "items.bonus.raise": "{ability} +{amount}, up to {max}",
+  "items.bonus.proficiency": "Proficiency bonus +{amount}",
+  "items.bonus.bows": "Longbow and shortbow damage +{amount}, and proficiency with these bows",
+  "items.bonus.unarmed": "Unarmed strikes +{amount} to attack and damage rolls",
   "units.itemReview": "{quantity} item(s), {weight} each. Bonuses follow carrying and attunement of this item.",
   "units.printCombat": "HP {p0}/{p1} · AC {p2} · Initiative {p3} · Speed {p4} · Proficiency {p5} · Hit Dice {p6} · Passive Perception {p7}",
   "{hours} h au plus (prolongée)": "at most {hours} h (extended)",
@@ -8882,7 +9053,6 @@ const UI_EN = Object.freeze({
   "Critique": "Critical",
   "Fléchette {p0}": "Dart {p0}",
   "Raté": "Miss",
-  "Résultat externe": "External result",
   "Sort lancé : {p0}.": "Spell cast: {p0}.",
   "Dernière charge à résoudre dans l’inventaire.": "Last charge to resolve in the inventory.",
   "Options modifiées": "Options changed",
@@ -8944,6 +9114,7 @@ const UI_EN = Object.freeze({
   "Effet reçu actif": "Active received effect",
   "+1d4 aux jets d’attaque et de sauvegarde · Concentration du lanceur": "+1d4 to attack rolls and saving throws · Caster's concentration",
   "+1d4 à un test de caractéristique, une fois": "+1d4 to one ability check, once",
+  "Avantage à ta prochaine attaque contre la cible touchée, avant la fin du prochain tour du lanceur": "Advantage on your next attack roll against the target that was hit, before the end of the caster's next turn",
   "+1d4 à un jet de sauvegarde, une fois": "+1d4 to one saving throw, once",
   "Soins · {p0}": "Healing · {p0}",
   "Fin d’un sort actif": "End of an active spell",
@@ -9040,6 +9211,8 @@ const UI_EN = Object.freeze({
   "attack.alterSelf": "Natural weapons",
   "attack.alterSelf.type": "bludgeoning, piercing or slashing",
   "attack.alterSelf.note": "magical, natural weapons form of Alter Self",
+  "attack.spellWeapon": "magical ({name})",
+  "attack.shadowBlade.note": "magical; dropped or thrown, it vanishes at the end of the turn",
   "attack.naga.bite": "target: DC {dc} Constitution saving throw, 1d4 poison on a failure",
   "attack.naga.constrict": "target grappled and restrained (escape DC {dc}), one target at a time",
   "share.empty": "No backup file was received.",
@@ -9163,7 +9336,29 @@ const UI_EN = Object.freeze({
   "attack.spell.cantrip": "Attack made as part of casting the spell",
   "attack.spell.boomingRest": "If the target willingly moves before your next turn",
   "attack.spell.greenFlameRest": "Second creature, next to the target",
+  "attack.spell.holyWeaponRest": "Bonus action: end the spell, burst around the weapon",
+  "attack.spell.spiritShroud": "Target within {distance}",
+  "attack.spell.ownCard": "Its dice are rolled separately, on the spell card",
+  "attack.spell.absorbElements": "On your next turn",
+  "attack.type.absorbed": "of the absorbed type",
   "attack.note.glimmering": "Next attack against the glimmering target",
+  "attack.note.giantMight": "Once per turn, while the feature is active",
+  "attack.note.fireRune": "Strength save DC {dc} or restrained",
+  "attack.note.arcaneShot": "Once per turn, on a hit, DC {dc}",
+  "attack.note.kenseiShot": "Bonus action, until the end of the turn",
+  "attack.harm.flurry": "Free during a paid Flurry of Blows",
+  "attack.note.fangsFireSnake": "Hit while the discipline is active",
+  "attack.note.empoweredArms": "Empowered Arms, once per turn",
+  "attack.note.foeSlayer": "Once per turn, against your favored enemy",
+  "attack.focusedAim.ki": "{count} ki · {left} left",
+  "attack.note.alchemicalSavant": "Spell cast with your alchemist’s supplies",
+  "attack.note.arcaneFirearm": "Spell cast through your arcane firearm",
+  "attack.note.arcaneJolt": "Once per turn, magic weapon",
+  "attack.note.eldritchSmite": "Once per turn; a Huge or smaller target is knocked prone",
+  "attack.note.overchannel": "Roll your necrotic damage from the {name} row",
+  "attack.note.poisoner": "Coated weapon: DC 14 Constitution save, or this damage and the poisoned condition",
+  "attack.note.piercer": "Once per turn: the lowest die below average is rerolled",
+  "attack.flourish.master": "{name}: 1d6, nothing spent",
   "Résistance des robustes": "Stout Resilience",
   "reminder.line": "{name}: {text}.",
   "reminder.damage.uncannyDodge": "reaction: half the damage of an attack, if you can see the attacker",
@@ -9199,6 +9394,8 @@ const UI_EN = Object.freeze({
   "dice.adjust.floor.one": "{source}: one die is treated as {value}.",
   "dice.adjust.floor.many": "{source}: {count} dice are treated as {value}.",
   "dice.adjust.best": "{source}: dice rolled twice, {kept} kept, {dropped} discarded.",
+  "dice.adjust.triple": "{source}: a third d20 rolled with advantage.",
+  "dice.adjust.explode": "{source}: a die at its maximum, one more die ({value}).",
   "checkOption.naturalExplorer": "Check related to your favored terrain{terrains}: proficiency doubled",
   "checkOption.dragonAncestor": "Dealing with a dragon: proficiency doubled",
   "checkOption.stonecunning": "Origin of stonework: proficiency doubled",
@@ -9207,11 +9404,70 @@ const UI_EN = Object.freeze({
   "checkOption.earForDeceit": "Spot a lie",
   "checkOption.earForDeceit.note": "{source}: a d20 roll of 7 or lower counts as 8",
   "attack.note.savageAttacker": "Once per turn: weapon dice rolled twice, best total kept",
+  "attack.item.vs.dragon": "Against a dragon",
+  "attack.item.vs.giantProne": "Against a giant, which makes a DC 15 Strength saving throw or falls prone",
+  "attack.item.vs.fiendUndead": "Against a fiend or an undead",
+  "attack.item.vs.undead": "Against an undead",
+  "attack.item.vs.undeadGlowing": "Against an undead, while the mace glows",
+  "attack.item.vs.aberration": "Against an aberration",
+  "attack.item.vs.plant": "Against a plant",
+  "attack.item.vs.construct": "Against a construct",
+  "attack.item.vs.object": "Against an object: the hit is a critical hit",
+  "attack.item.vs.wounded": "Target that doesn’t have all its hit points",
+  "attack.item.vs.demon": "against a demon",
+  "attack.item.notConstructUndead": "Except against a construct or an undead",
+  "attack.item.thrown": "Thrown weapon",
+  "attack.item.thrownGiant": "Thrown weapon against a giant",
+  "attack.item.nat20": "On a natural 20",
+  "attack.item.smitingConstruct": "On a natural 20 against a construct, destroyed if it has 25 hit points or fewer",
+  "attack.item.sharpness": "On a natural 20 against a creature; roll another d20: on a 20, a limb is lopped off",
+  "attack.item.lifeStealing": "On a natural 20, except construct or undead; you gain 10 temporary hit points",
+  "attack.item.vorpal": "On a natural 20, the head is cut off; these dice only if the creature avoids it",
+  "attack.item.withering": "The target makes a DC 15 Constitution saving throw",
+  "attack.item.bloodFury": "You regain hit points equal to this necrotic damage",
+  "attack.item.charges": "{count} charge(s) of {left}",
+  "attack.item.sworn": "against your sworn enemy",
+  "attack.item.swornAlive": "while your sworn enemy lives",
+  "attack.item.daySky": "under the daytime sky",
+  "attack.item.nineLives": "{name}: on a critical hit against a creature with fewer than 100 hit points, DC 15 Constitution saving throw or slain.",
+  "attack.item.wave": "{name}: on a critical hit, extra necrotic damage equal to half the target’s hit point maximum.",
+  "attack.item.giantBane": "{name}: on a natural 20 against a giant, DC 17 Constitution saving throw or die.",
   "ac.floor": ", raised to {value} by {source}",
   "+5 CA jusqu’au début de ton prochain tour": "+5 AC until the start of your next turn",
   "+1 CA et +1 aux jets de sauvegarde · Résistance à tous les dégâts": "+1 AC and +1 to saving throws · Resistance to all damage",
   "CA de 16 au moins · Concentration du lanceur": "AC of at least 16 · Caster's concentration",
   "+2 CA, vitesse doublée, avantage aux sauvegardes de Dextérité, une action de plus par tour · Concentration du lanceur": "+2 AC, doubled speed, advantage on Dexterity saving throws, one more action each turn · Caster's concentration",
+  "État Invisible, sans fin à l’attaque · Concentration du lanceur": "Invisible condition, not ended by attacking · Caster's concentration",
+  "Avantage aux jets d’attaque, tests et sauvegardes ; les attaques contre toi ont le désavantage": "Advantage on attack rolls, ability checks and saving throws; attacks against you have disadvantage",
+  "−1d4 aux jets d’attaque et de sauvegarde · Concentration du lanceur": "−1d4 to attack rolls and saving throws · Caster's concentration",
+  "−1d6 aux jets d’attaque et aux tests, et aux sauvegardes de Constitution pour la concentration · Sauvegarde d’Intelligence à la fin de chacun de tes tours": "−1d6 to attack rolls and ability checks, and to Constitution saving throws to maintain concentration · Intelligence saving throw at the end of each of your turns",
+  "Désavantage aux jets d’attaque et aux tests tant que tu gardes l’objet brûlant · Concentration du lanceur": "Disadvantage on attack rolls and ability checks while you keep the red-hot object · Caster's concentration",
+  "Désavantage aux jets d’attaque, tests et sauvegardes, sauf de Constitution · Vitesse de 3 m au plus": "Disadvantage on attack rolls, ability checks and saving throws other than Constitution · Speed of 10 feet at most",
+  "Désavantage aux jets d’attaque et aux sauvegardes de Dextérité ; les attaques contre toi ont l’avantage · Concentration du lanceur": "Disadvantage on attack rolls and Dexterity saving throws; attacks against you have advantage · Caster's concentration",
+  "Effet choisi par le lanceur · Concentration du lanceur": "Effect chosen by the caster · Caster's concentration",
+  "Maladie choisie par le lanceur, pour 7 jours": "Disease chosen by the caster, for 7 days",
+  "Effet du glyphe choisi par le lanceur, pour 1 minute": "Glyph effect chosen by the caster, for 1 minute",
+  "Désavantage à ta prochaine attaque d’arme, avant la fin de ton prochain tour": "Disadvantage on your next weapon attack roll, before the end of your next turn",
+  "Désavantage à ta prochaine attaque, avant la fin de ton prochain tour": "Disadvantage on your next attack roll, before the end of your next turn",
+  "Désavantage aux jets d’attaque contre toute autre créature que le lanceur · Concentration du lanceur": "Disadvantage on attack rolls against creatures other than the caster · Caster's concentration",
+  "Tes attaques d’arme de Force ne font que la moitié des dégâts · Sauvegarde de Constitution à la fin de chacun de tes tours": "Your Strength weapon attacks deal only half damage · Constitution saving throw at the end of each of your turns",
+  "Agrandi": "Enlarged",
+  "Rapetissé": "Reduced",
+  "Nauséeux": "Sickened",
+  "Endormi": "Asleep",
+  "Paniqué": "Panicked",
+  "Empoisonné, avant la maladie": "Poisoned, before the disease",
+  "Mal aveuglant": "Blinding Sickness",
+  "Fièvre répugnante": "Filth Fever",
+  "Chair putréfiée": "Flesh Rot",
+  "Esprit brûlant": "Mindfire",
+  "Convulsions": "Seizure",
+  "Fatalité visqueuse": "Slimy Doom",
+  "Discorde": "Discord",
+  "Peur": "Fear",
+  "Douleur": "Pain",
+  "Sommeil": "Sleep",
+  "Étourdissement": "Stunning",
   "Avantage aux sauvegardes de Sagesse et aux jets contre la mort, soins reçus au maximum de leurs dés · Concentration du lanceur": "Advantage on Wisdom saving throws and death saving throws, healing received at the maximum of its dice · Caster's concentration",
   "État Invisible, jusqu’à ta prochaine attaque ou ton prochain sort · Concentration du lanceur": "Invisible condition, until your next attack or spell · Caster's concentration",
   "+10 aux tests de Dextérité (Discrétion) · Concentration du lanceur": "+10 to Dexterity (Stealth) checks · Caster's concentration",
@@ -9226,6 +9482,20 @@ const UI_EN = Object.freeze({
   "rollMode.recklessAttack": "Attacks against you have advantage until your next turn",
   "rollMode.assassinate": "Target that has not taken a turn in this combat yet",
   "rollMode.steadyAim": "Bonus action, if you have not moved this turn; your speed becomes 0",
+  "rollMode.ambushMaster": "First round: against the first creature you hit, until your next turn",
+  "rollMode.versatileTrickster": "Bonus action: a creature near your mage hand, until the end of the turn",
+  "rollMode.masterDuelist": "After a miss, on the reroll · {left} left",
+  "rollMode.fightingSpirit": "Bonus action: weapon attacks until the end of the turn, temporary hit points when used",
+  "rollMode.fightingSpirit.active": "Already used this turn",
+  "rollMode.fightingSpirit.use": "Use it · {left} left",
+  "rollMode.unwaveringMark": "Bonus action, against your marked target that damaged someone else · {left} left",
+  "rollMode.vowOfEnmity": "Against the sworn creature, for 1 minute",
+  "rollMode.vowOfEnmity.vowed": "Creature already sworn",
+  "rollMode.vowOfEnmity.vow": "Utter the vow · {left} left",
+  "rollMode.mortalBulwark": "Against an aberration, celestial, elemental, fey or fiend",
+  "rollMode.avengingAngel": "Against a creature frightened by your aura",
+  "rollMode.umbralSight": "In darkness, against a creature relying on darkvision",
+  "rollMode.shadowStep": "First melee attack after your teleport, this turn",
   "rollMode.mountedCombatant": "While mounted, against an unmounted creature smaller than your mount",
   "rollMode.grappler": "Against a creature you are grappling",
   "rollMode.actor": "To pass yourself off as someone else",
@@ -9237,6 +9507,33 @@ const UI_EN = Object.freeze({
   "rollMode.spell.true-strike": "First attack against the targeted creature",
   "rollMode.spell.faerie-fire": "Against an outlined creature you can see",
   "rollMode.spell.hunters-mark": "To find the marked creature",
+  "rollMode.spell.shadow-blade": "Target in dim light or darkness",
+  "rollMode.spell.zephyr-strike": "One weapon attack, once per casting",
+  "rollMode.spell.mislead": "Invisible until your first attack or spell",
+  "rollMode.spell.soul-cage": "Borrow Experience: bonus action, one use of the soul",
+  "rollMode.armorProficiency": "Armor or shield without proficiency",
+  "rollMode.heavySmall": "Heavy weapon, Small size",
+  "rollMode.hawkSpirit": "Druid’s reaction, target in the spirit’s aura",
+  "rollMode.crusher": "Target of your bludgeoning critical hit, until your next turn",
+  "rollMode.closeRange": "Enemy within 5 feet",
+  "rollMode.closeRange.text": "Ranged attack, an enemy who sees you and can act",
+  "rollMode.longRange": "Long range",
+  "rollMode.longRange.text": "Target beyond normal range",
+  "rollMode.unseenTarget": "Target you can’t see",
+  "rollMode.unseenAttacker": "The target can’t see you",
+  "rollMode.targetProne": "Prone target",
+  "rollMode.targetProne.near": "You are within 5 feet",
+  "rollMode.targetProne.far": "You are farther than 5 feet",
+  "rollMode.targetHelpless": "Paralyzed or unconscious target",
+  "rollMode.targetHelpless.text": "Within 5 feet, a hit becomes a critical hit",
+  "rollMode.targetHindered": "Blinded, restrained, stunned or petrified target",
+  "rollMode.underwater": "Underwater",
+  "rollMode.underwater.ranged": "Beyond normal range, the attack misses",
+  "rollMode.situation": "Attack situation",
+  "rollMode.situation.distance": "Distance",
+  "rollMode.situation.visibility": "Visibility",
+  "rollMode.situation.target": "Target’s condition",
+  "rollMode.situation.environment": "Surroundings",
   "artillerist.freeCannon": "Eldritch Cannon",
   "artillerist.freeCannon.note": "One free creation per long rest, then a spell slot of 1st level or higher per cannon. “Use” creates the cannon.",
   "rest.event.dawn": "Dawn",
@@ -9469,6 +9766,7 @@ const UI_EN = Object.freeze({
   "dice.lucky.keep": "{name}: choose the d20 to keep",
   "dice.lucky.keepDie": "Keep the {value}",
   "dice.after.add": "{label}: add {formula} ({note})",
+  "dice.after.hit": "{label}: the attack hits ({note})",
   "dice.amend.invalid": "This roll cannot be amended.",
   "rangedNote.sharpshooter": "no disadvantage at long range",
   "rangedNote.crossbowExpert": "no disadvantage with an enemy next to you",
@@ -9539,6 +9837,23 @@ const UI_EN = Object.freeze({
   "received.gone": "{name}: used, removed from the sheet.",
   "received.counter.invalidList": "Invalid list of received counters.",
   "received.counter.invalid": "Invalid received counter.",
+  "received.duration.hour": "1 hour",
+  "received.duration.minute": "1 minute",
+  "received.duration.hours1d4": "1d4 hours",
+  "received.item.chooseWeapon": "First equip a slashing or piercing weapon, or ammunition, to coat.",
+  "received.item.effect": "Added to “Conditions and effects”, where you end it: {changes}.",
+  "received.item.tempHp": "{value} temporary hit points",
+  "received.effect.rolls": "{amount}: {rolls}",
+  "received.effect.ability": "{ability} at least {score}",
+  "received.effect.weapon": "Weapon: {name}",
+  "received.effect.ends": "Ends with your next attack",
+  "received.effect.ammunition": "Ammunition",
+  "received.field.variant": "Effect",
+  "received.field.weapon": "Weapon",
+  "received.toggle.light.on": "Light",
+  "received.toggle.light.off": "Put out",
+  "received.toggle.soul.on": "Soul devoured",
+  "received.toggle.soul.off": "Temporary hit points gone",
   "history.impact": "{label}: {before} → {after}",
   "Monnaie": "Money",
   "Correction d’un résultat de table": "Correction of a table result",
@@ -9614,6 +9929,15 @@ const UI_EN = Object.freeze({
   "roll.portent.other": "On another creature",
   "roll.portent.option": "{name}: the d20 is {value}",
   "roll.portent.normal": "No advantage or disadvantage: the portent replaces the roll.",
+  "roll.lock.save": "Keep",
+  "roll.lock.kept": "Kept",
+  "roll.lock.saveLabel": "Keep the checked boxes for the next rolls",
+  "roll.lock.keptLabel": "Kept: the checked boxes come back on every roll",
+  "roll.lock.resumed": "Boxes carried over from your previous roll.",
+  "roll.lock.line": "Kept boxes: {names}",
+  "roll.lock.history.on": "Boxes kept for the next rolls",
+  "roll.lock.history.off": "Boxes no longer kept",
+  "roll.lock.invalid": "Invalid kept boxes in the dice window.",
   "roll.reclaim.tempHp": "Reclaim Potential requires having no temporary hit points.",
   "roll.jolt.outcome": "Choose force damage or healing.",
   "roll.jolt.cost": "{name}: 1 use, once per turn after your magic weapon attack or your defender’s attack hits.",
@@ -34312,7 +34636,7 @@ const ITEM_REFERENCE_RULES = Object.freeze({
   "item|bgg|ring of amity": Object.freeze({"revision":"189d277c10f43d0f60d7319704b7077349d5863b68685998bb7573e171dfa564","sourceHash":"7ad798c47788ed0984b662d3e14bf6446cfe3c413ae5c14f112de0e8704b48c4","source":"BGG","name":"Ring of Amity","reqAttune":true,"rarity":"very rare","type":"RG|DMG","baseName":"Ring of Amity"}),
   "item|bgg|sanctum amulet": Object.freeze({"revision":"0e8ef7390b2c9b19af1198924b8e9f866c8cdff23e0ab981ba91367cc3e541b2","sourceHash":"c40cc7343fa6db16aa54194f167f228d95d34bee8af5cd390f2b96658ae0fd45","source":"BGG","name":"Sanctum Amulet","reqAttune":true,"rarity":"very rare","attachedSpells":Object.freeze({"will":Object.freeze(["spare the dying"])}),"baseName":"Sanctum Amulet"}),
   "item|bgg|shield of the blazing dreadnought": Object.freeze({"revision":"e01f8669102b1f07d145386720b471123d7ad9ff3a1c73e1e754d1fe4d27ca89","sourceHash":"e867d9a91ccde182aadac8ba8d492ef148691d5697b16e3444e10b32c64286b7","source":"BGG","name":"Shield of the Blazing Dreadnought","reqAttune":true,"rarity":"legendary","type":"S","baseName":"shield"}),
-  "item|bgg|staff of the rooted hills": Object.freeze({"revision":"66c827dfc118d85cd8d3ee66f1040962661c002d732dcebca46a5c86c1bd48a4","sourceHash":"dd67cd2f86aabc9e2b7cebb47832597a2fb6140b9e7be7b9aaa8c7eaa84ef259","source":"BGG","name":"Staff of the Rooted Hills","reqAttune":true,"rarity":"rare","bonusWeapon":"+1","attachedSpells":Object.freeze({"daily":Object.freeze({"1":Object.freeze(["hold person","speak with plants"])})}),"type":"M","baseName":"Staff of the Rooted Hills"}),
+  "item|bgg|staff of the rooted hills": Object.freeze({"revision":"66c827dfc118d85cd8d3ee66f1040962661c002d732dcebca46a5c86c1bd48a4","sourceHash":"dd67cd2f86aabc9e2b7cebb47832597a2fb6140b9e7be7b9aaa8c7eaa84ef259","source":"BGG","name":"Staff of the Rooted Hills","reqAttune":true,"rarity":"rare","bonusWeapon":"+1","attachedSpells":Object.freeze({"daily":Object.freeze({"1":Object.freeze(["hold person","speak with plants"])})}),"type":"M","baseName":"Quarterstaff"}),
   "item|bgg|stonebreaker's breastplate": Object.freeze({"revision":"5dac60047b69677bfbd9bbdd94d550833dd5cbf0a277d57d1d08780a3b91de02","sourceHash":"d44336f6106bf967bc2beeca70019b205857eb043c5942c6efd4e85f9a83851c","source":"BGG","name":"Stonebreaker's Breastplate","reqAttune":true,"rarity":"legendary","attachedSpells":Object.freeze({"daily":Object.freeze({"1e":Object.freeze(["wall of stone"])})}),"type":"MA","baseName":"breastplate"}),
   "item|bgg|thunderbuss": Object.freeze({"revision":"77c9ca56327e4909a287965efa1e26902c4a23e3a3e65697022d9ab75725d70f","sourceHash":"64cab6e59e8775991361adc66cde7321c6115d3aa18d539e3f492e25a18eeff6","source":"BGG","name":"Thunderbuss","rarity":"very rare","bonusWeapon":"+1","type":"R","baseName":"pistol"}),
   "item|bgg|war horn of valor": Object.freeze({"revision":"54a29118db253108a1afea80582ff659569f8026d128b7721a29209c1a42deec","sourceHash":"6e3d0ee8a9e7f99772cb5e3483525368cae945c50dbf585a485407d8ae6ecb0a","source":"BGG","name":"War Horn of Valor","rarity":"rare","bonusAc":"+1","type":"INS","baseName":"horn"}),
@@ -34345,7 +34669,7 @@ const ITEM_REFERENCE_RULES = Object.freeze({
   "item|bmt|euryale card": Object.freeze({"revision":"2c350c696f9c69338049d2ded1d0ad203377eef7c7779e8ffa24ebd7080b0584","sourceHash":"e8ef91d2b54bafb1f82aa0d6dfa7e16f5530c934454b04b23faa78c7886bc7e8","source":"BMT","name":"Euryale Card","rarity":"legendary","baseName":"Euryale Card"}),
   "item|bmt|euryale's aegis": Object.freeze({"revision":"601fe0d75be675505dc5d0d3894c92bedb96871411ebbcbf2b3760afa0bf7990","sourceHash":"d83ef2bc68e65f7b260f4c25cd83b84d6e048670dca4b4a3034a23ebbc9a143a","source":"BMT","name":"Euryale's Aegis","reqAttune":true,"rarity":"legendary","attachedSpells":Object.freeze({"daily":Object.freeze({"1e":Object.freeze(["lesser restoration","locate creature","transport via plants"])})}),"type":"S","baseName":"shield"}),
   "item|bmt|fabulist gem": Object.freeze({"revision":"b59474d680591c07ac516e7304d891b9bf53e3eaca9e86454654c7a5aca92e95","sourceHash":"1c41fc68faaf6f0907e33225dff8d83ba52374ee65521e25fd1b5c22fa1e571f","source":"BMT","name":"Fabulist Gem","reqAttune":true,"rarity":"uncommon","baseName":"Fabulist Gem"}),
-  "item|bmt|fate cutter shears": Object.freeze({"revision":"f772e57d01ecd14a9b65a8f635758d808bfa9d4f8d0d61107403c2f6f693ca44","sourceHash":"e51538d537361a0202b3967a238ad255fdc51a8008e3d16b5bf939dfbd9d440e","source":"BMT","name":"Fate Cutter Shears","reqAttune":true,"rarity":"very rare","type":"M","baseName":"dagger"}),
+  "item|bmt|fate cutter shears": Object.freeze({"revision":"f772e57d01ecd14a9b65a8f635758d808bfa9d4f8d0d61107403c2f6f693ca44","sourceHash":"e51538d537361a0202b3967a238ad255fdc51a8008e3d16b5bf939dfbd9d440e","source":"BMT","name":"Fate Cutter Shears","reqAttune":true,"rarity":"very rare","type":"M","critThreshold":19,"baseName":"dagger"}),
   "item|bmt|fates card": Object.freeze({"revision":"15576a4eb8a9c56d832c29c7a15e7d23580300d984fc5399b40f9748dd79695a","sourceHash":"653486912f92676c566cb184d0dc55b7aa72d196b49c3d77ec998ab84fef5511","source":"BMT","name":"Fates Card","rarity":"legendary","baseName":"Fates Card"}),
   "item|bmt|flames card": Object.freeze({"revision":"9e2ff2354e7dd733e8e7e5bcb2f7a428b1eaabb1aa1c04efa0b067dfed5b6b50","sourceHash":"da067deae8f8df6dd02a328b3253b1eb5d487b824ee2a57eea4e9dbeee9bf03d","source":"BMT","name":"Flames Card","rarity":"legendary","baseName":"Flames Card"}),
   "item|bmt|fool card": Object.freeze({"revision":"bdfa10c04a6e7821549ed4c0dbceceb65c3b5a37ed1ebb0ea860a23d3553f293","sourceHash":"89d7522b0ccd4acb61d43257ab86ca489d19f0be6caa5dfafad454345c813db7","source":"BMT","name":"Fool Card","rarity":"legendary","baseName":"Fool Card"}),
@@ -34383,7 +34707,7 @@ const ITEM_REFERENCE_RULES = Object.freeze({
   "item|bmt|star card": Object.freeze({"revision":"cb9cbfd2772ce091d85b514a16dda6f37a135bfb1a52847242c38629f4b78920","sourceHash":"5fa8695d145311132ac1f1cba53884e7f5710a0ef16d1e9f0ac2adcee9ab68f3","source":"BMT","name":"Star Card","rarity":"legendary","baseName":"Star Card"}),
   "item|bmt|stonemaker war pick": Object.freeze({"revision":"e65230dd110b62a380de37d5b6e1e5d7421884d1a44df56751a56775a7737930","sourceHash":"f2fb84e6b31173660225489d0eb597094db099aa9de310370cd61f1b8617d208","source":"BMT","name":"Stonemaker War Pick","reqAttune":true,"rarity":"very rare","bonusWeapon":"+1","attachedSpells":Object.freeze({"daily":Object.freeze({"1e":Object.freeze(["meld into stone"])})}),"charges":"{@dice 1d6 + 1}","type":"M","baseName":"war pick"}),
   "item|bmt|sun card": Object.freeze({"revision":"c3ed664fe2d279a0872a8e5c463b9e73ed05276f525016665389d672b41cca15","sourceHash":"2ba59d75663cff3a9878be625dda6b8c4554fa7960c2632d3772b1c415691842","source":"BMT","name":"Sun Card","rarity":"legendary","attachedSpells":Object.freeze({"daily":Object.freeze({"1e":Object.freeze(["sunbeam"])})}),"baseName":"Sun Card"}),
-  "item|bmt|sun staff": Object.freeze({"revision":"cdef2b05c8e4ef1db6609541f19a6ea7206cb02dc36afa41b9db52e465071505","sourceHash":"749087837937e69970ed2fa21cab1257ecd62fa2d572396e200dd24e6badd711","source":"BMT","name":"Sun Staff","reqAttune":"by a cleric, druid, or wizard","rarity":"rare","bonusWeapon":"+1","type":"M","baseName":"Sun Staff"}),
+  "item|bmt|sun staff": Object.freeze({"revision":"cdef2b05c8e4ef1db6609541f19a6ea7206cb02dc36afa41b9db52e465071505","sourceHash":"749087837937e69970ed2fa21cab1257ecd62fa2d572396e200dd24e6badd711","source":"BMT","name":"Sun Staff","reqAttune":"by a cleric, druid, or wizard","rarity":"rare","bonusWeapon":"+1","type":"M","baseName":"Quarterstaff"}),
   "item|bmt|talons card": Object.freeze({"revision":"3162225618ff180328616f89e8614ad824406adfe326b98e84fcf965dde515a1","sourceHash":"15257594034f3b44603a9361c7214c9484cf956a3acf63aad28f3aeaa1062eba","source":"BMT","name":"Talons Card","rarity":"legendary","baseName":"Talons Card"}),
   "item|bmt|telescopic transporter": Object.freeze({"revision":"cff67c4003ba3d8e892154a3320cb46250aef5855585b0adcee44424419eb772","sourceHash":"7640a5eff548fbfc7dc81f8cc29f75838286795748b106a8169c1c47a5f7f67b","source":"BMT","name":"Telescopic Transporter","rarity":"legendary","baseName":"Telescopic Transporter"}),
   "item|bmt|throne card": Object.freeze({"revision":"f2f7bc10eaa82411300c9b09009f8c67c94800b1fcc289fe3acc314e134d21f4","sourceHash":"242373606b8237e2563fbaf84aa7b16a8dc1e51de65bb470b96a992320290e8a","source":"BMT","name":"Throne Card","rarity":"legendary","attachedSpells":Object.freeze({"daily":Object.freeze({"1e":Object.freeze(["command"])})}),"baseName":"Throne Card"}),
@@ -34421,7 +34745,7 @@ const ITEM_REFERENCE_RULES = Object.freeze({
   "item|coa|ring of treachery": Object.freeze({"revision":"b1b4b78b8d26f7b4f4dedb40651e3202f8881bdc321628014f202370d21e9c87","sourceHash":"6d4280eca1cfdfd73e90d03aacf2f56e20e0c60b44d8ef75d3b3d04d67863944","source":"CoA","name":"Ring of Treachery","reqAttune":true,"rarity":"very rare","charges":3,"type":"RG|DMG","baseName":"Ring of Treachery"}),
   "item|coa|ruby rod of asmodeus": Object.freeze({"revision":"c6eef39056d66ea80239207af716b9fecf17bf361a8b152c221839984491e64b","sourceHash":"6624cb2cf031e6656b5d387695a54296350c0a5265af023179effe80142aead3","source":"CoA","name":"Ruby Rod of Asmodeus","reqAttune":true,"rarity":"artifact","bonusWeapon":"+2","attachedSpells":Object.freeze({"charges":Object.freeze({"3":Object.freeze(["lesser restoration"]),"12":Object.freeze(["greater restoration"])})}),"charges":66,"type":"RD|DMG","baseName":"Ruby Rod of Asmodeus"}),
   "item|coa|sage's mirror": Object.freeze({"revision":"9de75451340516e8bb11d056676007360713fab4481a7f7d3111a4739d512e28","sourceHash":"a38b62341e0d9da4137b78876db1f24bd9f57503620fdcffc08d6f4158f7b12b","source":"CoA","name":"Sage's Mirror","rarity":"rare","attachedSpells":Object.freeze({"charges":Object.freeze({"1":Object.freeze(["find the path","legend lore"])})}),"charges":3,"baseName":"Sage's Mirror"}),
-  "item|coa|scourge of shadow": Object.freeze({"revision":"cf1f38919a79ca477de00facae321b108924f2dbe8fa27549a2e42b0f789bf90","sourceHash":"c8b446ccd1ce22d347adab900fa548346ee691caf8b96411ae67a0b2811677d3","source":"CoA","name":"Scourge of Shadow","reqAttune":true,"rarity":"artifact","bonusWeapon":"+3","type":"M","baseName":"whip"}),
+  "item|coa|scourge of shadow": Object.freeze({"revision":"cf1f38919a79ca477de00facae321b108924f2dbe8fa27549a2e42b0f789bf90","sourceHash":"c8b446ccd1ce22d347adab900fa548346ee691caf8b96411ae67a0b2811677d3","source":"CoA","name":"Scourge of Shadow","reqAttune":true,"rarity":"artifact","bonusWeapon":"+3","type":"M","critThreshold":18,"baseName":"whip"}),
   "item|coa|skull of selfish knowledge": Object.freeze({"revision":"ce4ec7a76c06fd9ee3504227bf7c5d6c8ee51ac594a34134a30c4aa0a0112324","sourceHash":"78e94a3ad0bd50b4ec65ccd6f9c2e1bf9b22833293276b717e3830ee4bbadc4e","source":"CoA","name":"Skull of Selfish Knowledge","reqAttune":true,"rarity":"rare","baseName":"Skull of Selfish Knowledge"}),
   "item|coa|true-ice shards (dagger)": Object.freeze({"revision":"26eb8b4ca807e72cd2b868df68cb3a61f380f2ad052535444bf7180a3b5ece48","sourceHash":"f3f8077ef143c8945adcdb388c74f38a0d84487b3201e0448b6bfcf3697c2912","source":"CoA","name":"True-Ice Shards (Dagger)","reqAttune":true,"rarity":"artifact","bonusAc":"+3","attachedSpells":Object.freeze({"will":Object.freeze(["detect thoughts","locate animals or plants","locate creature","locate object"]),"daily":Object.freeze({"1e":Object.freeze(["find the path","scrying"])})}),"type":"M","baseName":"dagger"}),
   "item|coa|true-ice shards (rapier)": Object.freeze({"revision":"9b36eef689309b32d8c87885c4377aa5269b513c44dfe1044583822424541d73","sourceHash":"b043da249905d6f0eb34ee6b16963f04dd14cfb39c6d100c88d11891a1dda423","source":"CoA","name":"True-Ice Shards (Rapier)","reqAttune":true,"rarity":"artifact","bonusWeapon":"+3","attachedSpells":Object.freeze({"will":Object.freeze(["detect thoughts","locate animals or plants","locate creature","locate object"]),"daily":Object.freeze({"1e":Object.freeze(["find the path","scrying"])})}),"type":"M","baseName":"True-Ice Shards (Rapier)"}),
@@ -34430,7 +34754,7 @@ const ITEM_REFERENCE_RULES = Object.freeze({
   "item|cos|blood spear": Object.freeze({"revision":"0cbf5e843ee27a54023b94efd10f35b409d9f0d5b8e589314f5df5054bc743b4","sourceHash":"8e7f4e44e5042c930f9f48657cfe7dedee123f1bfbab9a6ce2327f9271d80027","source":"CoS","name":"Blood Spear","reqAttune":true,"rarity":"uncommon","bonusWeapon":"+2","type":"M","baseName":"spear"}),
   "item|cos|crusader's shortsword": Object.freeze({"revision":"dbe21bd003d7063236be0f5a696e2e6a99796f4cf11bb9fb2b11c77f0c8fcf15","sourceHash":"d66f1b0187a8b69dba1a203c7556fad981d00369586c4fd99ef5e7e44df015c8","source":"CoS","name":"Crusader's Shortsword","reqAttune":true,"rarity":"unknown (magic)","bonusWeapon":"+1","attachedSpells":Object.freeze({"daily":Object.freeze({"1e":Object.freeze(["crusader's mantle"])})}),"type":"M","baseName":"shortsword"}),
   "item|cos|green copper ewer": Object.freeze({"revision":"8294306d5d4ecb7bb6822fb380c7510f2d4c8472b78b08d99a9b8da4864a64f1","sourceHash":"cb45bc7392fabdc77d8b9af297bb573f92ef5cf5a158e39f28d10a0ecfd20004","source":"CoS","name":"Green Copper Ewer","rarity":"unknown (magic)","type":"OTH","baseName":"Green Copper Ewer"}),
-  "item|cos|gulthias staff": Object.freeze({"revision":"746bb75481dfcdfe145e36990b76b1a96a7e6ccc5d375b5035f2f9c1775ba508","sourceHash":"a47a9f58f6015f49ae147e8a62c279daf2fd1fd76c7837feff7bdef6583deea8","source":"CoS","name":"Gulthias Staff","reqAttune":true,"rarity":"rare","charges":10,"baseName":"Gulthias Staff"}),
+  "item|cos|gulthias staff": Object.freeze({"revision":"746bb75481dfcdfe145e36990b76b1a96a7e6ccc5d375b5035f2f9c1775ba508","sourceHash":"a47a9f58f6015f49ae147e8a62c279daf2fd1fd76c7837feff7bdef6583deea8","source":"CoS","name":"Gulthias Staff","reqAttune":true,"rarity":"rare","charges":10,"baseName":"Quarterstaff"}),
   "item|cos|holy symbol of ravenkind": Object.freeze({"revision":"da14c02d961c72bef11c52489a2f9f25c350da2f70177d16f778ccfc753cf6f9","sourceHash":"c24c0c70cc23fa59f5a0367c5231a15d9527d51ad9180afe552de601fed8c7cf","source":"CoS","name":"Holy Symbol of Ravenkind","reqAttune":"by a cleric or paladin of good alignment","rarity":"legendary","charges":10,"baseName":"Holy Symbol of Ravenkind"}),
   "item|cos|icon of ravenloft": Object.freeze({"revision":"81db2e73f2cbb3f02097c781f55470df410be514722528d7a1c65fa4cac2ab93","sourceHash":"437c11834c06dba3d9bc55bfd802548a925cfd436c99d40a16b5f6d7eddb1aff","source":"CoS","name":"Icon of Ravenloft","reqAttune":"by a creature of good alignment","rarity":"legendary","attachedSpells":Object.freeze({"will":Object.freeze(["protection from evil and good"]),"daily":Object.freeze({"1e":Object.freeze(["augury"])})}),"baseName":"Icon of Ravenloft"}),
   "item|cos|jakarion's staff of frost": Object.freeze({"revision":"7b55c938b86fb45baebeabf73ec26da3e9635265722cddab71754eb10ce89552","sourceHash":"4ffbfe458fbbd13034b9570d8003cb49d0a24e1160abbfa103ec1570223c7517","source":"CoS","name":"Jakarion's Staff of Frost","reqAttune":"by a druid, sorcerer, warlock, or wizard","rarity":"very rare","attachedSpells":Object.freeze({"charges":Object.freeze({"1":Object.freeze(["fog cloud"]),"4":Object.freeze(["ice storm","wall of ice"]),"5":Object.freeze(["cone of cold"])})}),"charges":10,"lastCharge":true,"baseName":"Jakarion's Staff of Frost"}),
@@ -34675,7 +34999,7 @@ const ITEM_REFERENCE_RULES = Object.freeze({
   "item|dmg|ioun stone, insight": Object.freeze({"revision":"123f88e5d5336a73580fcb138dd3bbe814a72ca9c6ff87fee31fc992d384f287","sourceHash":"de69b5e9a7f12beefaf5efd721ef198fc36a51a18fb3947258f908f9b872979b","source":"DMG","name":"Ioun Stone, Insight","ability":Object.freeze({"wis":2}),"reqAttune":true,"rarity":"very rare","baseName":"Ioun Stone, Insight"}),
   "item|dmg|ioun stone, intellect": Object.freeze({"revision":"8787736d9979de1fae8011e8bb08f78a8fda9cbac50b073a91d93595b85017d1","sourceHash":"ba335ce06c6df3d5ca130b9674a169b1449c12a4e7376be704f7dadde9605f4c","source":"DMG","name":"Ioun Stone, Intellect","ability":Object.freeze({"int":2}),"reqAttune":true,"rarity":"very rare","baseName":"Ioun Stone, Intellect"}),
   "item|dmg|ioun stone, leadership": Object.freeze({"revision":"fbdae9856ef4347cdb27b2338dcddf9ec4e416a71421c1891cdccf51757038db","sourceHash":"89345ce7120bb05bad5d98942aea8834077e6d6d98ae17194550e7bcdc399eac","source":"DMG","name":"Ioun Stone, Leadership","ability":Object.freeze({"cha":2}),"reqAttune":true,"rarity":"very rare","baseName":"Ioun Stone, Leadership"}),
-  "item|dmg|ioun stone, mastery": Object.freeze({"revision":"0aa5b642897ba6e922abb3ce3add0541a47031d62428edea76440239d1b1e2de","sourceHash":"ea8e382c2715da49eda508e724f5a8ca29df0be74f00b7375bc5ab5f33df6a95","source":"DMG","name":"Ioun Stone, Mastery","reqAttune":true,"rarity":"legendary","baseName":"Ioun Stone, Mastery"}),
+  "item|dmg|ioun stone, mastery": Object.freeze({"revision":"0aa5b642897ba6e922abb3ce3add0541a47031d62428edea76440239d1b1e2de","sourceHash":"ea8e382c2715da49eda508e724f5a8ca29df0be74f00b7375bc5ab5f33df6a95","source":"DMG","name":"Ioun Stone, Mastery","reqAttune":true,"rarity":"legendary","bonusProficiencyBonus":"+1","baseName":"Ioun Stone, Mastery"}),
   "item|dmg|ioun stone, protection": Object.freeze({"revision":"658606e13ace70435745c441ac20ad1d99542011f34082c121158c8881fdb70a","sourceHash":"9edc33b44e8093ab19f67623063c15801b214fd84e4cc915ba714e5563c34e00","source":"DMG","name":"Ioun Stone, Protection","reqAttune":true,"rarity":"rare","bonusAc":"+1","baseName":"Ioun Stone, Protection"}),
   "item|dmg|ioun stone, regeneration": Object.freeze({"revision":"c499b3da7da7be0ee7dc5c555ea5e7a793c89cebe57ce896681dbeddb64a6a02","sourceHash":"d6275dd1b49fbc930b05e44556a28ca039210f68f950585d621dc4b45d3a9e2c","source":"DMG","name":"Ioun Stone, Regeneration","reqAttune":true,"rarity":"legendary","baseName":"Ioun Stone, Regeneration"}),
   "item|dmg|ioun stone, reserve": Object.freeze({"revision":"53029f9bef807c7bccec45e53958fb38c12c157258142ee969c2d9563c96ce45","sourceHash":"7c07a34a7912819524f97cbf704b646a3951552da0dce55cd09ba87bbbfd63ee","source":"DMG","name":"Ioun Stone, Reserve","reqAttune":true,"rarity":"rare","baseName":"Ioun Stone, Reserve"}),
@@ -34891,19 +35215,19 @@ const ITEM_REFERENCE_RULES = Object.freeze({
   "item|dmg|spellguard shield": Object.freeze({"revision":"087448833ee543286ba3a61e80b5e499f73e37f05cd2d894eae5cd32b155a3ff","sourceHash":"bb5892ff80e1a1c31661dab45d36bb088eba139d1b15288b2f55b24facca6d3f","source":"DMG","name":"Spellguard Shield","reqAttune":true,"rarity":"very rare","type":"S","baseName":"Spellguard Shield"}),
   "item|dmg|sphere of annihilation": Object.freeze({"revision":"e2dc8ecfae6efc437ad242d8b2ba7b27dd18be261630ad9d1b721f0b8906e2a3","sourceHash":"5d3b147d550d113826ddaa960bd14930cdadfb66f428e5c85fdf6560310a51cd","source":"DMG","name":"Sphere of Annihilation","rarity":"legendary","baseName":"Sphere of Annihilation"}),
   "item|dmg|spinel": Object.freeze({"revision":"b67499d56dd85c31af53b5d93c09b1afcc9d2be74e2abd125f9c6b7899eea26b","sourceHash":"32d71f74efe716d719ac3b28ce36ca9e0fbcd71c131da245e325b878dcd9d16c","source":"DMG","name":"Spinel","rarity":"none","type":"$G|DMG","baseName":"Spinel"}),
-  "item|dmg|staff of charming": Object.freeze({"revision":"12e3c21ea3f157a6061d1889bd451ef0115b504f8d0049464f12afa2a7329773","sourceHash":"283056421cf2d86a1a7763cd0668a31f8edb734caf30171d7e9fd4ec9b0f16ab","source":"DMG","name":"Staff of Charming","reqAttune":"by a bard, cleric, druid, sorcerer, warlock, or wizard","rarity":"rare","attachedSpells":Object.freeze({"charges":Object.freeze({"1":Object.freeze(["charm person","command","comprehend languages"])})}),"lastCharge":true,"baseName":"Staff of Charming"}),
+  "item|dmg|staff of charming": Object.freeze({"revision":"12e3c21ea3f157a6061d1889bd451ef0115b504f8d0049464f12afa2a7329773","sourceHash":"283056421cf2d86a1a7763cd0668a31f8edb734caf30171d7e9fd4ec9b0f16ab","source":"DMG","name":"Staff of Charming","reqAttune":"by a bard, cleric, druid, sorcerer, warlock, or wizard","rarity":"rare","attachedSpells":Object.freeze({"charges":Object.freeze({"1":Object.freeze(["charm person","command","comprehend languages"])})}),"lastCharge":true,"baseName":"Quarterstaff"}),
   "item|dmg|staff of fire": Object.freeze({"revision":"a0b6e86db9bac9c91615f934f7fb93404dd15dc03856994089adb53bb4485e3c","sourceHash":"e8206c553d482d42b99b6089f7eb982292aaeed24f9f349e16800c8587f9187c","source":"DMG","name":"Staff of Fire","reqAttune":"by a druid, sorcerer, warlock, or wizard","rarity":"very rare","attachedSpells":Object.freeze({"charges":Object.freeze({"1":Object.freeze(["burning hands"]),"3":Object.freeze(["fireball"]),"4":Object.freeze(["wall of fire"])})}),"charges":10,"lastCharge":true,"baseName":"Staff of Fire"}),
   "item|dmg|staff of frost": Object.freeze({"revision":"1860597fbd05e609f9dbd0804dede99fd8a045eb65675dcde6d112a853348ce8","sourceHash":"a3c9830bd34aa9f898dd2bc02af609bfe4b5480143f8e5be15c1a0551413794b","source":"DMG","name":"Staff of Frost","reqAttune":"by a druid, sorcerer, warlock, or wizard","rarity":"very rare","attachedSpells":Object.freeze({"charges":Object.freeze({"1":Object.freeze(["fog cloud"]),"4":Object.freeze(["ice storm","wall of ice"]),"5":Object.freeze(["cone of cold"])})}),"charges":10,"lastCharge":true,"baseName":"Staff of Frost"}),
   "item|dmg|staff of healing": Object.freeze({"revision":"3cb48c7da9ac168d3e04ad921dc4a4f1e0fb1e872e3bfe2a137d90effc91e32f","sourceHash":"3861eb3e0db718ef190b998f151bf374efbde85a0f092f915e65bd9068748880","source":"DMG","name":"Staff of Healing","reqAttune":"by a bard, cleric, or druid","rarity":"rare","attachedSpells":Object.freeze({"charges":Object.freeze({"1":Object.freeze(["cure wounds"]),"2":Object.freeze(["lesser restoration"]),"5":Object.freeze(["mass cure wounds"])})}),"charges":10,"lastCharge":true,"baseName":"Staff of Healing"}),
-  "item|dmg|staff of power": Object.freeze({"revision":"9c5a1c931cb628ab247fd77f0ffa69facd8f89417c916432c47c23290aa3ec70","sourceHash":"9f6528316743b3ae0244518cad1256b7542933a1fa6404fedeef70dd16af31fa","source":"DMG","name":"Staff of Power","bonusSavingThrow":"+2","bonusSpellAttack":"+2","reqAttune":"by a sorcerer, warlock, or wizard","rarity":"very rare","bonusWeapon":"+2","bonusAc":"+2","attachedSpells":Object.freeze({"charges":Object.freeze({"1":Object.freeze(["magic missile","ray of enfeeblement"]),"2":Object.freeze(["levitate"]),"5":Object.freeze(["cone of cold","fireball#5","hold monster","lightning bolt#5","wall of force"]),"6":Object.freeze(["globe of invulnerability"])})}),"charges":20,"lastCharge":true,"baseName":"Staff of Power"}),
-  "item|dmg|staff of striking": Object.freeze({"revision":"bbc191cadc0c5d4ceada00ae495efcd2989136f9673cf58e45670301b10b0668","sourceHash":"3da842185f861f6bd17a644c2d0cbc4d4a5889803ebdcd82c15184289a48a85e","source":"DMG","name":"Staff of Striking","reqAttune":true,"rarity":"very rare","bonusWeapon":"+3","charges":10,"lastCharge":true,"baseName":"Staff of Striking"}),
+  "item|dmg|staff of power": Object.freeze({"revision":"9c5a1c931cb628ab247fd77f0ffa69facd8f89417c916432c47c23290aa3ec70","sourceHash":"9f6528316743b3ae0244518cad1256b7542933a1fa6404fedeef70dd16af31fa","source":"DMG","name":"Staff of Power","bonusSavingThrow":"+2","bonusSpellAttack":"+2","reqAttune":"by a sorcerer, warlock, or wizard","rarity":"very rare","bonusWeapon":"+2","bonusAc":"+2","attachedSpells":Object.freeze({"charges":Object.freeze({"1":Object.freeze(["magic missile","ray of enfeeblement"]),"2":Object.freeze(["levitate"]),"5":Object.freeze(["cone of cold","fireball#5","hold monster","lightning bolt#5","wall of force"]),"6":Object.freeze(["globe of invulnerability"])})}),"charges":20,"lastCharge":true,"baseName":"Quarterstaff"}),
+  "item|dmg|staff of striking": Object.freeze({"revision":"bbc191cadc0c5d4ceada00ae495efcd2989136f9673cf58e45670301b10b0668","sourceHash":"3da842185f861f6bd17a644c2d0cbc4d4a5889803ebdcd82c15184289a48a85e","source":"DMG","name":"Staff of Striking","reqAttune":true,"rarity":"very rare","bonusWeapon":"+3","charges":10,"lastCharge":true,"baseName":"Quarterstaff"}),
   "item|dmg|staff of swarming insects": Object.freeze({"revision":"f721fa40ec4ce59e716ad263255765552487a92812a2695c57f2477fe4a87c72","sourceHash":"97bf6cb6fbeddcafd1b9267ede3a8844b1d321166fba818718b481d0370be706","source":"DMG","name":"Staff of Swarming Insects","reqAttune":"by a bard, cleric, druid, sorcerer, warlock, or wizard","rarity":"rare","attachedSpells":Object.freeze({"charges":Object.freeze({"4":Object.freeze(["giant insect"]),"5":Object.freeze(["insect plague"])})}),"charges":10,"lastCharge":true,"baseName":"Staff of Swarming Insects"}),
   "item|dmg|staff of the adder": Object.freeze({"revision":"f5255c42de13e6d193857e5d5511a5b6d0b2672a2bfa8ee98dd11415a875cfd0","sourceHash":"f2bc0e3c8761278c79fa35890d9ee79e5240366c34d0b72182ab3abdef0ed337","source":"DMG","name":"Staff of the Adder","reqAttune":"by a cleric, druid, or warlock","rarity":"uncommon","baseName":"Staff of the Adder"}),
-  "item|dmg|staff of the magi": Object.freeze({"revision":"8f502ac28ac08b35217d307f3497633e2266fd3b2e74115af8e2c38332da9bac","sourceHash":"6ab83d801f6b79bdba7c3f646106b0e73276636762fe028da02872de4832eab2","source":"DMG","name":"Staff of the Magi","bonusSpellAttack":"+2","reqAttune":"by a sorcerer, warlock, or wizard","rarity":"legendary","bonusWeapon":"+2","attachedSpells":Object.freeze({"will":Object.freeze(["arcane lock","detect magic","enlarge/reduce","light","mage hand","protection from evil and good"]),"charges":Object.freeze({"2":Object.freeze(["flaming sphere","invisibility","knock","web"]),"3":Object.freeze(["dispel magic"]),"4":Object.freeze(["ice storm","wall of fire"]),"5":Object.freeze(["passwall","telekinesis"]),"7":Object.freeze(["conjure elemental","fireball#7","lightning bolt#7","plane shift"])})}),"charges":50,"lastCharge":true,"baseName":"Staff of the Magi"}),
+  "item|dmg|staff of the magi": Object.freeze({"revision":"8f502ac28ac08b35217d307f3497633e2266fd3b2e74115af8e2c38332da9bac","sourceHash":"6ab83d801f6b79bdba7c3f646106b0e73276636762fe028da02872de4832eab2","source":"DMG","name":"Staff of the Magi","bonusSpellAttack":"+2","reqAttune":"by a sorcerer, warlock, or wizard","rarity":"legendary","bonusWeapon":"+2","attachedSpells":Object.freeze({"will":Object.freeze(["arcane lock","detect magic","enlarge/reduce","light","mage hand","protection from evil and good"]),"charges":Object.freeze({"2":Object.freeze(["flaming sphere","invisibility","knock","web"]),"3":Object.freeze(["dispel magic"]),"4":Object.freeze(["ice storm","wall of fire"]),"5":Object.freeze(["passwall","telekinesis"]),"7":Object.freeze(["conjure elemental","fireball#7","lightning bolt#7","plane shift"])})}),"charges":50,"lastCharge":true,"baseName":"Quarterstaff"}),
   "item|dmg|staff of the python": Object.freeze({"revision":"23bc9f0f95544fcece32228f557511f204d77d7c60bf2978c7bb480ff91a3f7c","sourceHash":"91710e801183c64a6eea386da147a917a61b37021ae9aca1f18b90fcd25a6ffe","source":"DMG","name":"Staff of the Python","reqAttune":"by a cleric, druid, or warlock","rarity":"uncommon","baseName":"Staff of the Python"}),
-  "item|dmg|staff of the woodlands": Object.freeze({"revision":"5a0fbf38b1d78723a058cbdfbb2db22e34803d99b2089213a448ac44950b70d7","sourceHash":"fb1041763db85dfc5888c84f3a3bf997dc5547013d624df997aed0743f70e123","source":"DMG","name":"Staff of the Woodlands","bonusSpellAttack":"+2","reqAttune":"by a druid","rarity":"rare","bonusWeapon":"+2","attachedSpells":Object.freeze({"will":Object.freeze(["pass without trace"]),"charges":Object.freeze({"1":Object.freeze(["animal friendship","speak with animals"]),"2":Object.freeze(["barkskin","locate animals or plants"]),"3":Object.freeze(["speak with plants"]),"5":Object.freeze(["awaken"]),"6":Object.freeze(["wall of thorns"])})}),"charges":10,"lastCharge":true,"baseName":"Staff of the Woodlands"}),
-  "item|dmg|staff of thunder and lightning": Object.freeze({"revision":"88eb490b905076ef45c453c40012449b0959e22f79462d82bf508e7d2d7a9d98","sourceHash":"6163f544c6f2168d83b3e220fe9101e9557cbb93b19ff8bbb131a5f3c730329d","source":"DMG","name":"Staff of Thunder and Lightning","reqAttune":true,"rarity":"very rare","bonusWeapon":"+2","baseName":"Staff of Thunder and Lightning"}),
-  "item|dmg|staff of withering": Object.freeze({"revision":"0e63efaf0e9bbc19942edd47ca0cb68cb194ccd7ab3e6b4423db7a9a8ed426ab","sourceHash":"f8c84db98f18981486a33d58989d6f306206d65d36a9ccc67111ca91820e8415","source":"DMG","name":"Staff of Withering","reqAttune":"by a cleric, druid, or warlock","rarity":"rare","charges":3,"baseName":"Staff of Withering"}),
+  "item|dmg|staff of the woodlands": Object.freeze({"revision":"5a0fbf38b1d78723a058cbdfbb2db22e34803d99b2089213a448ac44950b70d7","sourceHash":"fb1041763db85dfc5888c84f3a3bf997dc5547013d624df997aed0743f70e123","source":"DMG","name":"Staff of the Woodlands","bonusSpellAttack":"+2","reqAttune":"by a druid","rarity":"rare","bonusWeapon":"+2","attachedSpells":Object.freeze({"will":Object.freeze(["pass without trace"]),"charges":Object.freeze({"1":Object.freeze(["animal friendship","speak with animals"]),"2":Object.freeze(["barkskin","locate animals or plants"]),"3":Object.freeze(["speak with plants"]),"5":Object.freeze(["awaken"]),"6":Object.freeze(["wall of thorns"])})}),"charges":10,"lastCharge":true,"baseName":"Quarterstaff"}),
+  "item|dmg|staff of thunder and lightning": Object.freeze({"revision":"88eb490b905076ef45c453c40012449b0959e22f79462d82bf508e7d2d7a9d98","sourceHash":"6163f544c6f2168d83b3e220fe9101e9557cbb93b19ff8bbb131a5f3c730329d","source":"DMG","name":"Staff of Thunder and Lightning","reqAttune":true,"rarity":"very rare","bonusWeapon":"+2","baseName":"Quarterstaff"}),
+  "item|dmg|staff of withering": Object.freeze({"revision":"0e63efaf0e9bbc19942edd47ca0cb68cb194ccd7ab3e6b4423db7a9a8ed426ab","sourceHash":"f8c84db98f18981486a33d58989d6f306206d65d36a9ccc67111ca91820e8415","source":"DMG","name":"Staff of Withering","reqAttune":"by a cleric, druid, or warlock","rarity":"rare","charges":3,"baseName":"Quarterstaff"}),
   "item|dmg|star rose quartz": Object.freeze({"revision":"e9121c99ccd7c71d9006a92a9b85a5139a55647807490143d334e693e6ef46c5","sourceHash":"2f33e3912ce33465663c2310820b26dcc731f39f15af371336f279ecf14ef841","source":"DMG","name":"Star rose quartz","rarity":"none","type":"$G|DMG","baseName":"Star rose quartz"}),
   "item|dmg|star ruby": Object.freeze({"revision":"8bb87c2a31eb8aae316ad82f083fb333d4e584c1d6851368d8e9c6a33675260b","sourceHash":"9a2a36cb98067e91c5d3ce56acc1eb7e8afbfd83c1a77d661c84f102fbf780d8","source":"DMG","name":"Star Ruby","rarity":"none","type":"$G|DMG","baseName":"Star Ruby"}),
   "item|dmg|star sapphire": Object.freeze({"revision":"978cbb0d18a1ffa1400b1648ffbe3ffe09f8e0005496567078c541f226a8f208","sourceHash":"3be134cda3eadf09d3b26612e1c2c580a6c2c56bff6cbf28fcb721c0d341c589","source":"DMG","name":"Star Sapphire","rarity":"none","type":"$G|DMG","baseName":"Star Sapphire"}),
@@ -34919,7 +35243,7 @@ const ITEM_REFERENCE_RULES = Object.freeze({
   "item|dmg|sword of answering (retorter)": Object.freeze({"revision":"cfc3c093f4b7e13b4247c877b36560853cc58bd8be4b18d250cb58b752082e85","sourceHash":"dad52bd396d15440f3ebf9b420c7b5caf39bc35a3f0e65df23714e58ab9441b0","source":"DMG","name":"Sword of Answering (Retorter)","reqAttune":"by a lawful good creature","rarity":"legendary","bonusWeapon":"+3","type":"M","baseName":"longsword"}),
   "item|dmg|sword of answering (scather)": Object.freeze({"revision":"c3888002a4b2c1097cec594dfe3a3c1ce6ab8bbeb79a9dbaf013ddcd2ccdd299","sourceHash":"628fca0a3ade375861f9986876094b204d9c4991d53b24de050ce4231ce7499c","source":"DMG","name":"Sword of Answering (Scather)","reqAttune":"by a lawful evil creature","rarity":"legendary","bonusWeapon":"+3","type":"M","baseName":"longsword"}),
   "item|dmg|sword of answering (squelcher)": Object.freeze({"revision":"1540ec173c24627a001fc2ea8b803cd307db2c9cb6c3ac69fd3f40e1135b230e","sourceHash":"f9e16915b75c2a03dc48832f0c35615fc14b38bd086747d48bfaa298deceede8","source":"DMG","name":"Sword of Answering (Squelcher)","reqAttune":"by a neutral evil creature","rarity":"legendary","bonusWeapon":"+3","type":"M","baseName":"longsword"}),
-  "item|dmg|sword of kas": Object.freeze({"revision":"b011489a5d1d37e89f7e9f08ab51538ebe7ec92955e968f4418dafa1eae9324e","sourceHash":"923b510be9e83cac180fb52fd8dc19aae2dd6767e21fa711773a768f8ccc0d22","source":"DMG","name":"Sword of Kas","reqAttune":true,"rarity":"artifact","bonusWeapon":"+3","attachedSpells":Object.freeze({"daily":Object.freeze({"1e":Object.freeze(["call lightning","divine word","finger of death"])})}),"type":"M","baseName":"longsword"}),
+  "item|dmg|sword of kas": Object.freeze({"revision":"b011489a5d1d37e89f7e9f08ab51538ebe7ec92955e968f4418dafa1eae9324e","sourceHash":"923b510be9e83cac180fb52fd8dc19aae2dd6767e21fa711773a768f8ccc0d22","source":"DMG","name":"Sword of Kas","reqAttune":true,"rarity":"artifact","bonusWeapon":"+3","attachedSpells":Object.freeze({"daily":Object.freeze({"1e":Object.freeze(["call lightning","divine word","finger of death"])})}),"type":"M","critThreshold":19,"baseName":"longsword"}),
   "item|dmg|talisman of pure good": Object.freeze({"revision":"06b143a6cc3998d2a100b81046f4e24731762c0da7fc9c50fc09d108c4733d40","sourceHash":"6f181c89dfd62bd493fe11462a375b78e3b5bd2416d9a782692547b9fbe72a8d","source":"DMG","name":"Talisman of Pure Good","bonusSpellAttack":"+2","reqAttune":"by a creature of good alignment","rarity":"legendary","charges":7,"lastCharge":true,"baseName":"Talisman of Pure Good"}),
   "item|dmg|talisman of the sphere": Object.freeze({"revision":"5c2669e17d9a89e28691da402462cbc85ed5909308e6af09d12e56be5043a74f","sourceHash":"9cefdf5c1cf574e7f61abd114c5f15e48b0dc9ade7a88545717d555b055e624f","source":"DMG","name":"Talisman of the Sphere","reqAttune":true,"rarity":"legendary","baseName":"Talisman of the Sphere"}),
   "item|dmg|talisman of ultimate evil": Object.freeze({"revision":"db1b52e82a28ee559ac76ca3d0c05170057474122c417ca0264f75e2e47a45dc","sourceHash":"d0ab605d1133f2b2025a242679b732a0ea7386f9059a828fb0f7e80a1e3adb5c","source":"DMG","name":"Talisman of Ultimate Evil","bonusSpellAttack":"+2","reqAttune":"by a creature of evil alignment","rarity":"legendary","charges":6,"lastCharge":true,"baseName":"Talisman of Ultimate Evil"}),
@@ -34978,7 +35302,7 @@ const ITEM_REFERENCE_RULES = Object.freeze({
   "item|egw|bloodaxe": Object.freeze({"revision":"74e41865544bef244f25076658e3d9f87edbf3e3900efeed7747f2b54099da51","sourceHash":"a5dc57d59ebe02eab33555d790b80a8e81996e72e69956d2225bf5d0cdaeadd7","source":"EGW","name":"Bloodaxe","reqAttune":true,"rarity":"very rare","bonusWeapon":"+2","type":"M","baseName":"greataxe"}),
   "item|egw|breathing bubble": Object.freeze({"revision":"df505957cfd04a0b7c1a048ccb7932e1a4297a1e5803367a272c0288d6d7cf32","sourceHash":"aa5ae0afced4abc70a398ad2788bf44b3aa2367447521cb8af2868c3c126ab2e","source":"EGW","name":"Breathing Bubble","rarity":"common","baseName":"Breathing Bubble"}),
   "item|egw|brooch of living essence": Object.freeze({"revision":"7c6b1637cd0e508d12b077586b6c70f8d81e9282564b3ab75299d79ea97b3146","sourceHash":"d956b0e1b4128cea6cc9c8763e99eb44e9e9e679a40e0d95b1994099d91241aa","source":"EGW","name":"Brooch of Living Essence","reqAttune":true,"rarity":"uncommon","baseName":"Brooch of Living Essence"}),
-  "item|egw|butcher's bib": Object.freeze({"revision":"3d20f7f2bdc2a0153e76b93e9c319776051800567d18ac1ef5b8a8288290b6f6","sourceHash":"f2bfa485da10d32d293188a26b78737da3970453200216ba7efdd45a598e832b","source":"EGW","name":"Butcher's Bib","reqAttune":true,"rarity":"rare","baseName":"Butcher's Bib"}),
+  "item|egw|butcher's bib": Object.freeze({"revision":"3d20f7f2bdc2a0153e76b93e9c319776051800567d18ac1ef5b8a8288290b6f6","sourceHash":"f2bfa485da10d32d293188a26b78737da3970453200216ba7efdd45a598e832b","source":"EGW","name":"Butcher's Bib","reqAttune":true,"rarity":"rare","critThreshold":19,"baseName":"Butcher's Bib"}),
   "item|egw|coin of delving": Object.freeze({"revision":"d46d981058403efe46fc0f76e3390edf033b979486d6a6ea75374163cca2f71b","sourceHash":"90652e613ae2c4cf142280ac40869dfc21a6d925979dabb1939c49c1df27ab5f","source":"EGW","name":"Coin of Delving","rarity":"common","baseName":"Coin of Delving"}),
   "item|egw|danoth's visor (awakened)": Object.freeze({"revision":"6d64b60750bbd9da89df275584d233248296b3aae2cb3eed2a0177987ad0e3ee","sourceHash":"039cc199e5503a57a3f526d6e2d1a86bce635fee2c8bcdb18fc858c3be9d74cb","source":"EGW","name":"Danoth's Visor (Awakened)","reqAttune":true,"rarity":"legendary","baseName":"Danoth's Visor (Awakened)"}),
   "item|egw|danoth's visor (dormant)": Object.freeze({"revision":"cdf944b4346c50eacb7aa4d3188727750225a09afd6b6423af4ff15901c46da0","sourceHash":"efcf19dfd72a1d1ddeb218bc36389179211a6fce38e8fcfb0cacfc5b4057b49a","source":"EGW","name":"Danoth's Visor (Dormant)","reqAttune":true,"rarity":"legendary","baseName":"Danoth's Visor (Dormant)"}),
@@ -35141,11 +35465,11 @@ const ITEM_REFERENCE_RULES = Object.freeze({
   "item|ggr|silver 25-zib coin": Object.freeze({"revision":"94c995cb2b7de2c3ba50a6b50c3269565938b2fe2d62732cacee7ed43af57684","sourceHash":"7d49811fe34cb5903bf79f3484acd1eccc76ee3f32001ef63258bf3530a07a62","source":"GGR","name":"Silver 25-Zib Coin","rarity":"none","type":"$C","baseName":"Silver 25-Zib Coin"}),
   "item|ggr|simic guild signet": Object.freeze({"revision":"de2f1f74d4b03bacd9449e72965b35a7bb5852aebb2f1c22588b4407c688c51b","sourceHash":"69b0a54f867d0ef592bb4114e1b585de20f0580606831b17a7de4500db122d20","source":"GGR","name":"Simic Guild Signet","reqAttune":true,"rarity":"uncommon","attachedSpells":Object.freeze({"charges":Object.freeze({"1":Object.freeze(["expeditious retreat"])})}),"charges":3,"type":"RG|DMG","baseName":"Simic Guild Signet"}),
   "item|ggr|simic keyrune": Object.freeze({"revision":"43415958ab96cfa86af37396b84dde32f3ff965bff3309373e9c7f82a8cefd54","sourceHash":"5ad98941ef10008da20bff94fef860aaa62461858243cd92cca07de0a9e580b2","source":"GGR","name":"Simic Keyrune","reqAttune":"by a member of the Simic guild","rarity":"uncommon","baseName":"Simic Keyrune"}),
-  "item|ggr|skyblinder staff": Object.freeze({"revision":"5380f241f1abdc47811e218582baeb2f303499b86a072bc5124611c869721dce","sourceHash":"fbbafa5e83192c198d2e8f33ded623998c519d8025d8862248cae01ce07e74a8","source":"GGR","name":"Skyblinder Staff","bonusSpellAttack":"+1","reqAttune":true,"rarity":"uncommon","bonusWeapon":"+1","baseName":"Skyblinder Staff"}),
+  "item|ggr|skyblinder staff": Object.freeze({"revision":"5380f241f1abdc47811e218582baeb2f303499b86a072bc5124611c869721dce","sourceHash":"fbbafa5e83192c198d2e8f33ded623998c519d8025d8862248cae01ce07e74a8","source":"GGR","name":"Skyblinder Staff","bonusSpellAttack":"+1","reqAttune":true,"rarity":"uncommon","bonusWeapon":"+1","baseName":"Quarterstaff"}),
   "item|ggr|spies' murmur": Object.freeze({"revision":"35b4973d4cfe03087e36999e8400208751f5cc697d801eedf4292dd907c3cf44","sourceHash":"eb25e6f74276fe98db2f205648fdf4305f3b2e899c1168aa913a69c9366f8f86","source":"GGR","name":"Spies' Murmur","reqAttune":true,"rarity":"uncommon","baseName":"Spies' Murmur"}),
   "item|ggr|sunforger": Object.freeze({"revision":"ad5ed9c2473a20609e516650f582068a5c243012588c1915f4389749e121b78f","sourceHash":"8526b8712c88e7de3eadf5e03cbe0f3187fc65913e0c2d5f5f93ce614c0ebfe8","source":"GGR","name":"Sunforger","reqAttune":true,"rarity":"rare","bonusWeapon":"+2","type":"M","baseName":"warhammer"}),
   "item|ggr|sword of the paruns": Object.freeze({"revision":"96b185c1f83d5de56ce9401616834b6bcd8422666ebde732bd0b9bd500469cc9","sourceHash":"457f630591ada9214bcf2d8848c526d49cca3bba0bd5226cecfe2bb4b8f897fc","source":"GGR","name":"Sword of the Paruns","reqAttune":true,"rarity":"very rare","bonusWeapon":"+1","type":"M","baseName":"longsword"}),
-  "item|ggr|voyager staff": Object.freeze({"revision":"2732e733b8c7ea0d8900bef757451c6d78e487b197d7e688efc83ae94c019e3d","sourceHash":"074b65a3dc918fda5ae684ac466a925a29497d6f5dbc486709832223d7990545","source":"GGR","name":"Voyager Staff","bonusSpellAttack":"+1","reqAttune":"by a spellcaster","rarity":"very rare","bonusWeapon":"+1","attachedSpells":Object.freeze({"charges":Object.freeze({"2":Object.freeze(["misty step"]),"3":Object.freeze(["blink"]),"4":Object.freeze(["banishment"]),"5":Object.freeze(["passwall"]),"7":Object.freeze(["teleport"])})}),"charges":10,"lastCharge":true,"baseName":"Voyager Staff"}),
+  "item|ggr|voyager staff": Object.freeze({"revision":"2732e733b8c7ea0d8900bef757451c6d78e487b197d7e688efc83ae94c019e3d","sourceHash":"074b65a3dc918fda5ae684ac466a925a29497d6f5dbc486709832223d7990545","source":"GGR","name":"Voyager Staff","bonusSpellAttack":"+1","reqAttune":"by a spellcaster","rarity":"very rare","bonusWeapon":"+1","attachedSpells":Object.freeze({"charges":Object.freeze({"2":Object.freeze(["misty step"]),"3":Object.freeze(["blink"]),"4":Object.freeze(["banishment"]),"5":Object.freeze(["passwall"]),"7":Object.freeze(["teleport"])})}),"charges":10,"lastCharge":true,"baseName":"Quarterstaff"}),
   "item|gos|charm of plant command": Object.freeze({"revision":"89eb4f9ffd013590e2f4a17b62ac0a1d60bdaac1419a0164545e3f0cfcd9d82f","sourceHash":"bf7b3dcb3769ac956fd47b236f166dc17e07750bea690ae7894f31d08faa0f9b","source":"GoS","name":"Charm of Plant Command","reqAttune":true,"rarity":"rare","attachedSpells":Object.freeze(["speak with plants"]),"charges":3,"baseName":"Charm of Plant Command"}),
   "item|gos|cursed luckstone": Object.freeze({"revision":"239fca1c1acef437cc6d4f95e9fb5ea1bf5eab76632faf7bc5ed08a1094a998e","sourceHash":"2288b72a970a1b185c4aa3ca6a6984b9c12f26e2a96fa7bf55ed2634d663dc6d","source":"GoS","name":"Cursed Luckstone","reqAttune":true,"rarity":"uncommon","baseName":"Cursed Luckstone"}),
   "item|gos|helm of underwater action": Object.freeze({"revision":"85cd8cc606b04e952b8aa8b2dbd98f9264aefd49768862004a50271aa365a1f0","sourceHash":"56a4cf226c7feb534656c20bb26a548f9166d86d27322a3ac5075cfacc02697b","source":"GoS","name":"Helm of Underwater Action","reqAttune":true,"rarity":"uncommon","baseName":"Helm of Underwater Action"}),
@@ -35235,7 +35559,7 @@ const ITEM_REFERENCE_RULES = Object.freeze({
   "item|lmop|dragonguard": Object.freeze({"revision":"9e6fe2060361e6d62d5d3b01195d127bce0bd6c9d05ebd206be16ada72668eaf","sourceHash":"50f6d1628aaed06d87a3fe85b6b17001cbb33db50b60e9fb15586673a7be8388","source":"LMoP","name":"Dragonguard","rarity":"rare","bonusAc":"+1","type":"MA","baseName":"Dragonguard"}),
   "item|lmop|hew": Object.freeze({"revision":"83616a10bd371d6807ef0bc6c124e0bf5c0f6ac1fd61ec6410fec756876600b0","sourceHash":"3f5a20bf0d7f9306b4683a7b90f5495ebb0f3579aa336a6560081dee96b990a9","source":"LMoP","name":"Hew","rarity":"unknown (magic)","bonusWeapon":"+1","type":"M","baseName":"battleaxe"}),
   "item|lmop|lightbringer": Object.freeze({"revision":"a5cbbe5115fd791ec84357109ddb1744fe81c9973cc93b0c066220882d20c90b","sourceHash":"95cfedf5de19ee9f1e5fdef796eabaa996b2a3a75b5e9d395c1459775df45d8c","source":"LMoP","name":"Lightbringer","rarity":"uncommon","bonusWeapon":"+1","type":"M","baseName":"mace"}),
-  "item|lmop|spider staff": Object.freeze({"revision":"63f42693e055bafe9d0d981844bc164e55c9bb0a057196ca3651d1746eb0b9f9","sourceHash":"cc877a06f627756dd60c601e7fde2eb89994492c432cd0e1fda4d400712e1e98","source":"LMoP","name":"Spider Staff","reqAttune":true,"rarity":"rare","attachedSpells":Object.freeze({"charges":Object.freeze({"1":Object.freeze(["spider climb"]),"2":Object.freeze(["web"])})}),"charges":10,"lastCharge":true,"baseName":"Spider Staff"}),
+  "item|lmop|spider staff": Object.freeze({"revision":"63f42693e055bafe9d0d981844bc164e55c9bb0a057196ca3651d1746eb0b9f9","sourceHash":"cc877a06f627756dd60c601e7fde2eb89994492c432cd0e1fda4d400712e1e98","source":"LMoP","name":"Spider Staff","reqAttune":true,"rarity":"rare","attachedSpells":Object.freeze({"charges":Object.freeze({"1":Object.freeze(["spider climb"]),"2":Object.freeze(["web"])})}),"charges":10,"lastCharge":true,"baseName":"Quarterstaff"}),
   "item|lmop|staff of defense": Object.freeze({"revision":"ef233585451d8871b672f8884a49338cc1fa5a4eb0180d1af0385a2a321c98b6","sourceHash":"4e2a7c7c32ca18b669f2ab504b9294cf3077b71eb3cc9254f903402581f3dd39","source":"LMoP","name":"Staff of Defense","reqAttune":true,"rarity":"rare","bonusAc":"+1","attachedSpells":Object.freeze({"charges":Object.freeze({"1":Object.freeze(["mage armor"]),"2":Object.freeze(["shield"])})}),"charges":10,"lastCharge":true,"baseName":"Staff of Defense"}),
   "item|lox|keg of alchemist's fire": Object.freeze({"revision":"1b4b3cdf93d97eb7460fdd8b7eea7c0f0959237d42e38446c66226e382303762","sourceHash":"2c6d7d2a960a87928c267450500909ce12f1ace2079977a2995bb90da01931f0","source":"LoX","name":"Keg of Alchemist's Fire","rarity":"none","type":"G","baseName":"Keg of Alchemist's Fire"}),
   "item|mcv2dc|nightbringer": Object.freeze({"revision":"6afd4f406f7e8b7929c7f1d18acfddb2b52c816a0f9cf47087e0b66aad0bbc44","sourceHash":"cae7d12cbf98f435b5926f095d3818ef326305e9009f05616b7280917d6aaaa8","source":"MCV2DC","name":"Nightbringer","reqAttune":true,"rarity":"legendary","bonusWeapon":"+3","charges":6,"type":"M","baseName":"mace"}),
@@ -35245,7 +35569,7 @@ const ITEM_REFERENCE_RULES = Object.freeze({
   "item|mm|soul bag": Object.freeze({"revision":"4389ab0612a9d15ea4e2c791eff2897bfcba5c99921ad1ba91d5e577f23dc4b8","sourceHash":"60f1e694b9abe1dedccd8350de2c14b1d04849de915bc9cac4df48c046075f42","source":"MM","name":"Soul Bag","rarity":"very rare","type":"OTH","baseName":"Soul Bag"}),
   "item|mot|akmon, hammer of purphoros": Object.freeze({"revision":"fdfc8326e11be2f3d750038e143b929fa7548352f3032b1f667ffbccb6566d18","sourceHash":"b2b484bedad5c529ab1b4b7e611899e4df0240d3a802468c2da9e1d65ca111a0","source":"MOT","name":"Akmon, Hammer of Purphoros","reqAttune":true,"rarity":"artifact","bonusWeapon":"+3","attachedSpells":Object.freeze({"daily":Object.freeze({"1e":Object.freeze(["animate objects","fabricate","heat metal","magic weapon","mending","shatter"])})}),"type":"M","baseName":"warhammer"}),
   "item|mot|dekella, bident of thassa": Object.freeze({"revision":"54c1bc4eab53d557c37d1a21adc78df6f54164c47e1569c34c15b5a27ec2be26","sourceHash":"9073d8cc39411b5358cc27fdf810f2d6daadddb6e13af8190f605390f69cc564","source":"MOT","name":"Dekella, Bident of Thassa","reqAttune":true,"rarity":"artifact","bonusWeapon":"+3","attachedSpells":Object.freeze(["dominate monster","true polymorph"]),"type":"M","baseName":"trident"}),
-  "item|mot|ephixis, bow of nylea": Object.freeze({"revision":"1a6fb4a7b55da7c8d37a41cac494c194f4e230d30c10a998ce1224b998abd517","sourceHash":"c4af5ed83145f63226d35cf308433c064d0b993d580bee4ecd3df036e5158057","source":"MOT","name":"Ephixis, Bow of Nylea","reqAttune":true,"rarity":"artifact","bonusWeapon":"+3","attachedSpells":Object.freeze({"daily":Object.freeze({"1e":Object.freeze(["awaken","ice storm","wall of thorns"])})}),"type":"R","baseName":"shortbow"}),
+  "item|mot|ephixis, bow of nylea": Object.freeze({"revision":"1a6fb4a7b55da7c8d37a41cac494c194f4e230d30c10a998ce1224b998abd517","sourceHash":"c4af5ed83145f63226d35cf308433c064d0b993d580bee4ecd3df036e5158057","source":"MOT","name":"Ephixis, Bow of Nylea","reqAttune":true,"rarity":"artifact","bonusWeapon":"+3","attachedSpells":Object.freeze({"daily":Object.freeze({"1e":Object.freeze(["awaken","ice storm","wall of thorns"])})}),"type":"R","critThreshold":19,"baseName":"shortbow"}),
   "item|mot|flying chariot": Object.freeze({"revision":"07e1c80e405ab54d73190ec7df58af029070fb856b6a4f2985ec10b1fc17570b","sourceHash":"c87f800cb664d2b832035066133bcf80e80d9f1bdc9f6975f82d3874971d653e","source":"MOT","name":"Flying Chariot","rarity":"rare","bonusAc":"+1","baseName":"Flying Chariot"}),
   "item|mot|helm of the gods": Object.freeze({"revision":"3d09473685a6813020695315bb522d5afddc46008469e2ee5bcf25cb5e55558b","sourceHash":"6abdc9675c77ad1aeba6c3bfe1f9923215c9049dfb8a18dd17c073b29d4a6aba","source":"MOT","name":"Helm of the Gods","reqAttune":true,"rarity":"rare","charges":3,"baseName":"Helm of the Gods"}),
   "item|mot|khrusor, spear of heliod": Object.freeze({"revision":"a5608b0f22725c64f6e92831291b6ef02de9b8b3d1d5f7034fa4c7d5c72ac3ee","sourceHash":"7ba249364ec744757b62e249d2074e3c00af2bd899fcffc1a329f7a6803749f7","source":"MOT","name":"Khrusor, Spear of Heliod","reqAttune":true,"rarity":"artifact","bonusWeapon":"+3","attachedSpells":Object.freeze({"charges":Object.freeze({"1":Object.freeze(["guiding bolt"]),"3":Object.freeze(["daylight"]),"6":Object.freeze(["sunbeam"])})}),"charges":10,"type":"M","baseName":"spear"}),
@@ -35299,7 +35623,7 @@ const ITEM_REFERENCE_RULES = Object.freeze({
   "item|pabtso|netherese ring of protection": Object.freeze({"revision":"8bb03a479f16896111ade46cb8f046a111375f51e9fc390e6cb3163cfd21b71d","sourceHash":"5519fe6533e1282259d219638071413368918954d4919e3b84631a50bfdf489e","source":"PaBTSO","name":"Netherese Ring of Protection","bonusSavingThrow":"+4","reqAttune":true,"rarity":"rare","bonusAc":"+1","type":"RG|DMG","baseName":"Netherese Ring of Protection"}),
   "item|pabtso|potion of psionic fortitude": Object.freeze({"revision":"f2127386f0c2d4427fb0137f24a6810127de8731701b404b406ab764fcaf44a9","sourceHash":"819a6becd12c08f6b412a50f7ae5ae6a2770ab510a8cc05f830546145225d4f5","source":"PaBTSO","name":"Potion of Psionic Fortitude","rarity":"uncommon","type":"P","baseName":"Potion of Psionic Fortitude"}),
   "item|pabtso|ring of the orator": Object.freeze({"revision":"3df4c32bfdec13a5401b12176ea56bc831aab04435a6ec16dab66d3bb53ad157","sourceHash":"3741d4503c71f8d0d5cfbb778617d177ff0568a22591c09452e4e6253fd57ef9","source":"PaBTSO","name":"Ring of the Orator","reqAttune":true,"rarity":"uncommon","charges":6,"type":"RG|DMG","baseName":"Ring of the Orator"}),
-  "item|pabtso|spider staff": Object.freeze({"revision":"e9f131369995797c66ae952e70ea014f9e3bb69dcb863ba0a534d373dc56d44a","sourceHash":"e8140116ace9f5edb47c9bd44dda16eeb87686d425f9a23bfbce9248650c514b","source":"PaBTSO","name":"Spider Staff","reqAttune":"by a bard, sorcerer, warlock, or wizard","rarity":"rare","attachedSpells":Object.freeze({"charges":Object.freeze({"1":Object.freeze(["spider climb"]),"2":Object.freeze(["web"])})}),"charges":10,"type":"M","lastCharge":true,"baseName":"Spider Staff"}),
+  "item|pabtso|spider staff": Object.freeze({"revision":"e9f131369995797c66ae952e70ea014f9e3bb69dcb863ba0a534d373dc56d44a","sourceHash":"e8140116ace9f5edb47c9bd44dda16eeb87686d425f9a23bfbce9248650c514b","source":"PaBTSO","name":"Spider Staff","reqAttune":"by a bard, sorcerer, warlock, or wizard","rarity":"rare","attachedSpells":Object.freeze({"charges":Object.freeze({"1":Object.freeze(["spider climb"]),"2":Object.freeze(["web"])})}),"charges":10,"type":"M","lastCharge":true,"baseName":"Quarterstaff"}),
   "item|pabtso|staff of defense": Object.freeze({"revision":"af313176ff745b0cb218c9b74a4b8d417f1e1c64336fa12fb04b49125feafd28","sourceHash":"ad73f9b32c1c85c8b5fbcb74d31a862c8b1f27f35a3f7216d88bec5c4d5629f8","source":"PaBTSO","name":"Staff of Defense","reqAttune":"by a bard, sorcerer, warlock, or wizard","rarity":"rare","bonusAc":"+1","attachedSpells":Object.freeze({"charges":Object.freeze({"1":Object.freeze(["mage armor"]),"2":Object.freeze(["shield"])})}),"charges":10,"type":"M","lastCharge":true,"baseName":"Staff of Defense"}),
   "item|pabtso|statuette of augury": Object.freeze({"revision":"f49d09bab9dc3aec165bb25a6c8d86a27b4c734ce75eec5268a533f337fbcca4","sourceHash":"8f929486e97177d95004957b9d6aba8daea1c0f85f650334d412d81bb869fd80","source":"PaBTSO","name":"Statuette of Augury","rarity":"unknown (magic)","attachedSpells":Object.freeze(["augury"]),"baseName":"Statuette of Augury"}),
   "item|phb|abacus": Object.freeze({"revision":"7dcee1f2be7fd1f7579483492c95dd5fb99439ed9b8f88200b4fb332f9112d44","sourceHash":"67ef5e264451f20bb511b2cc70affc81b5372c4d329b8f73aaeeae9546c3fd1d","source":"PHB","name":"Abacus","rarity":"none","type":"G","baseName":"Abacus"}),
@@ -35716,7 +36040,7 @@ const ITEM_REFERENCE_RULES = Object.freeze({
   "item|toa|bookmark": Object.freeze({"revision":"a6a4b0fb3812c9d50d61de1436f681bae8ae6f08f43fba11f9d5b80bdd798285","sourceHash":"1f52e50c1de886e91e1e3b8843ef25eee529d78d01d9f193331b4daa452d333f","source":"ToA","name":"Bookmark","reqAttune":true,"rarity":"legendary","bonusWeapon":"+3","attachedSpells":Object.freeze({"daily":Object.freeze({"1e":Object.freeze(["compulsion","dimension door"])})}),"type":"M","baseName":"dagger"}),
   "item|toa|canoe": Object.freeze({"revision":"b1042b5c9234d908c4833205baf8c7c7e5861d3baeb6a82c2c7d38878a314a66","sourceHash":"d0378190c3c09a53e25693ece2915e6f36ffa9b8c6b903fd28678c3f4e98a4d9","source":"ToA","name":"Canoe","rarity":"none","type":"SHP","baseName":"Canoe"}),
   "item|toa|dancing monkey fruit": Object.freeze({"revision":"7b9c1b8159bced73076e6651ca1f92b655a6e23b060c886d1c14d312e37b55de","sourceHash":"c0963f0ee86d10bd0e737165310bb29e780fcda2bd61c97bbcd26c61da9c3004","source":"ToA","name":"Dancing Monkey Fruit","rarity":"unknown (magic)","type":"OTH","baseName":"Dancing Monkey Fruit"}),
-  "item|toa|devlin's staff of striking": Object.freeze({"revision":"c683d12b9a1dec83fa8bce5a9fe74f754bdc7c36d1b765adc1e5afb28dd5557d","sourceHash":"d378983787458f687ce5562b154581bc2c86fdca1ed9cece70b88ad2514c4566","source":"ToA","name":"Devlin's Staff of Striking","reqAttune":true,"rarity":"very rare","bonusWeapon":"+3","charges":10,"lastCharge":true,"baseName":"Devlin's Staff of Striking"}),
+  "item|toa|devlin's staff of striking": Object.freeze({"revision":"c683d12b9a1dec83fa8bce5a9fe74f754bdc7c36d1b765adc1e5afb28dd5557d","sourceHash":"d378983787458f687ce5562b154581bc2c86fdca1ed9cece70b88ad2514c4566","source":"ToA","name":"Devlin's Staff of Striking","reqAttune":true,"rarity":"very rare","bonusWeapon":"+3","charges":10,"lastCharge":true,"baseName":"Quarterstaff"}),
   "item|toa|draconic longsword": Object.freeze({"revision":"a4bcd86dd169054283366f3e40e4f57062283e22aa99f79fa3d845ff669f263e","sourceHash":"03a793e0a1216969a53ba144ba0d2791c86d61443b649608e06ab7ef3c9cb05c","source":"ToA","name":"Draconic Longsword","rarity":"unknown (magic)","type":"M","baseName":"longsword"}),
   "item|toa|ghost lantern": Object.freeze({"revision":"365adcc1e87fa4790dee8f4f0b8ae1120d04b2d1533cd3d6bf7622fd77f70845","sourceHash":"d2c9e3b643e14c98bfd01f5d948188978a97b0f5811f834822c49cfe7136af8a","source":"ToA","name":"Ghost Lantern","reqAttune":true,"rarity":"rare","attachedSpells":Object.freeze(["mage hand"]),"baseName":"Ghost Lantern"}),
   "item|toa|insect repellent (block of incense)": Object.freeze({"revision":"c6aecb5b3a178311999ecca6ea2e31d2494a5d1a27a48189e1f463e328e270e4","sourceHash":"210f4823093c7e34fb0e6504c6a37a43268403307db549b4a0db88fdc3f8cc22","source":"ToA","name":"Insect Repellent (block of incense)","rarity":"none","charges":1,"type":"G","baseName":"Insect Repellent (block of incense)"}),
@@ -35730,7 +36054,7 @@ const ITEM_REFERENCE_RULES = Object.freeze({
   "item|toa|scorpion armor": Object.freeze({"revision":"b0e308bfd8765b0a6dfba33e0cc54ffbd0f7136604b63f31a1a7b7f47013d61d","sourceHash":"317fce10e820082427b26c161093ca6bb1d2daf1c9a889b126d869176f64ea3a","source":"ToA","name":"Scorpion Armor","reqAttune":true,"rarity":"rare","type":"HA","baseName":"Scorpion Armor"}),
   "item|toa|shield of shouting": Object.freeze({"revision":"2f73e3f5a70815bec0491aad01f904eed2aa1bdcb2ee24f9a4e3fa67964dec08","sourceHash":"7bbe8a01c24d8203181d98de62d47f686ad83dbe276bc15f5561bde7b6ed2382","source":"ToA","name":"Shield of Shouting","rarity":"unknown (magic)","type":"S","baseName":"Shield of Shouting"}),
   "item|toa|sinda berries (10)": Object.freeze({"revision":"fff56e359f4bed41ee8ed8e8665d243acfc69bfce2387ce64884e2876a1387e5","sourceHash":"caf745c2c9a9608662f17739962a75afb3ae35e8f7620abf6dd892c1c02a4ed0","source":"ToA","name":"Sinda berries (10)","rarity":"unknown","type":"G","baseName":"Sinda berries (10)"}),
-  "item|toa|staff of the forgotten one": Object.freeze({"revision":"8ec09f265ad0b744b20ee743d8e5055a4553863773c80ca6d705a3f8b41144b5","sourceHash":"6b8910d22d236292f6746afed06bbe476d4b88e1dfaf392cbc2f2fd3afb1174e","source":"ToA","name":"Staff of the Forgotten One","reqAttune":"by a sorcerer, warlock, or wizard","rarity":"artifact","bonusWeapon":"+3","charges":7,"baseName":"Staff of the Forgotten One"}),
+  "item|toa|staff of the forgotten one": Object.freeze({"revision":"8ec09f265ad0b744b20ee743d8e5055a4553863773c80ca6d705a3f8b41144b5","sourceHash":"6b8910d22d236292f6746afed06bbe476d4b88e1dfaf392cbc2f2fd3afb1174e","source":"ToA","name":"Staff of the Forgotten One","reqAttune":"by a sorcerer, warlock, or wizard","rarity":"artifact","bonusWeapon":"+3","charges":7,"baseName":"Quarterstaff"}),
   "item|toa|tej": Object.freeze({"revision":"3827f2afa740ce2f8dfd3ec5f03cd15ee4d57576d35ce4337b3a2f07cd1eef15","sourceHash":"8024e154786255678c13fbba307153a9722047614319b1acbc07a37d23b10528","source":"ToA","name":"Tej","rarity":"none","type":"FD","baseName":"Tej"}),
   "item|toa|wildroot": Object.freeze({"revision":"9f2b4e1cdb3e583775242bad202053452eb607c42f72a7d45c4319eaffd2f53b","sourceHash":"0b76564714c0476f3e8fd3bf980eb1f3e74b864544c42cbb99d9cf10c74fe704","source":"ToA","name":"Wildroot","rarity":"unknown","type":"G","baseName":"Wildroot"}),
   "item|toa|wukka nut": Object.freeze({"revision":"6a63421d24404c181bc244433bc80cb7f8b2ee9c0e7767dd4bf95291157230a8","sourceHash":"0f8efffdd3b8113d36f509d1929c06066c9dd5f42e2f5a15422a74d5be450f93","source":"ToA","name":"Wukka Nut","rarity":"unknown","type":"G","baseName":"Wukka Nut"}),
@@ -35756,7 +36080,7 @@ const ITEM_REFERENCE_RULES = Object.freeze({
   "item|wbtw|blue chromatic rose": Object.freeze({"revision":"916d78cf4c6ca2f59b4175b3b79057ef06dde02690912c10dada5c81bf01c795","sourceHash":"d29a79a0c5d88ad8f2a7566dfe484792e992002d0531f97585f959d94014eed9","source":"WBtW","name":"Blue Chromatic Rose","rarity":"rare","baseName":"Blue Chromatic Rose"}),
   "item|wbtw|bobbing lily pad": Object.freeze({"revision":"4a5e74f7b327007dd54d8260860d408643065d9dc606489eb3adc965543fb674","sourceHash":"f1c7dd8ca903ffe362cb832fc74b453a6b92bcc86228aed488eddc3cfb4cefe7","source":"WBtW","name":"Bobbing Lily Pad","reqAttune":true,"rarity":"very rare","baseName":"Bobbing Lily Pad"}),
   "item|wbtw|dust of corrosion": Object.freeze({"revision":"a1a5f2b2973d768bbc43a11485aba13830c9dcd57abda2bcbea7eda55b94cff6","sourceHash":"2f8b7ae1cb9a50a7ea2cfd70b2528975cf0fa9db2c5d41329ce7ad5bbda947d1","source":"WBtW","name":"Dust of Corrosion","rarity":"uncommon","baseName":"Dust of Corrosion"}),
-  "item|wbtw|eldritch staff": Object.freeze({"revision":"18c7ceb345fdeebc3f989ee9adb596158c88f13e792bf1772ed9f256e528a470","sourceHash":"22767d03494ce456670130331c43433b461e333573231391bcc65531a8bf2647","source":"WBtW","name":"Eldritch Staff","reqAttune":true,"rarity":"very rare","bonusWeapon":"+1","charges":10,"type":"M","lastCharge":true,"baseName":"Eldritch Staff"}),
+  "item|wbtw|eldritch staff": Object.freeze({"revision":"18c7ceb345fdeebc3f989ee9adb596158c88f13e792bf1772ed9f256e528a470","sourceHash":"22767d03494ce456670130331c43433b461e333573231391bcc65531a8bf2647","source":"WBtW","name":"Eldritch Staff","reqAttune":true,"rarity":"very rare","bonusWeapon":"+1","charges":10,"type":"M","lastCharge":true,"baseName":"Quarterstaff"}),
   "item|wbtw|feywild trinket": Object.freeze({"revision":"d994ba4059bbfae45c9eb09e97606166ad2ec30aa35e9e33baa5b46662771176","sourceHash":"30b278a616d7c93522f53e389787f92dd8bc699b1991a1f0c1fd0d0bbdb9d34c","source":"WBtW","name":"Feywild Trinket","rarity":"none","type":"G","baseName":"Feywild Trinket"}),
   "item|wbtw|green chromatic rose": Object.freeze({"revision":"79a3018d62d47b321f8830052a82f09d814ccf919398af765d6078d26b332ed5","sourceHash":"55604eb2433fd8702b98ea869aebe8bcfd28375cf3d229d78ab6a1d9528424d3","source":"WBtW","name":"Green Chromatic Rose","rarity":"rare","baseName":"Green Chromatic Rose"}),
   "item|wbtw|iggwilv's cauldron": Object.freeze({"revision":"63d916446f71a4a801312972e9102d9b63cb2da774fc86046ea274d5c6cc0251","sourceHash":"575e36eeb586498868b98a1834643c813b8c17b9169cb2541560f5d20f33014f","source":"WBtW","name":"Iggwilv's Cauldron","reqAttune":"by a spellcaster","rarity":"artifact","charges":3,"baseName":"Iggwilv's Cauldron"}),
@@ -35777,7 +36101,7 @@ const ITEM_REFERENCE_RULES = Object.freeze({
   "item|wdh|backpack parachute": Object.freeze({"revision":"73cffb1ad722fb3888df3149a72907ef80878f590fd2845815bfc15a2dc2e846","sourceHash":"e79865937d1aa1c0a52681e582d23697b586afbcdc121833f942df90db9d1496","source":"WDH","name":"Backpack Parachute","rarity":"unknown","type":"OTH","baseName":"Backpack Parachute"}),
   "item|wdh|badge of the watch": Object.freeze({"revision":"66fd21dac9b58d5acfda14f988701e4e3f877917e4ad3f2f3c2305b61037cc47","sourceHash":"7811d6dc0b35fc8bf445622dc9d613cbe6eff40702830e0bb3b1016b7c20d236","source":"WDH","name":"Badge of the Watch","reqAttune":true,"rarity":"rare","bonusAc":"+2","baseName":"Badge of the Watch"}),
   "item|wdh|barking box": Object.freeze({"revision":"062933e2095d0ef1e3b7c499d944a01decd4514b7c3cf9a2b651fe0d312eaf76","sourceHash":"f326dbae6536bce6976e615e8b6763c6388485c0d85a842d3b3412c57d3cdc4b","source":"WDH","name":"Barking Box","rarity":"unknown","type":"OTH","baseName":"Barking Box"}),
-  "item|wdh|blackstaff": Object.freeze({"revision":"e7eeed654d80ee3cdf000b7b30f1195c9584efdf75df64351ae0f74960ae3719","sourceHash":"d4068c4052140e573942e635819f824bb26cab83d74c43a4307b9dd186d780c5","source":"WDH","name":"Blackstaff","bonusSavingThrow":"+2","bonusSpellAttack":"+2","reqAttune":"by the Blackstaff heir, who must be a wizard","rarity":"legendary","bonusWeapon":"+2","bonusAc":"+2","attachedSpells":Object.freeze({"charges":Object.freeze({"1":Object.freeze(["dispel magic","magic missile","ray of enfeeblement"]),"2":Object.freeze(["levitate"]),"5":Object.freeze(["cone of cold","fireball#5","hold monster","lightning bolt#5","wall of force"]),"6":Object.freeze(["globe of invulnerability"])})}),"charges":20,"lastCharge":true,"baseName":"Blackstaff"}),
+  "item|wdh|blackstaff": Object.freeze({"revision":"e7eeed654d80ee3cdf000b7b30f1195c9584efdf75df64351ae0f74960ae3719","sourceHash":"d4068c4052140e573942e635819f824bb26cab83d74c43a4307b9dd186d780c5","source":"WDH","name":"Blackstaff","bonusSavingThrow":"+2","bonusSpellAttack":"+2","reqAttune":"by the Blackstaff heir, who must be a wizard","rarity":"legendary","bonusWeapon":"+2","bonusAc":"+2","attachedSpells":Object.freeze({"charges":Object.freeze({"1":Object.freeze(["dispel magic","magic missile","ray of enfeeblement"]),"2":Object.freeze(["levitate"]),"5":Object.freeze(["cone of cold","fireball#5","hold monster","lightning bolt#5","wall of force"]),"6":Object.freeze(["globe of invulnerability"])})}),"charges":20,"lastCharge":true,"baseName":"Quarterstaff"}),
   "item|wdh|bracer of flying daggers": Object.freeze({"revision":"f733c989f728a62491a2f63a553f284e627888727af3582459257d10f99c3dc1","sourceHash":"ac17b42cbd269496f180aaae30878dbb3798c2c05089999ee3d668b9b270b509","source":"WDH","name":"Bracer of Flying Daggers","reqAttune":true,"rarity":"rare","baseName":"Bracer of Flying Daggers"}),
   "item|wdh|charred wand of magic missiles": Object.freeze({"revision":"97c0f8bd575f2d9b938dfe2ac8dc74eaf4469e0f3bec564ee2fd20f47c097504","sourceHash":"9a0dd1ce918c9fd292533de667d3d4d563a9588d395ade1e7c2d251771769b37","source":"WDH","name":"Charred Wand of Magic Missiles","rarity":"uncommon","attachedSpells":Object.freeze({"charges":Object.freeze({"1":Object.freeze(["magic missile"])})}),"charges":7,"type":"WD|DMG","lastCharge":true,"baseName":"Charred Wand of Magic Missiles"}),
   "item|wdh|dragon": Object.freeze({"revision":"2a32ad1f43ef7c693937c3ae1ac65525519bde4337c9d7a176803ff41ed1b946","sourceHash":"2182499159426b6ef371bb8f86eccd7c6518034bed08c3352a2b089cc11d6740","source":"WDH","name":"Dragon","rarity":"none","type":"$C","baseName":"Dragon"}),
@@ -35887,6 +36211,7 @@ const itemLegacy = (ref) => WEAPONS[ref] || ARMORS[ref] || GEAR[ref] || TOOLS[re
 const itemError = (key) => new Error(uiText(`items.error.${key}`));
 // Trousse de soins : référence du catalogue et nombre d'utilisations que donne sa règle (« The kit has ten uses »).
 const ITEM_HEALERS_KIT = "item|phb|healer's kit", ITEM_KIT_USES = 10;
+const ITEM_INJURY_POISONS = ["item|phb|basic poison (vial)", "item|dmg|serpent venom", "item|dmg|wyvern poison", "item|dmg|purple worm poison", "item|dmg|drow poison"];
 
 /** État indépendant d'un exemplaire ; le snapshot de référence n'est jamais exécuté. */
 function createCatalogueItem(entry, ownerId, { id = itemId(), name, description = "" } = {}) {
@@ -36226,11 +36551,25 @@ function createRuntimeItem(ref, ownerId, { id = itemId() } = {}) {
   return item;
 }
 
+// Maximum d'une caractéristique augmentée par un objet porté, lu dans le texte de sa règle (le champ ability n'en donne que la hausse).
+const ITEM_ABILITY_CAPS = { "item|dmg|ioun stone, strength": 20, "item|dmg|ioun stone, agility": 20, "item|dmg|ioun stone, fortitude": 20, "item|dmg|ioun stone, insight": 20, "item|dmg|ioun stone, intellect": 20, "item|dmg|ioun stone, leadership": 20, "item|dmg|belt of dwarvenkind": 20, "item|kftgv|shard of xeluan": 22, "item|egw|orb of the veil": 22 };
+const ITEM_UNARMED = ["item|bmt|+1 wraps of unarmed prowess", "item|bmt|+2 wraps of unarmed prowess", "item|bmt|+3 wraps of unarmed prowess", "item|hotdq|insignia of claws", "item|tce|eldritch claw tattoo"];
 /** Adaptateurs bornés aux règles 2014 relues ; les autres propriétés restent textuelles. */
 function itemPersonalDefinition(item) {
   const raw = itemVerifiedDefinition(item), id = item.instance?.reference?.id;
   if (!raw) return null;
-  if (["gauntlets of ogre power", "headband of intellect", "amulet of health", ...["hill", "stone", "frost", "fire", "cloud", "storm"].map((giant) => `belt of ${giant} giant strength`)].some((name) => id === `item|dmg|${name}`)) return { slot: "worn", ability: raw.ability?.static };
+  // Objet harmonisé et porté qui fixe une caractéristique (champ ability.static) : gantelets, ceinturons, Main de Vecna. Les potions ne demandent pas d'harmonisation.
+  if (raw.reqAttune && raw.ability?.static) return { slot: "worn", ability: raw.ability.static };
+  // Augmentation tant que l'objet est porté, plafonnée par le texte de sa règle (pierres de Ioun : 20).
+  const raised = ITEM_ABILITY_CAPS[id];
+  if (raised && raw.ability) return { slot: "worn", raise: Object.fromEntries(Object.entries(raw.ability).filter(([, value]) => Number.isInteger(value)).map(([ability, value]) => [ability, { amount: value, max: raised }])) };
+  if (raw.bonusProficiencyBonus) return { slot: "worn", proficiency: Number(raw.bonusProficiencyBonus) };
+  // Bracelets d'archer : bonus de dégâts (bonusWeaponDamage) et maîtrise, à l'arc long et à l'arc court seulement.
+  if (id === "item|dmg|bracers of archery") return { slot: "worn", bows: ["longbow", "shortbow"], weaponDamage: Number(raw.bonusWeaponDamage) };
+  // Bonus d'arme (bonusWeapon) que la règle donne aux frappes à mains nues.
+  if (ITEM_UNARMED.includes(id)) return { slot: "worn", unarmed: Number(raw.bonusWeapon) };
+  // Armure démoniaque revêtue : frappes à mains nues magiques, 1d8 tranchants, +1.
+  if (id === "item|dmg|demon armor") return { slot: "armor", unarmed: Number(raw.bonusWeapon), unarmedDice: "1d8", unarmedType: "tranchants" };
   if (["item|dmg|cloak of protection", "item|dmg|ring of protection"].includes(id)) return { slot: "worn", save: Number(raw.bonusSavingThrow), ac: Number(raw.bonusAc) };
   if (id === "item|dmg|boots of striding and springing") return { slot: "worn", speedFloor: 9, heavyArmorNoSpeedPenalty: true };
   for (const [source, name, classId, slot] of [["dmg", "rod of the pact keeper", "warlock", "focus"], ["tce", "all-purpose tool", "artificer", "focus"], ["tce", "amulet of the devout", null, "worn"]]) {
@@ -36266,6 +36605,8 @@ function inventoryConsumableKind(item) {
   const type = itemVerifiedDefinition(item)?.type?.split("|")[0];
   if (item.ref === "potion-of-healing" || type === "P") return "potion";
   if (type === "SC") return "scroll";
+  // Poisons par blessure : une fiole s'applique sur une arme (inventoryItemEffect dans received-effects.js).
+  if (ITEM_INJURY_POISONS.includes(item.instance?.reference?.id) && type === "G") return "poison";
   return null;
 }
 
@@ -37409,7 +37750,12 @@ function validateCompanions(c) {
 
 // Module : received-effects
 
-// Effets personnels déclarés : aucune dépense, cible ou fin automatique.
+// Effets personnels déclarés : aucune dépense ni cible ; seul un effet d'une attaque (ends, strike) quitte la fiche de lui-même.
+// Agrandi ou rapetissé : sort Agrandissement/Rapetissement, potions d'agrandissement et de diminution.
+const RECEIVED_SIZE_VARIANTS = Object.freeze({
+  enlarge: { label: "Agrandi", dice: { notation: "1d4", rolls: ["damage"], once: false }, modes: [{ value: "advantage", rolls: ["check", "save"], abilities: ["str"] }] },
+  reduce: { label: "Rapetissé", dice: { notation: "1d4", rolls: ["damage"], once: false, subtract: true }, modes: [{ value: "disadvantage", rolls: ["check", "save"], abilities: ["str"] }] },
+});
 const RECEIVED_TARGETS = Object.freeze({ ac: "CA", hp: "PV maximum", speed: "Vitesse (m)", initiative: "Initiative", attack: "Attaques d’arme", damage: "Dégâts d’arme" });
 const RECEIVED_GUIDES = Object.freeze({
   "shield-of-faith": { target: "ac", value: 2, summary: "+2 CA · Concentration du lanceur" },
@@ -37425,15 +37771,71 @@ const RECEIVED_GUIDES = Object.freeze({
   barkskin: { grants: { effects: [{ target: "ac", mode: "floor", formula: 16 }] }, summary: "CA de 16 au moins · Concentration du lanceur" },
   haste: { target: "ac", value: 2, grants: { effects: [{ target: "speed", mode: "multiply", formula: 2 }] }, advantage: { save: ["dex"] }, summary: "+2 CA, vitesse doublée, avantage aux sauvegardes de Dextérité, une action de plus par tour · Concentration du lanceur" },
   "beacon-of-hope": { advantage: { save: ["wis"], death: true }, summary: "Avantage aux sauvegardes de Sagesse et aux jets contre la mort, soins reçus au maximum de leurs dés · Concentration du lanceur" },
-  invisibility: { conditions: ["Invisible"], summary: "État Invisible, jusqu’à ta prochaine attaque ou ton prochain sort · Concentration du lanceur" },
+  // ends : l'effet quitte la fiche au prochain jet d'attaque qu'il concerne (receivedEndings).
+  invisibility: { conditions: ["Invisible"], ends: "attack", summary: "État Invisible, jusqu’à ta prochaine attaque ou ton prochain sort · Concentration du lanceur" },
+  "greater-invisibility": { conditions: ["Invisible"], summary: "État Invisible, sans fin à l’attaque · Concentration du lanceur" },
   "pass-without-trace": { grants: { skillBonuses: { stealth: 10 } }, summary: "+10 aux tests de Dextérité (Discrétion) · Concentration du lanceur" },
-  // Rappels sans calcul : chacun dépend d'un choix que la fenêtre d'ajout ne demande pas (variante, caractéristique, arme, modificateur du lanceur).
-  "enlarge-reduce": { summary: "Agrandi : avantage aux tests et sauvegardes de Force, +1d4 aux dégâts de tes armes. Rapetissé : désavantage à ces jets, −1d4 aux dégâts (1 au moins) · Concentration du lanceur" },
+  // modes : avantage ou désavantage d'office aux jets de rolls, limités aux caractéristiques abilities (attaque : celle de l'arme) ou aux attaques d'arme (weapon).
+  foresight: { modes: [{ value: "advantage", rolls: ["attack", "check", "save"] }], summary: "Avantage aux jets d’attaque, tests et sauvegardes ; les attaques contre toi ont le désavantage" },
+  // Sorts reçus d'un ennemi (hostile : lancés par le personnage, ils visent un autre, sans question « Sur moi ») : un dé retiré (subtract) ou un désavantage, tant que l'effet est sur la fiche.
+  bane: { hostile: true, dice: { notation: "1d4", rolls: ["attack", "save"], once: false, subtract: true }, summary: "−1d4 aux jets d’attaque et de sauvegarde · Concentration du lanceur" },
+  "synaptic-static": { hostile: true, dice: { notation: "1d6", rolls: ["attack", "check"], once: false, subtract: true }, summary: "−1d6 aux jets d’attaque et aux tests, et aux sauvegardes de Constitution pour la concentration · Sauvegarde d’Intelligence à la fin de chacun de tes tours" },
+  "heat-metal": { hostile: true, modes: [{ value: "disadvantage", rolls: ["attack", "check"] }], summary: "Désavantage aux jets d’attaque et aux tests tant que tu gardes l’objet brûlant · Concentration du lanceur" },
+  "power-word-pain": { hostile: true, modes: [{ value: "disadvantage", rolls: ["attack", "check"] }, { value: "disadvantage", rolls: ["save"], abilities: ["str", "dex", "int", "wis", "cha"] }], summary: "Désavantage aux jets d’attaque, tests et sauvegardes, sauf de Constitution · Vitesse de 3 m au plus" },
+  "ottos-irresistible-dance": { hostile: true, modes: [{ value: "disadvantage", rolls: ["attack"] }, { value: "disadvantage", rolls: ["save"], abilities: ["dex"] }], summary: "Désavantage aux jets d’attaque et aux sauvegardes de Dextérité ; les attaques contre toi ont l’avantage · Concentration du lanceur" },
+  // variants : effet choisi dans la fenêtre d'ajout, gardé dans variant ; ses champs prennent la place de ceux de l'effet.
+  eyebite: { hostile: true, variants: { sickened: { label: "Nauséeux", modes: [{ value: "disadvantage", rolls: ["attack", "check"] }] }, asleep: { label: "Endormi", conditions: ["Inconscient"] }, panicked: { label: "Paniqué", conditions: ["Effrayé"] } }, summary: "Effet choisi par le lanceur · Concentration du lanceur" },
+  contagion: { hostile: true, variants: {
+    poisoned: { label: "Empoisonné, avant la maladie", conditions: ["Empoisonné"] },
+    blindingSickness: { label: "Mal aveuglant", conditions: ["Aveuglé"], modes: [{ value: "disadvantage", rolls: ["check", "save"], abilities: ["wis"] }] },
+    filthFever: { label: "Fièvre répugnante", modes: [{ value: "disadvantage", rolls: ["attack", "check", "save"], abilities: ["str"] }] },
+    fleshRot: { label: "Chair putréfiée", modes: [{ value: "disadvantage", rolls: ["check"], abilities: ["cha"] }] },
+    mindfire: { label: "Esprit brûlant", modes: [{ value: "disadvantage", rolls: ["check", "save"], abilities: ["int"] }] },
+    seizure: { label: "Convulsions", modes: [{ value: "disadvantage", rolls: ["attack", "check", "save"], abilities: ["dex"] }] },
+    slimyDoom: { label: "Fatalité visqueuse", modes: [{ value: "disadvantage", rolls: ["check", "save"], abilities: ["con"] }] },
+  }, summary: "Maladie choisie par le lanceur, pour 7 jours" },
+  symbol: { hostile: true, variants: { discord: { label: "Discorde", modes: [{ value: "disadvantage", rolls: ["attack", "check"] }] }, fear: { label: "Peur", conditions: ["Effrayé"] }, pain: { label: "Douleur", conditions: ["Neutralisé"] }, sleep: { label: "Sommeil", conditions: ["Inconscient"] }, stunning: { label: "Étourdissement", conditions: ["Étourdi"] } }, summary: "Effet du glyphe choisi par le lanceur, pour 1 minute" },
+  frostbite: { hostile: true, modes: [{ value: "disadvantage", rolls: ["attack"], weapon: true }], ends: "attack", summary: "Désavantage à ta prochaine attaque d’arme, avant la fin de ton prochain tour" },
+  "vicious-mockery": { hostile: true, modes: [{ value: "disadvantage", rolls: ["attack"] }], ends: "attack", summary: "Désavantage à ta prochaine attaque, avant la fin de ton prochain tour" },
+  "enlarge-reduce": { variants: RECEIVED_SIZE_VARIANTS, summary: "Agrandi : avantage aux tests et sauvegardes de Force, +1d4 aux dégâts de tes armes. Rapetissé : désavantage à ces jets, −1d4 aux dégâts (1 au moins) · Concentration du lanceur" },
+  // weapon : l'effet vaut pour l'arme choisie dans la fenêtre d'ajout ; bonusByLevel : [niveau minimal, bonus d'attaque et de dégâts], du plus haut au plus bas.
+  "magic-weapon": { level: 2, weapon: true, bonusByLevel: [[6, 3], [4, 2], [2, 1]], summary: "L’arme touchée devient magique : +1 à l’attaque et aux dégâts (+2 au niveau 4 ou 5, +3 au niveau 6 ou plus) · Concentration du lanceur" },
+  // Rappels sans calcul : chacun dépend d'un choix que la fenêtre d'ajout ne demande pas (caractéristique, modificateur du lanceur) ou de la cible.
   "enhance-ability": { summary: "Avantage aux tests de la caractéristique choisie par le lanceur · Concentration du lanceur" },
   heroism: { summary: "Immunité à l’état effrayé ; au début de chacun de tes tours, PV temporaires égaux au modificateur d’incantation du lanceur · Concentration du lanceur" },
-  "magic-weapon": { summary: "L’arme touchée devient magique : +1 à l’attaque et aux dégâts (+2 au niveau 4 ou 5, +3 au niveau 6 ou plus) · Concentration du lanceur" },
+  "compelled-duel": { hostile: true, summary: "Désavantage aux jets d’attaque contre toute autre créature que le lanceur · Concentration du lanceur" },
+  "ray-of-enfeeblement": { hostile: true, summary: "Tes attaques d’arme de Force ne font que la moitié des dégâts · Sauvegarde de Constitution à la fin de chacun de tes tours" },
 });
 const RECEIVED_ROLLS = ["attack", "damage", "save", "check"];
+const RECEIVED_MODE_ROLLS = ["attack", "check", "save"];
+/**
+ * Champs calculés d'un effet guidé, enregistrés avec lui : dé, avantages, fin, états d'une variante (variant, la première par défaut)
+ * et bonus selon le niveau (bonusByLevel). Ceux du guide remplacent ceux de l'entrée ; un effet sans guide garde les siens.
+ */
+function receivedGuideFields(entry) {
+  const guide = RECEIVED_GUIDES[entry.spellId];
+  if (!guide) return entry;
+  const variants = guide.variants ? Object.keys(guide.variants) : [], variant = variants.includes(entry.variant) ? entry.variant : variants[0];
+  const rule = { ...guide, ...(variant && guide.variants[variant]) }, next = { ...entry };
+  for (const key of ["dice", "bonus", "modes", "ends", "variant", ...(variant ? ["conditions"] : [])]) delete next[key];
+  if (variant) next.variant = variant;
+  for (const key of ["dice", "modes", "conditions"]) if (rule[key] && (key !== "conditions" || variant)) next[key] = structuredClone(rule[key]);
+  if (rule.ends) next.ends = rule.ends;
+  if (guide.bonusByLevel) next.bonus = { value: guide.bonusByLevel.find(([level]) => entry.level >= level)?.[1] || 0, rolls: ["attack", "damage"] };
+  return next;
+}
+/** L'effet vaut pour cette ligne d'attaque : sans arme désignée, toujours ; sinon l'exemplaire désigné ou une arme à munitions. */
+function receivedWeaponMatches(entry, line) {
+  return !entry.weapon || !!line && (entry.weapon === line.instanceId || entry.weapon === "ammunition" && !!line.weapon?.ammunition);
+}
+/** Une règle d'avantage ou de désavantage (modes) vaut pour ce jet : kind ("attack", "check", "save", "death"), ability du test ou de la sauvegarde, line de l'arme. */
+function receivedModeApplies(rule, kind, ability, line) {
+  if (!rule.rolls.includes(kind === "death" ? "save" : kind) || rule.weapon && !line) return false;
+  return !rule.abilities || kind !== "death" && rule.abilities.includes(kind === "attack" ? line?.ability : ability);
+}
+function receivedDamageType(type) {
+  return uiLanguage() === "en" ? type : DAMAGE_TYPE_LABELS[type] || type;
+}
 function receivedContribution(entry) {
   const guide = RECEIVED_GUIDES[entry.spellId];
   return guide ? { target: guide.target, value: entry.spellId === "aid" ? 5 * (entry.level - 1) : guide.value, formula: guide.formula } : { target: entry.target, value: entry.value };
@@ -37441,7 +37843,7 @@ function receivedContribution(entry) {
 function activeReceivedEffects(c) {
   const groups = new Map();
   for (const entry of c.receivedEffects || []) {
-    const key = entry.spellId || entry.referenceId || entry.id;
+    const key = `${entry.spellId || entry.referenceId || entry.id}${entry.weapon ? `|${entry.weapon}` : ""}`;
     const old = groups.get(key);
     if (!old || Math.abs(receivedContribution(entry).value || 0) >= Math.abs(receivedContribution(old).value || 0)) groups.set(key, entry);
   }
@@ -37450,12 +37852,22 @@ function activeReceivedEffects(c) {
 function receivedConditions(c) {
   return [...new Set([...c.state.conditions, ...(c.receivedEffects || []).flatMap((entry) => entry.conditions || RECEIVED_GUIDES[entry.spellId]?.conditions || [])])];
 }
-/** Avantage qu'un effet reçu actif donne d'office à ce jet (roll décrit comme pour rollModeSources) : { id, name, mode }. */
+/**
+ * Avantage ou désavantage qu'un effet reçu actif donne d'office à ce jet (roll décrit comme pour rollModeSources) : { id, name, mode }.
+ * Sources : l'avantage d'un guide (advantage), puis les règles de l'effet (modes), limitées à son arme quand il en désigne une.
+ */
 function receivedRollModes(c, roll) {
-  return activeReceivedEffects(c).filter((entry) => {
-    const rule = RECEIVED_GUIDES[entry.spellId]?.advantage;
-    return !!rule && (roll.kind === "death" ? !!rule.death : !!rule[roll.kind]?.includes(roll.ability));
-  }).map((entry) => ({ id: entry.id, name: entry.name, mode: "advantage" }));
+  const kind = roll.kind === "initiative" ? "check" : roll.kind, line = kind === "attack" && roll.weapon || null;
+  return activeReceivedEffects(c).flatMap((entry) => {
+    const rule = RECEIVED_GUIDES[entry.spellId]?.advantage, guided = !!rule && (roll.kind === "death" ? !!rule.death : !!rule[roll.kind]?.includes(roll.ability));
+    const values = [...new Set([...(guided ? ["advantage"] : []), ...(receivedWeaponMatches(entry, line) ? (entry.modes || []).filter((mode) => receivedModeApplies(mode, kind, roll.ability, line)).map((mode) => mode.value) : [])])];
+    return values.map((mode) => ({ id: values.length > 1 ? `${entry.id}:${mode}` : entry.id, name: entry.name, mode }));
+  });
+}
+/** Effets qui quittent la fiche avec ce jet d'attaque (ends) : Invisibilité, Gelure, Moquerie cruelle. Un effet à avantages ne finit qu'avec un jet qu'il concerne. */
+function receivedEndings(c, roll) {
+  const line = roll?.weapon || null;
+  return activeReceivedEffects(c).filter((entry) => (entry.ends || RECEIVED_GUIDES[entry.spellId]?.ends) === "attack" && receivedWeaponMatches(entry, line) && (!entry.modes?.length || entry.modes.some((mode) => receivedModeApplies(mode, "attack", "", line))));
 }
 function receivedProjection(c) {
   const entries = activeReceivedEffects(c);
@@ -37471,13 +37883,30 @@ function receivedProjection(c) {
     const grants = RECEIVED_GUIDES[entry.spellId].grants;
     return { key: `received|${entry.id}`, label: entry.name, kind: "received", level: 0, charLevel: 0, grants: { ...grants, ...(grants.effects && { effects: grants.effects.map((effect) => ({ ...effect, id: entry.name, label: entry.name })) }) } };
   });
+  // Caractéristique fixée (potion de force de géant) : un plancher, comme un ceinturon porté ; une valeur plus haute reste.
+  next.receivedAbilities = entries.filter((entry) => entry.abilities).map((entry) => ({ label: entry.name, ability: entry.abilities }));
   return next;
 }
 function validateReceivedEffects(entries) {
   if (!Array.isArray(entries) || entries.length > 200 || new Set(entries.map((entry) => entry?.id)).size !== entries.length) throw new Error(uiText("Liste d’effets reçus invalide."));
+  const rollList = (rolls, allowed) => Array.isArray(rolls) && !!rolls.length && rolls.every((roll) => allowed.includes(roll)) && new Set(rolls).size === rolls.length;
+  const abilityList = (list) => Array.isArray(list) && !!list.length && list.every((key) => Object.hasOwn(ABILITIES, key)) && new Set(list).size === list.length;
   for (const entry of entries) {
-    const dice = entry?.dice;
-    if (dice !== undefined && (!dice || typeof dice !== "object" || !/^1d(4|6|8|10|12)$/.test(dice.notation) || !Array.isArray(dice.rolls) || !dice.rolls.length || dice.rolls.some((roll) => !RECEIVED_ROLLS.includes(roll)) || new Set(dice.rolls).size !== dice.rolls.length || dice.once !== false)) throw new Error(uiText("Dé d’effet reçu invalide."));
+    const dice = entry?.dice, save = dice?.save;
+    // Un seul dé s'ajoute à un d20 ; plusieurs (Épée ardente 2d6, poison 12d6) ne vont qu'aux dégâts.
+    if (dice !== undefined && (!dice || typeof dice !== "object" || !/^([1-9]|1\d|20)d(4|6|8|10|12)$/.test(dice.notation) || !rollList(dice.rolls, RECEIVED_ROLLS) || dice.once !== false
+      || !/^1d/.test(dice.notation) && dice.rolls.some((roll) => roll !== "damage")
+      || dice.subtract !== undefined && dice.subtract !== true || dice.type !== undefined && !Object.hasOwn(DAMAGE_TYPE_LABELS, dice.type)
+      || save !== undefined && !(save && Object.hasOwn(ABILITIES, save.ability) && Number.isInteger(save.dc) && save.dc >= 1 && save.dc <= 30 && (save.half === undefined || save.half === true)))) throw new Error(uiText("Dé d’effet reçu invalide."));
+    // Bonus fixe aux jets choisis (huile d'affûtage, Arme magique) ; avantages et désavantages (modes) ; caractéristiques fixées au moins à une valeur (abilities) ;
+    // arme visée (weapon : exemplaire, ou « ammunition ») ; une seule attaque qui touche (strike) ; fin au prochain jet d'attaque (ends) ; objet qui l'a déclaré (item) ; variante d'un guide (variant).
+    const modes = entry?.modes, abilities = entry?.abilities, guide = RECEIVED_GUIDES[entry?.spellId];
+    if (entry?.bonus !== undefined && (dice !== undefined || !entry.bonus || !Number.isInteger(entry.bonus.value) || !entry.bonus.value || Math.abs(entry.bonus.value) > 20 || !rollList(entry.bonus.rolls, RECEIVED_ROLLS))
+      || modes !== undefined && (!Array.isArray(modes) || !modes.length || modes.length > 6 || modes.some((mode) => !mode || !["advantage", "disadvantage"].includes(mode.value) || !rollList(mode.rolls, RECEIVED_MODE_ROLLS) || mode.abilities !== undefined && !abilityList(mode.abilities) || mode.weapon !== undefined && mode.weapon !== true))
+      || abilities !== undefined && (!abilities || typeof abilities !== "object" || !Object.keys(abilities).length || Object.entries(abilities).some(([key, score]) => !Object.hasOwn(ABILITIES, key) || !Number.isInteger(score) || score < 1 || score > 30))
+      || ["weapon", "item"].some((key) => entry?.[key] !== undefined && (typeof entry[key] !== "string" || !entry[key] || entry[key].length > 300))
+      || entry?.strike !== undefined && entry.strike !== true || entry?.ends !== undefined && entry.ends !== "attack"
+      || entry?.variant !== undefined && !(guide?.variants && Object.hasOwn(guide.variants, entry.variant))) throw new Error(uiText("Effet reçu invalide."));
     if (entry?.affection !== undefined && typeof entry.affection !== "boolean" || entry?.conditions !== undefined && (!Array.isArray(entry.conditions) || entry.conditions.length > Object.keys(CONDITIONS).length || new Set(entry.conditions).size !== entry.conditions.length || entry.conditions.some((name) => !Object.hasOwn(CONDITIONS, name)))) throw new Error(uiText("États d’affection invalides."));
     if (!entry || typeof entry !== "object" || ["id", "name", "source", "caster", "duration", "description", "referenceId", "spellId"].some((key) => typeof entry[key] !== "string" || entry[key].length > (key === "description" ? 6000 : 300)) || !entry.id || !entry.name.trim() || !Number.isInteger(entry.level) || entry.level < (RECEIVED_GUIDES[entry.spellId]?.level || 0) || entry.level > 9 || !(entry.target === "" || Object.hasOwn(RECEIVED_TARGETS, entry.target)) || !Number.isFinite(entry.value) || Math.abs(entry.value) > 10000) throw new Error(uiText("Effet reçu invalide."));
   }
@@ -37486,8 +37915,10 @@ function validateReceivedEffects(entries) {
  * Ce qui a été reçu et se propose dans un jet. kinds : ["attack", "damage"] pour une attaque, ["save"] ou ["check"] pour un test.
  * Le dé d'un effet qui dure est coché d'office. Un compteur reçu qui donne un bonus ou un dé est décoché : le cocher dépense
  * une utilisation (cost), pour un seul jet (once). L'avantage d'un compteur passe par les sources de mode (receivedCounterModes).
+ * weapon : ligne d'attaque de l'arme. Les dégâts d'un effet reçu sont ceux des armes ; un effet qui désigne une arme ne vaut que pour elle.
+ * Un effet d'un seul coup (strike, poison) est coché d'office et quitte la fiche quand ses dégâts sont lancés (cost.received).
  */
-function receivedRollOptions(c, kinds) {
+function receivedRollOptions(c, kinds, { weapon = null } = {}) {
   const place = (option, rolls, piece) => {
     if (kinds.includes("attack") && rolls.includes("attack")) option.attack = piece;
     if (kinds.includes("damage") && rolls.includes("damage")) option.damage = { ...piece };
@@ -37496,7 +37927,14 @@ function receivedRollOptions(c, kinds) {
   };
   const usable = (entry) => entry.remaining > 0 && entry.rolls.some((roll) => kinds.includes(roll));
   return [
-    ...activeReceivedEffects(c).filter((entry) => entry.dice?.rolls.some((roll) => kinds.includes(roll))).map((entry) => place({ id: `received:${entry.id}`, label: entry.name, note: uiText("Effet reçu actif"), on: true }, entry.dice.rolls, { notation: entry.dice.notation })),
+    ...activeReceivedEffects(c).filter((entry) => receivedWeaponMatches(entry, weapon)).flatMap((entry) => {
+      const added = entry.dice || entry.bonus, rolls = (added?.rolls || []).filter((roll) => roll !== "damage" || weapon);
+      if (!rolls.some((roll) => kinds.includes(roll))) return [];
+      const rule = entry.dice?.save, save = rule ? `${uiText("spells.dice.save", { ability: uiCatalogueName(ABILITIES[rule.ability].name), dc: rule.dc })}${rule.half ? uiText(", moitié des dégâts en cas de réussite") : ""}` : "", piece = entry.dice ? { notation: entry.dice.notation, ...(entry.dice.subtract && { subtract: true }) } : { bonus: entry.bonus.value };
+      const option = place({ id: `received:${entry.id}`, label: entry.name, note: [uiText(entry.strike ? "attack.spell.nextHit" : "Effet reçu actif"), save].filter(Boolean).join(" · "), on: true, ...(entry.strike && { oncePerTurn: true, cost: { received: entry.id } }) }, rolls, piece);
+      if (option.damage) option.damage.type = entry.dice?.type ? receivedDamageType(entry.dice.type) : weapon?.type || "";
+      return [option];
+    }),
     ...receivedCounters(c).filter((entry) => ["bonus", "die"].includes(entry.gives) && usable(entry)).map((entry) => place({ id: `counter:${entry.id}`, label: entry.name, note: receivedCounterLeft(entry), on: false, once: true, cost: { resource: entry.id } }, entry.rolls, entry.gives === "die" ? { notation: `1d${entry.value}` } : { bonus: entry.value })),
   ];
 }
@@ -37507,11 +37945,76 @@ function receivedCounterModes(c, kind) {
 function setReceivedEffect(c, entry, id) {
   const next = structuredClone(c), before = activeReceivedEffects(c).filter((e) => e.spellId === "aid").reduce((sum, e) => sum + receivedContribution(e).value, 0);
   next.receivedEffects = (next.receivedEffects || []).filter((e) => e.id !== id);
-  if (entry) next.receivedEffects.push({ ...entry, id: id || `received:${globalThis.crypto.randomUUID()}` });
+  // Une arme laissée vide dans la fenêtre (aucune arme sur la fiche) ne vise rien.
+  if (entry) { const { weapon, ...rest } = receivedGuideFields(entry); next.receivedEffects.push({ ...rest, ...(weapon && { weapon }), id: id || `received:${globalThis.crypto.randomUUID()}` }); }
   validateReceivedEffects(next.receivedEffects);
   const after = activeReceivedEffects(next).filter((e) => e.spellId === "aid").reduce((sum, e) => sum + receivedContribution(e).value, 0);
   next.state.hp = Math.max(0, next.state.hp + after - before);
   return next;
+}
+
+// Effets que déclare un objet de l'inventaire, lus dans sa règle 2014 : use, en le buvant ou en l'appliquant (le stock baisse aussi) ;
+// toggle, allumé puis éteint depuis sa ligne (light : flammes ou cierge ; soul : âme dévorée de Noir rasoir).
+// weapon : "choose", l'arme enduite se choisit à l'usage ; "self", l'objet est l'arme. tempHp : PV temporaires donnés à l'usage.
+// variant : effet d'Agrandissement/Rapetissement ; duration : clé de la durée notée sur l'effet.
+const RECEIVED_POISON = (notation, dc, half) => ({ use: true, weapon: "choose", strike: true, duration: "minute", dice: { notation, rolls: ["damage"], once: false, type: "poison", save: { ability: "con", dc, ...(half && { half: true }) } } });
+const RECEIVED_FLAMES = (notation) => ({ toggle: "light", weapon: "self", dice: { notation, rolls: ["damage"], once: false, type: "fire" } });
+const RECEIVED_ALL_ROLLS_ADVANTAGE = [{ value: "advantage", rolls: ["attack", "check", "save"] }];
+const RECEIVED_ITEM_EFFECTS = Object.freeze({
+  "item|dmg|potion of heroism": { use: true, tempHp: 10, duration: "hour", dice: RECEIVED_GUIDES.bless.dice },
+  "item|dmg|potion of growth": { use: true, variant: "enlarge", duration: "hours1d4" },
+  "item|dmg|potion of diminution": { use: true, variant: "reduce", duration: "hours1d4" },
+  "item|dmg|potion of invisibility": { use: true, conditions: ["Invisible"], ends: "attack", duration: "hour" },
+  "item|dmg|oil of sharpness": { use: true, weapon: "choose", duration: "hour", bonus: { value: 3, rolls: ["attack", "damage"] } },
+  "item|phb|basic poison (vial)": RECEIVED_POISON("1d4", 10, false),
+  "item|dmg|serpent venom": RECEIVED_POISON("3d6", 11, true),
+  "item|dmg|wyvern poison": RECEIVED_POISON("7d6", 15, true),
+  "item|dmg|purple worm poison": RECEIVED_POISON("12d6", 19, true),
+  "magicvariant||flame tongue": RECEIVED_FLAMES("2d6"),
+  "item|egw|mace of the black crown (dormant)": RECEIVED_FLAMES("1d6"),
+  "item|egw|mace of the black crown (awakened)": RECEIVED_FLAMES("2d6"),
+  "item|egw|mace of the black crown (exalted)": RECEIVED_FLAMES("3d6"),
+  "item|dmg|blackrazor": { toggle: "soul", modes: RECEIVED_ALL_ROLLS_ADVANTAGE },
+  "item|dmg|candle of invocation": { toggle: "light", modes: RECEIVED_ALL_ROLLS_ADVANTAGE },
+});
+/** Règle d'effet d'un exemplaire vérifié : par sa référence, sa variante (Épée ardente), ou la Force fixée d'une potion de force de géant. */
+function inventoryItemEffectRule(item) {
+  const raw = item && itemVerifiedDefinition(item);
+  if (!raw) return null;
+  return RECEIVED_ITEM_EFFECTS[item.instance.reference.id] || RECEIVED_ITEM_EFFECTS[raw.variantReference] || (raw.type === "P" && raw.ability?.static ? { use: true, duration: "hour", abilities: { ...raw.ability.static } } : null);
+}
+/** Effet reçu que déclare cet objet, prêt pour setReceivedEffect ; weapon : exemplaire enduit, pour une règle qui le demande. */
+function inventoryItemEffect(item, { weapon = "" } = {}) {
+  const rule = inventoryItemEffectRule(item);
+  if (!rule) return null;
+  const size = rule.variant ? RECEIVED_SIZE_VARIANTS[rule.variant] : {}, target = rule.weapon === "self" ? item.id : rule.weapon === "choose" ? weapon : "";
+  return {
+    id: "", spellId: "", referenceId: item.instance.reference.id, name: item.name, source: "", caster: "", duration: rule.duration ? uiText(`received.duration.${rule.duration}`) : "", description: "", level: 0, target: "", value: 0, item: item.id,
+    ...(target && { weapon: target }),
+    ...Object.fromEntries(["dice", "bonus", "modes", "abilities", "conditions"].map((key) => [key, rule[key] || size[key]]).filter(([, value]) => value).map(([key, value]) => [key, structuredClone(value)])),
+    ...(rule.strike && { strike: true }), ...(rule.ends && { ends: rule.ends }),
+  };
+}
+/**
+ * Boire ou appliquer un objet : stock ou charges dépensés (useInventoryItem), puis son effet déclaré dans « États et effets ».
+ * Les PV temporaires de la potion d'héroïsme ne se cumulent pas : le plus haut des deux est gardé.
+ */
+function useInventoryItemEffect(c, id, { amount = 1, result = "", weapon = "" } = {}) {
+  const item = c.inventory.find((entry) => entry.id === id), rule = inventoryItemEffectRule(item);
+  if (rule?.weapon === "choose" && !weapon) throw new Error(uiText("received.item.chooseWeapon"));
+  let next = useInventoryItem(c, id, { amount, result });
+  if (!rule?.use) return next;
+  next = setReceivedEffect(next, inventoryItemEffect(item, { weapon }));
+  if (rule.tempHp) next.state.tempHp = Math.max(next.state.tempHp || 0, rule.tempHp);
+  return next;
+}
+/** Effet allumé depuis la ligne de l'objet ; un second appui l'éteint en retirant l'effet. */
+function toggleInventoryItemEffect(c, id) {
+  const active = (c.receivedEffects || []).find((entry) => entry.item === id);
+  if (active) return setReceivedEffect(c, null, active.id);
+  const item = c.inventory.find((entry) => entry.id === id);
+  if (!inventoryItemEffectRule(item)?.toggle) throw new Error(uiText("Effet reçu invalide."));
+  return setReceivedEffect(c, inventoryItemEffect(item));
 }
 
 // Compteurs reçus : ce qui se dépense (dé reçu, inspiration, compteur libre). Chacun est une ligne de ressource de la famille « Reçu »,
@@ -37530,6 +38033,8 @@ const RECEIVED_PRESETS = Object.freeze({
   guidance: { spell: true, summary: "+1d4 à un test de caractéristique, une fois", max: 1, reset: "once", gives: "die", value: 4, rolls: ["check"] },
   resistance: { spell: true, summary: "+1d4 à un jet de sauvegarde, une fois", max: 1, reset: "once", gives: "die", value: 4, rolls: ["save"] },
   inspiration: { max: 1, reset: "once", gives: "advantage", value: 0, rolls: ["attack", "check", "save"] },
+  // Éclair traçant : la prochaine attaque contre la cible touchée a l'avantage ; le joueur coche la case quand il attaque cette cible.
+  "guiding-bolt": { spell: true, summary: "Avantage à ta prochaine attaque contre la cible touchée, avant la fin du prochain tour du lanceur", max: 1, reset: "once", gives: "advantage", value: 0, rolls: ["attack"] },
 });
 /** Compteurs reçus avec leur compte : { ...entrée, remaining }. */
 function receivedCounters(c) {
@@ -40190,16 +40695,19 @@ function convertSpellResource(c, id) {
 
 
 /* ------------------------------------------ avantage et désavantage des jets */
-// États qui désavantagent le personnage : ses attaques, ses tests, une sauvegarde ; text : la condition à dire.
-const CONDITION_DISADVANTAGES = {
+// États qui désavantagent le personnage : ses attaques, ses tests, une sauvegarde ; text : la condition à dire ; mode : l'avantage, pour l'état Invisible.
+const CONDITION_MODES = {
   "À terre": { attack: true },
   Aveuglé: { attack: true },
   Effrayé: { attack: true, check: true, text: "rollMode.frightened" },
   Empoisonné: { attack: true, check: true },
   Entravé: { attack: true, save: "dex" },
+  Invisible: { attack: true, mode: "advantage" },
 };
 // Compétences avantagées tant qu'une rune du chevalier runique est portée.
 const RUNE_ADVANTAGE_SKILLS = { cloud: ["sleight", "deception"], frost: ["animal", "intimidation"], stone: ["insight"], storm: ["arcana"] };
+// Combat subaquatique : armes qui gardent leur jet d'attaque normal sous l'eau (les armes lancées aussi, à distance).
+const UNDERWATER_MELEE = ["dagger", "javelin", "shortsword", "spear", "trident"], UNDERWATER_RANGED = ["light-crossbow", "hand-crossbow", "heavy-crossbow", "net"];
 /**
  * Sources d'avantage et de désavantage d'un d20, tirées de la fiche.
  * roll : { kind: "check" | "save" | "initiative" | "attack" | "death", ability, skill, weapon (ligne de d.attacks), spell: { id, melee }, concentration (sauvegarde pour maintenir la concentration) }.
@@ -40207,7 +40715,10 @@ const RUNE_ADVANTAGE_SKILLS = { cloud: ["sleight", "deception"], frost: ["animal
  * nature "always" : la fiche suffit, la source compte d'office ; "choice" : la situation décide, le joueur la coche.
  * text : la condition ou la contrepartie à dire. single : la source ne vaut que pour une attaque.
  * cost : ce que la source cochée dépense au lancer ({ resource }), comme une option de jet.
+ * choices : paiements au choix, comme ceux d'une option ; le premier ne dépense rien (effet déjà lancé), il reste choisi d'une attaque à l'autre d'un enchaînement.
  * unless : option du jet qui, cochée, écarte la source : elle ne compte plus et n'est plus proposée.
+ * hitCritical : cochée, la source fait aussi de tout toucher un coup critique (cible paralysée au corps à corps).
+ * situation : règle générale du combat, rangée par thème (distance, visibility, target, environment) hors du panneau « Dés et bonus ».
  */
 function rollModeSources(c, roll, d = derive(c)) {
   const attack = roll.kind === "attack", save = roll.kind === "save", check = roll.kind === "check" || roll.kind === "initiative";
@@ -40220,10 +40731,15 @@ function rollModeSources(c, roll, d = derive(c)) {
 
   // La fiche suffit : rage, états déclarés, épuisement, armure portée, runes portées.
   if (ability === "str" && (check || save) && barbarianStatus(c).benefits) always("rage", "advantage", named(barbarianReference("Rage")));
-  for (const [name, rule] of Object.entries(CONDITION_DISADVANTAGES))
-    if (state.conditions.includes(name) && (attack && rule.attack || check && rule.check || save && rule.save === ability)) always(`condition:${name}`, "disadvantage", uiText(name), rule.text ? uiText(rule.text) : "");
+  // Sens sauvages (rôdeur 18) : ne pas voir la cible ne désavantage plus ses attaques, aveuglé compris.
+  const feral = attack && classLevel(c, "ranger") >= 18;
+  for (const [name, rule] of Object.entries(CONDITION_MODES))
+    if (state.conditions.includes(name) && !(feral && name === "Aveuglé") && (attack && rule.attack || check && rule.check || save && rule.save === ability)) always(`condition:${name}`, rule.mode || "disadvantage", uiText(name), rule.text ? uiText(rule.text) : "");
   // Épuisement 1 : tests ; épuisement 3 : attaques et sauvegardes, jet contre la mort compris.
   if (state.exhaustion >= (check ? 1 : 3)) always("exhaustion", "disadvantage", uiText("Épuisement"));
+  // Armure ou bouclier non maîtrisé : attaques, tests et sauvegardes de FOR ou de DEX. Arme lourde dans les mains d'une créature P ou TP.
+  if (!d.armorProficient && ["str", "dex"].includes(attack ? line?.ability : ability) && (attack || check || save)) always("armor-proficiency", "disadvantage", uiText("rollMode.armorProficiency"));
+  if (line?.weapon?.heavy && ["P", "TP"].includes(raceOf(c).size)) always("heavy-small", "disadvantage", uiText("rollMode.heavySmall"));
   if (skill === "stealth") {
     const armorer = armorerStatus(c);
     if (d.stealthDisadvantage) always("armor", "disadvantage", uiCatalogueName(ARMORS[c.equipment.armor].name));
@@ -40233,7 +40749,7 @@ function rollModeSources(c, roll, d = derive(c)) {
   if (skill === "acrobatics" && d.bladesong) always("bladesong", "advantage", named(wizardReference("Bladesong", "Bladesinging", 2)));
   // Mage de guerre, Esprit occulte : la sauvegarde de Constitution ouverte après des dégâts sert à maintenir la concentration (roll.concentration).
   if (save && ability === "con" && roll.concentration) for (const aid of _concentrationSaveAids(c, d)) if (aid.mode) always(aid.id, aid.mode, aid.name);
-  // Effets reçus actifs dont le guide donne l'avantage à ce jet (Hâte, Lueur d'espoir).
+  // Effets reçus actifs qui donnent l'avantage ou le désavantage à ce jet (Hâte, Lueur d'espoir, Prémonition, Métal brûlant, Gelure).
   for (const effect of receivedRollModes(c, { ...roll, ability })) always(effect.id, effect.mode, effect.name);
 
   // La situation décide : aptitudes, dons et trait de race du personnage.
@@ -40241,6 +40757,30 @@ function rollModeSources(c, roll, d = derive(c)) {
   if (line && melee && line.ability === "str" && classLevel(c, "barbarian") >= 2) choice("reckless-attack", "advantage", named(barbarianReference("Reckless Attack")), uiText("rollMode.recklessAttack"), false, null, "thrown-rage");
   if (attack && hasSubclass(c, "rogue", "assassin") && classLevel(c, "rogue") >= 3) choice("assassinate", "advantage", named(rogueReference("Assassinate", "Assassin", 3)), uiText("rollMode.assassinate"));
   if (attack && activeRuleVariants(c).some((variant) => variant.id === "steadyAim")) choice("steady-aim", "advantage", named(rogueReference("Steady Aim")), uiText("rollMode.steadyAim"), true);
+  if (attack && hasSubclass(c, "rogue", "scout") && classLevel(c, "rogue") >= 13) choice("ambush-master", "advantage", named(rogueReference("Ambush Master", "Scout", 13)), uiText("rollMode.ambushMaster"));
+  if (attack && hasSubclass(c, "rogue", "arcaneTrickster") && classLevel(c, "rogue") >= 13) choice("versatile-trickster", "advantage", named(rogueReference("Versatile Trickster", "Arcane Trickster", 13)), uiText("rollMode.versatileTrickster"));
+  // Maître du duel : après un échec, le jet relancé (bouton Relancer) a l'avantage ; une utilisation par repos court ou long.
+  const duelist = attack && hasSubclass(c, "rogue", "swashbuckler") && resources(c).find((entry) => entry.id === "rogue-master-duelist" && entry.remaining > 0);
+  if (duelist) choice("master-duelist", "advantage", named(rogueReference("Master Duelist", "Swashbuckler", 17)), uiText("rollMode.masterDuelist", { left: duelist.remaining }), true, { resource: duelist.id });
+  // Guerrier. Esprit combatif : avantage aux attaques d'arme jusqu'à la fin du tour ; activé depuis le jet, il dépense une utilisation et donne ses PV temporaires (useFighterFeature).
+  const spirit = line && hasSubclass(c, "fighter", "samurai") && resources(c).find((entry) => entry.id === "fighter-spirit");
+  if (spirit) sources.push({ id: "mode:fighting-spirit", name: named(fighterReference("Fighting Spirit", "Samurai", 3)), mode: "advantage", text: uiText("rollMode.fightingSpirit"), nature: "choice", single: false,
+    choices: [{ value: "active", label: uiText("rollMode.fightingSpirit.active") }, ...(spirit.remaining > 0 ? [{ value: "use", label: uiText("rollMode.fightingSpirit.use", { left: spirit.remaining }), cost: { fighterFeature: spirit.id } }] : [])] });
+  // Marque inflexible : attaque spéciale au corps à corps contre la cible marquée, avec l'avantage ; ses dégâts sont une option du jet (attackOptions).
+  const mark = line && melee && hasSubclass(c, "fighter", "cavalier") && resources(c).find((entry) => entry.id === "fighter-unwavering" && entry.remaining > 0);
+  if (mark) choice("unwavering-mark", "advantage", named(fighterReference("Unwavering Mark", "Cavalier", 3)), uiText("rollMode.unwaveringMark", { left: mark.remaining }), true, { resource: mark.id });
+  // Paladin. Vœu d'inimitié : avantage contre la créature vouée pendant 1 minute ; prononcé depuis le jet, il dépense le Conduit divin.
+  const channel = attack && hasSubclass(c, "paladin", "vengeance") && classLevel(c, "paladin") >= 3 && resources(c).find((entry) => entry.id === "channel");
+  if (channel) sources.push({ id: "mode:vow-of-enmity", name: named(paladinReference("Vow of Enmity", "Vengeance", 3)), mode: "advantage", text: uiText("rollMode.vowOfEnmity"), nature: "choice", single: false,
+    choices: [{ value: "vowed", label: uiText("rollMode.vowOfEnmity.vowed") }, ...(channel.remaining > 0 ? [{ value: "vow", label: uiText("rollMode.vowOfEnmity.vow", { left: channel.remaining }), cost: { resource: channel.id } }] : [])] });
+  // Rempart mortel et Ange de la vengeance déclarés : avantage contre certains types de créatures, ou contre la créature effrayée par l'aura.
+  const paladin = attack ? paladinSession(c).active : {};
+  if (paladin.mortalBulwark) choice("mortal-bulwark", "advantage", named(paladinReference("Mortal Bulwark", "Watchers", 20)), uiText("rollMode.mortalBulwark"));
+  if (paladin.avengingAngel) choice("avenging-angel", "advantage", named(paladinReference("Avenging Angel", "Vengeance", 20)), uiText("rollMode.avengingAngel"));
+  // Rôdeur. Vision des ombres : dans l'obscurité, invisible pour la créature qui compte sur sa vision dans le noir.
+  if (attack && hasSubclass(c, "ranger", "gloomStalker") && classLevel(c, "ranger") >= 3) choice("umbral-sight", "advantage", named(rangerReference("Umbral Sight", "Gloom Stalker", 3)), uiText("rollMode.umbralSight"));
+  // Moine. Foulée d'ombre : première attaque au corps à corps après la téléportation, avant la fin du tour.
+  if (melee && hasSubclass(c, "monk", "shadow") && classLevel(c, "monk") >= 6) choice("shadow-step", "advantage", named(monkReference("Shadow Step", "Shadow", 6)), uiText("rollMode.shadowStep"), true);
   if (melee && feats.includes("mountedCombatant")) choice("mounted-combatant", "advantage", named(FEATS.mountedCombatant), uiText("rollMode.mountedCombatant"));
   if (attack && feats.includes("grappler")) choice("grappler", "advantage", named(FEATS.grappler), uiText("rollMode.grappler"));
   if (["deception", "performance"].includes(skill) && feats.includes("actor")) choice("actor", "advantage", named(FEATS.actor), uiText("rollMode.actor"));
@@ -40249,16 +40789,61 @@ function rollModeSources(c, roll, d = derive(c)) {
     const enemies = allChoices(c, "enemy").filter((enemy) => String(enemy).trim()).join(", ");
     choice("favored-enemy", "advantage", named(rangerReference("Favored Enemy")), uiText(skill === "survival" ? "rollMode.favoredEnemy.track" : "rollMode.favoredEnemy.recall", { enemies: enemies ? ` (${enemies})` : "" }));
   }
-  if (c.raceId === "drow" && (attack || skill === "perception")) choice("sunlight-sensitivity", "disadvantage", uiCatalogueName("Sensibilité au soleil"), uiText("rollMode.sunlightSensitivity"));
+  // Sensibilité au soleil : toute race qui porte le trait (drow, duergar, kobold, elfe mul daya) ; le drow garde le nom de sa fiche.
+  const sunlight = raceTraitName(c, "Sensibilité au soleil") || raceReferenceTrait(c, "Sunlight Sensitivity");
+  if (sunlight && (attack || skill === "perception")) choice("sunlight-sensitivity", "disadvantage", sunlight, uiText("rollMode.sunlightSensitivity"));
   // Marée du chaos : avantage sur un seul jet d'attaque, test ou sauvegarde, payé par l'utilisation restante.
   const tides = (attack || check || save) && resources(c).find((entry) => entry.id === "tidesOfChaos" && entry.remaining > 0);
   if (tides) choice("tides-of-chaos", "advantage", uiCatalogueName(tides.name, tides.referenceId), uiText("{p0} restant(s)", { p0: tides.remaining }), true, { resource: tides.id });
   // Compteur reçu qui donne l'avantage (Inspiration du MJ) : une case sur les jets choisis, payée par une utilisation.
   for (const entry of receivedCounterModes(c, attack ? "attack" : save ? "save" : check ? "check" : "")) choice(entry.id, "advantage", entry.name, entry.text, true, { resource: entry.resource });
+  // Objets : ennemi juré de l'Arc du serment, ciel du jour pour Déluge, démon pour l'Armure démoniaque.
+  for (const entry of itemRollModes(c, roll)) choice(entry.id, entry.mode, entry.name, entry.text);
   // Sorts à concentration : [sort, jet concerné, une seule attaque], proposés tant que le personnage se concentre dessus.
   for (const [id, concerned, single] of [["friends", check && ability === "cha"], ["true-strike", attack, true], ["faerie-fire", attack], ["hunters-mark", ["perception", "survival"].includes(skill)]]) {
     const spell = concerned && spellById(c, id);
     if (spell && c.state.concentration === spell.name) choice(`spell:${id}`, "advantage", named(spell), uiText(`rollMode.spell.${id}`), single);
+  }
+  // Sorts à concentration du lanceur qui avantagent ses attaques d'office : Transformation de Tenser (armes courantes et de guerre),
+  // Gardien de la nature selon la forme choisie au lancement (Bête primitive : attaques de Force ; Grand arbre : de Dextérité et de Sagesse).
+  const focus = (id) => { const spell = attack && spellById(c, id); return spell && c.state.concentration === spell.name ? { spell, event: (c.state.spellEvents || []).findLast((row) => row.spellId === id) || null } : null; };
+  const tenser = line?.context === "weapon" && ["simple", "martial"].includes(line.weapon?.group) && focus("tensers-transformation");
+  if (tenser) always("spell:tensers-transformation", "advantage", named(tenser.spell));
+  const guardian = focus("guardian-of-nature"), attackAbility = line ? line.ability : roll.spell?.ability;
+  if (guardian && (guardian.event?.form === "beast" ? attackAbility === "str" : guardian.event?.form === "tree" && ["dex", "wis"].includes(attackAbility))) always("spell:guardian-of-nature", "advantage", named(guardian.spell));
+  // Lame d'ombres : l'épée créée par le sort (ligne de derive) a l'avantage contre une cible dans la pénombre ou les ténèbres.
+  if (line?.instanceId === "spell|shadow-blade") choice("spell:shadow-blade", "advantage", line.name, uiText("rollMode.spell.shadow-blade"));
+  // Frappe du zéphyr : une fois par lancement, l'avantage sur une attaque d'arme, choisi au jet ; cochée, elle marque le sort porté et ouvre ses 1d8 de force (attackOptions).
+  const zephyr = line?.context === "weapon" && focus("zephyr-strike");
+  if (zephyr && !zephyr.event?.struck) choice("spell:zephyr-strike", "advantage", named(zephyr.spell), uiText("rollMode.spell.zephyr-strike"), true, zephyr.event ? { strike: zephyr.event.id } : null);
+  // Double illusoire : invisible jusqu'à ta première attaque ou ton premier sort ; cochée, la case marque l'invisibilité perdue, le double reste.
+  const mislead = focus("mislead");
+  if (mislead && !mislead.event?.struck) choice("spell:mislead", "advantage", named(mislead.spell), uiText("rollMode.spell.mislead"), true, mislead.event ? { strike: mislead.event.id } : null);
+  // Cage des âmes, Emprunter l'expérience : une utilisation de l'âme en action bonus avantage le prochain jet d'attaque, test ou sauvegarde. Les six utilisations se comptent à la table.
+  const soul = (attack || check || save) && (c.state.spellEvents || []).findLast((row) => row.spellId === "soul-cage" && row.ongoing) && spellById(c, "soul-cage");
+  if (soul) choice("spell:soul-cage", "advantage", named(soul), uiText("rollMode.spell.soul-cage"), true);
+  // Esprit du faucon invoqué (druide berger) : sa réaction donne l'avantage contre une cible dans l'aura.
+  const druid = druidSession(c);
+  if (attack && druid.totemActive && druid.totem === "hawk") choice("hawk-spirit", "advantage", uiCatalogueName(DRUID_TOTEMS.hawk[0], DRUID_TOTEMS.hawk[2]), uiText("rollMode.hawkSpirit"), true);
+  // Broyeur : après ton coup critique contondant, les attaques contre la cible ont l'avantage jusqu'à ton prochain tour.
+  if (attack && feats.includes("crusher")) choice("crusher", "advantage", named(FEATS.crusher), uiText("rollMode.crusher"));
+  if (attack) {
+    // Règles générales du combat, décidées par la situation. Un don qui annule une règle la retire ; un état déclaré qui la contient déjà aussi.
+    // situation : le thème de la règle ; la fenêtre de dés range ces cases derrière son bouton « Situation de l'attaque », par thème.
+    const situation = (theme, ...rule) => { choice(...rule); sources.at(-1).situation = theme; };
+    const thrown = !!line?.weapon?.thrown, note = melee && thrown ? uiText("attack.note.thrown") : "";
+    if ((!melee || thrown) && !feats.includes("crossbowExpert") && !feats.includes("gunner")) situation("distance", "close-range", "disadvantage", uiText("rollMode.closeRange"), note || uiText("rollMode.closeRange.text"));
+    if (line?.weapon?.range && line.context !== "spell" && !feats.includes("sharpshooter")) situation("distance", "long-range", "disadvantage", uiText("rollMode.longRange"), note || uiText("rollMode.longRange.text"));
+    if (!state.conditions.includes("Aveuglé")) situation("visibility", "unseen-target", "disadvantage", uiText("rollMode.unseenTarget"), "");
+    if (!state.conditions.includes("Invisible")) situation("visibility", "unseen-attacker", "advantage", uiText("rollMode.unseenAttacker"), "");
+    situation("target", "target-prone", melee ? "advantage" : "disadvantage", uiText("rollMode.targetProne"), uiText(melee ? "rollMode.targetProne.near" : "rollMode.targetProne.far"));
+    // Paralysée ou inconsciente : au corps à corps, à 1,50 m, la case cochée fait aussi du toucher un coup critique (hitCritical, modeOptions).
+    situation("target", "target-helpless", "advantage", uiText("rollMode.targetHelpless"), melee ? uiText("rollMode.targetHelpless.text") : "");
+    if (melee) sources.at(-1).hitCritical = true;
+    situation("target", "target-hindered", "advantage", uiText("rollMode.targetHindered"), "");
+    // Sous l'eau : au corps à corps sans vitesse de nage, sauf dague, javeline, épée courte, lance et trident ; à distance, sauf arbalète, filet et arme lancée.
+    const underwater = line?.context === "weapon" && (melee ? !d.swimSpeed && !UNDERWATER_MELEE.includes(line.id) : !thrown && !UNDERWATER_RANGED.includes(line.id));
+    if (underwater) situation("environment", "underwater", "disadvantage", uiText("rollMode.underwater"), melee ? "" : uiText("rollMode.underwater.ranged"));
   }
   return sources;
 }
@@ -40371,6 +40956,11 @@ function _concentrationSaveAids(c, d) {
 function raceTraitName(c, name) {
   return (raceOf(c).traits || []).some((trait) => Array.isArray(trait) && trait[0] === name) ? uiCatalogueName(name) : null;
 }
+/** Nom d'un trait de la race du personnage, lu dans la référence de la race par sa clé anglaise (« Savage Attacks ») ; null s'il ne l'a pas. */
+function raceReferenceTrait(c, key) {
+  const trait = RACE_REFERENCE_DATA[c.raceId]?.traits.find((item) => item.key === key);
+  return trait ? uiLanguage() === "en" ? trait.englishName || key : trait.name : null;
+}
 /** Types de dégâts du don Adepte élémentaire : un par exemplaire du don dont le prérequis est rempli. */
 function elementalAdeptTypes(c) {
   return collect(c).featAcquisitions.filter((entry) => entry.id === "elementalAdept").map((entry) => picksOf(c, entry.sourceKey, "element")[0]).filter(Boolean);
@@ -40429,6 +41019,7 @@ function rangedAttackNotes(c, roll) {
   const weapon = !!line && line.context !== "spell" && !!(line.weapon?.ranged || line.weapon?.thrown);
   if (weapon && feats.includes("sharpshooter")) out.push({ id: "sharpshooter", name: _reminderName(FEATS.sharpshooter), text: uiText("rangedNote.sharpshooter") });
   if ((weapon || spell) && feats.includes("crossbowExpert")) out.push({ id: "crossbow-expert", name: _reminderName(FEATS.crossbowExpert), text: uiText("rangedNote.crossbowExpert") });
+  if ((weapon || spell) && feats.includes("gunner")) out.push({ id: "gunner", name: _reminderName(FEATS.gunner), text: uiText("rangedNote.crossbowExpert") });
   return out;
 }
 
@@ -42253,7 +42844,7 @@ function validateImport(input) {
     const m = event.material;
     if (!plain(m) || !["item", "gold", "table", "untracked"].includes(m.method) || typeof m.consumed !== "boolean" || m.method === "item" && (typeof m.itemId !== "string" || typeof m.name !== "string" || !Number.isInteger(m.quantity) || m.quantity < 1 || !Number.isFinite(m.value) || m.value < 0) || m.method === "gold" && (!m.consumed || !Number.isFinite(m.amount) || m.amount <= 0) || m.method === "table" && m.note !== undefined && (typeof m.note !== "string" || !m.note.trim() || m.note.length > 1000)) throw new Error(uiText("Déclaration de composante invalide."));
   }
-  for (const event of c.state.spellEvents) if (!plain(event) || typeof event.id !== "string" || typeof event.spellId !== "string" || !Number.isInteger(event.effectiveLevel) || event.effectiveLevel < 0 || event.effectiveLevel > 9 || !plain(event.costs) || event.noConcentration !== undefined && typeof event.noConcentration !== "boolean" || event.ongoing !== undefined && event.ongoing !== true || event.stock !== undefined && !(Number.isInteger(event.stock) && event.stock >= 1 && event.stock <= 99) || event.struck !== undefined && event.struck !== true || event.personalActions !== undefined && (!Array.isArray(event.personalActions) || event.personalActions.some((action) => !["concentration", "ward", "recovery", "tempHp"].includes(action)) || new Set(event.personalActions).size !== event.personalActions.length)) throw new Error(uiText("Événement de lancement invalide."));
+  for (const event of c.state.spellEvents) if (!plain(event) || typeof event.id !== "string" || typeof event.spellId !== "string" || !Number.isInteger(event.effectiveLevel) || event.effectiveLevel < 0 || event.effectiveLevel > 9 || !plain(event.costs) || event.noConcentration !== undefined && typeof event.noConcentration !== "boolean" || event.ongoing !== undefined && event.ongoing !== true || event.stock !== undefined && !(Number.isInteger(event.stock) && event.stock >= 1 && event.stock <= 99) || event.struck !== undefined && event.struck !== true || event.weaponId !== undefined && !(typeof event.weaponId === "string" && event.weaponId.length <= 200) || event.form !== undefined && !["beast", "tree"].includes(event.form) || event.personalActions !== undefined && (!Array.isArray(event.personalActions) || event.personalActions.some((action) => !["concentration", "ward", "recovery", "tempHp"].includes(action)) || new Set(event.personalActions).size !== event.personalActions.length)) throw new Error(uiText("Événement de lancement invalide."));
   if (c.state.pactPearlSlots !== undefined && (!Number.isInteger(c.state.pactPearlSlots) || c.state.pactPearlSlots < 0 || c.state.pactPearlSlots > Math.min(pactMagic(c)?.count || 0, c.state.pactUsed || 0) || c.state.pactPearlSlots > 0 && (pactMagic(c)?.slotLevel || 0) <= 3)) throw new Error(uiText("Réserve de pacte abaissé invalide."));
   if (c.state.pearlSlotOrigins !== undefined && (!Array.isArray(c.state.pearlSlotOrigins) || c.state.pearlSlotOrigins.length > (c.state.temporarySlots[3] || 0) || c.state.pearlSlotOrigins.some((level) => !Number.isInteger(level) || level < 4 || level > 9))) throw new Error(uiText("Origine d’emplacement abaissé invalide."));
   for (const event of c.state.spellEvents) if (event.costs.pactPearl !== undefined && (event.costs.pactPearl !== true || event.costs.pact || event.costs.slot || event.effectiveLevel !== 3)) throw new Error(uiText("Coût de pacte abaissé invalide."));
@@ -42261,6 +42852,10 @@ function validateImport(input) {
   if (Object.keys(c.state.temporarySlots).some((key) => !/^[1-9]$/.test(key))) throw new Error(uiText("Niveau d’emplacement temporaire invalide."));
   if (c.state.rest !== null && (!plain(c.state.rest) || !["started", "completed", "interrupted"].includes(c.state.rest.status) || !["short", "long"].includes(c.state.rest.type) || !Number.isFinite(c.state.rest.startedAtHours) || c.state.rest.startedAtHours < 0 || c.state.rest.previousLongRestHours != null && (!Number.isFinite(c.state.rest.previousLongRestHours) || c.state.rest.previousLongRestHours < 0))) throw new Error(uiText("État de repos invalide."));
   if (c.state.rest && (!Number.isFinite(c.state.rest.hpAtStart) || c.state.rest.hpAtStart < 0 || typeof c.state.rest.eligibleAtStart !== "boolean" || c.state.rest.completedAtHours != null && (!Number.isFinite(c.state.rest.completedAtHours) || c.state.rest.completedAtHours < c.state.rest.startedAtHours))) throw new Error(uiText("Admissibilité ou chronologie du repos invalide."));
+  // Cadenas de la fenêtre de dés : photo des cases gardées, absente quand rien n'est gardé.
+  const keptRoll = c.state.keptRollOptions, keptId = (value) => typeof value === "string" && !!value && value.length <= 200;
+  if (keptRoll !== undefined && (!plain(keptRoll) || Object.keys(keptRoll).some((key) => !["on", "choice"].includes(key)) || !Array.isArray(keptRoll.on) || keptRoll.on.length > 200 || !keptRoll.on.every(keptId) || new Set(keptRoll.on).size !== keptRoll.on.length
+    || !plain(keptRoll.choice) || Object.entries(keptRoll.choice).some(([id, value]) => !keptRoll.on.includes(id) || !keptId(value)))) throw new Error(uiText("roll.lock.invalid"));
   const historyErrors = validateRuleHistory(c);
   if (historyErrors.length) throw new Error(historyErrors.map((entry) => `${entry.path} : ${entry.message}`).join(" "));
   normalizeInventory(c);
@@ -43328,8 +43923,28 @@ function spendSpellSlot(c, { level, pact = false }) {
   return next;
 }
 
-/** Applique le coût d’un lancement autorisé sans modifier la fiche reçue. */
-function castSpell(c, id, mode, { acquisitionId = null, material = null, componentTracking = true, stock = null } = {}) {
+// Choix faits au lancement et gardés dans l'événement : weaponId, l'arme touchée (true : toute arme du personnage, ou celle d'un allié ;
+// liste : seulement ces armes, tenues par le lanceur) ; form, la forme prise.
+const SPELL_CAST_CHOICES = {
+  "elemental-weapon": { weaponId: true },
+  "holy-weapon": { weaponId: true },
+  shillelagh: { weaponId: ["club", "quarterstaff"] },
+  "guardian-of-nature": { form: ["beast", "tree"] },
+};
+/** Choix demandés au lancement d'un sort : { weaponId?, form? }, chacun une liste de [valeur, libellé] dont la première est proposée d'abord. */
+function spellCastChoices(c, id) {
+  const rule = SPELL_CAST_CHOICES[id];
+  if (!rule) return {};
+  const out = {};
+  if (rule.weaponId) {
+    const own = new Set(weaponInstances(c).filter((entry) => rule.weaponId === true || rule.weaponId.includes(entry.id)).map((entry) => entry.instanceId));
+    out.weaponId = [...derive(c).attacks.filter((attack) => own.has(attack.instanceId)).map((attack) => [attack.instanceId, attack.name]), ...(rule.weaponId === true ? [["ally", uiText("spell.cast.weaponAlly")]] : [])];
+  }
+  if (rule.form) out.form = rule.form.map((form) => [form, uiText(`spell.cast.form.${form}`)]);
+  return out;
+}
+/** Applique le coût d’un lancement autorisé sans modifier la fiche reçue. choices : { weaponId, form } retenus au lancement (spellCastChoices). */
+function castSpell(c, id, mode, { acquisitionId = null, material = null, componentTracking = true, stock = null, choices = {} } = {}) {
   const s = spellById(c, id), d = derive(c);
   if (!s) throw new Error(uiText("Sort inconnu."));
   const { details, modes } = spellCastOptions(c, s, d);
@@ -43350,14 +43965,19 @@ function castSpell(c, id, mode, { acquisitionId = null, material = null, compone
   next.state.spellEvents ||= [];
   next.state.spellEvents.push({ id: `spell-event:${next.state.spellEvents.length + 1}`, spellId: id, acquisitionId: option.acquisitionId || null, sourceKey: option.sourceKey || null, sourceType: option.sourceType || (option.classId ? "class" : "feature"), referenceId: s.referenceId || null, revision: s.revision || null, school: s.school, effectiveLevel: spellLevel, noConcentration: !!option.noConcentration, ability: option.ability || null, dc: option.dc || null, mode, sourceLabel: modes[mode], material: materialExpense, costs: { slot: option.slot || null, pact: !!option.pact, ...(option.pactPearl ? { pactPearl: true } : {}), resource: option.resource || null, resourceAmount: option.resource ? option.resourceCost || 1 : 0, itemId: option.itemId || null, charges: option.charges || 0 }, exceptionReason: option.reason || null });
   const event = next.state.spellEvents.at(-1);
+  for (const [key, values] of Object.entries(spellCastChoices(c, id))) {
+    if (choices[key] === undefined || choices[key] === null) continue;
+    if (!values.some(([value]) => value === choices[key])) throw new Error(uiText("Événement de lancement invalide."));
+    event[key] = choices[key];
+  }
   // Un sort qui dure sans concentration (Arme spirituelle, Image miroir, Cage des âmes) reste actif jusqu'à « Terminer » ou au repos.
   if (spellLasts(s)) event.ongoing = true;
   if (SPELL_STOCKS[id]) _poseSpellStock(next, event, s, stock);
   return next;
 }
-/** Sort qui reste actif après son lancement, sans concentration : il a des dés de dégâts, un jet sur sa carte ou un stock, et une durée. */
+/** Sort qui reste actif après son lancement, sans concentration : il a des dés de dégâts, un jet sur sa carte, un stock ou une arme désignée au lancement (Gourdin magique), et une durée. */
 function spellLasts(spell) {
-  return !!spell && !spell.concentration && (spell.level > 0 && !!SPELL_DICE[spell.id]?.rolls.length && !/^instant/i.test(spell.duration || "") || !!SPELL_ROLLS[spell.id]?.card || !!SPELL_STOCKS[spell.id]);
+  return !!spell && !spell.concentration && (spell.level > 0 && !!SPELL_DICE[spell.id]?.rolls.length && !/^instant/i.test(spell.duration || "") || !!SPELL_ROLLS[spell.id]?.card || !!SPELL_STOCKS[spell.id] || !!SPELL_CAST_CHOICES[spell.id]?.weaponId);
 }
 /** Identifiant de la ligne de Ressources d'un stock posé par un lancement : « spell-stock-3 » pour « spell-event:3 ». */
 function spellStockId(event) {
@@ -43494,11 +44114,15 @@ function spellHealAdditions(c, event) {
   const disciple = subclassOf(c, "cleric")?.data?.features?.find((feature) => feature[3]?.includes("|disciple of life|"));
   return disciple && event?.effectiveLevel >= 1 ? [{ source: disciple[1], bonus: 2 + event.effectiveLevel, fixedBonus: true }] : [];
 }
-/** Sort dont l'effet tient en une attaque (châtiment) : marqué une fois porté, il n'est plus proposé. */
-function markSpellStrike(c, eventId) {
+/** Sort dont l'effet tient en une attaque (châtiment) : marqué une fois porté, il n'est plus proposé. ends : le texte dit que le sort prend fin, il quitte les sorts actifs (concentration comprise). */
+function markSpellStrike(c, eventId, { ends = false } = {}) {
   const next = clone(c), event = next.state.spellEvents.find((row) => row.id === eventId);
   if (!event) throw new Error(uiText("Événement de lancement invalide."));
   event.struck = true;
+  if (ends) {
+    delete event.ongoing;
+    if (next.state.concentration && next.state.concentration === spellById(next, event.spellId)?.name) next.state.concentration = null;
+  }
   return next;
 }
 /** Termine un sort actif sans concentration déclaré au lancement. */
@@ -44275,6 +44899,20 @@ function weaponProficiency(c, entry, acc = collect(c)) {
   const pactWeapon = !!entry.instanceId && entry.instanceId === c.equipment.pactWeaponId && allChoices(c, "pact")[0] === "blade" && classLevel(c, "warlock") >= 3 && _warlockPactWeaponAllowed(c, entry);
   return { pactWeapon, proficient: pactWeapon || id === "unarmed" || acc.weapons.has(id) || [...acc.weapons].some((group) => weaponInGroup(weapon, group)) };
 }
+/**
+ * Sorts du lanceur qui changent ses lignes d'arme : { name, ability, d8, applies(entry, w) }. ability : caractéristique d'incantation du lancement,
+ * retenue quand elle est meilleure (le texte dit « peut utiliser ») ; d8 : le dé de l'arme devient un d8.
+ */
+function _spellWeapons(c) {
+  const out = [], events = c.state.spellEvents || [], named = (spell) => uiCatalogueName(spell.name, spell.referenceId);
+  // Gourdin magique : le gourdin ou le bâton désigné au lancement (sans arme désignée, tous), pour les attaques au corps à corps. Le sort dure sans concentration.
+  const shillelagh = events.findLast((event) => event.spellId === "shillelagh" && event.ongoing), club = shillelagh && spellById(c, "shillelagh");
+  if (club) out.push({ name: named(club), ability: shillelagh.ability, d8: true, applies: (entry, w) => ["club", "quarterstaff"].includes(entry.id) && !w.ranged && (!shillelagh.weaponId || shillelagh.weaponId === entry.instanceId) });
+  // Costume d'Outremonde de Tasha : toutes les attaques d'arme, à la place de la Force ou de la Dextérité.
+  const guise = spellById(c, "tashas-otherworldly-guise");
+  if (guise && c.state.concentration === guise.name) out.push({ name: named(guise), ability: events.findLast((event) => event.spellId === guise.id)?.ability, applies: () => true });
+  return out;
+}
 function _attack(c, entry, ctx, profile = null, bonusAttack = false) {
   const id = entry.id,
     barbarian = barbarianStatus(c), beastWeapon = id === "barbarian-beast" && barbarian.active && barbarian.subclass === "beast" ? BARBARIAN_BEAST_WEAPONS[barbarian.choices.beastWeapon] : null,
@@ -44283,14 +44921,21 @@ function _attack(c, entry, ctx, profile = null, bonusAttack = false) {
     w = infused ? { ...baseWeapon, type: BARBARIAN_ELEMENTS[barbarian.choices.giantElement].toLocaleLowerCase("fr"), thrown: true, range: "6/18 m" } : baseWeapon;
   if (!w) return null;
   const { mods, prof, styles, acc } = ctx;
+  // Sorts du lanceur qui changent cette arme (_spellWeapons) : elle devient magique.
+  const spellWeapons = (ctx.spellWeapons || []).filter((rule) => rule.applies(entry, w));
+  if (spellWeapons.length) entry = { ...entry, isMagical: true };
   const monk = _monkWeapon(c, w, id, entry, acc);
   let ability =
     w.ability || (w.finesse || monk ? (mods.dex > mods.str ? "dex" : "str") : w.ranged ? "dex" : "str");
   // Un profil est maîtrisé d'office, sauf celui d'une autre attaque avec l'arme elle-même (ownProficiency).
-  const { pactWeapon, proficient: usualProficiency } = weaponProficiency(c, entry, acc), proficient = !!profile && !profile.ownProficiency || id === "monk-astral" || !!beastWeapon || usualProficiency;
+  // Objets portés : bracelets d'archer (maîtrise et dégâts des arcs), bonus et gantelets griffus des frappes à mains nues.
+  const wornWeapon = (ctx.itemBonuses || []).filter((bonus) => bonus.bows?.includes(id) || id === "unarmed" && bonus.unarmed), claws = wornWeapon.find((bonus) => bonus.unarmedDice);
+  const wornEffect = (key) => wornWeapon.filter((bonus) => bonus[key]).map((bonus) => ({ id: bonus.label, sourceKey: bonus.sourceKey, referenceId: bonus.referenceId, revision: bonus.revision, mode: "add", formula: bonus[key] }));
+  const { pactWeapon, proficient: usualProficiency } = weaponProficiency(c, entry, acc), proficient = !!profile && !profile.ownProficiency || id === "monk-astral" || !!beastWeapon || usualProficiency || wornWeapon.some((bonus) => bonus.bows);
   const localEffects = acc.ruleEffects.filter((effect) => (!effect.instanceId || effect.instanceId === entry.instanceId) && (!effect.when?.magical || weaponIsMagical(entry, c)) && (!effect.when?.pactWeapon || pactWeapon) && (!effect.when?.melee || !w.ranged));
   const substitute = localEffects.filter((effect) => effect.target === "weaponAbility" && Object.hasOwn(ABILITIES, effect.ability)).sort((a, b) => (b.priority || 0) - (a.priority || 0))[0];
   if (substitute && mods[substitute.ability] > mods[ability]) ability = substitute.ability;
+  for (const rule of spellWeapons) if (rule.ability && mods[rule.ability] > mods[ability]) ability = rule.ability;
   const hexWarrior = hasSubclass(c, "warlock", "hexblade") && (entry.instanceId === c.equipment.hexWeaponId && id !== "unarmed" && !w.two && proficient || pactWeapon) && mods.cha > mods[ability];
   if (hexWarrior) ability = "cha";
   const battleReady = hasSubclass(c, "artificer", "battleSmith") && classLevel(c, "artificer") >= 3 && id !== "unarmed" && entry.instanceId === c.state.artificer?.battleWeaponId && weaponIsMagical(entry, c);
@@ -44301,6 +44946,8 @@ function _attack(c, entry, ctx, profile = null, bonusAttack = false) {
   const forgeMagic = itemForgeBlessingActive(c, c.inventory.find((item) => item.id === entry.instanceId));
   const improvedPact = pactWeapon && allChoices(c, "invocations").includes("improvedPactWeapon") && !magic && !forgeMagic ? 1 : 0;
   let dice = entry.twoHands && w.versatile ? w.versatile : w.damage;
+  if (spellWeapons.some((rule) => rule.d8)) dice = "1d8";
+  if (claws) dice = claws.unarmedDice;
   if (id === "unarmed" && dice === "1" && acc.feats.includes("tavernBrawler")) dice = "1d4";
   if (id === "unarmed" && styles.includes("unarmedFighting")) {
     const held = heldWeapons(c), sides = !c.equipment.shield && !held.main && !held.off ? 8 : 6;
@@ -44320,10 +44967,10 @@ function _attack(c, entry, ctx, profile = null, bonusAttack = false) {
   const pactBonus = (target) => improvedPact ? [{ id: `improved-pact-${target}`, mode: "add", formula: 1, sourceKey: "feat|eldritchAdept|improvedPactWeapon", referenceId: FEAT_OPTION_DATA.invocations.improvedPactWeapon.referenceId }] : [];
   const inventoryWeapon = c.inventory.find((item) => item.id === entry.inventoryId);
   const itemWeaponEffect = (formula) => inventoryWeapon && formula ? [{ id: inventoryWeapon.name, sourceKey: `item|${inventoryWeapon.id}`, referenceId: inventoryWeapon.ref, revision: inventoryWeapon.instance.reference.revision, mode: "add", formula }] : [];
-  const attackCalculation = resolveRuleEffects(mods[ability] + (proficient ? prof : 0) + magic - infusionWeaponBonus + Number(c.adjustments.attack || 0) + archery, [...infusionWeaponEffect, ...localEffects.filter((effect) => effect.target === "weaponAttack"), ...pactBonus("attack"), ...itemWeaponEffect(Number(entry.attackBonus || 0))], effectContext);
+  const attackCalculation = resolveRuleEffects(mods[ability] + (proficient ? prof : 0) + magic - infusionWeaponBonus + Number(c.adjustments.attack || 0) + archery, [...infusionWeaponEffect, ...localEffects.filter((effect) => effect.target === "weaponAttack"), ...pactBonus("attack"), ...itemWeaponEffect(Number(entry.attackBonus || 0)), ...wornEffect("unarmed")], effectContext);
   const rageDamage = barbarian.benefits && ability === "str" && (!w.ranged || barbarian.subclass === "giant" && w.thrown)
     ? [{ id: "rage-damage", sourceKey: "barbarian|rage", referenceId: barbarianReference("Rage").referenceId, mode: "add", formula: barbarian.bonus }] : [];
-  const damageCalculation = resolveRuleEffects(damageAbility + magic - infusionWeaponBonus + Number(c.adjustments.damage || 0) + dueling, [...infusionWeaponEffect, ...localEffects.filter((effect) => effect.target === "weaponDamage"), ...pactBonus("damage"), ...rageDamage, ...itemWeaponEffect(entry.bloodshed ? Math.max(1, mods.con) : 0)], effectContext);
+  const damageCalculation = resolveRuleEffects(damageAbility + magic - infusionWeaponBonus + Number(c.adjustments.damage || 0) + dueling, [...infusionWeaponEffect, ...localEffects.filter((effect) => effect.target === "weaponDamage"), ...pactBonus("damage"), ...rageDamage, ...itemWeaponEffect(entry.bloodshed ? Math.max(1, mods.con) : 0), ...wornEffect("unarmed"), ...wornEffect("weaponDamage")], effectContext);
   const attack = attackCalculation.value, damageBonus = damageCalculation.value;
   const props = [
     battleReady && "INT (Prêt au combat)",
@@ -44343,6 +44990,7 @@ function _attack(c, entry, ctx, profile = null, bonusAttack = false) {
     beastWeapon && barbarian.level >= 6 && "magique contre les résistances et immunités",
     forgeMagic && "magique (Bénédiction de la forge)",
     paladinSession(c).active.sacredWeapon && c.state.paladin.effects.sacredWeapon.instanceId === entry.instanceId && "magique (Arme sacrée)",
+    ...spellWeapons.map((rule) => uiText("attack.spellWeapon", { name: rule.name })),
     paladinSession(c).active.conqueror && !w.ranged && "critique sur 19 ou 20 au corps à corps",
     classLevel(c, "monk") >= 6 && (["unarmed", "monk-astral"].includes(id) || monkKenseiWeapons(c).includes(id)) && "magique contre les résistances et immunités",
     id === "monk-astral" && "allonge +1,50 m pendant ton tour",
@@ -44366,7 +45014,7 @@ function _attack(c, entry, ctx, profile = null, bonusAttack = false) {
     ...(!w.ranged && paladinSession(c).active.conqueror && { critThreshold: 19 }),
     ...(infused && { additionalDamageDice: `${barbarian.level >= 14 ? 2 : 1}d6`, additionalDamageSource: barbarianReference("Elemental Cleaver", "Giant", 6).referenceId }),
     damageBonus,
-    type: w.type,
+    type: claws ? claws.unarmedType : w.type,
     properties: props,
     monk,
     twoHands: !!entry.twoHands,
@@ -44382,12 +45030,15 @@ function _deriveBody(c, overrides = {}) {
     abilityProgression = _abilityProgression(c, acc),
     itemBonuses = inventoryPersonalBonuses(c),
     scores = Object.fromEntries(Object.entries(overrides.scores || abilityProgression.totals).map(([ability, score]) => {
-      const calculation = resolveRuleEffects(score, itemBonuses.filter((bonus) => bonus.ability?.[ability]).map((bonus) => ({ ...bonus, id: bonus.label, mode: "floor", formula: bonus.ability[ability] })));
+      // Hausse d'un objet porté (pierre de Ioun) jusqu'au maximum de sa règle, puis score fixé par un objet porté (gantelets, ceinturons) ou un effet reçu (potion de force de géant).
+      const raises = itemBonuses.filter((bonus) => bonus.raise?.[ability]).map((bonus) => ({ ...bonus, id: bonus.label, mode: "add", formula: Math.max(0, Math.min(bonus.raise[ability].amount, bonus.raise[ability].max - score)) }));
+      const calculation = resolveRuleEffects(score, [...raises, ...[...itemBonuses, ...(c.receivedAbilities || [])].filter((bonus) => bonus.ability?.[ability]).map((bonus) => ({ ...bonus, id: bonus.label, mode: "floor", formula: bonus.ability[ability] }))]);
       (abilityProgression.provenance[ability] ||= []).push(...calculation.details);
       return [ability, calculation.value];
     })),
     mods = Object.fromEntries(Object.entries(scores).map(([k, v]) => [k, mod(v)])),
-    prof = 2 + Math.floor((level - 1) / 4),
+    // Pierre de Ioun de maîtrise : bonus de maîtrise +1 tant qu'elle est portée.
+    prof = 2 + Math.floor((level - 1) / 4) + itemBonuses.reduce((sum, bonus) => sum + (bonus.proficiency || 0), 0),
     ranks = skillRanks(c, acc),
     styles = equippedStyles(c, acc),
     replacesArmor = acc.unarmored.some((entry) => entry.replacesArmor),
@@ -44517,7 +45168,7 @@ function _deriveBody(c, overrides = {}) {
     saveValues.str += mods.wis - mods.str;
     skillValues.athletics += mods.wis - mods.str;
   }
-  const ctx = { mods, prof, styles, acc, twoWeapon };
+  const ctx = { mods, prof, styles, acc, twoWeapon, spellWeapons: _spellWeapons(c), itemBonuses };
   const weaponEntries = c.equipment.weapons?.length ? weaponInstances(c) : [{ id: "unarmed", magic: 0, twoHands: false }];
   const barbarian = barbarianStatus(c);
   if (barbarian.active && barbarian.subclass === "beast" && BARBARIAN_BEAST_WEAPONS[barbarian.choices.beastWeapon]) weaponEntries.push({ id: "barbarian-beast", instanceId: "barbarian|beast|weapon", magic: 0, twoHands: false });
@@ -44547,6 +45198,12 @@ function _deriveBody(c, overrides = {}) {
   // Modification d'apparence, forme « armes naturelles » : frappe à mains nues magique, tant que la concentration porte sur le sort.
   if (c.state.concentration && c.state.concentration === spellById(c, "alter-self")?.name)
     attacks.push(_attack(c, { id: "unarmed", instanceId: "spell|alter-self|natural", magic: 1, isMagical: true }, ctx, { ...weaponOf("unarmed"), name: uiText("attack.alterSelf"), damage: "1d6", type: uiText("attack.alterSelf.type"), note: "attack.alterSelf.note" }));
+  // Lame d'ombres : l'épée créée tant que la concentration porte sur le sort, arme courante maîtrisée ; ses dés suivent l'emplacement du lancement.
+  const shadowBlade = spellById(c, "shadow-blade");
+  if (shadowBlade && c.state.concentration === shadowBlade.name) {
+    const event = (c.state.spellEvents || []).findLast((row) => row.spellId === "shadow-blade");
+    attacks.push(_attack(c, { id: "shadow-blade", instanceId: "spell|shadow-blade", magic: 0, isMagical: true }, ctx, { name: uiCatalogueName(shadowBlade.name, shadowBlade.referenceId), damage: spellDamageRolls("shadow-blade", { slotLevel: event?.effectiveLevel ?? shadowBlade.level }).rolls[0].notation, type: "psychiques", group: "simple", finesse: true, light: true, thrown: true, range: "6/18 m", note: "attack.shadowBlade.note" }));
+  }
   // Armure du fou de guerre : les pointes de l'armure portée, en action bonus pendant une rage.
   if (hasSubclass(c, "barbarian", "battlerager") && lv("barbarian") >= 3 && armor === ARMORS.spiked)
     attacks.push({ ..._attack(c, { id: "battlerager-spikes", instanceId: "barbarian|battlerager|spikes", magic: 0 }, ctx, { name: uiText("attack.spikes"), damage: "1d4", type: "perforants", ability: "str", note: "attack.spikes.note" }), bonusAction: true, attacksPerAction: 1 });
@@ -45396,6 +46053,7 @@ function applyStartingKit(c) {
 
 
 // Module : attack-sequence
+// Lot J1 des lanceurs, dons et races : états, classe des sorts et traits de race lus sur la fiche.
 
 // Séquence d'attaque commune aux armes et aux sorts : toucher, verdict choisi par le joueur, dégâts.
 // L'appli additionne et double ; la CA, les cibles et la réussite restent à la table.
@@ -45409,11 +46067,11 @@ function attackNaturalVerdict(result, critThreshold = 20) {
   return result.natural >= critThreshold ? "critical" : null;
 }
 
-// Une pièce ajoutée à un jet : dés (« 1d4 ») ou valeur fixe, avec sa provenance.
+// Une pièce ajoutée à un jet : dés (« 1d4 ») ou valeur fixe, avec sa provenance. subtract : dés retirés du jet (Fléau, Rapetissé).
 function attackAddition(piece, factor = 1) {
   const dice = ATTACK_DICE.exec(piece.notation || "");
   return dice
-    ? { count: Number(dice[1]) * factor, sides: Number(dice[2]), bonus: piece.bonus || 0, source: piece.label, type: piece.type || "" }
+    ? { count: Number(dice[1]) * factor, sides: Number(dice[2]), bonus: piece.bonus || 0, source: piece.label, type: piece.type || "", ...(piece.subtract && { subtract: true }) }
     : { fixedBonus: true, bonus: (Number(piece.notation) || 0) + (piece.bonus || 0), source: piece.label, type: piece.type || "" };
 }
 
@@ -45430,6 +46088,14 @@ function attackRollRequest(bonus, pieces = [], adjust = []) {
 function adjustedPiece(rule, piece) {
   return rule.weapon ? !!piece.weapon : rule.types ? piece.types?.length === 1 && rule.types.includes(piece.types[0]) : true;
 }
+// Retouches qui dépendent de la face des dés de la pièce : max, chaque dé compte son maximum (Fureur destructrice, Surcharge magique) ;
+// low, jusqu'à ce nombre de dés tombés sous la moyenne relancés, les plus bas d'abord (Sort renforcé, Empaleur). null : pièce sans dés.
+function fittedAdjust(rule, piece) {
+  if (!rule.max && !rule.low) return rule;
+  const sides = Number(ATTACK_DICE.exec(piece.notation || "")?.[2]), { max, low, ...rest } = rule;
+  if (!sides) return null;
+  return max ? { ...rest, floor: sides } : { ...rest, reroll: Array.from({ length: Math.floor(sides / 2) }, (_, i) => i + 1), limit: low };
+}
 /**
  * Jet de dégâts d'une attaque. Chaque pièce : { label, notation ("2d6" ou "3"), bonus, type, doubled, weapon, types }.
  * Au critique, tous les dés sont doublés, options comprises ; les bonus fixes ne le sont jamais.
@@ -45438,7 +46104,7 @@ function adjustedPiece(rule, piece) {
 function attackDamageRequest(pieces, { critical = false, adjust = [] } = {}) {
   if (!pieces.length) return null;
   const factor = (piece) => critical && piece.doubled !== false ? 2 : 1;
-  const retouched = (piece) => { const rules = adjust.filter((rule) => adjustedPiece(rule, piece)); return rules.length ? { adjust: rules } : {}; };
+  const retouched = (piece) => { const rules = adjust.filter((rule) => adjustedPiece(rule, piece)).map((rule) => fittedAdjust(rule, piece)).filter(Boolean); return rules.length ? { adjust: rules } : {}; };
   const [base, ...rest] = pieces, first = attackAddition(base, factor(base));
   return {
     kind: "damage",
@@ -45471,10 +46137,11 @@ function attackLineProfile(c, d, a) {
   // La rage est déjà dans le bonus de l'arme : on le dit pour éviter de l'ajouter deux fois.
   const rage = a.provenance?.damage?.details.some((effect) => effect.sourceKey === "barbarian|rage" && effect.applied);
   // Flèche de foudre : les dés du sort prennent la place des dégâts de la prochaine attaque à distance. Une arme de lancer sert aussi au corps à corps : le joueur choisit.
+  // cost : cochée, la pièce marque le lancement porté dès le premier jet, celui d'attaque compris : touchée ou ratée, la flèche est partie.
   const arrow = (a.weapon?.ranged || a.weapon?.thrown) && a.damageDice !== "0" ? weaponSpell(c, d, "lightning-arrow") : null;
   const parts = [{ label: a.name, notation: a.damageDice, bonus: a.damageBonus, type: a.type, weapon: true, ...(arrow && a.weapon.ranged && { on: false }) }];
-  if (arrow) parts.push({ label: arrow.name, notation: arrow.notation, bonus: 0, type: damageTypeLabel(arrow.types), ...(!a.weapon.ranged && { on: false }) });
-  return { name: a.name, attack: { bonus: a.attack, critThreshold: Math.min(a.critThreshold || 20, d.critThreshold) }, roll: { kind: "attack", weapon: a }, parts, options: attackOptions(c, d, { weapon: a }), note: [rage && uiText(" Le bonus de rage déclaré est déjà inclus.").trim(), arrow && uiText("attack.spell.lightningArrow")].filter(Boolean).join(" ") };
+  if (arrow) parts.push({ label: arrow.name, notation: arrow.notation, bonus: 0, type: damageTypeLabel(arrow.types), ...(!a.weapon.ranged && { on: false }), ...(arrow.event && { cost: { strike: arrow.event.id } }) });
+  return { name: a.name, attack: { bonus: a.attack, critThreshold: Math.min(a.critThreshold || 20, d.critThreshold, itemCritThreshold(c, a)) }, roll: { kind: "attack", weapon: a }, parts, options: attackOptions(c, d, { weapon: a }), note: [rage && uiText(" Le bonus de rage déclaré est déjà inclus.").trim(), arrow && uiText("attack.spell.lightningArrow"), itemAttackNote(c, a)].filter(Boolean).join(" ") };
 }
 
 // Domaines dont la Frappe divine ajoute des dégâts ; null : type de l'arme.
@@ -45489,6 +46156,8 @@ const GIANT_STRIKES = {
   stone: { label: "attack.giantStrike.stone", notation: "1d6", types: ["force"] },
   storm: { label: "attack.giantStrike.storm", notation: "1d6", types: ["lightning"] },
 };
+// Tirs arcaniques qui ajoutent des dés à la flèche qui touche : type de ces dés (Arcane Shot Options, XGE).
+const ARCANE_SHOT_TYPES = { banishing: "force", beguiling: "psychic", bursting: "force", enfeebling: "necrotic", grasping: "poison", shadow: "psychic" };
 function resourceDie(resource) {
   return Number(/\bd(4|6|8|10|12)\b/.exec(`${resource?.name || ""} ${resource?.note || ""}`)?.[1]) || null;
 }
@@ -45508,24 +46177,40 @@ const RANGER_STRIKES = [
 // Sorts dont des dés s'ajoutent aux dégâts d'une attaque : proposés tant que la concentration porte sur le sort, avec les dés de SPELL_DICE au niveau lancé.
 // cantrip : sort mineur lancé en portant une attaque de l'arme, proposé tant qu'il est connu, sans jet d'attaque de sort.
 // roll : rang de ces dés dans le sort ; on : cochée d'office ; melee : attaques au corps à corps seulement ; spells : aussi les sorts ;
-// strike : une seule attaque, puis l'option disparaît ; toHit : autant de bonus au toucher que de dés ; swap : à la place des dégâts de l'arme (weaponAttackProfile) ;
+// strike : une seule attaque, puis l'option (ou la pièce de swap) disparaît ; toHit : autant de bonus au toucher que de dés ; swap : à la place des dégâts de l'arme (attackLineProfile) ;
 // type : libellé quand le type se choisit au lancement ; note : précision de l'option ; rest : ce que lancent les autres dés, restés sur la ligne du sort.
+// weapon : l'arme touchée par le sort, désignée au lancement (spellCastChoices) ; form : seulement sous cette forme, choisie au lancement ;
+// near : cible proche, cochée d'office au corps à corps seulement, et seulement les sorts à jet d'attaque ; noSave : la sauvegarde du sort ne vise pas la cible touchée.
+// mark : aucun dé ajouté à l'arme (roll -1 : tous restent sur la carte du sort) ; cochée, la case marque le sort porté au toucher. ranged : attaque à distance, arme lancée comprise ;
+// requires : la case suit la source d'avantage qui paie le sort ; ends : le sort prend fin une fois porté (sans concentration, il quitte les sorts actifs).
 const WEAPON_SPELLS = {
   "divine-favor": { roll: 0, on: true },
   "crusaders-mantle": { roll: 0, on: true },
-  "elemental-weapon": { roll: 0, on: true, toHit: true, type: "attack.type.chosen", note: "attack.spell.elementalWeapon" },
+  "elemental-weapon": { roll: 0, on: true, toHit: true, weapon: true, type: "attack.type.chosen", note: "attack.spell.elementalWeapon" },
+  "holy-weapon": { roll: 0, on: true, weapon: true, rest: "attack.spell.holyWeaponRest" },
+  "spirit-shroud": { roll: 0, on: true, near: true, spells: true, type: "attack.type.chosen", note: "attack.spell.spiritShroud" },
+  "tensers-transformation": { roll: 0, on: true, noSave: true },
+  "guardian-of-nature": { roll: 0, on: true, melee: true, form: "beast" },
+  "ensnaring-strike": { roll: -1, strike: true, mark: true, note: "attack.spell.ownCard" },
+  "hail-of-thorns": { roll: -1, ranged: true, strike: true, mark: true, note: "attack.spell.ownCard" },
+  "zephyr-strike": { roll: 0, strike: true, requires: "mode:spell:zephyr-strike" },
+  "absorb-elements": { roll: 0, melee: true, strike: true, ends: true, type: "attack.type.absorbed", note: "attack.spell.absorbElements" },
   "bestow-curse": { roll: 0, spells: true, note: "attack.spell.curse" },
   "searing-smite": { roll: 0, melee: true, strike: true, rest: "attack.spell.searingRest" },
   "wrathful-smite": { roll: 0, melee: true, strike: true },
   "thunderous-smite": { roll: 0, melee: true, strike: true },
   "branding-smite": { roll: 0, strike: true },
   "blinding-smite": { roll: 0, melee: true, strike: true },
-  "lightning-arrow": { roll: 0, swap: true, rest: "attack.spell.lightningRest" },
+  "staggering-smite": { roll: 0, melee: true, strike: true },
+  "banishing-smite": { roll: 0, strike: true },
+  "lightning-arrow": { roll: 0, swap: true, strike: true, rest: "attack.spell.lightningRest" },
   "booming-blade": { roll: 1, melee: true, cantrip: true, note: "attack.spell.cantrip", rest: "attack.spell.boomingRest" },
   "green-flame-blade": { roll: 1, melee: true, cantrip: true, note: "attack.spell.cantrip", rest: "attack.spell.greenFlameRest" },
 };
 /** Lignes de dés qu'un sort garde sur sa propre ligne d'attaque : toutes (null), ou celles que ses options d'arme n'ajoutent pas déjà. */
 function spellProfileRolls(spellId) {
+  // Lame d'ombres : ses dés sont ceux de l'arme qu'elle crée, une ligne d'attaque de la fiche (derive).
+  if (spellId === "shadow-blade") return () => false;
   const rule = WEAPON_SPELLS[spellId];
   return rule ? (index) => index !== rule.roll : null;
 }
@@ -45533,23 +46218,74 @@ function spellProfileRolls(spellId) {
 function weaponSpell(c, d, id) {
   const rule = WEAPON_SPELLS[id], spell = spellById(c, id);
   if (!spell) return null;
-  if (rule.cantrip ? !(c.spells.known.includes(id) || spellAcquisitions(c, id).length || innateSpells(c).some((entry) => entry.id === id)) : c.state.concentration !== spell.name) return null;
   const event = rule.cantrip ? null : (c.state.spellEvents || []).findLast((row) => row.spellId === id) || null;
+  // Actif : sort mineur connu, concentration sur le sort, ou lancement qui dure sans concentration (Absorption des éléments).
+  if (rule.cantrip ? !(c.spells.known.includes(id) || spellAcquisitions(c, id).length || innateSpells(c).some((entry) => entry.id === id)) : c.state.concentration !== spell.name && !event?.ongoing) return null;
   if (rule.strike && event?.struck) return null;
   const model = spellDamageRolls(id, { slotLevel: event?.effectiveLevel ?? spell.level, characterLevel: d.level, keep: (index) => index === rule.roll }), roll = model.rolls[0];
-  if (!roll) return null;
-  const save = model.save.length && !rule.rest ? uiText("spells.dice.save", { ability: model.save.map((key) => uiCatalogueName(ABILITIES[key].name)).join(", "), dc: event?.dc ?? d.spellDC }) : "";
-  return { name: attackSourceName(spell), event, notation: roll.notation, types: roll.types, save };
+  if (!roll && !rule.mark) return null;
+  const save = model.save.length && !rule.rest && !rule.noSave ? uiText("spells.dice.save", { ability: model.save.map((key) => uiCatalogueName(ABILITIES[key].name)).join(", "), dc: event?.dc ?? d.spellDC }) : "";
+  return { name: attackSourceName(spell), event, notation: roll?.notation || "", types: roll?.types || [], save };
+}
+// Courroux du génie : type des dégâts selon le génie choisi.
+const GENIE_TYPES = { dao: "bludgeoning", djinni: "thunder", efreeti: "fire", marid: "cold" };
+/**
+ * Options d'un sort lancé que donnent les aptitudes des lanceurs et les dons, d'après ses types de dégâts et la classe qui le lance.
+ * Un bonus « à un jet de dégâts du sort » est coché d'office, comme Évocation renforcée ; une dépense reste à cocher.
+ */
+function casterSpellOptions(c, d, spell, { resource, left, feats }) {
+  const known = spellById(c, spell.id), rolls = known && spellDamageRolls(spell.id, { slotLevel: known.level, characterLevel: d.level })?.rolls || [], options = [];
+  if (!rolls.length) return options;
+  const types = [...new Set(rolls.flatMap((roll) => roll.types))], typed = (list) => types.filter((entry) => list.includes(entry)), owner = spellClassOf(c, spell.id);
+  const at = (classId, subclass, level) => hasSubclass(c, classId, subclass) && classLevel(c, classId) >= level;
+  // Incantation puissante : sort mineur de clerc, + SAG. Les domaines qui l'ont se lisent dans leurs aptitudes de niveau 8.
+  const domain = Object.keys(SUBCLASSES.cleric).find((id) => hasSubclass(c, "cleric", id)), potent = SUBCLASSES.cleric[domain]?.features.find((feature) => feature[0] === 8 && /\|potent spellcasting\|/.test(feature[3] || ""));
+  if (potent && known.level === 0 && owner === "cleric" && classLevel(c, "cleric") >= 8) options.push({ id: "potent-spellcasting", label: uiCatalogueName(potent[1], potent[3]), damage: { bonus: d.mods.wis }, on: true });
+  // Fureur destructrice (tempête) : le Conduit divin rend maximaux les dés de foudre et de tonnerre du sort.
+  const channel = at("cleric", "tempest", 2) && typed(["lightning", "thunder"]).length && resource("channel");
+  if (channel) options.push({ id: "destructive-wrath", label: attackSourceName(clericReference("Channel Divinity: Destructive Wrath", "Tempest", 2)), note: left(channel), adjust: { step: "damage", max: true, types: typed(["lightning", "thunder"]) }, cost: { resource: "channel" } });
+  // Savant alchimique : + INT (au moins 1) à un jet de dégâts d'acide, de feu, nécrotiques ou de poison, sort lancé avec le matériel d'alchimiste.
+  if (at("artificer", "alchemist", 5) && typed(["acid", "fire", "necrotic", "poison"]).length) options.push({ id: "alchemical-savant", label: attackSourceName(artificerReference("Alchemical Savant", "Alchemist")), note: uiText("attack.note.alchemicalSavant"), damage: { bonus: Math.max(1, d.mods.int), type: damageTypeLabel(typed(["acid", "fire", "necrotic", "poison"])) }, on: true });
+  // Arme à feu arcanique : sort d'artificier lancé à travers l'arme, +1d8 à un jet de dégâts.
+  if (at("artificer", "artillerist", 5) && owner === "artificer") options.push({ id: "arcane-firearm", label: attackSourceName(artificerReference("Arcane Firearm", "Artillerist")), note: uiText("attack.note.arcaneFirearm"), damage: { notation: "1d8", type: damageTypeLabel(types.slice(0, 1)) }, on: true });
+  // Affinité élémentaire (lignée draconique) : + CHA à un jet de dégâts du type de l'ancêtre.
+  const ancestry = DRAGONS[allChoices(c, "dragon")[0]], element = ancestry && Object.keys(DAMAGE_TYPE_LABELS).find((id) => DAMAGE_TYPE_LABELS[id] === ancestry[1]);
+  if (at("sorcerer", "draconic", 6) && element && types.includes(element)) options.push({ id: "elemental-affinity", label: attackSourceName(sorcererReference("Elemental Affinity", "Draconic", 6)), damage: { bonus: d.mods.cha, type: damageTypeLabel([element]) }, on: true });
+  // Sort renforcé : un point de sorcellerie, jusqu'à CHA dés (au moins 1) tombés sous la moyenne relancés, les plus bas d'abord.
+  const points = sorcererKnownMetamagic(c).includes("empowered") ? ["sorcery", "feat-metamagic"].map(resource).filter(Boolean) : [];
+  if (points.length) options.push({ id: "empowered-spell", label: attackSourceName(FEAT_OPTION_DATA.metamagic.empowered), adjust: { step: "damage", low: Math.max(1, d.mods.cha), types },
+    ...(points.length > 1 ? { choices: points.map((pool) => ({ value: pool.id, label: `${pool.name} · ${left(pool)}`, cost: { resource: pool.id } })) } : { note: left(points[0]), cost: { resource: points[0].id } }) });
+  // Bombardement de sorts (magie sauvage 18) : une fois par tour, un dé au maximum fait lancer un dé de plus.
+  if (at("sorcerer", "wildMagic", 18)) options.push({ id: "spell-bombardment", oncePerTurn: true, label: attackSourceName(sorcererReference("Spell Bombardment", "Wild", 18)), note: uiText("Une fois par tour"), adjust: { step: "damage", explode: true, types }, on: true });
+  // Âme radiante (céleste 6) : + CHA à un jet de dégâts radiants ou de feu.
+  if (at("warlock", "celestial", 6) && typed(["radiant", "fire"]).length) options.push({ id: "radiant-soul", label: attackSourceName(warlockReference("Radiant Soul", "Celestial", 6)), damage: { bonus: d.mods.cha, type: damageTypeLabel(typed(["radiant", "fire"])) }, on: true });
+  // Lien renforcé (fournaises 6) : sort de feu, esprit invoqué, +1d8 à un jet de dégâts.
+  if (at("druid", "wildfire", 6) && typed(["fire"]).length && (c.actors || []).some((actor) => actor?.origin === "wildfire")) options.push({ id: "enhanced-bond", label: attackSourceName(druidReference("Enhanced Bond", "Wildfire", 6)), damage: { notation: "1d8", type: damageTypeLabel(["fire"]) }, on: true });
+  // Sursaut de puissance (magie de guerre 6) : une fois par tour, sort de magicien, la moitié du niveau de magicien en force.
+  const surge = at("wizard", "warMagic", 6) && owner === "wizard" && resource("wizard-power-surge");
+  if (surge) options.push({ id: "power-surge", oncePerTurn: true, label: attackSourceName(wizardReference("Power Surge", "War", 6)), note: `${uiText("Une fois par tour")} · ${left(surge)}`, damage: { bonus: Math.floor(classLevel(c, "wizard") / 2), type: damageTypeLabel(["force"]) }, cost: { resource: "wizard-power-surge" } });
+  // Surcharge magique (évocation 14) : sort de magicien de niveau 1 à 5 aux dégâts maximaux. La première fois, gratuite ;
+  // ensuite, la ligne de la ressource lance les dégâts nécrotiques subis.
+  if (at("wizard", "evocation", 14) && owner === "wizard" && known.level >= 1 && known.level <= 5) {
+    const free = resource("overchannel"), name = attackSourceName(wizardReference("Overchannel", "Evocation", 14));
+    options.push({ id: "overchannel", label: name, ...(free ? { cost: { resource: "overchannel" } } : { note: uiText("attack.note.overchannel", { name }) }), adjust: { step: "damage", max: true, types } });
+  }
+  // Flammes de Phlégéthos : les 1 des dés de feu d'un sort sont relancés d'office.
+  if (feats.includes("flamesOfPhlegethos") && types.includes("fire")) options.push({ id: "flames-of-phlegethos", label: attackSourceName(FEATS.flamesOfPhlegethos), auto: true, adjust: { step: "damage", reroll: [1], types: ["fire"] } });
+  return options;
 }
 /**
  * Options de jet d'une attaque, d'après la fiche : aptitudes de classe, sorts actifs et dons.
- * Une option : { id, label, note, on, attack?, damage?, critThreshold?, hitCritical?, criticalOnly?, doubled?, requires?, cost?, choices?, oncePerTurn?, mode?, adjust?, auto?, after? }.
+ * Une option : { id, label, note, on, attack?, damage?, critThreshold?, hitCritical?, criticalOnly?, doubled?, requires?, cost?, choices?, oncePerTurn?, mode?, situation?, adjust?, auto?, after? }.
  * oncePerTurn : une fois entrée dans un jet de dégâts, l'option n'est plus proposée aux attaques suivantes d'un enchaînement.
  * mode : l'option n'ajoute rien au jet, elle lui donne l'avantage ou le désavantage (modeOptions).
+ * situation : avec mode, règle générale du combat ; la fenêtre de dés la range par thème derrière son bouton « Situation de l'attaque ».
  * adjust : l'option retouche des dés ({ step, reroll | floor | best, weapon?, types? }, voir resolveDiceRoll et adjustedPiece) ; auto : appliquée d'office, sans case.
  * attack et damage sont les pièces ajoutées au toucher et aux dégâts ; cost est dépensé au lancer des dés (ressource, emplacement, ou sort porté par cette attaque).
  * hitCritical : cochée, tout toucher est un coup critique.
  * after : la règle place l'option après le dé (Frappe guidée, Attaque précise). Sans case : un bouton l'ajoute au jet déjà lancé (afterRollOptions).
+ * hit : avec after, le bouton fait toucher l'attaque ratée, sans rien ajouter au jet (Coup de chance). costOnHit : le coût n'est payé que si l'attaque touche (Frappes guidées).
+ * mark : l'option n'ajoute aucun dé ; cochée aux dégâts (le toucher), elle marque le sort porté par son coût (Frappe piégeuse).
  */
 function attackOptions(c, d, { weapon = null, spell = null } = {}) {
   const options = [], available = resources(c), resource = (id) => available.find((entry) => entry.id === id && entry.remaining > 0);
@@ -45586,17 +46322,58 @@ function attackOptions(c, d, { weapon = null, spell = null } = {}) {
     }
     // Inspiration bardique dépensée par le barde sur sa propre attaque d'arme : Fioriture de lame (Épées), Lames psychiques (Murmures).
     const inspiration = resource("inspiration"), bard = classLevel(c, "bard");
-    if (inspiration && hasSubclass(c, "bard", "swords")) options.push({ id: "blade-flourish", oncePerTurn: true, label: attackSourceName(bardReference("Blade Flourish", "Swords", 3)), note: `${uiText("Une fois par tour")} · ${left(inspiration)}`, damage: { notation: `1d${bardInspirationDie(bard)}`, type }, cost: { resource: "inspiration" } });
+    // Fioriture de maître (niveau 14) : un d6 sans dépense à la place du dé d'inspiration, proposé en premier ; le dé d'inspiration reste au choix.
+    const flourish = hasSubclass(c, "bard", "swords") && bard >= 14 ? attackSourceName(bardReference("Master's Flourish", "Swords", 14)) : "";
+    const spend = inspiration && { label: `${inspiration.name} (d${bardInspirationDie(bard)}) · ${left(inspiration)}`, notation: `1d${bardInspirationDie(bard)}`, cost: { resource: "inspiration" } };
+    if (flourish) options.push({ id: "blade-flourish", oncePerTurn: true, label: attackSourceName(bardReference("Blade Flourish", "Swords", 3)), note: uiText("Une fois par tour"), damage: { notation: "1d6", type }, choices: [{ value: "master", label: uiText("attack.flourish.master", { name: flourish }), notation: "1d6" }, ...(spend ? [{ value: "inspiration", ...spend }] : [])] });
+    else if (inspiration && hasSubclass(c, "bard", "swords")) options.push({ id: "blade-flourish", oncePerTurn: true, label: attackSourceName(bardReference("Blade Flourish", "Swords", 3)), note: `${uiText("Une fois par tour")} · ${left(inspiration)}`, damage: { notation: `1d${bardInspirationDie(bard)}`, type }, cost: { resource: "inspiration" } });
     if (inspiration && hasSubclass(c, "bard", "whispers")) options.push({ id: "psychic-blades", oncePerTurn: true, label: attackSourceName(bardReference("Psychic Blades", "Whispers", 3)), note: `${uiText("Une fois par tour")} · ${left(inspiration)}`, damage: { notation: bard >= 15 ? "8d6" : bard >= 10 ? "5d6" : bard >= 5 ? "3d6" : "2d6", type: damageTypeLabel(["psychic"]) }, cost: { resource: "inspiration" } });
     const psi = resource("fighter-psi-dice");
     if (psi && hasSubclass(c, "fighter", "psiWarrior")) options.push({ id: "psionic-strike", oncePerTurn: true, label: uiText("Frappe psionique"), note: `${uiText("Une fois par tour")} · ${left(psi)}`, damage: { notation: `1d${resourceDie(psi) || 6}`, bonus: Math.max(1, d.mods.int), type: damageTypeLabel(["force"]) }, cost: { resource: "fighter-psi-dice" } });
+    // Puissance du géant : une fois par tour pendant la minute. La fiche ne suit pas l'état : case décochée, la table le vérifie.
+    const fighter = classLevel(c, "fighter");
+    if (hasSubclass(c, "fighter", "runeKnight") && fighter >= 3) options.push({ id: "giant-might", oncePerTurn: true, label: attackSourceName(fighterReference("Giant's Might", "Rune Knight", 3)), note: uiText("attack.note.giantMight"), damage: { notation: `1d${fighter >= 18 ? 10 : fighter >= 10 ? 8 : 6}`, type } });
+    // Rune de feu invoquée sur une attaque d'arme qui touche, rune portée : 2d6 de feu, la sauvegarde se résout à la table.
+    const fireRune = fighterCarriedRunes(c).includes("fire") && resource("fighter-rune-fire");
+    if (fireRune) options.push({ id: "fire-rune", label: uiCatalogueName(FIGHTER_RUNES.fire[0], FIGHTER_RUNES.fire[2]), note: `${uiText("attack.note.fireRune", { dc: 8 + d.prof + d.mods.con })} · ${left(fireRune)}`, damage: { notation: "2d6", type: damageTypeLabel(["fire"]) }, cost: { resource: "fighter-rune-fire" } });
+    // Marque inflexible : l'attaque spéciale (source de mode payée, rollModeSources) ajoute la moitié du niveau de guerrier aux dégâts.
+    if (melee && hasSubclass(c, "fighter", "cavalier") && fighter >= 3) options.push({ id: "unwavering-mark", label: attackSourceName(fighterReference("Unwavering Mark", "Cavalier", 3)), damage: { bonus: Math.floor(fighter / 2), type }, requires: "mode:unwavering-mark", on: true });
+    // Tir arcanique : une fois par tour, flèche d'arc court ou long qui touche ; dés et type de la flèche choisie. Perçante et chercheuse remplacent le jet d'attaque, la bannissante n'a de dés qu'au niveau 18.
+    const shot = ["longbow", "shortbow"].includes(weapon.id) && resource("fighter-arcane-shot");
+    const shots = shot ? allChoices(c, "arcaneShots").filter((id) => ARCANE_SHOT_TYPES[id] && (id !== "banishing" || fighter >= 18)) : [];
+    if (shots.length) options.push({ id: "arcane-shot", oncePerTurn: true, label: attackSourceName(fighterReference("Arcane Shot", "Arcane Archer", 3)), note: `${uiText("attack.note.arcaneShot", { dc: 8 + d.prof + d.mods.int })} · ${left(shot)}`, damage: { notation: "2d6", type }, cost: { resource: "fighter-arcane-shot" },
+      choices: shots.map((id) => ({ value: id, label: uiCatalogueName(FIGHTER_SHOTS[id][0], FIGHTER_SHOTS[id][2]), notation: fighter >= 18 && id !== "banishing" ? "4d6" : "2d6", type: damageTypeLabel([ARCANE_SHOT_TYPES[id]]) })) });
+    // Moine. Kensei : Tir du kensei (action bonus, jusqu'à la fin du tour, attaques à distance) et Frappe habile (1 ki, une fois par tour), avec une arme de kensei.
+    const monk = classLevel(c, "monk"), ki = resource("ki"), kensei = hasSubclass(c, "monk", "kensei") && monkKenseiWeapons(c).includes(weapon.id);
+    if (kensei && ranged && monk >= 3) options.push({ id: "kensei-shot", label: attackSourceName(monkReference("Kensei's Shot", "Kensei", 3)), note: uiText("attack.note.kenseiShot"), damage: { notation: "1d4", type } });
+    if (kensei && ki && monk >= 6) options.push({ id: "deft-strike", oncePerTurn: true, label: uiText("Frappe habile"), note: `${uiText("Une fois par tour")} · ${left(ki)}`, damage: { notation: `1d${d.martialDie}`, type }, cost: { resource: "ki" } });
+    // Main du mal : frappe à mains nues, 1 ki, une fois par tour ; gratuite dans un Déluge de coups déjà payé au niveau 11.
+    const kiRow = available.find((entry) => entry.id === "ki"), harm = weapon.id === "unarmed" && hasSubclass(c, "monk", "mercy") && monk >= 3 && kiRow;
+    const harmPays = harm ? [...(kiRow.remaining > 0 ? [{ value: "ki", label: left(kiRow), cost: { resource: "ki" } }] : []), ...(monk >= 11 ? [{ value: "flurry", label: uiText("attack.harm.flurry") }] : [])] : [];
+    if (harmPays.length) options.push({ id: "hand-of-harm", oncePerTurn: true, label: attackSourceName(monkReference("Hand of Harm", "Mercy", 3)), note: uiText("Une fois par tour"), damage: { notation: `1d${d.martialDie}`, bonus: d.mods.wis, type: damageTypeLabel(["necrotic"]) }, choices: harmPays });
+    // Crochets du serpent de feu : sur une frappe à mains nues qui touche pendant la discipline, 1 ki de plus pour 1d10 de feu.
+    if (weapon.id === "unarmed" && ki && hasSubclass(c, "monk", "fourElements") && allChoices(c, "disciplines").includes("fangsFireSnake")) options.push({ id: "fangs-fire-snake", label: attackSourceName(monkReference("Fangs of the Fire Snake")), note: `${uiText("attack.note.fangsFireSnake")} · ${left(ki)}`, damage: { notation: "1d10", type: damageTypeLabel(["fire"]) }, cost: { resource: "ki" } });
+    // Corps du Moi astral (bras renforcés) : présent avec les bras et le visage, un dé d'arts martiaux une fois par tour avec les bras.
+    const astral = monkSession(c);
+    if (weapon.id === "monk-astral" && astral.sub === "astralSelf" && monk >= 11 && astral.arms && astral.visage) options.push({ id: "empowered-arms", oncePerTurn: true, label: attackSourceName(monkReference("Body of the Astral Self", "Astral Self", 11)), note: uiText("attack.note.empoweredArms"), damage: { notation: `1d${d.martialDie}`, type }, on: true });
     // Frappe des géants : attaque d'arme au corps à corps ou arme de lancer. La sauvegarde et l'effet secondaire se résolvent à la table.
     const strike = resource("strike-of-the-giants"), giant = strike && GIANT_STRIKES[picksOf(c, strike.sourceKey, "giantStrike")[0]];
     if (giant && (melee || weapon.weapon?.thrown)) options.push({ id: "giant-strike", oncePerTurn: true, label: uiText(giant.label), note: `${uiText("Une fois par tour")} · ${left(strike)}`, damage: { notation: giant.notation, type: giant.types ? damageTypeLabel(giant.types) : type }, cost: { resource: "strike-of-the-giants" } });
     const blades = resource("rogue-psi-dice");
-    if (blades && classLevel(c, "rogue") >= 9 && String(weapon.id || "").startsWith("rogue-psychic")) options.push({ id: "homing-strikes", label: uiText("Frappes guidées"), note: left(blades), attack: { notation: `1d${resourceDie(blades) || 6}` }, cost: { resource: "rogue-psi-dice" } });
+    // Frappes guidées : le dé s'ajoute après un échec ; la règle ne le dépense que s'il fait toucher (costOnHit, payé au verdict).
+    if (blades && classLevel(c, "rogue") >= 9 && String(weapon.id || "").startsWith("rogue-psychic")) options.push({ id: "homing-strikes", label: uiText("Frappes guidées"), note: left(blades), attack: { notation: `1d${resourceDie(blades) || 6}` }, after: true, costOnHit: true, cost: { resource: "rogue-psi-dice" } });
     // Buveuse de vie : dégâts nécrotiques de l'arme de pacte, déjà annoncés dans ses propriétés.
     if (weapon.pactWeapon && allChoices(c, "invocations").includes("lifedrinker")) options.push({ id: "lifedrinker", label: attackSourceName(FEAT_OPTION_DATA.invocations.lifedrinker), damage: { bonus: Math.max(1, d.mods.cha), type: damageTypeLabel(["necrotic"]) }, on: true });
+    // Attaque occulte : une fois par tour, un emplacement de pacte dépensé, 1d8 de force plus 1d8 par niveau de l'emplacement.
+    const pactSlots = weapon.pactWeapon && allChoices(c, "invocations").includes("eldritchSmite") ? availableSpellSlots(c, d).filter((slot) => slot.pact) : [];
+    if (pactSlots.length) options.push({ id: "eldritch-smite", oncePerTurn: true, label: attackSourceName(FEAT_OPTION_DATA.invocations.eldritchSmite), note: uiText("attack.note.eldritchSmite"), damage: { notation: `${pactSlots[0].level + 1}d8`, type: damageTypeLabel(["force"]) },
+      choices: pactSlots.map((slot) => ({ value: `pact:${slot.level}`, label: uiText("Emplacement de pacte niveau {p0} · {p1} restant(s)", { p0: slot.level, p1: slot.remaining }), notation: `${slot.level + 1}d8`, cost: { slot: { level: slot.level, pact: true } } })) });
+    // Décharge arcanique (forgeron de guerre 9) : une fois par tour, avec une arme magique, une utilisation dépensée.
+    const jolt = hasSubclass(c, "artificer", "battleSmith") && classLevel(c, "artificer") >= 9 && resource("battle-smith-jolt");
+    if (jolt) options.push({ id: "arcane-jolt", oncePerTurn: true, label: attackSourceName(artificerReference("Arcane Jolt", "Battle Smith")), note: `${uiText("attack.note.arcaneJolt")} · ${left(jolt)}`, damage: { notation: classLevel(c, "artificer") >= 15 ? "4d6" : "2d6", type: damageTypeLabel(["force"]) }, cost: { resource: "battle-smith-jolt" } });
+    // Chant de victoire (chantelame 14) et Entité symbiotique : cochés d'office tant que le Chantelame ou l'entité est actif, au corps à corps avec une arme.
+    if (melee && weapon.context === "weapon" && d.bladesong && hasSubclass(c, "wizard", "bladesinging") && classLevel(c, "wizard") >= 14) options.push({ id: "song-of-victory", label: attackSourceName(wizardReference("Song of Victory", "Bladesinging", 14)), damage: { bonus: Math.max(1, d.mods.int), type }, on: true });
+    if (melee && weapon.context === "weapon" && druidSession(c).symbiotic) options.push({ id: "symbiotic-entity", label: attackSourceName(druidReference("Symbiotic Entity", "Spores", 2)), damage: { notation: "1d6", type: damageTypeLabel(["necrotic"]) }, on: true });
     // Flèches enflammées (décision S4) : chaque jet de dégâts d'une arme à munitions fait avec l'option retire une munition de la ligne du sort.
     const flames = weapon.weapon?.ammunition && available.find((entry) => entry.spellStock?.use === "option" && entry.remaining > 0);
     if (flames) options.push({ id: "flame-arrows", label: uiText("stock.flameArrow"), note: left(flames), damage: { notation: "1d6", type: damageTypeLabel(["fire"]) }, on: true, cost: { resource: flames.id } });
@@ -45617,15 +46394,29 @@ function attackOptions(c, d, { weapon = null, spell = null } = {}) {
     const weaponDie = /d(\d+)$/.exec(weapon.damageDice || "")?.[1];
     const brutal = classLevel(c, "barbarian") >= 17 ? 3 : classLevel(c, "barbarian") >= 13 ? 2 : classLevel(c, "barbarian") >= 9 ? 1 : 0;
     if (melee && weaponDie && brutal) options.push({ id: "brutal-critical", label: uiText("Critique brutal"), damage: { notation: `${brutal}d${weaponDie}`, type }, criticalOnly: true, doubled: false, on: true });
-    if (melee && weaponDie && c.raceId === "halfOrc") options.push({ id: "savage-attacks", label: uiText("attack.savageAttacks"), damage: { notation: `1d${weaponDie}`, type }, criticalOnly: true, doubled: false, on: true });
+    if (melee && weaponDie && raceReferenceTrait(c, "Savage Attacks")) options.push({ id: "savage-attacks", label: uiText("attack.savageAttacks"), damage: { notation: `1d${weaponDie}`, type }, criticalOnly: true, doubled: false, on: true });
     // Style Armes à deux mains : les 1 et 2 des dés d'une arme de corps à corps tenue à deux mains (deux mains, ou polyvalente tenue ainsi) sont relancés d'office.
     if (melee && weaponDie && (weapon.weapon?.two || weapon.weapon?.versatile && weapon.twoHands) && equippedStyles(c).includes("greatWeapon")) options.push({ id: "great-weapon-fighting", label: attackSourceName(FEAT_OPTION_DATA.style.greatWeapon), auto: true, adjust: { step: "damage", reroll: [1, 2], weapon: true } });
     // Attaquant sauvage : les dés de l'arme lancés deux fois, le meilleur total gardé ; relancer puis choisir revient au même.
     if (melee && weaponDie && feats.includes("savageAttacker")) options.push({ id: "savage-attacker", oncePerTurn: true, label: attackSourceName(FEATS.savageAttacker), note: uiText("attack.note.savageAttacker"), adjust: { step: "damage", best: true, weapon: true } });
+    // Objets : arme de la ligne et objets portés (item-attacks.js).
+    options.push(...itemAttackOptions(c, weapon));
+    // Empaleur, arme perforante : une fois par tour, le plus bas des dés de l'arme sous la moyenne est relancé ; au critique, un dé de l'arme en plus.
+    if (weaponDie && type === DAMAGE_TYPE_LABELS.piercing && feats.includes("piercer")) {
+      options.push({ id: "piercer", oncePerTurn: true, label: attackSourceName(FEATS.piercer), note: uiText("attack.note.piercer"), adjust: { step: "damage", low: 1, weapon: true }, on: true });
+      options.push({ id: "piercer-critical", label: attackSourceName(FEATS.piercer), damage: { notation: `1d${weaponDie}`, type }, criticalOnly: true, doubled: false, on: true });
+    }
+    // Fureur orc : un dé de l'arme (courante ou de guerre) en plus, une utilisation par repos court.
+    const fury = weaponDie && ["simple", "martial"].includes(weapon.weapon?.group) && resource("feat-orcishFury");
+    if (fury) options.push({ id: "orcish-fury", label: attackSourceName(FEATS.orcishFury), note: left(fury), damage: { notation: `1d${weaponDie}`, type }, cost: { resource: "feat-orcishFury" } });
+    // Empoisonneur : dose appliquée sur l'arme ou la munition ; la cible sauve, la table tranche.
+    if (weapon.context === "weapon" && weapon.weapon?.group && feats.includes("poisoner")) options.push({ id: "poisoner", label: attackSourceName(FEATS.poisoner), note: uiText("attack.note.poisoner"), damage: { notation: "2d8", type: damageTypeLabel(["poison"]) } });
   }
   // Chanceux : le 1 naturel du d20 d'un jet d'attaque est relancé d'office.
   const lucky = attackRoll && raceTraitName(c, "Chanceux");
   if (lucky) options.push({ id: "lucky", label: lucky, auto: true, adjust: { step: "attack", reroll: [1] } });
+  // Précision elfique : avec l'avantage et une attaque de DEX, INT, SAG ou CHA (tout sort), un troisième d20, d'office.
+  if (attackRoll && feats.includes("elvenAccuracy") && (!weapon || weapon.context === "spell" || weapon.ability !== "str")) options.push({ id: "elven-accuracy", label: attackSourceName(FEATS.elvenAccuracy), auto: true, adjust: { step: "attack", triple: true } });
   // Adepte élémentaire : sur les dés d'un sort du type choisi, un 1 compte 2, d'office.
   const elements = spell && feats.includes("elementalAdept") ? elementalAdeptTypes(c) : [];
   if (elements.length) options.push({ id: "elemental-adept", label: attackSourceName(FEATS.elementalAdept), auto: true, adjust: { step: "damage", floor: 2, types: elements } });
@@ -45634,8 +46425,25 @@ function attackOptions(c, d, { weapon = null, spell = null } = {}) {
   // Le texte des deux aptitudes place le choix après le dé, avant que le MJ dise si l'attaque touche.
   const channel = resource("channel"), guided = hasSubclass(c, "cleric", "war") && classLevel(c, "cleric") >= 2 ? clericReference("Channel Divinity: Guided Strike", "War", 2) : hasSubclass(c, "paladin", "conquest") ? paladinReference("Guided Strike", "Conquest", 3) : null;
   if (attackRoll && channel && guided) options.push({ id: "guided-strike", label: attackSourceName(guided), note: left(channel), attack: { bonus: 10 }, after: true, cost: { resource: "channel" } });
+  // Favori des dieux (âme divine) : 2d4 ajoutés après une attaque ratée, une utilisation par repos court.
+  const favored = hasSubclass(c, "sorcerer", "divineSoul") && resource("sorcerer-favored");
+  if (attackRoll && favored) options.push({ id: "favored-by-the-gods", label: attackSourceName(sorcererReference("Favored by the Gods", "Divine Soul", 1)), note: left(favored), attack: { notation: "2d4" }, after: true, cost: { resource: "sorcerer-favored" } });
   // Assassinat : contre une cible surprise, le toucher est un coup critique. Le joueur déclare la surprise.
   if (attackRoll && hasSubclass(c, "rogue", "assassin")) options.push({ id: "assassinate", label: uiText("attack.assassinate", { name: attackSourceName(rogueReference("Assassinate", "Assassin", 3)) }), note: uiText("attack.note.assassinate"), hitCritical: true });
+  // Coup de chance : une attaque ratée devient un toucher, une utilisation par repos court ou long.
+  const luck = attackRoll && resource("stroke-luck");
+  if (luck) options.push({ id: "stroke-of-luck", label: attackSourceName(rogueReference("Stroke of Luck")), note: left(luck), after: true, hit: true, cost: { resource: "stroke-luck" } });
+  // Légende vivante déclarée : une fois par tour, l'attaque d'arme ratée touche.
+  if (weapon && paladinSession(c).active.livingLegend) options.push({ id: "living-legend", oncePerTurn: true, label: attackSourceName(paladinReference("Living Legend", "Glory", 20)), note: uiText("Une fois par tour"), after: true, hit: true });
+  // Tueur implacable : une fois par tour, la Sagesse au toucher ou aux dégâts contre un ennemi juré ; choisie au toucher, elle n'est plus proposée aux dégâts.
+  if (attackRoll && classLevel(c, "ranger") >= 20) {
+    const foeSlayer = { oncePerTurn: true, label: attackSourceName(rangerReference("Foe Slayer")), note: uiText("attack.note.foeSlayer") };
+    options.push({ id: "foe-slayer", ...foeSlayer, attack: { bonus: d.mods.wis } }, { id: "foe-slayer-damage", ...foeSlayer, damage: { bonus: d.mods.wis, type: weapon ? type : "" }, unless: "foe-slayer" });
+  }
+  // Visée concentrée (variante de Tasha) : après un échec, 1 à 3 ki pour +2 par ki.
+  const focus = attackRoll && classLevel(c, "monk") >= 5 && activeRuleVariants(c).some((variant) => variant.id === "focusedAim") && resource("ki");
+  if (focus) options.push({ id: "focused-aim", label: attackSourceName(monkReference("Focused Aim")), after: true, attack: { notation: "+2" },
+    choices: [1, 2, 3].filter((count) => count <= focus.remaining).map((count) => ({ value: String(count), label: uiText("attack.focusedAim.ki", { count, left: focus.remaining }), notation: `+${2 * count}`, cost: { resource: "ki", amount: count } })) });
   for (const strike of RANGER_STRIKES) {
     if (!(weapon || strike.spells && attackRoll) || !hasSubclass(c, "ranger", strike.subclass)) continue;
     options.push({ id: strike.id, ...(strike.once && { oncePerTurn: true }), label: attackSourceName(rangerReference(...strike.feature, 3)), note: uiText(strike.note), damage: { notation: strike.dice[classLevel(c, "ranger") >= 11 ? 1 : 0], type: strike.types ? damageTypeLabel(strike.types) : type } });
@@ -45644,9 +46452,14 @@ function attackOptions(c, d, { weapon = null, spell = null } = {}) {
     if (rule.swap || !(weapon ? (!rule.melee || melee) && (!rule.cantrip || weapon.context === "weapon" && !["unarmed", "monk-astral"].includes(weapon.id)) : rule.spells && spell)) continue;
     const active = weaponSpell(c, d, id);
     if (!active) continue;
-    const note = [rule.strike && uiText("attack.spell.nextHit"), rule.note && uiText(rule.note), active.save].filter(Boolean).join(" · ");
-    options.push({ id, label: active.name, ...(note && { note }), ...(rule.toHit && { attack: { bonus: Number(active.notation.split("d")[0]) } }), damage: { notation: active.notation, type: active.types.length ? damageTypeLabel(active.types) : rule.type ? uiText(rule.type) : type },
-      on: !!rule.on || !!rule.strike && !!active.event, ...(rule.strike && { oncePerTurn: true }), ...(rule.strike && active.event && { cost: { strike: active.event.id } }) });
+    // Arme désignée au lancement (weaponId de l'événement) : l'option ne vaut que pour ses lignes ; un lancement sans arme désignée vaut pour toutes.
+    const chosen = active.event?.weaponId;
+    if (rule.weapon && chosen && !(weapon?.instanceId === chosen || String(weapon?.instanceId || "").startsWith(`${chosen}|`))) continue;
+    if (rule.form && active.event?.form !== rule.form || rule.near && spell && !spell.attack || rule.ranged && !(ranged || weapon?.weapon?.thrown)) continue;
+    const note = [rule.strike && !rule.requires && uiText("attack.spell.nextHit"), rule.note && uiText(rule.note, rule.near ? { distance: formatGameMeasure(3, "m", { language: uiLanguage() }) } : {}), active.save].filter(Boolean).join(" · ");
+    options.push({ id, label: active.name, ...(note && { note }), ...(rule.toHit && { attack: { bonus: Number(active.notation.split("d")[0]) } }), ...(rule.mark ? { mark: true } : { damage: { notation: active.notation, type: active.types.length ? damageTypeLabel(active.types) : rule.type ? uiText(rule.type) : type } }),
+      on: !!rule.on && !(rule.near && !melee) || !!rule.strike && !!active.event && !(rule.ranged && !ranged), ...(rule.strike && { oncePerTurn: true }), ...(rule.requires && { requires: rule.requires }),
+      ...(rule.strike && active.event && !rule.requires && { cost: { strike: active.event.id, ...(rule.ends && { ends: true }) } }) });
   }
   if (attackRoll && concentrating("hex")) options.push({ id: "hex", label: uiText("Maléfice"), damage: { notation: "1d6", type: damageTypeLabel(["necrotic"]) }, on: true });
   // Armurier infiltrateur : le Lanceur de foudre ajoute 1d6 une fois par tour ; au niveau 15, la prochaine attaque contre la cible luisante aussi.
@@ -45666,12 +46479,16 @@ function attackOptions(c, d, { weapon = null, spell = null } = {}) {
   if (spell?.id === "eldritch-blast" && allChoices(c, "invocations").includes("agonizing")) options.push({ id: "agonizing-blast", label: uiText("Décharge déchirante"), damage: { bonus: d.mods.cha }, on: true });
   // L'école se lit dans le catalogue du moteur : celle que transmet l'interface est traduite en anglais.
   if (spell && hasSubclass(c, "wizard", "evocation") && classLevel(c, "wizard") >= 10 && spellById(c, spell.id)?.school === "Évocation") options.push({ id: "empowered-evocation", label: uiText("Évocation renforcée"), damage: { bonus: d.mods.int }, on: true });
+  // Courroux du génie : une fois par tour, toute attaque qui touche, sort compris : + bonus de maîtrise du type du génie, coché d'office.
+  const genie = attackRoll && hasSubclass(c, "warlock", "genie") ? GENIE_TYPES[allChoices(c, "genieKind")[0]] : null;
+  if (genie) options.push({ id: "genies-wrath", oncePerTurn: true, label: attackSourceName(warlockReference("Genie's Wrath", "Genie", 1)), note: uiText("Une fois par tour"), damage: { bonus: d.prof, type: damageTypeLabel([genie]) }, on: true });
+  if (spell) options.push(...casterSpellOptions(c, d, spell, { resource, left, feats }));
   return options;
 }
 
 /** Sources de mode au choix du joueur, en options à cocher du d20 ; une source d'une seule attaque ne se repropose pas dans l'enchaînement. */
 function modeOptions(sources) {
-  return sources.filter((source) => source.nature === "choice").map((source) => ({ id: source.id, label: source.name, note: source.text, mode: source.mode, oncePerTurn: source.single, ...(source.cost && { cost: source.cost }), ...(source.unless && { unless: source.unless }) }));
+  return sources.filter((source) => source.nature === "choice").map((source) => ({ id: source.id, label: source.name, note: source.text, mode: source.mode, oncePerTurn: source.single, ...(source.cost && { cost: source.cost }), ...(source.choices && { choices: source.choices }), ...(source.unless && { unless: source.unless }), ...(source.hitCritical && { hitCritical: true }), ...(source.situation && { situation: source.situation }) }));
 }
 
 // État d'une option pour un jet : visible à cette étape, cochée, et son choix éventuel.
@@ -45682,7 +46499,7 @@ function optionVisible(option, state, step, { critical = false } = {}) {
   // Un effet à usage unique dépensé au toucher ne revient pas aux dégâts.
   if (option.once && state.spent?.[option.id] && state.spent[option.id] !== step) return false;
   // unless : option qui, cochée, écarte celle-ci (arme lancée pour l'Attaque téméraire).
-  return !!(optionPiece(option, step) || step === "attack" && (option.critThreshold || option.hitCritical || option.fromAttack) || step !== "damage" && option.mode || option.adjust?.step === step && !option.auto) && (!option.criticalOnly || critical) && (!option.requires || !!state.on[option.requires]) && !(option.unless && state.on[option.unless]);
+  return !!(optionPiece(option, step) || step === "attack" && (option.critThreshold || option.hitCritical || option.fromAttack || option.hit) || step !== "damage" && option.mode || step === "damage" && option.mark || option.adjust?.step === step && !option.auto) && (!option.criticalOnly || critical) && (!option.requires || !!state.on[option.requires]) && !(option.unless && state.on[option.unless]);
 }
 /**
  * Options que la règle place après le dé, encore disponibles à cette étape : une par paiement possible,
@@ -45692,10 +46509,10 @@ function optionVisible(option, state, step, { critical = false } = {}) {
 function afterRollOptions(options, state, step) {
   return options.filter((option) => option.after && !state.on[option.id] && optionVisible(option, state, step)).flatMap((option) => {
     // « 1d8 » pour un dé, « +10 » pour un bonus fixe.
-    const piece = optionPiece(option, step), formula = (notation) => `${notation || ""}${piece.bonus ? `${piece.bonus > 0 ? "+" : "−"}${Math.abs(piece.bonus)}` : ""}`;
+    const piece = optionPiece(option, step), formula = (notation) => `${notation || ""}${piece?.bonus ? `${piece.bonus > 0 ? "+" : "−"}${Math.abs(piece.bonus)}` : ""}`;
     return option.choices?.length > 1
-      ? option.choices.map((choice) => ({ id: option.id, choice: choice.value, label: option.label, note: choice.label, formula: formula(choice.notation || piece.notation) }))
-      : [{ id: option.id, choice: null, label: option.label, note: option.note || option.choices?.[0]?.label || "", formula: formula(option.choices?.[0]?.notation || piece.notation) }];
+      ? option.choices.map((choice) => ({ id: option.id, choice: choice.value, label: option.label, note: choice.label, formula: formula(choice.notation || piece?.notation), hit: !!option.hit }))
+      : [{ id: option.id, choice: null, label: option.label, note: option.note || option.choices?.[0]?.label || "", formula: formula(option.choices?.[0]?.notation || piece?.notation), hit: !!option.hit }];
   });
 }
 /**
@@ -45723,11 +46540,37 @@ function rereadRollOptions(roll, fresh) {
 function optionChoice(option, state) {
   return option.choices?.find((choice) => choice.value === state.choice?.[option.id]) || option.choices?.[0] || null;
 }
+// Une case se garde si elle ne coûte rien : ni l'option, ni le choix retenu, et pas une option ajoutée après le dé.
+const keptRollFree = (option, choice) => !option.after && !option.cost && !option.costOnHit && !choice?.cost;
+/**
+ * Photo du cadenas de la fenêtre de dés (state.keptRollOptions) : les cases cochées gratuites, { on: [identifiants], choice: { identifiant: valeur } }.
+ * Une option liée (requires) n'est gardée qu'avec l'option dont elle dépend.
+ */
+function keptRollPhoto(options, state) {
+  const free = options.filter((option) => state.on[option.id] && keptRollFree(option, optionChoice(option, state)));
+  const kept = free.filter((option) => !option.requires || free.some((entry) => entry.id === option.requires));
+  return { on: kept.map((option) => option.id), choice: Object.fromEntries(kept.filter((option) => option.choices?.length > 1).map((option) => [option.id, optionChoice(option, state).value])) };
+}
+/**
+ * Cases qu'une photo coche dans la liste d'un jet, { on: [identifiants], choice } : celles du jet dont l'identifiant est gardé,
+ * avec leur choix s'il est encore proposé et gratuit. Une option absente de ce jet (arc, autre arme, déjà entrée dans le tour) ne revient pas.
+ */
+function keptRollOptions(options, photo) {
+  const on = [], choice = {};
+  for (const option of options) {
+    if (!photo?.on.includes(option.id)) continue;
+    const value = photo.choice?.[option.id], picked = option.choices?.length ? (value === undefined ? option.choices[0] : option.choices.find((entry) => entry.value === value)) : null;
+    if (option.choices?.length && !picked || !keptRollFree(option, picked)) continue;
+    on.push(option.id);
+    if (option.choices?.length > 1) choice[option.id] = picked.value;
+  }
+  return { on, choice };
+}
 /** Pièces ajoutées au jet par les options cochées et visibles à cette étape. */
 function optionPieces(options, state, step, { critical = false } = {}) {
   return options.filter((option) => state.on[option.id] && optionVisible(option, state, step, { critical }) && optionPiece(option, step)).map((option) => {
     const piece = optionPiece(option, step), choice = optionChoice(option, state);
-    return { label: option.label, notation: choice?.notation || piece.notation || "", bonus: piece.bonus || 0, type: piece.type || "", doubled: option.doubled !== false };
+    return { label: option.label, notation: choice?.notation || piece.notation || "", bonus: piece.bonus || 0, type: choice?.type || piece.type || "", doubled: option.doubled !== false, ...(piece.subtract && { subtract: true }) };
   });
 }
 /** Retouches de dés à cette étape : celles d'office et celles des cases cochées, chacune au nom de sa source. */
@@ -45736,7 +46579,7 @@ function optionAdjustments(options, state, step, { critical = false } = {}) {
 }
 /** Dépenses des options cochées à cette étape : ressource ou emplacement. */
 function optionCosts(options, state, step, { critical = false } = {}) {
-  return options.filter((option) => state.on[option.id] && optionVisible(option, state, step, { critical })).map((option) => ({ id: option.id, label: option.label, cost: optionChoice(option, state)?.cost || option.cost || null })).filter((entry) => entry.cost);
+  return options.filter((option) => state.on[option.id] && !option.costOnHit && optionVisible(option, state, step, { critical })).map((option) => ({ id: option.id, label: option.label, cost: optionChoice(option, state)?.cost || option.cost || null })).filter((entry) => entry.cost);
 }
 /** Seuil de critique du toucher, abaissé par une option cochée (Malédiction du Hexblade). */
 function optionCritThreshold(base, options, state) {
@@ -45774,7 +46617,7 @@ function spellAttackProfile(spell, event, model, attackBonus, options = []) {
     name: spell.level > 0 ? uiText("{p0} · niveau {p1}", { p0: spell.name, p1: event.effectiveLevel }) : spell.name,
     // Lame retentissante, Lame des flammes vertes : l'attaque est celle de l'arme, pas un jet d'attaque de sort.
     attack: model.attack && !rule?.cantrip && Number.isFinite(attackBonus) ? { bonus: attackBonus, critThreshold: 20 } : null,
-    roll: model.attack && !rule?.cantrip ? { kind: "attack", spell: { id: spell.id, melee: model.attack === "M" } } : null,
+    roll: model.attack && !rule?.cantrip ? { kind: "attack", spell: { id: spell.id, melee: model.attack === "M", ability: event.ability || null } } : null,
     save: model.save.length && event.dc ? { abilities: model.save, dc: event.dc, half: model.half } : null,
     // Plusieurs dégâts : ceux qui s'additionnent sont cochés, les autres restent au choix du joueur.
     parts: model.rolls.map((roll, i) => ({ label: spell.name, notation: roll.notation, bonus: roll.bonus, type: damageTypeLabel(roll.types), types: roll.types, on: i === 0 || !!roll.join })),
@@ -45783,6 +46626,184 @@ function spellAttackProfile(spell, event, model, attackBonus, options = []) {
     options,
     ...(rule?.rest && { note: uiText(rule.rest) }),
   };
+}
+
+
+// Module : item-attacks
+
+// Ce qu'un objet tenu, porté ou harmonisé ajoute aux attaques de son porteur. Les dés et types viennent du texte anglais de chaque objet
+// (data/en/items.json), absent des champs structurés : une ligne par objet, clé = variante (magicvariant) ou référence de l'objet.
+// dice / bonus : pièce de dégâts ; types : type des dégâts, absent : celui de l'arme ; attack : bonus au toucher.
+// Sans note, l'objet ajoute ses dés à chaque coup (case cochée d'office) ; note : condition que la table vérifie (case décochée).
+// on : cochée d'office malgré la note (exception à vérifier) ; nat20 : sur un 20 naturel, appliquée d'office au critique (criticalOnly) ;
+// melee : attaque au corps à corps seulement ; choices : [clé du libellé, dés] ; charges : charges dépensables par coup ;
+// requires : rang d'une autre ligne du même objet qu'il faut cocher ; sworn : ennemi juré de l'Arc du serment (source d'avantage cochée).
+const ITEM_STRIKES = {
+  "magicvariant||frost brand": [{ dice: "1d6", types: ["cold"] }],
+  "item|tce|devotee's censer": [{ dice: "1d8", types: ["radiant"] }],
+  "item|bgg|adze of annam": [{ dice: "3d12", types: ["force"] }],
+  "item|mot|akmon, hammer of purphoros": [{ dice: "3d10", types: ["fire"] }],
+  "item|mot|dekella, bident of thassa": [{ dice: "2d10", types: ["cold"] }],
+  "item|mot|khrusor, spear of heliod": [{ dice: "2d8", types: ["radiant"] }],
+  "item|mot|mastix, whip of erebos": [{ dice: "2d8", types: ["necrotic"] }],
+  "item|pota|drown": [{ dice: "1d8", types: ["cold"] }],
+  "item|pota|ironfang": [{ dice: "1d8", types: ["thunder"] }],
+  "item|pota|tinderstrike": [{ dice: "2d6", types: ["fire"] }],
+  "item|pota|windvane": [{ dice: "1d6", types: ["lightning"] }],
+  "item|rot|dragontooth dagger": [{ dice: "1d6", types: ["acid"] }],
+  "item|mcv2dc|nightbringer": [{ dice: "4d4", types: ["radiant"] }],
+  "item|cm|serpent's fang": [{ dice: "1d10", types: ["poison"] }],
+  "item|hat-lmi|red wizard blade": [{ dice: "3d12", types: ["necrotic"], melee: true }],
+  "item|egw|ruin's wake (dormant)": [{ dice: "1d8", types: ["piercing"] }],
+  "item|wbtw|witchlight vane": [{ dice: "1d8", types: ["radiant"] }],
+  "item|bmt|fate cutter shears": [{ dice: "1d6", types: ["force"] }],
+  "item|egw|bloodaxe": [{ dice: "1d6", types: ["necrotic"], note: "attack.item.notConstructUndead", on: true }],
+  "item|erlw|dyrrn's tentacle whip": [{ dice: "1d6", types: ["psychic"] }],
+  "item|bgg|lash of immolation": [{ dice: "1d6", types: ["fire"] }],
+  "item|lmop|spider staff": [{ dice: "1d6", types: ["poison"] }],
+  "item|pabtso|spider staff": [{ dice: "1d6", types: ["poison"] }],
+  "item|bmt|sun staff": [{ dice: "1d8", types: ["fire"] }],
+  "item|toa|staff of the forgotten one": [{ dice: "3d6", types: ["necrotic"] }],
+  // Contre un type de créature.
+  "magicvariant||dragon slayer": [{ dice: "3d6", note: "attack.item.vs.dragon" }],
+  "magicvariant||giant slayer": [{ dice: "2d6", note: "attack.item.vs.giantProne" }],
+  "magicvariant||holy avenger": [{ dice: "2d10", types: ["radiant"], note: "attack.item.vs.fiendUndead" }],
+  "item|dmg|sun blade": [{ dice: "1d8", types: ["radiant"], note: "attack.item.vs.undead" }],
+  "item|dmg|mace of disruption": [{ dice: "2d6", types: ["radiant"], note: "attack.item.vs.fiendUndead" }],
+  "item|dmg|sword of kas": [{ dice: "2d10", types: ["slashing"], note: "attack.item.vs.undead" }],
+  "item|wdh|azuredge": [{ dice: "2d6", types: ["radiant"], note: "attack.item.vs.fiendUndead" }],
+  "item|oota|dawnbringer": [{ dice: "1d8", types: ["radiant"], note: "attack.item.vs.undead" }],
+  "item|cos|sunsword": [{ dice: "1d8", types: ["radiant"], note: "attack.item.vs.undead" }],
+  "item|vrgr|nepenthe": [{ dice: "2d10", types: ["radiant"], note: "attack.item.vs.fiendUndead" }],
+  "item|imr|ruinblade": [{ dice: "1d8", types: ["force"], note: "attack.item.vs.undead" }],
+  "item|egw|duskcrusher": [{ dice: "1d8", types: ["radiant"], note: "attack.item.vs.undead" }],
+  "item|lmop|lightbringer": [{ dice: "1d6", types: ["radiant"], note: "attack.item.vs.undeadGlowing" }],
+  "item|pabtso|lightbringer": [{ dice: "1d6", types: ["radiant"], note: "attack.item.vs.undeadGlowing" }],
+  "item|skt|dragon thighbone club": [{ dice: "2d8", types: ["bludgeoning"], note: "attack.item.vs.dragon" }],
+  "item|pabtso|flayer slayer": [{ dice: "1d12", types: ["slashing"], note: "attack.item.vs.aberration" }],
+  "item|tftyp|macuahuitl": [{ dice: "2d6", note: "attack.item.vs.plant" }],
+  "item|cos|yester hill axe": [{ dice: "1d8", types: ["slashing"], note: "attack.item.vs.plant" }],
+  "item|wbtw|woodcutter's axe": [{ dice: "2d6", types: ["slashing"], note: "attack.item.vs.plant" }],
+  "item|tftyp|waythe": [{ dice: "2d6", types: ["slashing"], note: "attack.item.vs.giantProne" }],
+  // Masse destructrice : +1 devient +3 contre un artificiel ; 7 contondants sur un 20 naturel, 14 contre un artificiel.
+  "item|dmg|mace of smiting": [
+    { attack: 2, bonus: 2, note: "attack.item.vs.construct" },
+    { bonus: 7, types: ["bludgeoning"], nat20: true, note: "attack.item.nat20" },
+    { bonus: 7, types: ["bludgeoning"], nat20: true, requires: 0, note: "attack.item.smitingConstruct" },
+  ],
+  // Arme lancée (l'objet lui donne la propriété lancer) : 1d8, 2d8 contre un géant (Déluge : contondants).
+  "item|dmg|dwarven thrower": [{ note: "attack.item.thrown", choices: [["attack.item.thrown", "1d8"], ["attack.item.thrownGiant", "2d8"]] }],
+  "item|bgg|elven thrower": [{ note: "attack.item.thrown", choices: [["attack.item.thrown", "1d8"], ["attack.item.thrownGiant", "2d8"]] }],
+  "item|dmg|whelm": [{ types: ["bludgeoning"], note: "attack.item.thrown", choices: [["attack.item.thrown", "1d8"], ["attack.item.thrownGiant", "2d8"]] }],
+  "item|dmg|oathbow": [{ dice: "3d6", types: ["piercing"], sworn: true, on: true }],
+  // Tout coup contre un objet est critique.
+  "magicvariant||adamantine weapon": [{ hitCritical: true, note: "attack.item.vs.object" }],
+  // Sur un 20 naturel.
+  "magicvariant||vicious weapon": [{ bonus: 7, nat20: true, note: "attack.item.nat20" }],
+  "magicvariant||vicious +1 weapon": [{ bonus: 7, nat20: true, note: "attack.item.nat20" }],
+  "magicvariant||sword of sharpness": [{ bonus: 14, types: ["slashing"], nat20: true, note: "attack.item.sharpness" }],
+  "magicvariant||sword of life stealing": [{ bonus: 10, types: ["necrotic"], nat20: true, note: "attack.item.lifeStealing" }],
+  "magicvariant||vorpal sword": [{ dice: "6d8", types: ["slashing"], nat20: true, on: false, note: "attack.item.vorpal" }],
+  // Charges dépensées sur un coup au corps à corps.
+  "item|dmg|staff of striking": [{ dice: "1d6", types: ["force"], charges: 3, melee: true }],
+  "item|wbtw|eldritch staff": [{ dice: "1d8", types: ["lightning"], charges: 3, melee: true }],
+  "item|dmg|staff of power": [{ dice: "1d6", types: ["force"], charges: 1, melee: true }],
+  "item|dmg|staff of withering": [{ dice: "2d10", types: ["necrotic"], charges: 1, note: "attack.item.withering" }],
+};
+// Objets portés dont une charge s'ajoute à toute attaque d'arme qui touche : tatouage harmonisé, armure revêtue.
+const ITEM_WORN_STRIKES = {
+  "item|tce|blood fury tattoo": { dice: "4d6", types: ["necrotic"], charges: 1, note: "attack.item.bloodFury" },
+  "item|egw|hunter's coat": { dice: "1d10", types: ["necrotic"], charges: 1, slot: "armor", note: "attack.item.vs.wounded" },
+};
+// Effets d'un critique ou d'un 20 naturel sans dés à lancer : rappelés sur la ligne d'attaque.
+const ITEM_CRITICAL_NOTES = {
+  "magicvariant||nine lives stealer": "attack.item.nineLives",
+  "item|dmg|wave": "attack.item.wave",
+  "item|dmg|hammer of thunderbolts": "attack.item.giantBane",
+};
+
+// Exemplaire de l'inventaire derrière une ligne d'attaque (ligne d'arme à deux armes ou de talon d'arme d'hast comprises), actif : emporté et harmonisé s'il le demande.
+function attackItem(c, weapon) {
+  const id = String(weapon?.instanceId || "").split("|")[0], item = id && (c.inventory || []).find((entry) => entry.id === id);
+  return item && itemActive(c, item) ? item : null;
+}
+function itemActive(c, item) {
+  const raw = itemVerifiedDefinition(item);
+  return !!raw && item.qty === 1 && inventoryItemCarried(c, item) && (!raw.reqAttune || item.instance.attunement.active);
+}
+function itemKey(item) {
+  return itemVerifiedDefinition(item).variantReference || item.instance.reference.id;
+}
+function itemStrikeOption(item, rule, index, weapon) {
+  const type = rule.types ? damageTypeLabel(rule.types) : weapon.type || "", id = `item:${item.id}:${index}`;
+  const charges = item.instance.charges, notation = rule.dice || rule.choices?.[0][1];
+  const piece = notation || rule.bonus ? { damage: { ...(notation && { notation }), ...(rule.bonus && { bonus: rule.bonus }), type } } : {};
+  const option = { id, label: item.name, ...piece, on: rule.on ?? !rule.note, ...(rule.note && { note: uiText(rule.note) }), ...(rule.attack && { attack: { bonus: rule.attack } }) };
+  if (rule.nat20) Object.assign(option, { criticalOnly: true, on: rule.on ?? true });
+  if (rule.hitCritical) option.hitCritical = true;
+  if (rule.requires !== undefined) option.requires = `item:${item.id}:${rule.requires}`;
+  if (rule.sworn) option.requires = `mode:${swornId(item)}`;
+  if (rule.choices) option.choices = rule.choices.map(([label, notation], i) => ({ value: String(i), label: uiText(label), notation }));
+  if (rule.charges) {
+    if (!charges?.current) return null;
+    const amounts = Array.from({ length: Math.min(rule.charges, charges.current) }, (_, i) => i + 1), count = Number(rule.dice.split("d")[0]), sides = rule.dice.split("d")[1];
+    option.choices = amounts.map((amount) => ({ value: String(amount), label: uiText("attack.item.charges", { count: amount, left: charges.current }), notation: `${count * amount}d${sides}`, cost: { item: { id: item.id, amount } } }));
+    option.on = false;
+  }
+  return option;
+}
+const swornId = (item) => `item:${item.id}:sworn`;
+
+/** Options qu'ajoutent l'arme de la ligne, les objets portés et les munitions magiques : dés à chaque coup, contre une cible, sur un 20 naturel, charges et munitions dépensées. */
+function itemAttackOptions(c, weapon) {
+  const options = [], item = attackItem(c, weapon), melee = !weapon.weapon?.ranged;
+  (item && ITEM_STRIKES[itemKey(item)] || []).forEach((rule, index) => {
+    if (rule.melee && !melee) return;
+    const option = itemStrikeOption(item, rule, index, weapon);
+    if (option) options.push(option);
+  });
+  for (const worn of c.inventory || []) {
+    const rule = itemActive(c, worn) && ITEM_WORN_STRIKES[itemKey(worn)];
+    if (!rule || rule.slot && worn.instance.equippedSlot !== rule.slot) continue;
+    const option = itemStrikeOption(worn, rule, 0, weapon);
+    if (option) options.push(option);
+  }
+  // Munitions +1 à +3 emportées que l'arme tire (flèches, carreaux, billes, aiguilles) : une case par sorte, la munition retirée au jet d'attaque.
+  // L'inventaire garde chaque munition magique en exemplaire de quantité 1 : les exemplaires d'une même référence sont comptés ensemble.
+  const stacks = (weapon.weapon?.ammunition ? c.inventory || [] : []).filter((stack) => {
+    const raw = itemVerifiedDefinition(stack);
+    return Number(raw?.bonusWeapon) > 0 && stack.instance?.ammunition && stack.qty >= 1 && inventoryItemCarried(c, stack) && `${String(raw.baseName).toLowerCase().replaceAll(" ", "-")}s` === weapon.weapon.ammunition;
+  });
+  for (const stack of stacks.filter((entry, index) => stacks.findIndex((other) => other.ref === entry.ref) === index)) {
+    const bonus = Number(itemVerifiedDefinition(stack).bonusWeapon), left = stacks.filter((other) => other.ref === stack.ref).reduce((sum, other) => sum + other.qty, 0);
+    options.push({ id: `item:${stack.ref}:ammo`, label: stack.name, note: uiText("{p0} restant(s)", { p0: left }), attack: { bonus }, damage: { bonus, type: weapon.type || "" }, cost: { ammo: stack.id } });
+  }
+  return options;
+}
+/** Effet d'un critique sans dés que l'arme de la ligne rappelle (Voleuse des neuf vies, Vague), ou "". */
+function itemAttackNote(c, weapon) {
+  const item = attackItem(c, weapon), key = item && ITEM_CRITICAL_NOTES[itemKey(item)];
+  return key ? uiText(key, { name: item.name }) : "";
+}
+/** Seuil de critique fixé par l'arme de la ligne (Épée de Kas : 19), 20 sinon. */
+function itemCritThreshold(c, weapon) {
+  return Number(attackItem(c, weapon) && itemVerifiedDefinition(attackItem(c, weapon)).critThreshold) || 20;
+}
+/**
+ * Sources d'avantage et de désavantage au choix que donnent les objets : ennemi juré de l'Arc du serment (avantage avec l'arc, désavantage avec les autres armes),
+ * Déluge sous le ciel du jour, Armure démoniaque contre un démon. { id, mode, name, text }.
+ */
+function itemRollModes(c, roll) {
+  const attack = roll.kind === "attack", line = attack && roll.weapon || null, modes = [], held = line && attackItem(c, line);
+  for (const item of c.inventory || []) {
+    if (!itemActive(c, item)) continue;
+    const key = itemKey(item);
+    if (key === "item|dmg|oathbow" && line?.weapon?.ranged && held === item) modes.push({ id: swornId(item), mode: "advantage", name: item.name, text: uiText("attack.item.sworn") });
+    if (key === "item|dmg|oathbow" && line && held !== item) modes.push({ id: `item:${item.id}:sworn-other`, mode: "disadvantage", name: item.name, text: uiText("attack.item.swornAlive") });
+    if (key === "item|dmg|whelm" && ["attack", "save", "check", "initiative"].includes(roll.kind)) modes.push({ id: `item:${item.id}:sky`, mode: "disadvantage", name: item.name, text: uiText("attack.item.daySky") });
+    if (key === "item|dmg|demon armor" && attack && item.instance.equippedSlot === "armor") modes.push({ id: `item:${item.id}:demon`, mode: "disadvantage", name: item.name, text: uiText("attack.item.vs.demon") });
+  }
+  return modes;
 }
 
 
@@ -47091,10 +48112,11 @@ function carriedWeightSummary(character, derived) {
 
 // Module : session-undo
 // Les reçus restent dans les snapshots existants ; les journaux d'événements et de dés ne sont jamais inversés.
+// Les cases gardées de la fenêtre de dés (keptRollOptions) sont un réglage de jet : leur enregistrement n'ouvre pas d'opération annulable.
 const _undoCopy = (value) => value === undefined ? undefined : structuredClone(value);
 const _undoEqual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const _undoObject = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
-const _undoExcluded = new Set(["resourceEvents", "spellEvents", "rolls", "rollHistory", "diceHistory"]);
+const _undoExcluded = new Set(["resourceEvents", "spellEvents", "rolls", "rollHistory", "diceHistory", "keptRollOptions"]);
 
 function sessionUndoPatches(before, after) {
   const patches = [];
@@ -48355,6 +49377,7 @@ const iconPaths={
  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/>',zap:'<path d="m13 2-9 12h7l-1 8 10-13h-7Z"/>',
  cloud:'<path d="M7 18a5 5 0 1 1 0-10 7 7 0 0 1 13 3 4 4 0 0 1-1 7Z"/>',
  lock:'<rect x="4" y="10" width="16" height="12" rx="3"/><path d="M7 10V7a5 5 0 0 1 10 0v3m-5 5v3"/>',
+ unlock:'<rect x="4" y="10" width="16" height="12" rx="3"/><path d="M7 10V7a5 5 0 0 1 9.6-2m-4.6 10v3"/>',
  phone:'<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 5h4m-3 14h2"/>',
  note:'<path d="M5 2h10l5 5v15H5Zm10 0v6h5M8 12h9m-9 4h9"/>',
  undo:'<path d="M3 10h12a6 6 0 0 1 0 12M3 10l5-5m-5 5 5 5"/>',
@@ -48377,6 +49400,9 @@ const esc = value => String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'
 //   { source, reroll: [1, 2] } : un dé qui montre une de ces faces est relancé une fois (Chanceux, style Armes à deux mains) ;
 //   { source, floor: 8 } : un dé inférieur compte comme le plancher (Oreille attentive aux mensonges, Adepte élémentaire) ;
 //   { source, best: true } : les dés sont lancés deux fois, le meilleur total est gardé (Attaquant sauvage).
+//   { source, reroll, limit: 2 } : au plus deux dés relancés, les plus bas d'abord (Sort renforcé, Empaleur) ;
+//   { source, triple: true } : un d20 avec l'avantage est lancé trois fois (Précision elfique) ;
+//   { source, explode: true } : un dé au maximum fait lancer un dé de plus, ajouté (Bombardement de sorts).
 // result.notes dit, source nommée, ce qui a été relancé, relevé ou écarté ; une addition peut porter ses propres retouches.
 // request.rolled : dés déjà lancés, repris tels quels sans relance ({ values, keep, notes }). keep désigne le d20 gardé d'un test ou d'une attaque,
 // quel que soit le mode ; notes reprend ce qui avait été dit de ces dés (result.rolledNotes). Voir amendDiceRoll.
@@ -48407,8 +49433,11 @@ function resolveDiceRoll(request, mode = "normal", random = rollDie) {
   const bonus = request.bonus ?? 0, minimum = request.minimum ?? 0, multiplier = request.multiplier ?? 1;
   if (![bonus, minimum, multiplier].every(Number.isFinite) || minimum < 0 || multiplier <= 0) throw new Error(uiText("Modificateur de jet invalide."));
   const adjust = request.adjust || [], rule = (key) => adjust.filter((entry) => entry[key] !== undefined);
-  if (!Array.isArray(adjust) || adjust.some((entry) => !entry?.source?.trim() || [Array.isArray(entry.reroll), Number.isInteger(entry.floor) && entry.floor > 1, entry.best === true].filter(Boolean).length !== 1)
-    || adjust.length && !check && !["damage", "sum"].includes(kind) || check && (rule("best").length || kind !== "check" && rule("floor").length)) throw new Error(uiText("dice.adjust.invalid"));
+  if (!Array.isArray(adjust) || adjust.some((entry) => !entry?.source?.trim() || [Array.isArray(entry.reroll), Number.isInteger(entry.floor) && entry.floor > 1, entry.best === true, entry.triple === true, entry.explode === true].filter(Boolean).length !== 1)
+    || adjust.length && !check && !["damage", "sum"].includes(kind) || check && (rule("best").length || rule("explode").length || kind !== "check" && rule("floor").length) || !check && rule("triple").length) throw new Error(uiText("dice.adjust.invalid"));
+  // Précision elfique : avec l'avantage, un troisième d20 ; le plus haut reste gardé.
+  const [triple] = check && !rolled && mode === "advantage" ? rule("triple") : [];
+  if (triple) count = 3;
   const rollOne = () => {
     const value = random(sides);
     if (!Number.isInteger(value) || value < 1 || value > sides) throw new Error(uiText("Résultat de dé invalide."));
@@ -48420,12 +49449,16 @@ function resolveDiceRoll(request, mode = "normal", random = rollDie) {
   const rollSet = () => {
     const set = Array.from({ length: count }, rollOne);
     for (const entry of rule("reroll")) {
+      // limit : les plus bas d'abord, jusqu'à ce nombre de dés.
+      const most = check ? 1 : entry.limit || Infinity, order = set.map((_, i) => i);
+      if (entry.limit) order.sort((a, b) => set[a] - set[b]);
       let done = 0;
-      set.forEach((value, i) => {
-        if (!entry.reroll.includes(value) || check && done) return;
+      for (const i of order) {
+        const value = set[i];
+        if (!entry.reroll.includes(value) || done >= most) continue;
         set[i] = rollOne(); done++;
         rerolled.set(entry.source, [...(rerolled.get(entry.source) || []), `${value} → ${set[i]}`]);
-      });
+      }
     }
     return set;
   };
@@ -48433,6 +49466,14 @@ function resolveDiceRoll(request, mode = "normal", random = rollDie) {
   const floor = check ? 0 : Math.max(0, ...rule("floor").map((entry) => entry.floor)), counts = (value) => Math.max(floor, value);
   const diceSum = (set) => set.reduce((sum, value) => sum + counts(value), 0);
   let values = rolled ? [...rolled.values] : fixed === null ? rollSet() : [], kept = values.map(() => true);
+  // Un dé au maximum : un dé de plus, ajouté aux autres.
+  const [burst] = rule("explode");
+  if (burst && !rolled && values.includes(sides)) {
+    const value = rollOne();
+    values.push(value); kept.push(true);
+    notes.push(uiText("dice.adjust.explode", { source: burst.source, value }));
+  }
+  if (triple) notes.push(uiText("dice.adjust.triple", { source: triple.source }));
   // Meilleur de deux lancers : les deux séries restent visibles, la moins bonne est écartée.
   const [best] = rule("best");
   if (best && values.length && !rolled) {
@@ -48490,7 +49531,7 @@ function resolveDiceRoll(request, mode = "normal", random = rollDie) {
       if (addition.fixedBonus) {
         if (!Number.isFinite(addition.bonus)) throw new Error(uiText("Bonus invalide."));
         Object.assign(rolled, { total: addition.bonus, bonus: addition.bonus, detail: `${addition.bonus > 0 ? "+" : ""}${addition.bonus}` });
-      }
+      } else if (addition.subtract) Object.assign(rolled, { total: -rolled.total, detail: `−(${rolled.detail})` });
       return { ...rolled, source: addition.source.trim(), type: addition.type || "" };
     });
     const rawBaseTotal = kind === "damage" ? ((fixed ?? keptSum) + bonus) * multiplier : result.total;
@@ -52181,7 +53222,28 @@ function openReceivedEffect(c, { spellId = "", id = "", referenceId = "", name =
   ui.receivedAll = false;
   ui.receivedSelected = !!(saved || spellId || name || affection);
   ui.form = saved ? clone(saved) : { ...(affection ? { affection: true, conditions: [] } : {}), ...(guide?.dice ? { dice: clone(guide.dice) } : {}), id: "", spellId, referenceId: referenceId || spell?.referenceId || "", name: name || spell?.name || (guide?.name ? uiText(guide.name) : ""), description, source: spell ? `${spell.name} (${spell.source.toUpperCase()})` : name, caster: "", duration: spell?.duration || "", target: "", value: 0, level: level ?? spell?.level ?? 0 };
+  // Effet guidé à choisir (Agrandi ou Rapetissé, maladie de Contagion) ou porté par une arme (Arme magique) : la fenêtre le demande.
+  if (guide?.variants && !ui.form.variant) ui.form.variant = Object.keys(guide.variants)[0];
+  if (guide?.weapon && !ui.form.weapon) ui.form.weapon = Object.keys(receivedWeaponChoices(c))[0] || "";
   openModal("received-effect");
+}
+/** Armes de la fiche qu'un effet peut viser : { instanceId: nom de l'objet du sac, sinon de l'arme }. coated : armes tranchantes ou perforantes, et munitions (huile, poison). */
+function receivedWeaponChoices(c, { coated = false } = {}) {
+  const lines = uiDerive(c).attacks.filter((a) => a.weapon && a.instanceId && a.id !== "unarmed" && a.context !== "spell");
+  const fit = coated ? lines.filter((a) => !a.weapon.ammunition && ["tranchants", "perforants"].includes(WEAPONS[a.id]?.type)) : lines;
+  return { ...Object.fromEntries(fit.map((a) => [a.instanceId, c.inventory.find((item) => item.id === a.instanceId)?.name || a.name])), ...(coated && lines.some((a) => a.weapon.ammunition) && { ammunition: uiText("received.effect.ammunition") }) };
+}
+/** Ce que l'effet change aux jets et à la fiche, en mots courts, pour sa ligne dans « États et effets » et l'aperçu d'un objet utilisé. */
+function receivedEffectChanges(c, entry) {
+  const rolls = (list) => RECEIVED_ROLL_ORDER.filter((roll) => list.includes(roll)).map((roll) => uiText(`received.roll.${roll}`).toLocaleLowerCase()).join(", ");
+  const dice = entry.dice && uiText("received.effect.rolls", { amount: `${entry.dice.subtract ? "−" : "+"}${entry.dice.notation}${entry.dice.type ? ` ${damageTypeLabel([entry.dice.type])}` : ""}`, rolls: rolls(entry.dice.rolls) });
+  const weapon = entry.weapon && (entry.weapon === "ammunition" ? uiText("received.effect.ammunition") : c.inventory.find((item) => item.id === entry.weapon)?.name || uiDerive(c).attacks.find((a) => a.instanceId === entry.weapon)?.name);
+  return [
+    ...Object.entries(entry.abilities || {}).map(([key, score]) => uiText("received.effect.ability", { ability: uiAbilities[key].name, score })),
+    dice, entry.bonus && uiText("received.effect.rolls", { amount: signed(entry.bonus.value), rolls: rolls(entry.bonus.rolls) }),
+    ...(entry.modes || []).map((mode) => uiText("received.effect.rolls", { amount: uiText(mode.value === "advantage" ? "Avantage" : "Désavantage"), rolls: `${rolls(mode.rolls)}${mode.abilities ? ` (${mode.abilities.map((key) => uiAbilities[key].short).join(", ")})` : ""}` })),
+    weapon && uiText("received.effect.weapon", { name: weapon }), entry.strike && uiText("attack.spell.nextHit"), (entry.ends || RECEIVED_GUIDES[entry.spellId]?.ends) && uiText("received.effect.ends"),
+  ].filter(Boolean);
 }
 const RECEIVED_ROLL_ORDER = ["attack", "damage", "check", "save"];
 function receivedPresetLabel(c, preset) {
@@ -52219,7 +53281,7 @@ function receivedCounterModal(c) {
 function renderReceivedEffects(c, compact = false) {
   const active = new Set(activeReceivedEffects(c).map((entry) => entry.id));
   if (compact && !(c.receivedEffects || []).length) return "";
-  return `<div class="received-effect-list ${compact ? "" : "section-gap"}">${compact ? "" : `<div class="panel-head"><h3>${uiText("Effets reçus")}</h3><div>${button(uiText("Ajouter un effet"), "received-add", "", "small-btn")}${button(uiText("Ajouter une affection"), "affection-add", "", "small-btn ghost")}</div></div>`}${(c.receivedEffects || []).map((entry) => `<div class="summary-row"><div><strong>${esc(entry.name)}</strong><small class="muted">${esc([entry.source, entry.caster, entry.duration, ...(entry.conditions || []), entry.target ? `${RECEIVED_TARGETS[entry.target]} : ${signed(entry.value)}` : "", entry.dice && `+${entry.dice.notation}`].filter(Boolean).join(" · "))}${active.has(entry.id) ? "" : uiText(" · même effet, contribution non cumulée")}</small></div>${button(uiText("Détail / corriger"), "received-edit", `data-id="${esc(entry.id)}"`, "small-btn ghost")}</div>`).join("")}</div>`;
+  return `<div class="received-effect-list ${compact ? "" : "section-gap"}">${compact ? "" : `<div class="panel-head"><h3>${uiText("Effets reçus")}</h3><div>${button(uiText("Ajouter un effet"), "received-add", "", "small-btn")}${button(uiText("Ajouter une affection"), "affection-add", "", "small-btn ghost")}</div></div>`}${(c.receivedEffects || []).map((entry) => `<div class="summary-row"><div><strong>${esc(entry.name)}</strong><small class="muted">${esc([entry.source, entry.caster, entry.duration, ...(entry.conditions || []), entry.target ? `${RECEIVED_TARGETS[entry.target]} : ${signed(entry.value)}` : "", ...receivedEffectChanges(c, entry)].filter(Boolean).join(" · "))}${active.has(entry.id) ? "" : uiText(" · même effet, contribution non cumulée")}</small></div>${button(uiText("Détail / corriger"), "received-edit", `data-id="${esc(entry.id)}"`, "small-btn ghost")}</div>`).join("")}</div>`;
 }
 function receivedEffectModal(c) {
   const f = ui.form, guide = RECEIVED_GUIDES[f.spellId], selected = ui.receivedSelected, query = librarySearchText(ui.receivedQuery || "").trim();
@@ -52234,10 +53296,12 @@ function receivedEffectModal(c) {
       // Guides qui touchent les sauvegardes (toutes, du même bonus) ou une compétence.
       if (before.saves.str !== after.saves.str) changes.push(`${uiText("Jets de sauvegarde")} : ${signed(after.saves.str - before.saves.str)}`);
       changes.push(...Object.keys(before.skills).filter((key) => before.skills[key] !== after.skills[key]).map((key) => `${esc(uiSkills[key][0])} : ${signed(before.skills[key])} → ${signed(after.skills[key])}`));
+      // Dés, bonus et avantages proposés dans la fenêtre de dés, caractéristique fixée, arme visée.
+      changes.push(...receivedEffectChanges(c, receivedGuideFields(f)).map(esc));
       if (changes.length) preview = `<div role="status" class="notice">${changes.join(" · ")}</div>`;
     } catch { preview = ("<p role=\"alert\">" + uiText("Renseigne un nom et des valeurs valides.") + "</p>"); }
   }
-  return modalShell(f.affection ? (f.id ? uiText("Corriger une affection") : uiText("Ajouter une affection")) : (f.id ? uiText("Corriger un effet reçu") : uiText("Ajouter un effet")), search + (selected ? `${field(uiText("Nom"), "form.name", f.name, "text", "", 'maxlength="300"')}${f.affection ? `${field(uiText("Source de l’affection"), "form.source", f.source, "text", "", 'maxlength="300"')}<h3>${uiText("États associés")}</h3>${conditionSelector(f.conditions || [], "toggle-affection-condition")}${(f.conditions || []).map((name) => `<details class="feature-item"><summary>${esc(uiSystemText(name))}</summary><div class="detail-copy">${esc(uiSystemText(CONDITIONS[name]))}</div></details>`).join("")}` : ""}${guide ? `<p><strong>${esc(guide.summary)}</strong></p>` : ""}${guide?.level ? field(uiText("Niveau de lancement"), "form.level", f.level, "number", "", `min="${guide.level}" max="9" step="1"`) : ""}${!guide ? `<div class="form-grid">${selectField(uiText("Bonus ou malus"), "form.target", f.target, { "": uiText("Description seulement"), ...RECEIVED_TARGETS })}${f.target ? field("Valeur", "form.value", f.value, "number", "", 'min="-10000" max="10000" step="0.5"') : ""}</div>` : ""}${preview}${f.spellId && uiSpellById(c, f.spellId) ? `<details><summary>${uiText("Règle de référence")}</summary>${renderSpellDescription(uiSpellById(c, f.spellId))}</details>` : ""}${field(f.affection ? uiText("Évolution et guérison (notes)") : uiText("Notes ou description (facultatif)"), "form.description", f.description, "textarea", "", 'maxlength="6000" rows="4"')}<details data-detail="received-source"><summary>${f.affection ? uiText("Durée (note)") : uiText("Source et durée (facultatif)")}</summary>${!f.affection ? `${field("Source", "form.source", f.source, "text", "", 'maxlength="300"')}${field(uiText("Nom du lanceur"), "form.caster", f.caster, "text", "", 'maxlength="300"')}` : ""}${field(uiText("Durée (note)"), "form.duration", f.duration, "text", "", 'maxlength="300"')}</details>${sourceLink(f.name, f.referenceId)}` : ""), (selected ? button(uiText("Annuler"), "close-modal") : "") + (f.id ? button(uiText("Retirer cet effet"), "received-remove", `data-id="${esc(f.id)}"`, "danger") : "") + (selected ? button(f.id ? uiText("Enregistrer") : uiText("Appliquer"), "received-save", "", "primary") : ""), false, "", "carnet-effects-modal");
+  return modalShell(f.affection ? (f.id ? uiText("Corriger une affection") : uiText("Ajouter une affection")) : (f.id ? uiText("Corriger un effet reçu") : uiText("Ajouter un effet")), search + (selected ? `${field(uiText("Nom"), "form.name", f.name, "text", "", 'maxlength="300"')}${f.affection ? `${field(uiText("Source de l’affection"), "form.source", f.source, "text", "", 'maxlength="300"')}<h3>${uiText("États associés")}</h3>${conditionSelector(f.conditions || [], "toggle-affection-condition")}${(f.conditions || []).map((name) => `<details class="feature-item"><summary>${esc(uiSystemText(name))}</summary><div class="detail-copy">${esc(uiSystemText(CONDITIONS[name]))}</div></details>`).join("")}` : ""}${guide ? `<p><strong>${esc(guide.summary)}</strong></p>` : ""}${guide?.variants ? selectField(uiText("received.field.variant"), "form.variant", f.variant, Object.fromEntries(Object.entries(guide.variants).map(([key, variant]) => [key, uiSystemText(variant.label)]))) : ""}${guide?.weapon ? selectField(uiText("received.field.weapon"), "form.weapon", f.weapon, receivedWeaponChoices(c)) : ""}${guide?.level ? field(uiText("Niveau de lancement"), "form.level", f.level, "number", "", `min="${guide.level}" max="9" step="1"`) : ""}${!guide ? `<div class="form-grid">${selectField(uiText("Bonus ou malus"), "form.target", f.target, { "": uiText("Description seulement"), ...RECEIVED_TARGETS })}${f.target ? field("Valeur", "form.value", f.value, "number", "", 'min="-10000" max="10000" step="0.5"') : ""}</div>` : ""}${preview}${f.spellId && uiSpellById(c, f.spellId) ? `<details><summary>${uiText("Règle de référence")}</summary>${renderSpellDescription(uiSpellById(c, f.spellId))}</details>` : ""}${field(f.affection ? uiText("Évolution et guérison (notes)") : uiText("Notes ou description (facultatif)"), "form.description", f.description, "textarea", "", 'maxlength="6000" rows="4"')}<details data-detail="received-source"><summary>${f.affection ? uiText("Durée (note)") : uiText("Source et durée (facultatif)")}</summary>${!f.affection ? `${field("Source", "form.source", f.source, "text", "", 'maxlength="300"')}${field(uiText("Nom du lanceur"), "form.caster", f.caster, "text", "", 'maxlength="300"')}` : ""}${field(uiText("Durée (note)"), "form.duration", f.duration, "text", "", 'maxlength="300"')}</details>${sourceLink(f.name, f.referenceId)}` : ""), (selected ? button(uiText("Annuler"), "close-modal") : "") + (f.id ? button(uiText("Retirer cet effet"), "received-remove", `data-id="${esc(f.id)}"`, "danger") : "") + (selected ? button(f.id ? uiText("Enregistrer") : uiText("Appliquer"), "received-save", "", "primary") : ""), false, "", "carnet-effects-modal");
 }
 function conditionAnnotationSummary(c) {
   return Object.entries(conditionAnnotationsOf(c)).map(([key, entry]) => {
@@ -54551,6 +55615,10 @@ function inventoryBonusSummary(bonus) {
     ...Object.entries(bonus.ability || {}).map(([ability, value]) => uiText("{p0} {p1} si ton score est inférieur", { p0: uiAbilities[ability].short, p1: value })),
     bonus.ac && uiText("CA +{p0}", { p0: bonus.ac }), bonus.save && uiText("Sauvegardes +{p0}", { p0: bonus.save }),
     bonus.speedFloor && uiText("units.speedFloor", { value: uiMeters(bonus.speedFloor) }),
+    ...Object.entries(bonus.raise || {}).map(([ability, raise]) => uiText("items.bonus.raise", { ability: uiAbilities[ability].short, amount: raise.amount, max: raise.max })),
+    bonus.proficiency && uiText("items.bonus.proficiency", { amount: bonus.proficiency }),
+    bonus.bows && uiText("items.bonus.bows", { amount: bonus.weaponDamage }),
+    bonus.unarmed && uiText("items.bonus.unarmed", { amount: bonus.unarmed }),
     bonus.spellDC && uiText("DD et attaque des sorts +{p0}{p1}", { p0: bonus.spellDC, p1: bonus.spellClass ? ` (${uiClasses[bonus.spellClass].name})` : " (toutes tes classes)" }),
   ].filter(Boolean).join(" · ");
 }
@@ -54603,7 +55671,10 @@ function renderInventoryUseActions(c, item) {
   // Trousse de soins : « Consommer 1 » dépense une utilisation ; vide, le bouton reste grisé et la ligne le dit.
   const use = kit ? button(uiText("Consommer 1"), "use-inventory-item", `data-id="${esc(item.id)}" ${kit.current ? "" : "disabled"}`, "small-btn") + (kit.current ? "" : `<span class="small muted" data-kit-empty>${uiText("items.kit.empty")}</span>`)
     : state?.charges ? button(uiText("Utiliser des charges"), "use-inventory-item", `data-id="${esc(item.id)}"`, "small-btn") : button(uiText("Consommer 1"), "use-inventory-item", `data-id="${esc(item.id)}"`, "small-btn");
-  return `${state?.destroyed ? ("<strong>" + uiText("Objet détruit") + "</strong>") : ""}${receipt ? `<p class="small">${uiText("Dernière utilisation : {p0} {p1}. {p2}{p3}", { p0: receipt.amount, p1: kit ? uiText("items.kit.use") : state.charges ? "charge(s)" : uiText("unité"), p2: esc(receipt.result), p3: receipt.decision ? ` · ${esc({ pending: uiText("Dernière charge à résoudre"), maintain: uiText("Objet conservé"), destroy: uiText("Objet détruit") }[receipt.decision])}` : "" })}</p>` : ""}${recovery ? `<p class="small">${uiText("Recharge {p0} : {p1}. {p2}", { p0: recovery.event === "dawn" ? uiText("à l’aube") : uiText("déclarée"), p1: recovery.amount, p2: esc(recovery.result) })}</p>` : ""}${!state?.destroyed && inventoryItemCarried(c, item) && item.qty > 0 && (kit || inventoryConsumableKind(item) || state?.charges?.current > 0) ? use : ""}${receipt && receipt.decision !== "pending" ? button(uiText("Préciser le résultat"), "declare-item-result", `data-id="${esc(item.id)}"`, "small-btn ghost") : ""}${receipt?.decision === "pending" ? button(uiText("Résoudre la dernière charge"), "resolve-last-charge", `data-id="${esc(item.id)}"`, "small-btn") : ""}`;
+  // Objet qu'on allume (Épée ardente, cierge) : son effet entre dans « États et effets » et en sort par le même bouton. Harmonisation exigée par sa règle.
+  const toggle = inventoryItemEffectRule(item)?.toggle, lit = toggle && (c.receivedEffects || []).some((entry) => entry.item === item.id);
+  const switcher = toggle && (lit || !state.destroyed && inventoryItemCarried(c, item) && item.qty === 1 && (!state.attunement.required || state.attunement.active)) ? button(uiText(`received.toggle.${toggle}.${lit ? "off" : "on"}`), "toggle-item-effect", `data-id="${esc(item.id)}" aria-pressed="${!!lit}"`, "small-btn") : "";
+  return `${switcher}${state?.destroyed ? ("<strong>" + uiText("Objet détruit") + "</strong>") : ""}${receipt ? `<p class="small">${uiText("Dernière utilisation : {p0} {p1}. {p2}{p3}", { p0: receipt.amount, p1: kit ? uiText("items.kit.use") : state.charges ? "charge(s)" : uiText("unité"), p2: esc(receipt.result), p3: receipt.decision ? ` · ${esc({ pending: uiText("Dernière charge à résoudre"), maintain: uiText("Objet conservé"), destroy: uiText("Objet détruit") }[receipt.decision])}` : "" })}</p>` : ""}${recovery ? `<p class="small">${uiText("Recharge {p0} : {p1}. {p2}", { p0: recovery.event === "dawn" ? uiText("à l’aube") : uiText("déclarée"), p1: recovery.amount, p2: esc(recovery.result) })}</p>` : ""}${!state?.destroyed && inventoryItemCarried(c, item) && item.qty > 0 && (kit || inventoryConsumableKind(item) || state?.charges?.current > 0) ? use : ""}${receipt && receipt.decision !== "pending" ? button(uiText("Préciser le résultat"), "declare-item-result", `data-id="${esc(item.id)}"`, "small-btn ghost") : ""}${receipt?.decision === "pending" ? button(uiText("Résoudre la dernière charge"), "resolve-last-charge", `data-id="${esc(item.id)}"`, "small-btn") : ""}`;
 }
 function inventoryUseRule(item) {
   const infusion = activeCharacter()?.infusions?.find((row) => row.active && row.id === item.instance?.infusionId);
@@ -54630,6 +55701,13 @@ function inventoryRollContext(c) {
 function inventoryUseFormula(c, item) {
   const roll = inventoryUseRoll(item, inventoryRollContext(c));
   return roll ? diceFormula({ notation: `${roll.count}d${roll.sides}`, bonus: roll.bonus }) : "";
+}
+/** Effet qu'un objet bu ou appliqué déclare dans « États et effets », pour sa fenêtre d'utilisation et sa revue ; "" sans effet. */
+function inventoryUseEffectText(c, item, weapon) {
+  const rule = inventoryItemEffectRule(item);
+  if (!rule?.use) return "";
+  const effect = inventoryItemEffect(item, { weapon });
+  return uiText("received.item.effect", { changes: [...(effect.conditions || []).map(uiSystemText), ...receivedEffectChanges(c, effect), ...(rule.tempHp ? [uiText("received.item.tempHp", { value: rule.tempHp })] : [])].join(" · ") });
 }
 function inventoryChargesLabel(item) {
   return uiText(inventoryHealersKit(item) ? "items.kit.uses" : "items.charges");
@@ -54868,13 +55946,19 @@ async function performInventory(action, el, c, data, d) {
     case "declare-item-result":
     case "use-inventory-item":
     case "resolve-last-charge":
-      ui.form = { itemId: data.id, amount: 1, result: action === "declare-item-result" ? c.inventory.find((entry) => entry.id === data.id)?.instance.lastUse.result || "" : "", decision: "" }; openModal(action); void loadInventoryUseRule(c.inventory.find((entry) => entry.id === data.id), ui.form); break;
+      // weapon : arme enduite par une huile ou un poison, choisie dans la fenêtre (la première proposée par défaut).
+      ui.form = { itemId: data.id, amount: 1, result: action === "declare-item-result" ? c.inventory.find((entry) => entry.id === data.id)?.instance.lastUse.result || "" : "", decision: "", weapon: "" }; openModal(action); void loadInventoryUseRule(c.inventory.find((entry) => entry.id === data.id), ui.form); break;
     case "review-use-inventory-item": {
       const item = c.inventory.find((entry) => entry.id === ui.form.itemId), roll = inventoryUseRoll(item, inventoryRollContext(c)), formula = inventoryUseFormula(c, item);
       // Potion à dés : sa formule tient lieu de résultat déclaré, puis le jet s'ouvre après la validation, comme pour une ressource.
       const result = roll ? uiText("items.use.heal", { dice: formula }) : ui.form.result;
-      const next = useInventoryItem(c, item.id, { amount: Number(ui.form.amount), result });
-      openReview(next, uiText("Utiliser : {p0}", { p0: item.name }), uiText("{p0} de cet exemplaire uniquement. {p1}{p2}", { p0: uiText(inventoryHealersKit(item) && item.instance.charges ? "items.kit.usesShort" : item.instance.charges ? "Charges" : "Stock"), p1: roll ? uiText("Après validation, lance {p0}.", { p0: formula }) : ui.form.result, p2: next.inventory.find((entry) => entry.id === item.id).instance.lastUse.decision === "pending" ? uiText(" Dernière charge : résous sa conséquence depuis l’objet dans le sac.") : "" }), "session", roll ? { spendRoll: { ...roll, name: item.name } } : {}); break;
+      // Potion bue, huile ou poison appliqué : son effet entre dans « États et effets » avec la dépense.
+      const next = useInventoryItemEffect(c, item.id, { amount: Number(ui.form.amount), result, weapon: ui.form.weapon }), effect = inventoryItemEffectRule(item)?.use ? inventoryUseEffectText(c, item, ui.form.weapon) : "";
+      openReview(next, uiText("Utiliser : {p0}", { p0: item.name }), `${uiText("{p0} de cet exemplaire uniquement. {p1}{p2}", { p0: uiText(inventoryHealersKit(item) && item.instance.charges ? "items.kit.usesShort" : item.instance.charges ? "Charges" : "Stock"), p1: roll ? uiText("Après validation, lance {p0}.", { p0: formula }) : ui.form.result, p2: next.inventory.find((entry) => entry.id === item.id).instance.lastUse.decision === "pending" ? uiText(" Dernière charge : résous sa conséquence depuis l’objet dans le sac.") : "" })}${effect ? ` ${effect}` : ""}`, "session", roll ? { spendRoll: { ...roll, name: item.name } } : {}); break;
+    }
+    case "toggle-item-effect": {
+      const item = c.inventory.find((entry) => entry.id === data.id), lit = (c.receivedEffects || []).some((entry) => entry.item === data.id);
+      await saveCharacter(toggleInventoryItemEffect(c, data.id), uiText(lit ? "received.removed" : "received.saved", { name: item.name }), "session", c); break;
     }
     case "review-item-result":
       openReview(declareInventoryUseResult(c, ui.form.itemId, ui.form.result), "Résultat déclaré", ui.form.result || "Résultat effacé.", "session"); break;
@@ -54978,7 +56062,11 @@ function renderInventoryModals(c, d, cancel) {
     const item = c.inventory.find((entry) => entry.id === ui.form.itemId), last = ui.modal === "resolve-last-charge", resultOnly = ui.modal === "declare-item-result";
     // Potion à dés : l'application lance les soins après la validation, le résultat n'est plus demandé.
     const useRoll = ui.modal === "use-inventory-item" && inventoryUseFormula(c, item);
-    return modalShell(last ? uiText("Dernière charge") : item.name, `${resultOnly ? "" : last ? ("<p>" + uiText("Dernière charge dépensée : applique sa conséquence avec le MJ et confirme le devenir de cet exemplaire.") + "</p>") + selectField(uiText("Décision de la table"), "form.decision", ui.form.decision, { "": uiText("Choisis une décision"), maintain: uiText("Conserver l’objet"), destroy: uiText("Détruire l’objet") }) : `<p>${uiText("Après utilisation : ")}<span data-item-use-preview>${inventoryChargePreview(item, ui.form.amount)}</span>${uiText(". Les emplacements personnels sont conservés.")}</p>${item.instance.charges && !inventoryHealersKit(item) ? field(uiText("Charges à dépenser"), "form.amount", ui.form.amount, "number", "", `min="1" max="${item.instance.charges.current}" step="1"`) : ""}`}${useRoll ? `<p class="small" data-item-use-roll>${uiText("Après validation, lance {p0}.", { p0: useRoll })}</p>` : field(uiText("Résultat déclaré ou jet (facultatif)"), "form.result", ui.form.result, "textarea", uiText("Les soins et autres conséquences sont déclarés séparément sur la fiche."), 'maxlength="1000"')}${inventoryUseRule(item)}`, cancel + button(uiText("Voir les conséquences"), resultOnly ? "review-item-result" : last ? "review-last-charge" : "review-use-inventory-item", "", "primary"));
+    // Huile ou poison : l'arme enduite se choisit ici ; l'effet déclaré est montré avant la revue.
+    const effectRule = ui.modal === "use-inventory-item" ? inventoryItemEffectRule(item) : null, coated = effectRule?.use && effectRule.weapon === "choose" ? receivedWeaponChoices(c, { coated: true }) : null;
+    if (coated && !Object.hasOwn(coated, ui.form.weapon)) ui.form.weapon = Object.keys(coated)[0] || "";
+    const effect = effectRule?.use ? `${coated ? Object.keys(coated).length ? selectField(uiText("received.field.weapon"), "form.weapon", ui.form.weapon, coated) : notice(uiText("received.item.chooseWeapon")) : ""}<p class="small" data-item-use-effect>${esc(inventoryUseEffectText(c, item, ui.form.weapon))}</p>` : "";
+    return modalShell(last ? uiText("Dernière charge") : item.name, `${effect}${resultOnly ? "" : last ?("<p>" + uiText("Dernière charge dépensée : applique sa conséquence avec le MJ et confirme le devenir de cet exemplaire.") + "</p>") + selectField(uiText("Décision de la table"), "form.decision", ui.form.decision, { "": uiText("Choisis une décision"), maintain: uiText("Conserver l’objet"), destroy: uiText("Détruire l’objet") }) : `<p>${uiText("Après utilisation : ")}<span data-item-use-preview>${inventoryChargePreview(item, ui.form.amount)}</span>${uiText(". Les emplacements personnels sont conservés.")}</p>${item.instance.charges && !inventoryHealersKit(item) ? field(uiText("Charges à dépenser"), "form.amount", ui.form.amount, "number", "", `min="1" max="${item.instance.charges.current}" step="1"`) : ""}`}${useRoll ? `<p class="small" data-item-use-roll>${uiText("Après validation, lance {p0}.", { p0: useRoll })}</p>` : field(uiText("Résultat déclaré ou jet (facultatif)"), "form.result", ui.form.result, "textarea", uiText("Les soins et autres conséquences sont déclarés séparément sur la fiche."), 'maxlength="1000"')}${inventoryUseRule(item)}`, cancel + button(uiText("Voir les conséquences"), resultOnly ? "review-item-result" : last ? "review-last-charge" : "review-use-inventory-item", "", "primary"));
   }
   if (["item-spell-stock", "item-spell-deposit", "item-spell-remove", "item-slot-recovery"].includes(ui.modal)) return renderItemSpellModal(c, cancel);
   if (ui.modal === "equipment") {
@@ -55285,6 +56373,14 @@ function castMaterialText(event) {
 function castOptions(c, d, s) {
   return spellCastOptions(c, s, d);
 }
+// Choix du lancement (arme touchée, forme) : celui de la fenêtre, sinon le premier proposé.
+function castChoiceValues(c, cast) {
+  return Object.fromEntries(Object.entries(spellCastChoices(c, cast.id)).filter(([, values]) => values.length).map(([key, values]) => [key, values.some(([value]) => value === cast[key]) ? cast[key] : values[0][0]]));
+}
+function renderCastChoices(c, cast) {
+  const chosen = castChoiceValues(c, cast);
+  return Object.entries(spellCastChoices(c, cast.id)).filter(([key]) => key in chosen).map(([key, values]) => selectField(uiText(`spell.cast.${key}`), `ui.cast.${key}`, chosen[key], Object.fromEntries(values))).join("");
+}
 // Dés du sort déclaré, au niveau réellement lancé : emplacement, ou niveau du personnage pour un sort mineur.
 function castDiceModel(c, d, event) {
   return event ? spellDamageRolls(event.spellId, { slotLevel: event.effectiveLevel, characterLevel: levelOf(c), modifier: event.ability ? d.mods[event.ability] : 0, keep: spellProfileRolls(event.spellId) }) : null;
@@ -55429,7 +56525,7 @@ async function performSpells(action, el, c, data, d) {
         mode = ui.cast.mode;
       if (ui.modal !== "cast" || !mode || !s) break;
       const option = castOptions(c, d, s).details[mode];
-      let next = castSpell(c, s.id, mode, { acquisitionId: option?.acquisitionId, material: ui.cast.material, componentTracking: componentTracking(), ...(SPELL_STOCKS[s.id]?.ask && { stock: Number(ui.cast.stock ?? SPELL_STOCKS[s.id].ask) }) });
+      let next = castSpell(c, s.id, mode, { acquisitionId: option?.acquisitionId, material: ui.cast.material, componentTracking: componentTracking(), choices: castChoiceValues(c, ui.cast), ...(SPELL_STOCKS[s.id]?.ask && { stock: Number(ui.cast.stock ?? SPELL_STOCKS[s.id].ask) }) });
       const event = next.state.spellEvents.at(-1);
       // Concentration, Protection arcanique, récupération : cochées dans la fenêtre, validées avec le lancement.
       for (const action of spellPersonalActions(next, event.id)) if (ui.cast.actions[action.id] ?? true) next = applySpellPersonalAction(next, event.id, action.id);
@@ -55452,7 +56548,7 @@ async function performSpells(action, el, c, data, d) {
       // Jet au lancement (Couleurs dansantes, Sommeil, Arrêt du temps…) : la fenêtre de dés suit « Lancer ».
       else if (SPELL_ROLLS[s.id]?.cast) await openSpellRoll(after, s, event);
       // Un sort de portée personnelle (Bouclier) agit sur son lanceur : pas de question « allié ou moi », l’effet se pose sur la fiche.
-      else if (RECEIVED_GUIDES[s.id] || RECEIVED_PRESETS[s.id]) { if (/^personnelle/i.test(spellById(c, s.id)?.range || "")) await perform("received-cast", el); else openModal("cast-target"); }
+      else if (RECEIVED_GUIDES[s.id] && !RECEIVED_GUIDES[s.id].hostile || RECEIVED_PRESETS[s.id]) { if (/^personnelle/i.test(spellById(c, s.id)?.range || "")) await perform("received-cast", el); else openModal("cast-target"); }
       else closeModal();
       toast(message);
       break;
@@ -55576,7 +56672,7 @@ function renderSpellModals(c, d, cancel) {
     ].filter(Boolean);
     return modalShell(
       s.name,
-      `${Object.keys(modes).length ? selectField(uiText("Comment le lancer ?"), "ui.cast.mode", cast.mode, modes) : notice(blocked ? esc(blocked) : uiText("Aucun emplacement ou usage disponible. Prépare le sort, récupère une ressource ou fais un repos."), "warning")}${effect || ability ? `<p class="small cast-effect">${[effect && esc(effect), ability && uiText("{p0} : DD {p1}, attaque de sort {p2}.", { p0: uiAbilities[ability].name, p1: casting.dc ?? 8 + d.prof + d.mods[ability], p2: signed(casting.spellAttack ?? d.prof + d.mods[ability]) })].filter(Boolean).join("<br>")}</p>` : ""}${cast.mode && SPELL_STOCKS[s.id]?.ask ? selectField(uiText("stock.ask.stones"), "ui.cast.stock", String(cast.stock ?? SPELL_STOCKS[s.id].ask), Object.fromEntries(Array.from({ length: SPELL_STOCKS[s.id].ask }, (_, index) => [String(index + 1), String(index + 1)]))) : ""}${checks || adds ? `<div class="cast-actions">${checks}${adds}</div>` : ""}${ends}${renderCastMaterial(c, s, cast)}${runeReserve ? `<p class="small" data-runes="cast-cost">${uiText("{p0} : {p1} → {p2} dépensée(s).", { p0: esc(runeReserve.name), p1: runeReserve.spent, p2: runeReserve.spent + 1 })}</p>` : ""}${block ? notice(uiText("L’équipement non maîtrisé ou ton état actuel empêche normalement de lancer un sort."), "error") : ""}${overrides.length ? `<div class="spell-data">${overrides.map(([label, value]) => `<div><b>${label}</b>${value}</div>`).join("")}</div>` : ""}${renderSpellDescription(s, c, { omitFacts })}`,
+      `${Object.keys(modes).length ? selectField(uiText("Comment le lancer ?"), "ui.cast.mode", cast.mode, modes) : notice(blocked ? esc(blocked) : uiText("Aucun emplacement ou usage disponible. Prépare le sort, récupère une ressource ou fais un repos."), "warning")}${effect || ability ? `<p class="small cast-effect">${[effect && esc(effect), ability && uiText("{p0} : DD {p1}, attaque de sort {p2}.", { p0: uiAbilities[ability].name, p1: casting.dc ?? 8 + d.prof + d.mods[ability], p2: signed(casting.spellAttack ?? d.prof + d.mods[ability]) })].filter(Boolean).join("<br>")}</p>` : ""}${cast.mode && SPELL_STOCKS[s.id]?.ask ? selectField(uiText("stock.ask.stones"), "ui.cast.stock", String(cast.stock ?? SPELL_STOCKS[s.id].ask), Object.fromEntries(Array.from({ length: SPELL_STOCKS[s.id].ask }, (_, index) => [String(index + 1), String(index + 1)]))) : ""}${cast.mode ? renderCastChoices(c, cast) : ""}${checks || adds ? `<div class="cast-actions">${checks}${adds}</div>` : ""}${ends}${renderCastMaterial(c, s, cast)}${runeReserve ? `<p class="small" data-runes="cast-cost">${uiText("{p0} : {p1} → {p2} dépensée(s).", { p0: esc(runeReserve.name), p1: runeReserve.spent, p2: runeReserve.spent + 1 })}</p>` : ""}${block ? notice(uiText("L’équipement non maîtrisé ou ton état actuel empêche normalement de lancer un sort."), "error") : ""}${overrides.length ? `<div class="spell-data">${overrides.map(([label, value]) => `<div><b>${label}</b>${value}</div>`).join("")}</div>` : ""}${renderSpellDescription(s, c, { omitFacts })}`,
       cancel + button(uiText("Lancer"), "confirm-cast", !Object.keys(modes).length || block ? "disabled" : "", "primary"),
     );
   }
@@ -57110,9 +58206,13 @@ function rollCheck(name, bonus, kind = "check", options = {}) {
 function rollFailureFollow(r) {
   return r?.failRoll && r.dc && r.result && !r.result.groups && !thresholdPassed({ atLeast: r.dc.value }, r.result.total) ? r.failRoll : null;
 }
-/** État de départ des options d'un jet ; kept : options gardées cochées depuis l'attaque précédente d'un enchaînement. */
-function rollOptionState(optionList, kept = []) {
-  return { on: Object.fromEntries(optionList.map((option) => [option.id, !!option.on || kept.includes(option.id)])), choice: {}, spent: {} };
+/**
+ * État de départ des options d'un jet ; kept : options gardées cochées depuis l'attaque précédente d'un enchaînement ;
+ * photo : cases gardées par le cadenas (state.keptRollOptions), reprises avec leur choix (keptRollOptions).
+ */
+function rollOptionState(optionList, kept = [], photo = null) {
+  const resumed = keptRollOptions(optionList, photo);
+  return { on: Object.fromEntries(optionList.map((option) => [option.id, !!option.on || kept.includes(option.id) || resumed.on.includes(option.id)])), choice: resumed.choice, spent: {} };
 }
 function rollHasModes(r) {
   return ["check", "attack", "death"].includes(r.request.kind);
@@ -57172,7 +58272,9 @@ function rollSettingsLocked(r) {
  */
 function prepareDiceDialog(name, request, options = {}, inPlace = false) {
   const listed = options.read ? fromSheet(options.read) : { optionList: [] };
-  ui.roll = { name, request, phase: "ready", result: null, rolledRequest: null, lucky: null, history: [], panel: null, extras: { support: "", bonus: 0 }, ...listed, optionState: rollOptionState(listed.optionList, options.chainOn), ...options, baseNote: options.note || "" };
+  // Cases reprises du cadenas : celles que le jet n'aurait pas cochées d'office, nommées par l'indicateur (rollKeptOptions).
+  const photo = activeCharacter()?.state.keptRollOptions || null, keptIds = keptRollOptions(listed.optionList, photo).on.filter((id) => !listed.optionList.find((option) => option.id === id).on);
+  ui.roll = { name, request, phase: "ready", result: null, rolledRequest: null, lucky: null, history: [], panel: null, extras: { support: "", bonus: 0 }, ...listed, optionState: rollOptionState(listed.optionList, options.chainOn, photo), keptIds, ...options, baseNote: options.note || "" };
   if (ui.roll.sequence) ui.roll.request = sequenceRequest(ui.roll);
   ui.roll.portent = portentRollState(ui.roll);
   ui.rollMode = sheetRollMode(ui.roll).mode;
@@ -57187,7 +58289,7 @@ function diceRequestFormula(request) {
     notation = request.notation || (d20 && request.rolled ? String(request.rolled.values[0]) : `${count}d${d20 ? 20 : request.sides || 6}`),
     // Avantage et désavantage : deux d20 roulent, mais un seul compte.
     pair = d20 && ui.rollMode !== "normal" ? uiText(" · {p0} de 2 dés", { p0: ui.rollMode === "advantage" ? "meilleur" : "moins bon" }) : "";
-  const added = (request.additions || []).map((part) => part.fixedBonus ? signed(part.bonus) : `+ ${part.count ?? 1}d${part.sides}${part.bonus ? signed(part.bonus) : ""}`).join(" ");
+  const added = (request.additions || []).map((part) => part.fixedBonus ? signed(part.bonus) : `${part.subtract ? "−" : "+"} ${part.count ?? 1}d${part.sides}${part.bonus ? signed(part.bonus) : ""}`).join(" ");
   return `${notation}${request.bonus ? signed(request.bonus) : ""}${request.kind === "hit-dice" ? " par dé" : ""}${added ? ` ${added}` : ""}${request.multiplier && request.multiplier !== 1 ? uiText(" × {p0}", { p0: request.multiplier }) : ""}${pair}`;
 }
 function currentDiceRequest(r) {
@@ -57308,7 +58410,7 @@ function startAttackSequence(build, step = "attack", options = {}, inPlace = fal
     const current = build(c, d), aid = attacking && current && !current.creature ? creationHelpSource(c) : null;
     const modeSources = [...(attacking && current?.roll ? rollModeSources(c, current.roll, d) : []), ...(aid ? [aid] : [])];
     // Ce que le personnage a reçu (Bénédiction, Inspiration) ne s'ajoute pas au jet d'une créature.
-    return { modeSources, optionList: [...modeOptions(modeSources), ...(current?.options || []), ...(current?.creature ? [] : receivedRollOptions(c, ["attack", "damage"]))].filter((option) => !options.chainUsed?.includes(option.id)) };
+    return { modeSources, optionList: [...modeOptions(modeSources), ...(current?.options || []), ...(current?.creature ? [] : receivedRollOptions(c, ["attack", "damage"], { weapon: current?.roll?.weapon || null }))].filter((option) => !options.chainUsed?.includes(option.id)) };
   };
   prepareDiceDialog(sequenceTitle(sequence), null, { sequence, read, modeNotes: attacking && profile.roll ? rangedAttackNotes(activeCharacter(), profile.roll) : [], critThreshold: profile.attack?.critThreshold || 20, ...options }, inPlace);
 }
@@ -57338,13 +58440,24 @@ async function spendRollOptions(r) {
   const step = rollStep(r), cost = r.sequence ? r.sequence.profile.cost : r.cost, own = cost ? [{ id: "__profile", label: r.sequence?.profile.name || r.name, cost }] : [];
   // Le jet d'attaque lancé met fin à l'aide en attente, que le joueur ait gardé l'avantage ou non.
   const aid = step === "attack" ? (r.modeSources || []).filter((source) => source.aid).map((source) => ({ id: source.id, label: uiText("creations.pill.help"), cost: { aid: true } })) : [];
-  const costs = [...own, ...aid, ...optionCosts(r.optionList, r.optionState, step, { critical: r.sequence?.verdict === "critical" })].filter((entry) => !r.optionState.spent[entry.id]);
+  // Pièce de dégâts cochée qui porte un sort (Flèche de foudre) : dépensée au premier jet, celui d'attaque compris, que l'attaque touche ou rate.
+  const parts = r.sequence ? r.sequence.profile.parts.flatMap((part, i) => part.cost && r.sequence.parts[i] ? [{ id: `__part:${i}`, label: part.label, cost: part.cost }] : []) : [];
+  // Effet reçu qui finit avec ce jet d'attaque (Invisibilité, Gelure) : retiré de la fiche une fois le dé lancé, le mode du jet déjà fixé.
+  const ends = step === "attack" && r.sequence && !r.sequence.profile.creature ? receivedEndings(activeCharacter(), r.sequence.profile.roll).map((entry) => ({ id: `ends:${entry.id}`, label: entry.name, cost: { received: entry.id } })) : [];
+  const costs = [...own, ...parts, ...aid, ...ends, ...optionCosts(r.optionList, r.optionState, step, { critical: r.sequence?.verdict === "critical" })].filter((entry) => !r.optionState.spent[entry.id]);
   if (!costs.length) return;
   let next = activeCharacter();
   for (const { cost } of costs) {
     if (cost.slot) next = spendSpellSlot(next, cost.slot);
-    if (cost.resource) next = spendResources(next, [{ id: cost.resource, amount: 1 }]);
-    if (cost.strike) next = markSpellStrike(next, cost.strike);
+    if (cost.resource) next = spendResources(next, [{ id: cost.resource, amount: cost.amount || 1 }]);
+    // Esprit combatif : l'utilisation donne aussi ses PV temporaires.
+    if (cost.fighterFeature) next = useFighterFeature(next, cost.fighterFeature);
+    if (cost.strike) next = markSpellStrike(next, cost.strike, { ends: !!cost.ends });
+    // Charges d'un objet dépensées sur le coup (bâton percussif, tatouage de fureur sanglante).
+    if (cost.item) next = useInventoryItem(next, cost.item.id, { amount: cost.item.amount });
+    // Munition magique tirée : une de moins dans sa pile.
+    if (cost.ammo) next = consumeInventoryAmmunition(next, cost.ammo);
+    if (cost.received) next = setReceivedEffect(next, null, cost.received);
     if (cost.aid) next = endCreationHelp(next);
   }
   await saveRollSpend(r, next, uiText("Jet : {p0}", { p0: costs.map((entry) => entry.label).join(", ") }), costs.map((entry) => entry.id));
@@ -57354,13 +58467,19 @@ async function spendRollOptions(r) {
 // Assassinat coché : contre une cible surprise, le toucher est un coup critique.
 function attackVerdictChoices(r) {
   const natural = attackNaturalVerdict(r.result, rollCritThreshold(r));
+  // Coup de chance, Légende vivante : l'option ajoutée après le dé fait toucher l'attaque, 1 naturel compris.
+  if (r.optionList.some((option) => option.hit && r.optionState.on[option.id])) return natural === "critical" ? ["critical"] : ["hit"];
   return r.result?.external ? ["miss", "hit", "critical"] : natural === "miss" ? [] : natural === "critical" ? ["critical"] : ["miss", optionHitCritical(r.optionList, r.optionState) ? "critical" : "hit"];
 }
-function sequenceVerdict(r, value) {
+async function sequenceVerdict(r, value) {
   const seq = r.sequence;
   if (seq.step === "attack") {
     if (r.phase !== "result" || !attackVerdictChoices(r).includes(value)) return;
     if (value === "miss") { if (!nextChainedAttack(r)) closeModal(); return; }
+    // Frappes guidées : le dé ajouté après l'échec n'est dépensé que maintenant, l'attaque touchée.
+    const onHit = r.optionList.filter((option) => option.costOnHit && r.optionState.on[option.id] && !r.optionState.spent[option.id]);
+    if (onHit.length) await saveRollSpend(r, onHit.reduce((next, option) => spendResources(next, [{ id: option.cost.resource, amount: 1 }]), activeCharacter()), uiText("Jet : {p0}", { p0: onHit.map((option) => option.label).join(", ") }), onHit.map((option) => option.id));
+    if (ui.roll !== r) return;
     // L'effet de critique s'arrête avant de passer aux dégâts, sur une fenêtre neuve.
     stopDiceFx(); r.critical = null;
     seq.locked = true;
@@ -57398,7 +58517,8 @@ function optionFormula(option, r, step) {
   if (!piece) return option.mode ? uiText(option.mode === "advantage" ? "Avantage" : "Désavantage") : option.critThreshold ? uiText("critique {p0}-20", { p0: option.critThreshold }) : "";
   const choice = option.choices?.find((entry) => entry.value === r.optionState.choice[option.id]) || option.choices?.[0];
   const notation = choice?.notation || piece.notation || "";
-  return `${notation ? diceFormula({ notation, bonus: piece.bonus || 0 }) : signed(piece.bonus || 0)}${piece.type ? ` ${piece.type}` : ""}`;
+  const type = choice?.type || piece.type;
+  return `${piece.subtract ? "−" : ""}${notation ? diceFormula({ notation, bonus: piece.bonus || 0 }) : signed(piece.bonus || 0)}${type ? ` ${type}` : ""}`;
 }
 // Options à cocher du panneau ; celles que la règle place après le dé ont leur bouton sous le résultat (renderDiceAfterRoll).
 function visibleRollOptions(r) {
@@ -57418,7 +58538,7 @@ function renderDiceAfterRoll(r) {
   const lucky = luckPoints(activeCharacter()), d20 = r.result.dice.slice(0, r.result.values.length), locked = r.busy ? "disabled" : "";
   const keep = r.lucky ? `<div class="dice-lucky-keep" data-lucky-keep><span id="dice-lucky-label">${esc(uiText("dice.lucky.keep", { name: r.lucky }))}</span><div class="segmented" role="group" aria-labelledby="dice-lucky-label">${d20.map((die, index) => `<button id="dice-keep-${index}" class="${die.kept ? "active" : ""}" data-action="dice-keep" data-index="${index}" aria-pressed="${die.kept}" aria-label="${esc(uiText("dice.lucky.keepDie", { value: die.value }))}" ${locked}>${die.value}</button>`).join("")}</div></div>` : "";
   const luck = !r.lucky && lucky?.remaining > 0 ? button(esc(uiText(lucky.remaining > 1 ? "dice.lucky.roll" : "dice.lucky.rollLast", { name: lucky.name, count: lucky.remaining })), "dice-lucky", `id="dice-lucky" ${locked}`, "ghost") : "";
-  const options = afterRollOptions(r.optionList, r.optionState, rollStep(r)).map((option) => button(esc(uiText("dice.after.add", { label: option.label, formula: option.formula, note: option.note })), "dice-after-option", `data-id="${esc(option.id)}" ${option.choice === null ? "" : `data-choice="${esc(option.choice)}"`} ${locked}`, "ghost")).join("");
+  const options = afterRollOptions(r.optionList, r.optionState, rollStep(r)).map((option) => button(esc(uiText(option.hit ? "dice.after.hit" : "dice.after.add", { label: option.label, formula: option.formula, note: option.note })), "dice-after-option", `data-id="${esc(option.id)}" ${option.choice === null ? "" : `data-choice="${esc(option.choice)}"`} ${locked}`, "ghost")).join("");
   return keep + luck + options;
 }
 // Petit écran : quand quelque chose est proposé après le dé, cette proposition et le verdict qui la suit sont amenés à l'écran.
@@ -57462,16 +58582,47 @@ async function amendRolledDice(r, change) {
   updateDiceDialog();
   revealAfterRoll();
 }
+// Une case du jet, dans « Dés et bonus » ou dans la situation de l'attaque.
+function renderDiceOptionRow(r, option) {
+  const locked = rollSettingsLocked(r), step = rollStep(r), state = r.optionState, on = !!state.on[option.id], spent = state.spent[option.id];
+  const choices = option.choices?.length > 1 && on ? `<select class="dice-option-choice" data-roll-option-choice="${esc(option.id)}" aria-label="${esc(option.label)}" ${locked || spent ? "disabled" : ""}>${option.choices.map((choice) => `<option value="${esc(choice.value)}" ${(state.choice[option.id] || option.choices[0].value) === choice.value ? "selected" : ""}>${esc(choice.label)}</option>`).join("")}</select>` : "";
+  // Le coût est annoncé dès que l'option est visible : seul emplacement possible, ou choix sous l'option cochée.
+  const note = [option.note, option.choices?.length === 1 && option.choices[0].label, spent && uiText("Dépensé pour ce jet")].filter(Boolean).join(" · ");
+  return `<div class="dice-option-row"><button class="dice-option ${on ? "on" : ""}" data-action="dice-option" data-id="${esc(option.id)}" aria-pressed="${on}" ${locked ? "disabled" : ""}><span>${esc(option.label)}${note ? `<small>${esc(note)}</small>` : ""}</span><strong>${esc(optionFormula(option, r, step))}</strong></button>${choices}</div>`;
+}
+// Cases de ce jet reprises du cadenas, encore cochées et proposées à cette étape.
+function rollKeptOptions(r) {
+  return visibleRollOptions(r).filter((option) => r.keptIds?.includes(option.id) && r.optionState.on[option.id]);
+}
+// Titre de « Dés et bonus » et son cadenas : « Garder » enregistre les cases gratuites cochées, « Gardé » les oublie.
+function renderDiceKeepTitle(r, label) {
+  const kept = !!activeCharacter()?.state.keptRollOptions;
+  const lock = `<button type="button" id="dice-keep-options" class="btn small-btn dice-keep${kept ? " on" : ""}" data-action="dice-keep-options" aria-pressed="${kept}" aria-label="${esc(uiText(kept ? "roll.lock.keptLabel" : "roll.lock.saveLabel"))}" ${rollSettingsLocked(r) ? "disabled" : ""}>${icon(kept ? "lock" : "unlock", 18)}<span>${esc(uiText(kept ? "roll.lock.kept" : "roll.lock.save"))}</span></button>`;
+  return `<div class="dice-panel-head"><p class="dice-panel-title">${esc(label)}</p>${lock}</div>${rollKeptOptions(r).length ? `<p class="dice-keep-note">${esc(uiText("roll.lock.resumed"))}</p>` : ""}`;
+}
+// Dés et bonus : les cases du jet, hors règles générales du combat (renderDiceSituation), puis le dé de soutien et le bonus saisis.
 function renderDiceOptions(r) {
-  const e = r.extras, ready = r.phase === "ready", locked = rollSettingsLocked(r), step = rollStep(r), state = r.optionState;
-  const rows = visibleRollOptions(r).map((option) => {
-    const on = !!state.on[option.id], spent = state.spent[option.id];
-    const choices = option.choices?.length > 1 && on ? `<select class="dice-option-choice" data-roll-option-choice="${esc(option.id)}" aria-label="${esc(option.label)}" ${locked || spent ? "disabled" : ""}>${option.choices.map((choice) => `<option value="${esc(choice.value)}" ${(state.choice[option.id] || option.choices[0].value) === choice.value ? "selected" : ""}>${esc(choice.label)}</option>`).join("")}</select>` : "";
-    // Le coût est annoncé dès que l'option est visible : seul emplacement possible, ou choix sous l'option cochée.
-    const note = [option.note, option.choices?.length === 1 && option.choices[0].label, spent && uiText("Dépensé pour ce jet")].filter(Boolean).join(" · ");
-    return `<div class="dice-option-row"><button class="dice-option ${on ? "on" : ""}" data-action="dice-option" data-id="${esc(option.id)}" aria-pressed="${on}" ${locked ? "disabled" : ""}><span>${esc(option.label)}${note ? `<small>${esc(note)}</small>` : ""}</span><strong>${esc(optionFormula(option, r, step))}</strong></button>${choices}</div>`;
-  }).join("");
+  const e = r.extras, ready = r.phase === "ready";
+  const rows = visibleRollOptions(r).filter((option) => !option.situation).map((option) => renderDiceOptionRow(r, option)).join("");
   return `${rows}<label>${uiText("Dé de soutien ")}<select id="dice-extra-support" data-roll-extra="support" ${ready ? "" : "disabled"}>${[["", uiText("Aucun")], ...[4, 6, 8, 10, 12].map((n) => [String(n), `1d${n}`])].map(([value, label]) => `<option value="${value}" ${e.support === value ? "selected" : ""}>${label}</option>`).join("")}</select></label><label>${uiText("Bonus ou malus ")}<input type="number" min="-100" max="100" step="1" id="dice-extra-bonus" data-roll-extra="bonus" value="${esc(e.bonus)}" ${ready ? "" : "disabled"}></label>${rollHasModes(r) ? `<p class="tiny muted">${uiText("Avantage et désavantage ensemble : choisis Normal.")}</p>` : ""}`;
+}
+// Situation de l'attaque : les règles générales du combat, rangées par thème dans l'ordre du moteur. Cochées, elles règlent le mode du jet.
+function renderDiceSituation(r) {
+  const options = visibleRollOptions(r).filter((option) => option.situation);
+  return [...new Set(options.map((option) => option.situation))].map((theme) => `<div class="dice-situation" role="group" aria-labelledby="dice-situation-${theme}"><p class="dice-situation-theme" id="dice-situation-${theme}">${esc(uiText(`rollMode.situation.${theme}`))}</p>${options.filter((option) => option.situation === theme).map((option) => renderDiceOptionRow(r, option)).join("")}</div>`).join("");
+}
+/**
+ * Réglages repliés en tête de la fenêtre, { value, icon, label, badge } : dés et bonus ; avant le lancer, la situation de l'attaque quand le jet
+ * a des règles générales à cocher ; une fois le dé lancé, la correction du résultat (pas pour le jet contre la mort, que son dé naturel décide).
+ */
+function dicePanels(r) {
+  const death = r.request.kind === "death";
+  if (!rollTypable(r) || !death && !["check", "attack", "damage", "sum"].includes(r.request.kind)) return [];
+  const options = visibleRollOptions(r), situation = options.filter((option) => option.situation), checked = (list) => list.filter((option) => r.optionState.on[option.id]).length;
+  const extras = (r.extras.support ? 1 : 0) + (Number(r.extras.bonus) ? 1 : 0);
+  return [{ value: "options", icon: "plus", label: uiText("Dés et bonus"), badge: checked(options.filter((option) => !option.situation)) + extras },
+    ...(r.result ? death ? [] : [{ value: "external", icon: "edit", label: uiText("Corriger le résultat"), badge: 0 }]
+      : situation.length ? [{ value: "situation", icon: "warning", label: uiText("rollMode.situation"), badge: checked(situation) }] : [])];
 }
 function renderDiceParts(r, result) {
   const seq = r.sequence;
@@ -57513,18 +58664,17 @@ function renderDiceDialog() {
   const choices = seq?.step === "attack" && result ? attackVerdictChoices(r) : [];
   const verdictLabels = { miss: uiText("Raté"), hit: uiText("Touché"), critical: choices.length === 1 ? uiText("Lancer les dégâts du critique") : uiText("Critique") };
   const verdict = choices.length ? `<div class="dice-verdict" role="group" aria-label="${uiText("Verdict")}" style="--choices:${choices.length}">${choices.map((value) => `<button class="btn ${value === "miss" ? "ghost" : "primary"}" data-action="dice-verdict" data-value="${value}">${verdictLabels[value]}</button>`).join("")}</div>` : "";
-  // Deux réglages repliés en tête : dés et bonus conditionnels, résultat saisi à la main.
-  // Le jet contre la mort n'a que le premier : son dé naturel décide, un total saisi ne le dit pas.
-  const death = r.request.kind === "death", editable = rollTypable(r) && (death || ["check", "attack", "damage", "sum"].includes(r.request.kind));
-  const active = visibleRollOptions(r).filter((option) => r.optionState.on[option.id]).length + (r.extras.support ? 1 : 0) + (Number(r.extras.bonus) ? 1 : 0);
-  const panelLabels = { options: uiText("Dés et bonus"), external: result ? uiText("Corriger le résultat") : uiText("Résultat externe") };
-  const panels = editable ? [["options", "plus", active], ...(death ? [] : [["external", "edit", 0]])].map(([value, name, badge]) => `<button type="button" id="dice-panel-${value}" class="icon-btn dice-panel-toggle ${r.panel === value ? "active" : ""}" data-action="dice-panel" data-value="${value}" aria-pressed="${r.panel === value}" aria-controls="dice-panel-body" aria-label="${esc(panelLabels[value])}${badge ? ` (${badge})` : ""}" title="${esc(panelLabels[value])}" ${rolling ? "disabled" : ""}>${icon(name, 18)}${badge ? `<span class="dice-badge" aria-hidden="true">${badge}</span>` : ""}</button>`).join("") : "";
-  const panelTitle = editable && r.panel && !(r.panel === "external" && (rolling || death)) ? `<p class="dice-panel-title">${esc(panelLabels[r.panel])}</p>` : "";
-  const panelBody = panelTitle + (editable && r.panel === "options" ? renderDiceOptions(r)
-    : editable && !death && r.panel === "external" && !rolling ? `<label>${uiText("Total final ")}<input id="dice-external-total" type="number" step="1" value="${result?.total ?? ""}"></label><label>${uiText("Provenance ")}<input id="dice-external-source" maxlength="120" placeholder="${uiText("Dés physiques, correction du MJ…")}"></label>${button(uiText("Utiliser le total saisi"), "roll-external", "", "small-btn")}` : "");
+  // Réglages repliés en tête (dicePanels), un seul ouvert à la fois ; la correction se cache pendant que les dés roulent.
+  const panels = dicePanels(r), open = panels.find((panel) => panel.value === r.panel && !(panel.value === "external" && rolling));
+  const toggles = panels.map(({ value, icon: name, label, badge }) => `<button type="button" id="dice-panel-${value}" class="icon-btn dice-panel-toggle${value === "situation" ? " dice-situation-toggle" : ""} ${r.panel === value ? "active" : ""}" data-action="dice-panel" data-value="${value}" aria-pressed="${r.panel === value}" aria-controls="dice-panel-body" aria-label="${esc(label)}${badge ? ` (${badge})` : ""}" title="${esc(label)}" ${rolling ? "disabled" : ""}>${icon(name, 18)}${badge ? `<span class="dice-badge" aria-hidden="true">${badge}</span>` : ""}</button>`).join("");
+  const panelBody = !open ? "" : (open.value === "options" ? renderDiceKeepTitle(r, open.label) : `<p class="dice-panel-title">${esc(open.label)}</p>`) + (open.value === "options" ? renderDiceOptions(r) : open.value === "situation" ? renderDiceSituation(r)
+    : `<label>${uiText("Total final ")}<input id="dice-external-total" type="number" step="1" value="${result?.total ?? ""}"></label><label>${uiText("Provenance ")}<input id="dice-external-source" maxlength="120" placeholder="${uiText("Dés physiques, correction du MJ…")}"></label>${button(uiText("Utiliser le total saisi"), "roll-external", "", "small-btn")}`);
   const history = r.history.length ? `<details class="dice-history"><summary>${uiText("Résultats précédents ({p0})", { p0: r.history.length })}</summary>${r.history.map((previous, i) => `<p class="small">${i + 1}. ${esc(previous.reason)} · ${esc(({ normal: "Normal", advantage: uiText("Avantage"), disadvantage: uiText("Désavantage") })[previous.mode])} : ${esc(previous.detail)}</p>`).join("")}</details>` : "";
   // Avant le lancer : le mode tiré de la fiche et ses sources, puis l'aide propre au jet.
   const help = ready ? [sheetRollMode(r).note, r.help].filter(Boolean).join(" ") : "";
+  // Cases reprises du cadenas : dites même panneau fermé, avant le lancer.
+  const keptNames = ready ? rollKeptOptions(r).map((option) => option.label) : [];
+  const keptHtml = keptNames.length ? `<p class="dice-roll-kept" data-roll-kept>${icon("lock", 14)}<span>${esc(uiText("roll.lock.line", { names: keptNames.join(", ") }))}</span></p>` : "";
   // Seuil connu (sauvegarde de concentration) : dit avant le lancer, puis comparé au total, qui suit les retouches du jet.
   // Le seuil se compare « au moins » (DD) ou « au plus » (atMost : Intervention divine).
   const passed = r.dc && result && !result.groups && thresholdPassed(r.dc.atMost ? { atMost: r.dc.value } : { atLeast: r.dc.value }, result.total);
@@ -57536,7 +58686,7 @@ function renderDiceDialog() {
   const applies = !!r.apply && (!r.applyWhen || !!result && r.applyWhen(result));
   // Rappels d'une sauvegarde : une ligne chacun sous la note du mode, avant comme après le lancer.
   const reminders = (r.reminders || []).map((entry) => `<p class="dice-roll-reminder" data-roll-reminder="${esc(entry.id)}">${esc(uiText("reminder.line", entry))}</p>`).join("");
-  const body = `<div class="dice-roll-content"><div class="dice-panel-body" id="dice-panel-body">${panelBody}</div><div class="dice-sequence">${renderDiceSequence(r)}${renderPortentChoice(r)}</div>${portentApplies(r) ? "" : modeHtml}${quantity}<button id="dice-tray" class="dice-tray" data-action="roll-start" aria-label="${uiText("Lancer les dés")}" ${!ready ? "disabled" : ""}><canvas class="dice-canvas" aria-hidden="true"></canvas><span class="dice-tray-hint">${hint}<span class="dice-roll-formula">${esc(diceRequestFormula(currentDiceRequest(r)))}</span></span></button><div class="dice-outcome" role="status" aria-live="polite" aria-atomic="true">${scoreHtml}${result && r.note ? `<p class="dice-roll-note">${esc(r.note)}</p>` : ""}${outcomeHtml}${dc}</div><div class="dice-after-roll">${renderDiceAfterRoll(r)}</div><div class="dice-verdict-zone">${verdict}</div><div class="dice-roll-extra">${history}${help ? `<p class="dice-roll-help">${esc(help)}</p>` : ""}${reminders}</div></div>`;
+  const body = `<div class="dice-roll-content"><div class="dice-panel-body" id="dice-panel-body">${panelBody}</div><div class="dice-sequence">${renderDiceSequence(r)}${renderPortentChoice(r)}</div>${portentApplies(r) ? "" : modeHtml}${quantity}<button id="dice-tray" class="dice-tray" data-action="roll-start" aria-label="${uiText("Lancer les dés")}" ${!ready ? "disabled" : ""}><canvas class="dice-canvas" aria-hidden="true"></canvas><span class="dice-tray-hint">${hint}<span class="dice-roll-formula">${esc(diceRequestFormula(currentDiceRequest(r)))}</span></span></button><div class="dice-outcome" role="status" aria-live="polite" aria-atomic="true">${scoreHtml}${result && r.note ? `<p class="dice-roll-note">${esc(r.note)}</p>` : ""}${outcomeHtml}${dc}</div><div class="dice-after-roll">${renderDiceAfterRoll(r)}</div><div class="dice-verdict-zone">${verdict}</div><div class="dice-roll-extra">${history}${keptHtml}${help ? `<p class="dice-roll-help">${esc(help)}</p>` : ""}${reminders}</div></div>`;
   const footer = ready || rolling
     ? button(uiText("Annuler"), "close-modal", "", "ghost") + button(rolling ? uiText("Lancer en cours…") : r.launchLabel || uiText("Lancer les dés"), "roll-start", `id="dice-launch" ${rolling ? "disabled" : ""}`, "primary")
     : applies ? button(r.cancelLabel || uiText("Annuler"), "close-modal", "", "ghost") + button(r.acceptLabel || uiText("Utiliser ce résultat"), "roll-accept", 'id="dice-accept"', "primary")
@@ -57545,7 +58695,7 @@ function renderDiceDialog() {
       : (r.chain?.length ? button(uiText("attack.chain.next", { name: fromSheet(r.chain[0]).name }), "dice-chain-next", 'id="dice-finish"', "primary") : button(uiText("Terminer"), "close-modal", 'id="dice-finish"', "primary")) + (r.request.kind !== "death" ? button(uiText("{p0} Relancer", { p0: icon("dice", 16) }), "reroll", 'id="dice-reroll"', "ghost") : "");
   // Enchaînement : « Attaque 2/3 » au-dessus du titre.
   const eyebrow = r.chainTotal ? uiText("attack.chain.count", { index: r.chainIndex, total: r.chainTotal }) : "";
-  return modalShell(title, body, footer, false, eyebrow, "", `<span class="dice-head-actions">${panels}</span>`).replace('class="modal ', `data-roll-phase="${r.phase}" class="modal dice-roll-dialog `);
+  return modalShell(title, body, footer, false, eyebrow, "", `<span class="dice-head-actions">${toggles}</span>`).replace('class="modal ', `data-roll-phase="${r.phase}" class="modal dice-roll-dialog `);
 }
 function mountDiceTray() {
   if (ui.modal !== "roll" || !ui.roll) return;
@@ -57733,10 +58883,10 @@ async function performDice(action, el, c, data, d) {
       if (ui.roll && ui.roll.phase !== "rolling") nextChainedAttack(ui.roll);
       break;
     case "dice-panel":
-      if (ui.roll && ui.roll.phase !== "rolling" && ["options", "external"].includes(data.value)) { ui.roll.panel = ui.roll.panel === data.value ? null : data.value; updateDiceDialog(); }
+      if (ui.roll && ui.roll.phase !== "rolling" && dicePanels(ui.roll).some((panel) => panel.value === data.value)) { ui.roll.panel = ui.roll.panel === data.value ? null : data.value; updateDiceDialog(); }
       break;
     case "dice-verdict":
-      if (ui.roll?.sequence && ui.roll.phase !== "rolling" && ["miss", "hit", "critical"].includes(data.value)) sequenceVerdict(ui.roll, data.value);
+      if (ui.roll?.sequence && ui.roll.phase !== "rolling" && ["miss", "hit", "critical"].includes(data.value)) await sequenceVerdict(ui.roll, data.value);
       break;
     case "dice-option": {
       const r = ui.roll, option = r?.optionList.find((entry) => entry.id === data.id);
@@ -57746,6 +58896,27 @@ async function performDice(action, el, c, data, d) {
       r.optionState.on[data.id] = !r.optionState.on[data.id];
       // Une source de mode cochée ou décochée recalcule le mode du jet, comme la case qui en écarte une (arme lancée).
       if (option.mode || r.modeSources?.some((source) => source.unless === option.id)) ui.rollMode = sheetRollMode(r).mode;
+      refreshSequence(r, uiText("Options modifiées"));
+      break;
+    }
+    // Cadenas : « Garder » enregistre dans la fiche la photo des cases gratuites cochées ; « Gardé » l'efface et remet les cases du jet à leur état d'origine.
+    case "dice-keep-options": {
+      const r = ui.roll, photo = c.state.keptRollOptions;
+      if (!r || r.busy || rollSettingsLocked(r)) break;
+      const next = clone(c);
+      if (photo) delete next.state.keptRollOptions;
+      else next.state.keptRollOptions = keptRollPhoto(r.optionList, r.optionState);
+      r.busy = true;
+      try { await saveCharacter(next, photo ? "roll.lock.history.off" : "roll.lock.history.on", "session", c); } finally { r.busy = false; }
+      if (ui.roll !== r || ui.modal !== "roll") break;
+      if (!photo) { updateDiceDialog(); break; }
+      // Une option déjà payée pour ce jet reste cochée.
+      for (const option of r.optionList.filter((entry) => !r.optionState.spent[entry.id])) {
+        r.optionState.on[option.id] = !!option.on || !!r.chainOn?.includes(option.id);
+        delete r.optionState.choice[option.id];
+      }
+      r.keptIds = [];
+      ui.rollMode = sheetRollMode(r).mode;
       refreshSequence(r, uiText("Options modifiées"));
       break;
     }
@@ -57780,7 +58951,9 @@ async function performDice(action, el, c, data, d) {
         r.optionState.on[option.id] = true;
         await spendRollOptions(r);
         if (ui.roll !== r || ui.modal !== "roll") break;
-        await amendRolledDice(r, { additions: optionAdditions(optionPieces([option], r.optionState, rollStep(r))) });
+        // Une option qui fait toucher n'ajoute rien au jet : seul le verdict change.
+        if (option.hit) rebuildDiceDialog();
+        else await amendRolledDice(r, { additions: optionAdditions(optionPieces([option], r.optionState, rollStep(r))) });
         // Le bonus payé reste dans le jet s'il est relancé.
         if (r.sequence) r.request = sequenceRequest(r);
       } catch (error) { r.optionState.on[option.id] = false; throw error; } finally { r.busy = false; }
@@ -57821,7 +58994,7 @@ async function performDice(action, el, c, data, d) {
     }
     case "roll-external": {
       const r = ui.roll;
-      if (!r || !rollTypable(r) || r.phase === "rolling" || !["check", "attack", "damage", "sum"].includes(r.request.kind)) break;
+      if (!r || !rollTypable(r) || r.phase !== "result" || !["check", "attack", "damage", "sum"].includes(r.request.kind)) break;
       const input = modalRoot.querySelector("#dice-external-total"), source = modalRoot.querySelector("#dice-external-source");
       if (!input.value.trim()) throw new Error(uiText("Indique le total final."));
       const result = externalDiceResult(Number(input.value), source.value);
@@ -59365,7 +60538,7 @@ async function perform(action, el) {
       await performEffects(action, el, c, data, d); break;
     case "roll-ability": case "roll-save": case "roll-skill": case "roll-combat-action": case "roll-free": case "roll-martial-arts": case "roll-extra-attack":
     case "roll-attack": case "roll-damage": case "roll-two-weapon": case "dice-chain-next": case "dice-panel": case "dice-verdict": case "dice-option":
-    case "dice-lucky": case "dice-keep": case "dice-after-option": case "dice-part": case "dice-portent": case "roll-mode": case "dice-pick": case "roll-external": case "roll-start":
+    case "dice-lucky": case "dice-keep": case "dice-keep-options": case "dice-after-option": case "dice-part": case "dice-portent": case "roll-mode": case "dice-pick": case "roll-external": case "roll-start":
     case "roll-accept": case "reroll": case "death-roll": case "death-mark": case "roll-initiative":
       await performDice(action, el, c, data, d); break;
     case "equipment": case "review-equipment": case "add-library-item": case "instance-reference": case "attunements": case "toggle-repair-attunement":
@@ -59374,7 +60547,7 @@ async function perform(action, el) {
     case "review-item-slot-recovery": case "review-reset-item-recovery": case "declare-item-result": case "use-inventory-item": case "resolve-last-charge":
     case "review-use-inventory-item": case "review-item-result": case "review-last-charge": case "consume-ammunition": case "new-item": case "convert-equipment-pack":
     case "review-equipment-pack": case "edit-item": case "review-item": case "delete-item": case "equip-add-weapon": case "equip-remove-weapon": case "catalog-item":
-    case "catalog-tab": case "add-catalog-item":
+    case "catalog-tab": case "add-catalog-item": case "toggle-item-effect":
       await performInventory(action, el, c, data, d); break;
     case "campaign-new": case "campaign-personal-new": case "campaign-language": case "campaign-edit": case "campaign-proposal": case "campaign-track-new":
     case "campaign-track-edit": case "campaign-track-review": case "campaign-acquisition-review": case "campaign-personal-review": case "campaign-toggle":
