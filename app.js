@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-preview.20";
+const APP_VERSION = "2.0.0-preview.21";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -4010,6 +4010,13 @@ const UI_FR = Object.freeze({
   "units.convention": "Conventions D&D : 10 ft = 3 m ; 2 lb = 1 kg.",
   "units.sourceText": "Les textes de règles et tes saisies gardent leurs unités d’origine. Les champs chiffrés de modification indiquent leur unité de saisie.",
   "units.failure": "Le choix d’unités est actif, mais ce navigateur n’a pas pu le conserver.",
+  "listOrder.label": "Ordre des listes",
+  "listOrder.core": "Manuel d’abord",
+  "listOrder.alpha": "De A à Z",
+  "listOrder.help": "Races, classes et historiques. « Manuel d’abord » place ceux du Manuel des joueurs en tête, puis les autres de A à Z.",
+  "listOrder.failure": "L’ordre choisi est actif, mais ce navigateur n’a pas pu le conserver.",
+  "update.downloading": "Nouvelle version en cours de téléchargement…",
+  "settings.version": "Version {p0} · build {p1}",
   "units.capacityKnown": "Au moins {p0} pour {p1} de capacité.",
   "units.overCapacity": "Sac trop lourd : {p0} / {p1}.",
   "units.perItem": "{value} / unité",
@@ -8666,6 +8673,13 @@ const UI_EN = Object.freeze({
   "units.convention": "D&D conventions: 10 ft = 3 m; 2 lb = 1 kg.",
   "units.sourceText": "Rules text and your entries keep their original units. Numeric editing fields show their input unit.",
   "units.failure": "The unit choice is active, but this browser could not save it.",
+  "listOrder.label": "List order",
+  "listOrder.core": "Handbook first",
+  "listOrder.alpha": "A to Z",
+  "listOrder.help": "Races, classes and backgrounds. “Handbook first” lists the Player’s Handbook entries first, then the others from A to Z.",
+  "listOrder.failure": "The order is active, but this browser could not save it.",
+  "update.downloading": "Downloading a new version…",
+  "settings.version": "Version {p0} · build {p1}",
   "units.capacityKnown": "At least {p0} for {p1} carrying capacity.",
   "units.overCapacity": "Bag too heavy: {p0} / {p1}.",
   "units.perItem": "{value} / item",
@@ -9783,6 +9797,35 @@ function formatGameMeasure(value, from, { system = unitSystem(), language = "fr"
 /** Le tri garde l'identité technique ; les accents et nombres sont comparables. */
 function compareUnitLabels(a, b, language = "fr") {
   return new Intl.Collator(language === "en" ? "en" : "fr", { sensitivity: "base", numeric: true }).compare(a, b);
+}
+
+
+// Module : list-order
+// Ordre des races, classes et historiques dans les listes de choix : préférence de présentation, propre à l'appareil.
+
+const LIST_ORDER_STORAGE_KEY = "compagnon-list-order";
+const CORE_SOURCES = ["phb", "srd"];
+let selectedListOrder = "core";
+try { selectedListOrder = localStorage.getItem(LIST_ORDER_STORAGE_KEY) === "alpha" ? "alpha" : "core"; } catch { /* Préférence en mémoire si le stockage est indisponible. */ }
+
+/** « core » : le Manuel des joueurs d'abord, puis le reste ; « alpha » : tout de A à Z. */
+function listOrder() { return selectedListOrder; }
+
+function setListOrder(order) {
+  selectedListOrder = order === "alpha" ? "alpha" : "core";
+  try { localStorage.setItem(LIST_ORDER_STORAGE_KEY, selectedListOrder); return true; } catch { return false; }
+}
+
+/** Le SRD reprend le Manuel des joueurs : ses entrées comptent parmi celles du Manuel. */
+function coreListSource(source) {
+  return CORE_SOURCES.includes(String(source || "").toLowerCase());
+}
+
+/** Trie selon la langue affichée ; en ordre « core », les entrées du Manuel passent d'abord, chacune des deux parts restant de A à Z. */
+function sortListChoices(items, name, core = () => false) {
+  const collator = new Intl.Collator(uiLanguage() === "en" ? "en" : "fr", { sensitivity: "base", numeric: true });
+  const first = selectedListOrder === "core";
+  return [...items].sort((a, b) => (first ? Number(core(b)) - Number(core(a)) : 0) || collator.compare(name(a), name(b)));
 }
 
 
@@ -51177,7 +51220,11 @@ function creationNextPortrait(id) {
 
 /* ---------------------------------------------------------------- sélection */
 function creationNextFamilyRaces(family) {
-  return family === "Maison" ? ["custom"] : Object.keys(uiRaces).filter((id) => (RACES[id].group || RACES[id].name) === family);
+  return family === "Maison" ? ["custom"] : creationNextSortRaces(Object.entries(uiRaces).filter(([id]) => (RACES[id].group || RACES[id].name) === family)).map(([id]) => id);
+}
+/** Variantes d’une famille dans l’ordre choisi en réglage. */
+function creationNextSortRaces(entries) {
+  return sortListChoices(entries, ([, race]) => race.name, ([, race]) => coreListSource(race.source));
 }
 /** Un clic dans la liste adopte la race. Rien n’est précoché : l’ascendance posée par selectCharacterRace est retirée. Une correction garde l’origine remplacée pour l’héritage. */
 function creationNextSelectRace(id) {
@@ -51250,7 +51297,9 @@ function creationNextFiche(kind, fiche) {
 function renderCreationNextRace(w, c) {
   const groups = {};
   for (const [id, race] of Object.entries(uiRaces)) (groups[RACES[id].group || RACES[id].name] ||= []).push([id, race]);
-  const order = [...RACE_GROUP_ORDER.filter((g) => groups[g]), ...Object.keys(groups).filter((g) => !RACE_GROUP_ORDER.includes(g)), "Maison"];
+  // Familles et variantes suivent le réglage d’ordre des listes ; l’origine maison reste la dernière.
+  const order = [...sortListChoices(Object.keys(groups), (family) => uiSystemText(uiCatalogueName(family)), (family) => RACE_GROUP_ORDER.includes(family)), "Maison"];
+  for (const family of Object.keys(groups)) groups[family] = creationNextSortRaces(groups[family]);
   const query = creationChoiceNormalize(ui.raceQuery);
   const entries = order.flatMap((family) => family === "Maison" ? [{ id: "custom", family, race: { name: uiText("creation.homebrewOrigin") } }] : groups[family].map(([id, race]) => ({ id, race, family })));
   if (ui.raceFamily === "all") return `<div class="origin-tools origin-family-search"><div class="search-wrap">${icon("search", 18)}<input id="origin-search" class="search-input" data-bind="ui.raceQuery" value="${esc(ui.raceQuery || "")}" placeholder="${uiText("creation.searchRace")}" aria-label="${uiText("creation.searchRace")}"></div></div><div class="origin-family-grid">${order.map((family) => {
@@ -51288,7 +51337,7 @@ function renderCreationNextClass(w, c) {
     sections: [],
     todo: creationNextTodo(c, "class", cls.name, w.original ? [] : [[uiText("Niveau de départ"), "skills"]], spellcasters(c).length ? [[uiText("creation.todoClassSpells"), "magic"]] : []),
   };
-  return `<div class="${creationChoiceLayout("class")}">${creationChoiceDirectory("class", Object.entries(uiClasses), chosen ? id : null, chosen ? id : null)}${creationNextFiche("class", fiche)}</div>`;
+  return `<div class="${creationChoiceLayout("class")}">${creationChoiceDirectory("class", sortedClassEntries(), chosen ? id : null, chosen ? id : null)}${creationNextFiche("class", fiche)}</div>`;
 }
 function creationNextBackgroundDescription(id, background) {
   if (id === "custom") return "Deux compétences et une aptitude à définir.";
@@ -51312,7 +51361,7 @@ function creationNextBackgroundBenefits(background) {
 }
 function renderCreationNextBackground(w, c) {
   const id = c.background.id || "custom", chosen = !!w.nextBackgroundConfirmed, bg = uiBackgroundOf(c), custom = id === "custom";
-  const items = [...Object.entries(uiBackgrounds), ["custom", { name: uiText("Personnalisé"), skills: [] }]];
+  const items = [...sortedBackgroundEntries(), ["custom", { name: uiText("Personnalisé"), skills: [] }]];
   const fiche = chosen && {
     image: backgroundIllustration(id, "creation-fiche-image"),
     title: bg.name, subtitle: custom ? uiText("Avec l’accord du MJ") : "", source: bg.source, reference: bg.referenceId || libraryRuntimeReference("background", id), lead: creationNextBackgroundDescription(id, bg),
@@ -52670,7 +52719,7 @@ function renderSettings() {
       .slice(-12)
       .reverse();
   if (ui.auditSettingsSection) return `<div class="audit-settings"><div class="page-head"><h1>${uiText(ui.auditSettingsSection === "backups" ? "Sauvegardes" : "audit.settings.more")}</h1></div>${button(uiText("audit.settings.back"), "audit-settings-open", 'data-value=""', "small-btn ghost audit-back")}<div class="settings-stack">${ui.auditSettingsSection === "backups" ? `<section class="panel"><h3>${uiText("Sauvegardes")}</h3><div class="settings-row"><div><strong>${uiText("Sur cet appareil")}</strong><p>${uiText("Les fiches sont enregistrées dans ce navigateur, sans synchronisation.")}</p></div><span class="pill">${uiText("{p4} fiche(s)", { p4: appData.characters.length })}</span></div><div class="settings-row"><div><strong>${uiText("Exporter toutes les fiches")}</strong><p>${appData.lastExport ? uiText("settings.lastExport", { p0: dateLabel(appData.lastExport) }) : uiText("Aucun export effectué sur cet appareil.")}</p></div>${button(uiText("{p0} Export JSON", { p0: icon("download", 16) }), "export-all", "", "small-btn green")}</div><div class="settings-row"><div><strong>${uiText("Importer un fichier JSON")}</strong><p>${uiText("Les fiches sont ajoutées en copie, jamais écrasées. Les sauvegardes de la version précédente sont converties.")}</p></div>${button(uiText("{p0} Importer", { p0: icon("upload", 16) }), "import", "", "small-btn")}</div><div class="settings-row"><div><strong>${uiText("Copier ou coller une sauvegarde")}</strong></div><div class="actions">${button(uiText("Copier"), "export-all", "", "small-btn")}${button(uiText("Coller"), "paste-import", "", "small-btn")}</div></div>${notice(uiText("Effacer les données du site, changer de navigateur ou de téléphone peut supprimer les fiches. Exporte-les régulièrement."), "warning")}<details class="settings-details"><summary>${uiText("Détails du stockage")}</summary><p class="small muted section-gap">${uiText("Stockage {p16}", { p16: localStore.mode === "indexeddb" ? "IndexedDB" : localStore.mode === "localstorage" ? "localStorage" : "temporaire" })}</p><div class="settings-row"><div><strong>${uiText("Demander un stockage persistant")}</strong><p>${uiText("Le navigateur décide de l’accorder. Cela ne remplace pas une sauvegarde.")}</p></div>${button(uiText("Demander"), "persist-storage", "", "small-btn")}</div></details></section>` : `<section class="panel"><h3>${uiText("Composantes consommées")}</h3><div class="settings-row"><div><strong>${uiText("Suivi du stock et des PO")}</strong><p>${uiText("En désactivant ce suivi, gère les composantes à la table.")}</p></div>${button(componentTracking() ? uiText("Activé") : uiText("Désactivé"), "toggle-components", `aria-pressed="${componentTracking()}"`, "small-btn")}</div></section><section class="panel"><h3>${uiText("Munitions")}</h3><div class="settings-row"><div><strong>${uiText("Consommation unitaire")}</strong><p>${uiText("En désactivant ce suivi, gère les dépenses à la table.")}</p></div>${button(ammunitionTracking() ? uiText("Activé") : uiText("Désactivé"), "toggle-ammunition", `aria-pressed="${ammunitionTracking()}"`, "small-btn")}</div></section><section class="panel"><h3>${uiText("Installer Compagnon")}</h3><div class="settings-row"><div>${renderCompactHelp(uiText("Sur Android : menu du navigateur, Installer. Sur iPhone : Safari, Partager, Sur l’écran d’accueil."), uiText("Aide à l’installation"))}</div>${button(uiText("{p0} Installer", { p0: icon("phone", 16) }), "install", "", "small-btn")}</div><div class="settings-row"><div><strong>${uiText("Contenu hors ligne")}</strong><p>${uiText("Télécharge le catalogue complet et vérifie sa disponibilité avant ta séance.")}</p></div>${button(uiText("Préparer le contenu"), "navigate", 'data-route="offline"', "small-btn")}</div></section>${history.length ? `<section class="panel"><div class="panel-head"><h3>${uiText("Retour en arrière")}</h3></div>${renderCompactHelp(uiText("Historique limité à 30 versions et 12 Mio de photos. Les versions conservées sont complètes."))}${history.map((s) => `<div class="history-row"><div>${esc(uiStoredText(s.label))}<small>${dateLabel(s.date)} · ${esc(s.character.name)}</small>${s.operation?.description ? `<small>${esc(uiStoredText(s.operation.description))}</small>` : ""}${s.operation?.impactRows?.map((row) => `<small>${esc(uiText("history.impact", { label: uiStoredText(row.label), before: uiStoredText(row.before ?? ""), after: uiStoredText(row.after ?? "") }))}${row.source ? ` · ${esc(uiStoredText(row.source))}` : ""}</small>`).join("") || ""}</div>${s.operation ? s.operation.undone ? ("<small>" + uiText("Opération annulée") + "</small>") : button(uiText("Annuler l’opération"), "undo-session", `data-id="${esc(s.id)}"`, "small-btn ghost") : ""}${button(uiText("Restaurer la fiche"), "restore-snapshot", `data-id="${esc(s.id)}"`, "small-btn ghost")}</div>`).join("")}</section>` : ""}<details class="panel settings-details"><summary>${uiText("Calculs et limites")}</summary><p class="small muted section-gap">${uiText("Sous-classes, dons et multiclassage jusqu’au niveau 20.")}</p><p class="small muted section-gap">${uiText("Caractéristiques, maîtrises, expertise, langues et outils ; PV, CA (armures, défense sans armure, styles), initiative, vitesse ; attaques de chaque arme ; emplacements de sorts y compris multiclasse et pacte ; sorts connus, préparés et toujours préparés ; ressources de classe, de sous-classe, d’origine et de dons ; repos et dés de vie.")}</p></details><details class="panel settings-details"><summary>${uiText("Crédits")}</summary><p class="small muted section-gap">${uiText("Résumés de jeu. Consulte les références pour le texte complet.")}</p><p class="small muted section-gap">${uiText("Ce travail comprend du contenu du Document de Référence du Système 5.1 (« SRD 5.1 ») de Wizards of the Coast LLC, disponible à l’adresse ")}<a href="https://dnd.wizards.com/fr/resources/systems-reference-document" target="_blank" rel="noopener noreferrer">${uiText("Document de Référence du Système")}</a>${uiText(", sous licence ")}<a href="https://creativecommons.org/licenses/by/4.0/legalcode.fr" target="_blank" rel="noopener noreferrer">Creative Commons Attribution 4.0 International</a>.</p><p class="small muted">${uiText("Terminologie et textes de référence : SRD 5.1 français. Traductions et adaptations : Compagnon. La référence anglaise est consultable lorsqu’elle est disponible. Compagnon est une application indépendante. Version {p47}.", { p47: APP_VERSION })}</p><p class="small"><a href="${SRD_URL}" target="_blank" rel="noopener noreferrer">${uiText("Lire le SRD 5.1 français officiel ↗")}</a></p></details>${c ? `<section class="panel"><div class="settings-row"><div><strong>${uiText("Supprimer {p0}", { p0: esc(c.name) })}</strong><p>${uiText("Exporte d’abord sa fiche. Les autres personnages seront conservés.")}</p></div>${button(uiText("Supprimer"), "delete-character", "", "small-btn danger")}</div></section>` : ""}`}</div></div>`;
-  return `<div class="audit-settings"><div class="page-head"><h1>${uiText("Réglages")}</h1></div><div class="audit-settings-grid"><section class="audit-setting audit-language"><h2><label for="settings-language">${uiText("audit.settings.language")}</label></h2>${renderLanguageSwitch()}</section><section class="audit-setting"><h2>${uiText("Apparence")}</h2><div class="audit-setting-choices" role="group" aria-label="${esc(uiText("Apparence"))}">${[["light", uiText("Clair")], ["dark", uiText("Sombre")]].map(([value, label]) => `<button type="button" data-action="set-theme" data-value="${value}" aria-pressed="${currentTheme() === value}" class="${currentTheme() === value ? "active" : ""}">${label}</button>`).join("")}</div><button type="button" class="audit-theme-auto ${currentTheme() === "auto" ? "active" : ""}" data-action="set-theme" data-value="auto" aria-pressed="${currentTheme() === "auto"}">${uiText("audit.settings.themeAuto")}</button></section><section class="audit-setting" data-unit-settings><h2>${uiText("units.label")}</h2><div class="audit-setting-choices" role="group" aria-label="${esc(uiText("units.label"))}">${[["metric", "m · kg"], ["imperial", "ft · lb"]].map(([value, label]) => `<button type="button" data-action="set-units" data-value="${value}" aria-pressed="${unitSystem() === value}" class="${unitSystem() === value ? "active" : ""}">${label}</button>`).join("")}</div><details class="audit-units-help"><summary>${uiText("audit.settings.unitDetails")}</summary><p>${uiText("units.convention")}</p><p>${uiText("units.sourceText")}</p></details></section></div><div class="audit-menu-list">${auditMenuRow("", "download", uiText("Sauvegardes"), { action: "audit-settings-open", extra: 'data-value="backups"' })}${auditMenuRow("offline", "download", uiText("Contenu hors ligne"))}</div><div class="audit-settings-more">${button(uiText("audit.settings.more"), "audit-settings-open", 'data-value="more"', "ghost small-btn")}</div></div>`;
+  return `<div class="audit-settings"><div class="page-head"><h1>${uiText("Réglages")}</h1></div><div class="audit-settings-grid"><section class="audit-setting audit-language"><h2><label for="settings-language">${uiText("audit.settings.language")}</label></h2>${renderLanguageSwitch()}</section><section class="audit-setting"><h2>${uiText("Apparence")}</h2><div class="audit-setting-choices" role="group" aria-label="${esc(uiText("Apparence"))}">${[["light", uiText("Clair")], ["dark", uiText("Sombre")]].map(([value, label]) => `<button type="button" data-action="set-theme" data-value="${value}" aria-pressed="${currentTheme() === value}" class="${currentTheme() === value ? "active" : ""}">${label}</button>`).join("")}</div><button type="button" class="audit-theme-auto ${currentTheme() === "auto" ? "active" : ""}" data-action="set-theme" data-value="auto" aria-pressed="${currentTheme() === "auto"}">${uiText("audit.settings.themeAuto")}</button></section><section class="audit-setting" data-unit-settings><h2>${uiText("units.label")}</h2><div class="audit-setting-choices" role="group" aria-label="${esc(uiText("units.label"))}">${[["metric", "m · kg"], ["imperial", "ft · lb"]].map(([value, label]) => `<button type="button" data-action="set-units" data-value="${value}" aria-pressed="${unitSystem() === value}" class="${unitSystem() === value ? "active" : ""}">${label}</button>`).join("")}</div><details class="audit-units-help"><summary>${uiText("audit.settings.unitDetails")}</summary><p>${uiText("units.convention")}</p><p>${uiText("units.sourceText")}</p></details></section><section class="audit-setting audit-list-order" data-list-order-settings><h2>${uiText("listOrder.label")}</h2><div class="audit-setting-choices" role="group" aria-label="${esc(uiText("listOrder.label"))}">${[["core", uiText("listOrder.core")], ["alpha", uiText("listOrder.alpha")]].map(([value, label]) => `<button type="button" data-action="set-list-order" data-value="${value}" aria-pressed="${listOrder() === value}" class="${listOrder() === value ? "active" : ""}">${label}</button>`).join("")}</div><p class="small muted section-gap">${uiText("listOrder.help")}</p></section></div><div class="audit-menu-list">${auditMenuRow("", "download", uiText("Sauvegardes"), { action: "audit-settings-open", extra: 'data-value="backups"' })}${auditMenuRow("offline", "download", uiText("Contenu hors ligne"))}</div><div class="audit-settings-more">${button(uiText("audit.settings.more"), "audit-settings-open", 'data-value="more"', "ghost small-btn")}</div><p class="audit-settings-version">${uiText("settings.version", { p0: APP_VERSION, p1: (document.querySelector('meta[name="compagnon-build"]')?.content || "").slice(0, 12) })}</p></div>`;
 }
 function traitCandidate() {
   const c = clone(activeCharacter()),
@@ -52897,6 +52946,12 @@ async function performMore(action, el, c, data, d) {
       const saved = setUnitSystem(data.value);
       render();
       if (!saved) toast(uiText("units.failure"));
+      break;
+    }
+    case "set-list-order": {
+      const saved = setListOrder(data.value);
+      render();
+      if (!saved) toast(uiText("listOrder.failure"));
       break;
     }
     case "set-language": {
@@ -53316,6 +53371,18 @@ function creationChoiceLayout(kind) {
 function creationChoiceNormalize(value) {
   return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr-FR");
 }
+/** Classes dans l’ordre choisi en réglage : de A à Z, ou le Manuel des joueurs d’abord. */
+function sortedClassEntries() {
+  return sortListChoices(Object.entries(uiClasses), ([, cls]) => cls.name, ([id]) => coreListSource(CLASS_LEVEL_RULES[id]?.source));
+}
+/** Options de progression rangées comme la liste des classes. */
+function sortedClassOptions(options) {
+  const rank = sortedClassEntries().map(([id]) => id);
+  return [...options].sort((a, b) => rank.indexOf(a.classId) - rank.indexOf(b.classId));
+}
+function sortedBackgroundEntries() {
+  return sortListChoices(Object.entries(uiBackgrounds), ([, background]) => background.name, ([, background]) => coreListSource(background.source));
+}
 function creationChoiceDirectory(kind, items, current, inspected) {
   const classList = kind === "class",
     queryKey = classList ? "creationClassQuery" : "creationBackgroundQuery",
@@ -53515,7 +53582,7 @@ function renderMagicStep(w, c) {
 }
 function renderStartingClassPicker(c, level) {
   const current = c.levels[level - 1].classId,
-    options = progressionClassOptions(c, level).filter((entry) => entry.ok || entry.classId === current),
+    options = sortedClassOptions(progressionClassOptions(c, level).filter((entry) => entry.ok || entry.classId === current)),
     id = `starting-class-${level}`;
   return `<section class="choice-spec"><label class="field" for="${id}"><span>${uiText("Classe du niveau {p1}", { p1: level })}</span><select id="${id}" data-bind="wiz.progressionClass.${level}">${options.map((entry) => `<option value="${entry.classId}" ${current === entry.classId ? "selected" : ""} ${entry.ok ? "" : "disabled"}>${esc(uiClasses[entry.classId].name)} ${entry.classLevel}${entry.ok ? "" : uiText(" (prérequis manquants)")}</option>`).join("")}</select></label></section>`;
 }
@@ -54209,9 +54276,9 @@ function renderLevelFlow() {
   if (f.step === 0) {
     const lines = creationLevelLines(c, level), open = creationNextOpenLine(lines, creationNextLineScope());
     let classPicker = "";
-    if (!f.isNew) classPicker = selectField(uiText("Classe du niveau {p0}", { p0: level }), "lvl.repairClass", l.classId, Object.fromEntries(Object.entries(uiClasses).map(([id, cls]) => [id, cls.name])), uiText("Les choix touchés restent dans l’historique. Vérifie les niveaux suivants."));
+    if (!f.isNew) classPicker = selectField(uiText("Classe du niveau {p0}", { p0: level }), "lvl.repairClass", l.classId, Object.fromEntries(sortedClassEntries().map(([id, cls]) => [id, cls.name])), uiText("Les choix touchés restent dans l’historique. Vérifie les niveaux suivants."));
     if (f.isNew) {
-      const opts = progressionClassOptions(c, level).filter((option) => option.ok || option.classId === l.classId);
+      const opts = sortedClassOptions(progressionClassOptions(c, level).filter((option) => option.ok || option.classId === l.classId));
       const current = opts.filter((o) => o.current),
         others = opts.filter((o) => !o.current);
       const card = (o) => {
@@ -58514,6 +58581,7 @@ const ui = {
   saving: false,
   online: navigator.onLine,
   update: false,
+  updateDownloading: false,
   journalSelectedId: null,
   journalQuery: "",
   journalCharacterId: null,
@@ -58713,7 +58781,7 @@ function renderNow() {
   const saveLabel = ui.saving ? uiText("save.saving") : localStore.readOnly ? uiText("save.readonly") : localStore.mode === "memory" ? uiText("save.memory") : ui.online ? uiText("save.local") : uiText("save.offline");
   const mobileStatus = ui.saving ? uiText("save.saving") : localStore.readOnly ? uiText("save.readonly") : localStore.mode === "memory" ? uiText("save.unsaved") : ui.online ? uiText("save.saved") : uiText("save.offlineShort");
   clearDashboardMount();
-  root.innerHTML = `<a class="skip" href="#main-content">${uiText("shell.skip")}</a><div class="app-shell ${emptyHome ? "empty-home" : ""}" style="--livery:${liveryOf(c)}"><aside class="sidebar"><button class="brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 30)}</span><span><span class="brand-name">Compagnon</span></span></button><div class="sidebar-label">${uiText("shell.table")}</div>${navFor(c).map(([route, ico, label]) => `<button class="nav-btn ${ui.route === route && !wizardActive ? "active" : ""}" data-action="navigate" data-route="${route}" ${ui.route === route && !wizardActive ? 'aria-current="page"' : ""} ${!c ? "disabled" : ""}>${icon(ico, 20)}${uiText(`nav.${route}`)}</button>`).join("")}<div class="sidebar-bottom"><button class="nav-btn ${ui.route === "library" ? "active" : ""}" data-action="navigate" data-route="library">${uiText("{p6}Bibliothèque", { p6: icon("book", 20) })}</button><button class="nav-btn ${ui.route === "offline" ? "active" : ""}" data-action="navigate" data-route="offline">${uiText("{p8}Contenu hors ligne", { p8: icon("download", 20) })}</button><button class="nav-btn ${ui.route === "home" && !wizardActive ? "active" : ""}" data-action="navigate" data-route="home">${uiText("{p10}Mes personnages", { p10: icon("users", 20) })}</button><button class="nav-btn ${ui.route === "settings" ? "active" : ""}" data-action="navigate" data-route="settings">${uiText("{p12}Réglages & sauvegardes", { p12: icon("settings", 20) })}</button><div class="local-note">${icon("lock", 19)}<div>${uiText("shell.local")}</div></div><div class="side-footer"><span>${uiText("shell.rules")}</span><span>v${APP_VERSION}</span></div></div></aside><div class="main-shell"><header class="topbar"><div class="top-title"><strong>${wizardActive ? uiText("shell.creation") : uiText(`nav.${ui.route}`)}</strong></div><button class="brand mobile-brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 26)}</span><span><span class="brand-name">Compagnon</span><span class="brand-sub">${uiText("shell.rules")}</span></span></button><div class="top-actions"><span class="save-status" title="${esc(saveLabel)}" role="status"><span class="status-dot" style="${localStore.mode === "memory" || localStore.readOnly ? "background:var(--warning)" : ""}" aria-hidden="true"></span><span class="status-text">${esc(saveLabel)}</span><span class="status-mobile">${esc(mobileStatus)}</span></span>${c && !wizardActive ? renderCharacterMenu(c) : !isInstalledApp() ? `<span class="top-utility">${smallIcon("phone", "install", uiText("shell.install"))}</span>` : ""}</div></header>${ui.languageWarning ? notice(uiText("language.failure"), "warning") : ""}${ui.update ? `<div class="update-banner">${uiText("Une nouvelle version est prête. Tes fiches seront conservées.{p0}", { p0: button(uiText("Mettre à jour"), "update-app", "", "small-btn") })}</div>` : ""}${localStore.mode === "memory" ? notice(("Le navigateur bloque le stockage. <strong>" + uiText("Les changements ne survivront pas à la fermeture.") + "</strong> Exporte tes fiches et ouvre l’application hors navigation privée."), "error") : ""}${localStore.readOnly ? notice(uiText("Le stockage de ce navigateur est en lecture seule. Exporte tes fiches pour les conserver dans un navigateur compatible."), "warning") : ""}${localStore.pendingState ? notice(uiText("Une modification n’a pas été enregistrée. {p0}", { p0: button(uiText("Exporter les modifications en attente"), "export-pending", "", "small-btn") }), "warning") : ""}${appData.recovery?.length ? notice(uiText("{p0} fiche(s) nécessitent une récupération. Les autres restent accessibles. {p1}", { p0: appData.recovery.length, p1: button(uiText("Exporter les données à récupérer"), "export-recovery", "", "small-btn") }), "warning") : ""}<main class="main ${wizardActive ? "wizard-active" : ""}" id="main-content" tabindex="-1">${ui.wizard ? renderWizard() : ui.levelFlow ? renderLevelFlow() : renderPage(c)}${c ? printSheet(c) : ""}</main></div></div><nav class="mobile-nav" aria-label="${esc(uiText("shell.navigation"))}">${[
+  root.innerHTML = `<a class="skip" href="#main-content">${uiText("shell.skip")}</a><div class="app-shell ${emptyHome ? "empty-home" : ""}" style="--livery:${liveryOf(c)}"><aside class="sidebar"><button class="brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 30)}</span><span><span class="brand-name">Compagnon</span></span></button><div class="sidebar-label">${uiText("shell.table")}</div>${navFor(c).map(([route, ico, label]) => `<button class="nav-btn ${ui.route === route && !wizardActive ? "active" : ""}" data-action="navigate" data-route="${route}" ${ui.route === route && !wizardActive ? 'aria-current="page"' : ""} ${!c ? "disabled" : ""}>${icon(ico, 20)}${uiText(`nav.${route}`)}</button>`).join("")}<div class="sidebar-bottom"><button class="nav-btn ${ui.route === "library" ? "active" : ""}" data-action="navigate" data-route="library">${uiText("{p6}Bibliothèque", { p6: icon("book", 20) })}</button><button class="nav-btn ${ui.route === "offline" ? "active" : ""}" data-action="navigate" data-route="offline">${uiText("{p8}Contenu hors ligne", { p8: icon("download", 20) })}</button><button class="nav-btn ${ui.route === "home" && !wizardActive ? "active" : ""}" data-action="navigate" data-route="home">${uiText("{p10}Mes personnages", { p10: icon("users", 20) })}</button><button class="nav-btn ${ui.route === "settings" ? "active" : ""}" data-action="navigate" data-route="settings">${uiText("{p12}Réglages & sauvegardes", { p12: icon("settings", 20) })}</button><div class="local-note">${icon("lock", 19)}<div>${uiText("shell.local")}</div></div><div class="side-footer"><span>${uiText("shell.rules")}</span><span>v${APP_VERSION}</span></div></div></aside><div class="main-shell"><header class="topbar"><div class="top-title"><strong>${wizardActive ? uiText("shell.creation") : uiText(`nav.${ui.route}`)}</strong></div><button class="brand mobile-brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 26)}</span><span><span class="brand-name">Compagnon</span><span class="brand-sub">${uiText("shell.rules")}</span></span></button><div class="top-actions"><span class="save-status" title="${esc(saveLabel)}" role="status"><span class="status-dot" style="${localStore.mode === "memory" || localStore.readOnly ? "background:var(--warning)" : ""}" aria-hidden="true"></span><span class="status-text">${esc(saveLabel)}</span><span class="status-mobile">${esc(mobileStatus)}</span></span>${c && !wizardActive ? renderCharacterMenu(c) : !isInstalledApp() ? `<span class="top-utility">${smallIcon("phone", "install", uiText("shell.install"))}</span>` : ""}</div></header>${ui.languageWarning ? notice(uiText("language.failure"), "warning") : ""}${ui.update ? `<div class="update-banner">${uiText("Une nouvelle version est prête. Tes fiches seront conservées.{p0}", { p0: button(uiText("Mettre à jour"), "update-app", "", "small-btn") })}</div>` : ui.updateDownloading ? `<div class="update-banner" role="status">${uiText("update.downloading")}</div>` : ""}${localStore.mode === "memory" ? notice(("Le navigateur bloque le stockage. <strong>" + uiText("Les changements ne survivront pas à la fermeture.") + "</strong> Exporte tes fiches et ouvre l’application hors navigation privée."), "error") : ""}${localStore.readOnly ? notice(uiText("Le stockage de ce navigateur est en lecture seule. Exporte tes fiches pour les conserver dans un navigateur compatible."), "warning") : ""}${localStore.pendingState ? notice(uiText("Une modification n’a pas été enregistrée. {p0}", { p0: button(uiText("Exporter les modifications en attente"), "export-pending", "", "small-btn") }), "warning") : ""}${appData.recovery?.length ? notice(uiText("{p0} fiche(s) nécessitent une récupération. Les autres restent accessibles. {p1}", { p0: appData.recovery.length, p1: button(uiText("Exporter les données à récupérer"), "export-recovery", "", "small-btn") }), "warning") : ""}<main class="main ${wizardActive ? "wizard-active" : ""}" id="main-content" tabindex="-1">${ui.wizard ? renderWizard() : ui.levelFlow ? renderLevelFlow() : renderPage(c)}${c ? printSheet(c) : ""}</main></div></div><nav class="mobile-nav" aria-label="${esc(uiText("shell.navigation"))}">${[
     ["sheet", "clipboard", uiText("Fiche")],
     ["spells", "book", uiText("Sorts")],
     ["features", "swords", uiText("Aptitudes")],
@@ -59229,7 +59297,7 @@ async function perform(action, el) {
     case "temporary-hp": case "quick-amount": case "apply-amount": case "print": case "print-select-all": case "confirm-print": case "ac-info":
       await performSheet(action, el, c, data, d); break;
     case "export-pending": case "export-repair-draft": case "export-recovery": case "download-content": case "pause-content": case "clear-content": case "check-content":
-    case "set-units": case "set-language": case "audit-settings-open": case "audit-more-companions": case "audit-more-back": case "demo": case "new-trait":
+    case "set-units": case "set-list-order": case "set-language": case "audit-settings-open": case "audit-more-companions": case "audit-more-back": case "demo": case "new-trait":
     case "edit-trait": case "review-trait": case "toggle-trait": case "delete-trait": case "new-custom-spell": case "edit-custom-spell": case "review-custom-spell":
     case "delete-custom-spell": case "export-one": case "export-all": case "aidedd-same-class": case "aidedd-resolve": case "aidedd-open": case "aidedd-back":
     case "aidedd-export": case "aidedd-report": case "aidedd-edit": case "aidedd-confirm": case "import": case "confirm-import": case "persist-storage": case "install":
@@ -59683,6 +59751,27 @@ window.addEventListener("appinstalled", () => {
   render();
   toast("Compagnon est installé.");
 });
+// L’appli installée reste ouverte des jours : à l’ouverture, puis au retour sur l’onglet après une minute d’absence,
+// un petit fichier dit quel build est publié. S’il a changé, le téléchargement part aussitôt et le bandeau le signale.
+const UPDATE_CHECK_PAUSE = 60 * 1000;
+let hiddenSince = null;
+async function checkForUpdate() {
+  if (!swRegistration || ui.update) return;
+  try {
+    const response = await fetch(`./version.json?t=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) return;
+    const { appBuild } = await response.json();
+    if (!appBuild || appBuild === document.querySelector('meta[name="compagnon-build"]')?.content) return;
+    if (!ui.updateDownloading) { ui.updateDownloading = true; render(); }
+    await swRegistration.update();
+  } catch { /* Hors ligne : le prochain retour sur l’onglet vérifiera de nouveau. */ }
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) { hiddenSince = Date.now(); return; }
+  const away = hiddenSince !== null && Date.now() - hiddenSince >= UPDATE_CHECK_PAUSE;
+  hiddenSince = null;
+  if (away) void checkForUpdate();
+});
 async function setupServiceWorker() {
   if (window.COMPANION_STANDALONE || !("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
   try {
@@ -59696,10 +59785,17 @@ async function setupServiceWorker() {
       worker?.addEventListener("statechange", () => {
         if (worker.state === "installed" && navigator.serviceWorker.controller) {
           ui.update = true;
+          ui.updateDownloading = false;
+          render();
+        }
+        // Téléchargement abandonné : le bandeau disparaît, la prochaine vérification relancera.
+        if (worker.state === "redundant" && ui.updateDownloading && !ui.update) {
+          ui.updateDownloading = false;
           render();
         }
       });
     });
+    void checkForUpdate();
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       // La fenêtre qui a demandé la mise à jour bascule dès que le nouveau worker a pris la main.
       if (updateRequested) { location.reload(); return; }

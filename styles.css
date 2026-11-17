@@ -2772,7 +2772,7 @@ button.state-active::after{content:"";position:absolute;inset:-11px 0}
 .audit-settings .page-head h1,.audit-more .page-head h1{font-family:var(--serif);font-size:30px;line-height:1.15;margin:0}
 .audit-settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
 .audit-setting{min-width:0;padding:14px;border:1px solid var(--line);border-radius:4px;background:var(--panel)}
-.audit-setting.audit-language{grid-column:1/-1}
+.audit-setting.audit-language,.audit-setting.audit-list-order{grid-column:1/-1}
 .audit-setting h2{font-family:var(--serif);font-size:22px;line-height:1.2;margin:0 0 10px;font-weight:700}
 .audit-language select{width:100%;min-height:44px;border:1px solid var(--line);border-radius:4px;background:transparent;color:var(--ink);padding:8px 12px;font-family:inherit;font-size:14px;font-weight:600}
 .audit-setting-choices{display:flex;gap:5px;flex-wrap:wrap}
@@ -2793,6 +2793,7 @@ button.state-active::after{content:"";position:absolute;inset:-11px 0}
 .audit-menu-label{margin:23px 0 10px;font:400 12px/1.4 var(--sans);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
 .audit-more .page-head+.audit-menu-label{margin-top:0}
 .audit-settings-more{margin-top:16px}
+.audit-settings-version{margin:12px 0 0;color:var(--muted);font-size:12px}
 .audit-settings-more>.btn{padding:6px 0;border:0;background:transparent;color:var(--muted);font-family:inherit}
 .audit-back{margin-bottom:16px}
 .audit-character-actions{margin-top:20px;font-size:14px;color:var(--muted)}
