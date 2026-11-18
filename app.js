@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-preview.24";
+const APP_VERSION = "2.0.0-candidate-1";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -5187,7 +5187,19 @@ const UI_FR = Object.freeze({
   "omen.correct.title": "Corriger le présage",
   "omen.correct.field": "Résultat du dé",
   "omen.correct.note": "Si tu as lancé un vrai dé, choisis son résultat.",
-  "roll.phrase.omen.rest": "Le signe vaut jusqu’à ton prochain repos long."
+  "roll.phrase.omen.rest": "Le signe vaut jusqu’à ton prochain repos long.",
+  "import.intro.new": "{count} fiche(s) valide(s), ajoutée(s) à tes personnages.",
+  "import.intro.existing": "{count} fiche(s) valide(s). Pour un personnage déjà présent, choisis de le remplacer ou de garder les deux ; la version remplacée reste dans « Retour en arrière ».",
+  "import.existing": "Déjà sur cet appareil, modifiée le {date}.",
+  "import.replace": "Remplacer",
+  "import.keepBoth": "Garder les deux",
+  "import.newerHere": "La fiche de cet appareil est plus récente que celle importée.",
+  "import.done": "{count} fiche(s) importée(s).",
+  "import.doneReplaced": "{count} fiche(s) importée(s), dont {replaced} remplacée(s).",
+  "Remplacée par un import": "Remplacée par un import",
+  "Une fiche déjà présente peut être remplacée. Les sauvegardes de la version précédente sont converties.": "Une fiche déjà présente peut être remplacée. Les sauvegardes de la version précédente sont converties.",
+  "Colle ici le texte d’une sauvegarde Compagnon.": "Colle ici le texte d’une sauvegarde Compagnon.",
+  "Importer ces personnages ?": "Importer ces personnages ?"
 });
 
 
@@ -10012,7 +10024,19 @@ const UI_EN = Object.freeze({
   "omen.correct.title": "Correct the omen",
   "omen.correct.field": "Die result",
   "omen.correct.note": "If you rolled a real die, choose its result.",
-  "roll.phrase.omen.rest": "The omen lasts until your next long rest."
+  "roll.phrase.omen.rest": "The omen lasts until your next long rest.",
+  "import.intro.new": "{count} valid character(s), added to your characters.",
+  "import.intro.existing": "{count} valid character(s). For a character already here, choose to replace it or keep both; the replaced version stays in “Undo history”.",
+  "import.existing": "Already on this device, modified {date}.",
+  "import.replace": "Replace",
+  "import.keepBoth": "Keep both",
+  "import.newerHere": "The sheet on this device is newer than the imported one.",
+  "import.done": "{count} character(s) imported.",
+  "import.doneReplaced": "{count} character(s) imported, {replaced} replaced.",
+  "Remplacée par un import": "Replaced by an import",
+  "Une fiche déjà présente peut être remplacée. Les sauvegardes de la version précédente sont converties.": "A character already here can be replaced. Previous-version backups are converted.",
+  "Colle ici le texte d’une sauvegarde Compagnon.": "Paste a Compagnon backup here.",
+  "Importer ces personnages ?": "Import these characters?"
 });
 
 
@@ -53787,7 +53811,7 @@ function renderSettings() {
       .filter((s) => !c || s.characterId === c.id)
       .slice(-12)
       .reverse();
-  if (ui.auditSettingsSection) return `<div class="audit-settings"><div class="page-head"><h1>${uiText(ui.auditSettingsSection === "backups" ? "Sauvegardes" : "audit.settings.more")}</h1></div>${button(uiText("audit.settings.back"), "audit-settings-open", 'data-value=""', "small-btn ghost audit-back")}<div class="settings-stack">${ui.auditSettingsSection === "backups" ? `<section class="panel"><h3>${uiText("Sauvegardes")}</h3><div class="settings-row"><div><strong>${uiText("Sur cet appareil")}</strong><p>${uiText("Les fiches sont enregistrées dans ce navigateur, sans synchronisation.")}</p></div><span class="pill">${uiText("{p4} fiche(s)", { p4: appData.characters.length })}</span></div><div class="settings-row"><div><strong>${uiText("Exporter toutes les fiches")}</strong><p>${appData.lastExport ? uiText("settings.lastExport", { p0: dateLabel(appData.lastExport) }) : uiText("Aucun export effectué sur cet appareil.")}</p></div>${button(uiText("{p0} Export JSON", { p0: icon("download", 16) }), "export-all", "", "small-btn green")}</div><div class="settings-row"><div><strong>${uiText("Importer un fichier JSON")}</strong><p>${uiText("Les fiches sont ajoutées en copie, jamais écrasées. Les sauvegardes de la version précédente sont converties.")}</p></div>${button(uiText("{p0} Importer", { p0: icon("upload", 16) }), "import", "", "small-btn")}</div><div class="settings-row"><div><strong>${uiText("Copier ou coller une sauvegarde")}</strong></div><div class="actions">${button(uiText("Copier"), "export-all", "", "small-btn")}${button(uiText("Coller"), "paste-import", "", "small-btn")}</div></div>${notice(uiText("Effacer les données du site, changer de navigateur ou de téléphone peut supprimer les fiches. Exporte-les régulièrement."), "warning")}<details class="settings-details"><summary>${uiText("Détails du stockage")}</summary><p class="small muted section-gap">${uiText("Stockage {p16}", { p16: localStore.mode === "indexeddb" ? "IndexedDB" : localStore.mode === "localstorage" ? "localStorage" : "temporaire" })}</p><div class="settings-row"><div><strong>${uiText("Demander un stockage persistant")}</strong><p>${uiText("Le navigateur décide de l’accorder. Cela ne remplace pas une sauvegarde.")}</p></div>${button(uiText("Demander"), "persist-storage", "", "small-btn")}</div></details></section>` : `<section class="panel"><h3>${uiText("Composantes consommées")}</h3><div class="settings-row"><div><strong>${uiText("Suivi du stock et des PO")}</strong><p>${uiText("En désactivant ce suivi, gère les composantes à la table.")}</p></div>${button(componentTracking() ? uiText("Activé") : uiText("Désactivé"), "toggle-components", `aria-pressed="${componentTracking()}"`, "small-btn")}</div></section><section class="panel"><h3>${uiText("Munitions")}</h3><div class="settings-row"><div><strong>${uiText("Consommation unitaire")}</strong><p>${uiText("En désactivant ce suivi, gère les dépenses à la table.")}</p></div>${button(ammunitionTracking() ? uiText("Activé") : uiText("Désactivé"), "toggle-ammunition", `aria-pressed="${ammunitionTracking()}"`, "small-btn")}</div></section><section class="panel"><h3>${uiText("Installer Compagnon")}</h3><div class="settings-row"><div>${renderCompactHelp(uiText("Sur Android : menu du navigateur, Installer. Sur iPhone : Safari, Partager, Sur l’écran d’accueil."), uiText("Aide à l’installation"))}</div>${button(uiText("{p0} Installer", { p0: icon("phone", 16) }), "install", "", "small-btn")}</div><div class="settings-row"><div><strong>${uiText("Contenu hors ligne")}</strong><p>${uiText("Télécharge le catalogue complet et vérifie sa disponibilité avant ta séance.")}</p></div>${button(uiText("Préparer le contenu"), "navigate", 'data-route="offline"', "small-btn")}</div></section>${history.length ? `<section class="panel"><div class="panel-head"><h3>${uiText("Retour en arrière")}</h3></div>${renderCompactHelp(uiText("Historique limité à 30 versions et 12 Mio de photos. Les versions conservées sont complètes."))}${history.map((s) => `<div class="history-row"><div>${esc(uiStoredText(s.label))}<small>${dateLabel(s.date)} · ${esc(s.character.name)}</small>${s.operation?.description ? `<small>${esc(uiStoredText(s.operation.description))}</small>` : ""}${s.operation?.impactRows?.map((row) => `<small>${esc(uiText("history.impact", { label: uiStoredText(row.label), before: uiStoredText(row.before ?? ""), after: uiStoredText(row.after ?? "") }))}${row.source ? ` · ${esc(uiStoredText(row.source))}` : ""}</small>`).join("") || ""}</div>${s.operation ? s.operation.undone ? ("<small>" + uiText("Opération annulée") + "</small>") : button(uiText("Annuler l’opération"), "undo-session", `data-id="${esc(s.id)}"`, "small-btn ghost") : ""}${button(uiText("Restaurer la fiche"), "restore-snapshot", `data-id="${esc(s.id)}"`, "small-btn ghost")}</div>`).join("")}</section>` : ""}<details class="panel settings-details"><summary>${uiText("Calculs et limites")}</summary><p class="small muted section-gap">${uiText("Sous-classes, dons et multiclassage jusqu’au niveau 20.")}</p><p class="small muted section-gap">${uiText("Caractéristiques, maîtrises, expertise, langues et outils ; PV, CA (armures, défense sans armure, styles), initiative, vitesse ; attaques de chaque arme ; emplacements de sorts y compris multiclasse et pacte ; sorts connus, préparés et toujours préparés ; ressources de classe, de sous-classe, d’origine et de dons ; repos et dés de vie.")}</p></details><details class="panel settings-details"><summary>${uiText("Crédits")}</summary><p class="small muted section-gap">${uiText("Résumés de jeu. Consulte les références pour le texte complet.")}</p><p class="small muted section-gap">${uiText("Ce travail comprend du contenu du Document de Référence du Système 5.1 (« SRD 5.1 ») de Wizards of the Coast LLC, disponible à l’adresse ")}<a href="https://dnd.wizards.com/fr/resources/systems-reference-document" target="_blank" rel="noopener noreferrer">${uiText("Document de Référence du Système")}</a>${uiText(", sous licence ")}<a href="https://creativecommons.org/licenses/by/4.0/legalcode.fr" target="_blank" rel="noopener noreferrer">Creative Commons Attribution 4.0 International</a>.</p><p class="small muted">${uiText("Terminologie et textes de référence : SRD 5.1 français. Traductions et adaptations : Compagnon. La référence anglaise est consultable lorsqu’elle est disponible. Compagnon est une application indépendante. Version {p47}.", { p47: APP_VERSION })}</p><p class="small"><a href="${SRD_URL}" target="_blank" rel="noopener noreferrer">${uiText("Lire le SRD 5.1 français officiel ↗")}</a></p></details>${c ? `<section class="panel"><div class="settings-row"><div><strong>${uiText("Supprimer {p0}", { p0: esc(c.name) })}</strong><p>${uiText("Exporte d’abord sa fiche. Les autres personnages seront conservés.")}</p></div>${button(uiText("Supprimer"), "delete-character", "", "small-btn danger")}</div></section>` : ""}`}</div></div>`;
+  if (ui.auditSettingsSection) return `<div class="audit-settings"><div class="page-head"><h1>${uiText(ui.auditSettingsSection === "backups" ? "Sauvegardes" : "audit.settings.more")}</h1></div>${button(uiText("audit.settings.back"), "audit-settings-open", 'data-value=""', "small-btn ghost audit-back")}<div class="settings-stack">${ui.auditSettingsSection === "backups" ? `<section class="panel"><h3>${uiText("Sauvegardes")}</h3><div class="settings-row"><div><strong>${uiText("Sur cet appareil")}</strong><p>${uiText("Les fiches sont enregistrées dans ce navigateur, sans synchronisation.")}</p></div><span class="pill">${uiText("{p4} fiche(s)", { p4: appData.characters.length })}</span></div><div class="settings-row"><div><strong>${uiText("Exporter toutes les fiches")}</strong><p>${appData.lastExport ? uiText("settings.lastExport", { p0: dateLabel(appData.lastExport) }) : uiText("Aucun export effectué sur cet appareil.")}</p></div>${button(uiText("{p0} Export JSON", { p0: icon("download", 16) }), "export-all", "", "small-btn green")}</div><div class="settings-row"><div><strong>${uiText("Importer un fichier JSON")}</strong><p>${uiText("Une fiche déjà présente peut être remplacée. Les sauvegardes de la version précédente sont converties.")}</p></div>${button(uiText("{p0} Importer", { p0: icon("upload", 16) }), "import", "", "small-btn")}</div><div class="settings-row"><div><strong>${uiText("Copier ou coller une sauvegarde")}</strong></div><div class="actions">${button(uiText("Copier"), "export-all", "", "small-btn")}${button(uiText("Coller"), "paste-import", "", "small-btn")}</div></div>${notice(uiText("Effacer les données du site, changer de navigateur ou de téléphone peut supprimer les fiches. Exporte-les régulièrement."), "warning")}<details class="settings-details"><summary>${uiText("Détails du stockage")}</summary><p class="small muted section-gap">${uiText("Stockage {p16}", { p16: localStore.mode === "indexeddb" ? "IndexedDB" : localStore.mode === "localstorage" ? "localStorage" : "temporaire" })}</p><div class="settings-row"><div><strong>${uiText("Demander un stockage persistant")}</strong><p>${uiText("Le navigateur décide de l’accorder. Cela ne remplace pas une sauvegarde.")}</p></div>${button(uiText("Demander"), "persist-storage", "", "small-btn")}</div></details></section>` : `<section class="panel"><h3>${uiText("Composantes consommées")}</h3><div class="settings-row"><div><strong>${uiText("Suivi du stock et des PO")}</strong><p>${uiText("En désactivant ce suivi, gère les composantes à la table.")}</p></div>${button(componentTracking() ? uiText("Activé") : uiText("Désactivé"), "toggle-components", `aria-pressed="${componentTracking()}"`, "small-btn")}</div></section><section class="panel"><h3>${uiText("Munitions")}</h3><div class="settings-row"><div><strong>${uiText("Consommation unitaire")}</strong><p>${uiText("En désactivant ce suivi, gère les dépenses à la table.")}</p></div>${button(ammunitionTracking() ? uiText("Activé") : uiText("Désactivé"), "toggle-ammunition", `aria-pressed="${ammunitionTracking()}"`, "small-btn")}</div></section><section class="panel"><h3>${uiText("Installer Compagnon")}</h3><div class="settings-row"><div>${renderCompactHelp(uiText("Sur Android : menu du navigateur, Installer. Sur iPhone : Safari, Partager, Sur l’écran d’accueil."), uiText("Aide à l’installation"))}</div>${button(uiText("{p0} Installer", { p0: icon("phone", 16) }), "install", "", "small-btn")}</div><div class="settings-row"><div><strong>${uiText("Contenu hors ligne")}</strong><p>${uiText("Télécharge le catalogue complet et vérifie sa disponibilité avant ta séance.")}</p></div>${button(uiText("Préparer le contenu"), "navigate", 'data-route="offline"', "small-btn")}</div></section>${history.length ? `<section class="panel"><div class="panel-head"><h3>${uiText("Retour en arrière")}</h3></div>${renderCompactHelp(uiText("Historique limité à 30 versions et 12 Mio de photos. Les versions conservées sont complètes."))}${history.map((s) => `<div class="history-row"><div>${esc(uiStoredText(s.label))}<small>${dateLabel(s.date)} · ${esc(s.character.name)}</small>${s.operation?.description ? `<small>${esc(uiStoredText(s.operation.description))}</small>` : ""}${s.operation?.impactRows?.map((row) => `<small>${esc(uiText("history.impact", { label: uiStoredText(row.label), before: uiStoredText(row.before ?? ""), after: uiStoredText(row.after ?? "") }))}${row.source ? ` · ${esc(uiStoredText(row.source))}` : ""}</small>`).join("") || ""}</div>${s.operation ? s.operation.undone ? ("<small>" + uiText("Opération annulée") + "</small>") : button(uiText("Annuler l’opération"), "undo-session", `data-id="${esc(s.id)}"`, "small-btn ghost") : ""}${button(uiText("Restaurer la fiche"), "restore-snapshot", `data-id="${esc(s.id)}"`, "small-btn ghost")}</div>`).join("")}</section>` : ""}<details class="panel settings-details"><summary>${uiText("Calculs et limites")}</summary><p class="small muted section-gap">${uiText("Sous-classes, dons et multiclassage jusqu’au niveau 20.")}</p><p class="small muted section-gap">${uiText("Caractéristiques, maîtrises, expertise, langues et outils ; PV, CA (armures, défense sans armure, styles), initiative, vitesse ; attaques de chaque arme ; emplacements de sorts y compris multiclasse et pacte ; sorts connus, préparés et toujours préparés ; ressources de classe, de sous-classe, d’origine et de dons ; repos et dés de vie.")}</p></details><details class="panel settings-details"><summary>${uiText("Crédits")}</summary><p class="small muted section-gap">${uiText("Résumés de jeu. Consulte les références pour le texte complet.")}</p><p class="small muted section-gap">${uiText("Ce travail comprend du contenu du Document de Référence du Système 5.1 (« SRD 5.1 ») de Wizards of the Coast LLC, disponible à l’adresse ")}<a href="https://dnd.wizards.com/fr/resources/systems-reference-document" target="_blank" rel="noopener noreferrer">${uiText("Document de Référence du Système")}</a>${uiText(", sous licence ")}<a href="https://creativecommons.org/licenses/by/4.0/legalcode.fr" target="_blank" rel="noopener noreferrer">Creative Commons Attribution 4.0 International</a>.</p><p class="small muted">${uiText("Terminologie et textes de référence : SRD 5.1 français. Traductions et adaptations : Compagnon. La référence anglaise est consultable lorsqu’elle est disponible. Compagnon est une application indépendante. Version {p47}.", { p47: APP_VERSION })}</p><p class="small"><a href="${SRD_URL}" target="_blank" rel="noopener noreferrer">${uiText("Lire le SRD 5.1 français officiel ↗")}</a></p></details>${c ? `<section class="panel"><div class="settings-row"><div><strong>${uiText("Supprimer {p0}", { p0: esc(c.name) })}</strong><p>${uiText("Exporte d’abord sa fiche. Les autres personnages seront conservés.")}</p></div>${button(uiText("Supprimer"), "delete-character", "", "small-btn danger")}</div></section>` : ""}`}</div></div>`;
   return `<div class="audit-settings"><div class="page-head"><h1>${uiText("Réglages")}</h1></div><div class="audit-settings-grid"><section class="audit-setting audit-language"><h2><label for="settings-language">${uiText("audit.settings.language")}</label></h2>${renderLanguageSwitch()}</section><section class="audit-setting"><h2>${uiText("Apparence")}</h2><div class="audit-setting-choices" role="group" aria-label="${esc(uiText("Apparence"))}">${[["light", uiText("Clair")], ["dark", uiText("Sombre")]].map(([value, label]) => `<button type="button" data-action="set-theme" data-value="${value}" aria-pressed="${currentTheme() === value}" class="${currentTheme() === value ? "active" : ""}">${label}</button>`).join("")}</div><button type="button" class="audit-theme-auto ${currentTheme() === "auto" ? "active" : ""}" data-action="set-theme" data-value="auto" aria-pressed="${currentTheme() === "auto"}">${uiText("audit.settings.themeAuto")}</button></section><section class="audit-setting" data-unit-settings><h2>${uiText("units.label")}</h2><div class="audit-setting-choices" role="group" aria-label="${esc(uiText("units.label"))}">${[["metric", "m · kg"], ["imperial", "ft · lb"]].map(([value, label]) => `<button type="button" data-action="set-units" data-value="${value}" aria-pressed="${unitSystem() === value}" class="${unitSystem() === value ? "active" : ""}">${label}</button>`).join("")}</div><details class="audit-units-help"><summary>${uiText("audit.settings.unitDetails")}</summary><p>${uiText("units.convention")}</p><p>${uiText("units.sourceText")}</p></details></section><section class="audit-setting audit-list-order" data-list-order-settings><h2>${uiText("listOrder.label")}</h2><div class="audit-setting-choices" role="group" aria-label="${esc(uiText("listOrder.label"))}">${[["core", uiText("listOrder.core")], ["alpha", uiText("listOrder.alpha")]].map(([value, label]) => `<button type="button" data-action="set-list-order" data-value="${value}" aria-pressed="${listOrder() === value}" class="${listOrder() === value ? "active" : ""}">${label}</button>`).join("")}</div><p class="small muted section-gap">${uiText("listOrder.help")}</p></section></div><div class="audit-menu-list">${auditMenuRow("", "download", uiText("Sauvegardes"), { action: "audit-settings-open", extra: 'data-value="backups"' })}${auditMenuRow("offline", "download", uiText("Contenu hors ligne"))}</div><div class="audit-settings-more">${button(uiText("audit.settings.more"), "audit-settings-open", 'data-value="more"', "ghost small-btn")}</div>${appVersionLine()}</div>`;
 }
 function traitCandidate() {
@@ -53845,6 +53869,26 @@ async function checkImportedCharacters(list) {
     result.push(validateImport(character));
   }
   return result;
+}
+/** Fiche de cet appareil qu'une fiche importée remplacerait : même identifiant (exportée d'ici ou d'un autre appareil), sinon même nom. */
+function importTarget(character, taken = new Set()) {
+  const free = appData.characters.filter((c) => !taken.has(c.id)), name = character.name.trim().toLocaleLowerCase();
+  return free.find((c) => c.id === character.id) || free.find((c) => c.name.trim().toLocaleLowerCase() === name) || null;
+}
+/** Vérifie les fiches puis ouvre la confirmation ; une fiche déjà présente propose d'office de la remplacer. */
+async function prepareImport(list) {
+  ui.imported = await checkImportedCharacters(list);
+  const taken = new Set();
+  ui.importTargets = ui.imported.map((character) => { const target = importTarget(character, taken); if (target) taken.add(target.id); return target?.id || null; });
+  ui.importChoices = ui.importTargets.map((id) => id ? "replace" : "copy");
+  openModal("import");
+}
+/** Choix d'une fiche importée déjà présente : la remplacer ou garder les deux. La fiche de l'appareil plus récente est signalée. */
+function importChoiceHtml(character, index) {
+  const target = appData.characters.find((c) => c.id === ui.importTargets?.[index]);
+  if (!target) return "";
+  const choice = ui.importChoices[index], newer = target.updatedAt && character.updatedAt && target.updatedAt > character.updatedAt;
+  return `<div class="import-choice"><p class="small muted">${uiText("import.existing", { date: dateLabel(target.updatedAt) })}</p><div class="segmented" role="group" aria-label="${esc(character.name)}">${[["replace", uiText("import.replace")], ["copy", uiText("import.keepBoth")]].map(([value, label]) => `<button type="button" class="${choice === value ? "active" : ""}" aria-pressed="${choice === value}" data-action="import-choice" data-index="${index}" data-value="${value}">${label}</button>`).join("")}</div>${newer && choice === "replace" ? notice(uiText("import.newerHere"), "warning") : ""}</div>`;
 }
 function requestAideddImport() {
   if (!AIDEDD_IMPORT_ENABLED) return;
@@ -53927,8 +53971,7 @@ async function importSaveFile(file) {
     else if (raw && [1, SCHEMA_VERSION].includes(raw.schemaVersion) && (raw.classId || raw.levels)) list = [raw];
     else throw new Error(uiText("Ce fichier n’est pas une sauvegarde Compagnon."));
     if (list.length < 1 || list.length > 100) throw new Error(uiText("Importe entre 1 et 100 personnages à la fois."));
-    ui.imported = await checkImportedCharacters(list);
-    openModal("import");
+    await prepareImport(list);
   } catch (error) {
     openInfo("Import refusé", uiText("{p0} Aucune fiche existante n’a été modifiée.", { p0: error.message }));
   }
@@ -54200,26 +54243,38 @@ async function performMore(action, el, c, data, d) {
     case "import":
       requestImport();
       break;
+    case "import-choice":
+      ui.importChoices[Number(data.index)] = data.value === "replace" ? "replace" : "copy";
+      render();
+      break;
     case "confirm-import": {
-      const list = clone(ui.imported);
+      const list = clone(ui.imported), targets = list.map((_, index) => ui.importChoices?.[index] === "replace" ? ui.importTargets?.[index] : null);
+      let replaced = 0;
       await mutateApp(
         (s) => {
-          for (const item of list) {
-            const previousId = item.id;
-            item.id = uid();
+          list.forEach((item, index) => {
+            const previousId = item.id, target = targets[index] && s.characters.find((c) => c.id === targets[index]);
+            // Remplacer garde l'identifiant de la fiche de l'appareil ; sa version d'avant reste dans « Retour en arrière ».
+            item.id = target ? target.id : uid();
             for (const object of item.inventory || []) if (object.instance?.ownerId === previousId) object.instance.ownerId = item.id;
             for (const infusion of item.infusions || []) if (infusion.schemaVersion === 1 && infusion.creatorId === previousId) infusion.creatorId = item.id;
-            item.name = item.name.slice(0, 70) + " (import)";
-            item.updatedAt = new Date().toISOString();
-            s.characters.push(reconcileState(item));
-          }
+            // La fiche garde sa date de modification : réimporter le même fichier ne la fait pas passer pour plus récente.
+            const now = new Date().toISOString(), modified = item.updatedAt || now;
+            const imported = Object.assign(reconcileState(item), { updatedAt: modified });
+            if (target) {
+              s.snapshots.push({ id: uid(), characterId: target.id, label: "Remplacée par un import", date: now, character: clone(target) });
+              s.characters[s.characters.indexOf(target)] = imported;
+              replaced++;
+            } else s.characters.push(imported);
+          });
+          if (replaced) s.snapshots = retainJournalSnapshots(s.snapshots);
           s.activeId = list[0].id;
         },
         { redraw: false },
       );
       closeModal();
       go("home");
-      toast(uiText("{p0} fiche(s) importée(s), sans remplacer tes personnages.", { p0: list.length }));
+      toast(replaced ? uiText("import.doneReplaced", { count: list.length, replaced }) : uiText("import.done", { count: list.length }));
       break;
     }
     case "persist-storage": {
@@ -54290,8 +54345,7 @@ async function performMore(action, el, c, data, d) {
         else if ([1, SCHEMA_VERSION].includes(raw.schemaVersion) && (raw.classId || raw.levels)) list = [raw];
         else throw new Error(uiText("Ce texte n’est pas une sauvegarde Compagnon."));
         if (list.length < 1 || list.length > 100) throw new Error(uiText("Importe entre 1 et 100 personnages à la fois."));
-        ui.imported = await checkImportedCharacters(list);
-        openModal("import");
+        await prepareImport(list);
       } catch (error) {
         toast(error instanceof SyntaxError ? uiText("Texte illisible : colle la sauvegarde complète, du premier au dernier caractère.") : error.message, null, true);
       }
@@ -54336,8 +54390,8 @@ function renderMoreModals(c, d, cancel) {
   if (ui.modal === "aidedd") return renderAideddPreview();
   if (ui.modal === "import")
     return modalShell(
-      uiText("Ajouter ces personnages ?"),
-      `<p class="modal-copy">${uiText("{p0} fiche(s) valide(s). Chacune sera ajoutée comme une nouvelle copie ; aucun personnage existant ne sera remplacé.", { p0: ui.imported.length })}</p>${ui.imported.some((x) => x.referenceArchive?.unresolved?.length) ? notice(uiText("Certaines références ne sont pas incluses dans la sauvegarde. Elles restent identifiées ; aucune autre version ne sera choisie par son nom."), "warning") : ""}${ui.imported.map((x) => `<div class="summary-row"><span>${esc(x.name)}</span><strong>${esc(classSummary(x))}</strong></div>`).join("")}`,
+      uiText("Importer ces personnages ?"),
+      `<p class="modal-copy">${uiText(ui.importTargets?.some(Boolean) ? "import.intro.existing" : "import.intro.new", { count: ui.imported.length })}</p>${ui.imported.some((x) => x.referenceArchive?.unresolved?.length) ? notice(uiText("Certaines références ne sont pas incluses dans la sauvegarde. Elles restent identifiées ; aucune autre version ne sera choisie par son nom."), "warning") : ""}${ui.imported.map((x, index) => `<div class="summary-row"><span>${esc(x.name)}</span><strong>${esc(classSummary(x))}</strong></div>${importChoiceHtml(x, index)}`).join("")}`,
       cancel + button(uiText("Importer les fiches"), "confirm-import", "", "primary"),
     );
   if (ui.modal === "install")
@@ -54355,7 +54409,7 @@ function renderMoreModals(c, d, cancel) {
   if (ui.modal === "import-text")
     return modalShell(
       uiText("Coller une sauvegarde"),
-      `<p class="modal-copy">${uiText("Colle ici le texte d’une sauvegarde Compagnon. Les fiches sont ajoutées en copie, jamais écrasées.")}</p><label class="sr-only" for="import-json">${uiText("Sauvegarde JSON")}</label><textarea id="import-json" class="json-box" rows="8" data-bind="ui.importText" placeholder="{&quot;format&quot;:&quot;compagnon-srd51&quot;…}">${esc(ui.importText || "")}</textarea>`,
+      `<p class="modal-copy">${uiText("Colle ici le texte d’une sauvegarde Compagnon.")}</p><label class="sr-only" for="import-json">${uiText("Sauvegarde JSON")}</label><textarea id="import-json" class="json-box" rows="8" data-bind="ui.importText" placeholder="{&quot;format&quot;:&quot;compagnon-srd51&quot;…}">${esc(ui.importText || "")}</textarea>`,
       button(uiText("Annuler"), "close-modal", "", "ghost") + button(uiText("Vérifier la sauvegarde"), "parse-import-text", "", "primary"),
     );
 }
@@ -58201,7 +58255,7 @@ function rollCheck(name, bonus, kind = "check", options = {}) {
   };
   prepareDiceDialog(name, { kind, bonus, reliable: !!options.reliable }, {
     read,
-    note: options.note || "", reliableName: options.reliableName || "Savoir-faire", critThreshold: kind === "attack" ? options.critThreshold || uiDerive(c).critThreshold : 20, fxAbility: options.fxAbility || (options.modeRoll?.skill ? options.modeRoll.ability : null), fxTotal: !!options.fxTotal,
+    note: options.note || "", reliableName: options.reliableName || "Savoir-faire", critThreshold: kind === "attack" ? options.critThreshold || uiDerive(c).critThreshold : 20, fxAbility: options.fxAbility || (options.modeRoll?.kind === "check" ? options.modeRoll.ability : null), fxTotal: !!options.fxTotal,
     // Sauvegarde de caractéristique : ce que la fiche possède et qui dépend de l'effet subi, rappelé sous les dés sans rien cocher.
     reminders: options.modeRoll?.kind === "save" ? saveReminders(c, options.modeRoll.ability, { concentration: !!options.modeRoll.concentration }, uiDerive(c)) : [],
     ...(options.dc && { dc: options.dc }), ...(options.launchLabel && { launchLabel: options.launchLabel }), ...(options.failRoll && { failRoll: options.failRoll }),
@@ -60478,7 +60532,7 @@ async function perform(action, el) {
     case "set-units": case "set-list-order": case "set-language": case "audit-settings-open": case "audit-more-companions": case "audit-more-back": case "demo": case "new-trait":
     case "edit-trait": case "review-trait": case "toggle-trait": case "delete-trait": case "new-custom-spell": case "edit-custom-spell": case "review-custom-spell":
     case "delete-custom-spell": case "export-one": case "export-all": case "aidedd-same-class": case "aidedd-resolve": case "aidedd-open": case "aidedd-back":
-    case "aidedd-export": case "aidedd-report": case "aidedd-edit": case "aidedd-confirm": case "import": case "confirm-import": case "persist-storage": case "install":
+    case "aidedd-export": case "aidedd-report": case "aidedd-edit": case "aidedd-confirm": case "import": case "import-choice": case "confirm-import": case "persist-storage": case "install":
     case "update-app": case "copy-export": case "paste-import": case "parse-import-text": case "toggle-components": case "toggle-ammunition": case "set-theme":
       await performMore(action, el, c, data, d); break;
     case "reload-library": case "library-browse": case "inventory-library": case "library-home": case "library-group": case "library-type": case "library-all":

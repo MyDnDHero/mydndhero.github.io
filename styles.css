@@ -2819,6 +2819,9 @@ button.state-active::after{content:"";position:absolute;inset:-11px 0}
 .audit-delete .audit-menu-row{color:var(--error);font-weight:500}
 .audit-delete .audit-menu-row>svg{color:inherit}
 @media(max-width:380px){.audit-setting{padding:13px}.audit-setting-choices button{padding-inline:6px;font-size:12px}.audit-menu-row{padding-inline:18px}}
+.import-choice{display:grid;gap:8px;padding:8px 0 12px;border-bottom:1px solid var(--line)}
+.import-choice .segmented{margin:0}
+.import-choice p{margin:0}
 
 /* Fiche B, couche finale après les styles de pages. */
 .character-menu{position:relative;color:var(--ink)}
