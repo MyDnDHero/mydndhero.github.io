@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-candidate-1";
+const APP_VERSION = "2.0.0-candidate-2";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -40746,6 +40746,8 @@ const UNDERWATER_MELEE = ["dagger", "javelin", "shortsword", "spear", "trident"]
  */
 function rollModeSources(c, roll, d = derive(c)) {
   const attack = roll.kind === "attack", save = roll.kind === "save", check = roll.kind === "check" || roll.kind === "initiative";
+  // Le jet contre la mort est une sauvegarde (PHB 2014, « Death Saving Throws ») : ce qui donne l'avantage à « un jet de sauvegarde » y vaut aussi.
+  const death = roll.kind === "death";
   const ability = roll.kind === "initiative" ? "dex" : roll.ability || "", skill = roll.skill || "", line = attack && roll.weapon || null;
   const melee = attack && (line ? line.context !== "spell" && !line.weapon?.ranged : !!roll.spell?.melee);
   const state = _wildShapeState(c), feats = characterFeatIds(c), sources = [];
@@ -40817,10 +40819,10 @@ function rollModeSources(c, roll, d = derive(c)) {
   const sunlight = raceTraitName(c, "Sensibilité au soleil") || raceReferenceTrait(c, "Sunlight Sensitivity");
   if (sunlight && (attack || skill === "perception")) choice("sunlight-sensitivity", "disadvantage", sunlight, uiText("rollMode.sunlightSensitivity"));
   // Marée du chaos : avantage sur un seul jet d'attaque, test ou sauvegarde, payé par l'utilisation restante.
-  const tides = (attack || check || save) && resources(c).find((entry) => entry.id === "tidesOfChaos" && entry.remaining > 0);
+  const tides = (attack || check || save || death) && resources(c).find((entry) => entry.id === "tidesOfChaos" && entry.remaining > 0);
   if (tides) choice("tides-of-chaos", "advantage", uiCatalogueName(tides.name, tides.referenceId), uiText("{p0} restant(s)", { p0: tides.remaining }), true, { resource: tides.id });
   // Compteur reçu qui donne l'avantage (Inspiration du MJ) : une case sur les jets choisis, payée par une utilisation.
-  for (const entry of receivedCounterModes(c, attack ? "attack" : save ? "save" : check ? "check" : "")) choice(entry.id, "advantage", entry.name, entry.text, true, { resource: entry.resource });
+  for (const entry of receivedCounterModes(c, attack ? "attack" : save || death ? "save" : check ? "check" : "")) choice(entry.id, "advantage", entry.name, entry.text, true, { resource: entry.resource });
   // Objets : ennemi juré de l'Arc du serment, ciel du jour pour Déluge, démon pour l'Armure démoniaque.
   for (const entry of itemRollModes(c, roll)) choice(entry.id, entry.mode, entry.name, entry.text);
   // Sorts à concentration : [sort, jet concerné, une seule attaque], proposés tant que le personnage se concentre dessus.
@@ -59076,9 +59078,12 @@ async function performDice(action, el, c, data, d) {
       if (c.state.hp > 0 || c.state.deathSuccess >= 3 || c.state.deathFailure >= 3) {
         toast(uiText("Pas de nouveau jet : le personnage est conscient, stabilisé ou mort. Corrige les compteurs si nécessaire.")); break;
       }
-      // Une sauvegarde comme les autres pour le mode et les effets reçus (le d4 de Bénédiction).
+      // Une sauvegarde comme les autres pour le mode, ses cases d'avantage (Inspiration, Marée du chaos) et les effets reçus (le d4 de Bénédiction).
       prepareDiceDialog("Jet de sauvegarde contre la mort", { kind: "death", bonus: classLevel(c, "monk") >= 14 ? d.prof : 0 }, {
-        read: (c, d) => ({ modeSources: rollModeSources(c, { kind: "death" }, d), optionList: [...checkRollOptions(c, { kind: "death" }, d), ...receivedRollOptions(c, ["save"])] }),
+        read: (c, d) => {
+          const modeSources = rollModeSources(c, { kind: "death" }, d);
+          return { modeSources, optionList: [...modeOptions(modeSources), ...checkRollOptions(c, { kind: "death" }, d), ...receivedRollOptions(c, ["save"])] };
+        },
         help: "Le résultat est enregistré dès le lancer.",
       });
       break;
