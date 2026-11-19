@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-candidate-2";
+const APP_VERSION = "2.0.0-candidate-3";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -730,6 +730,17 @@ const UI_FR = Object.freeze({
   "Ta classe ne lance pas de sorts, mais ton origine ou un don t’en donne.": "Ta classe ne lance pas de sorts, mais ton origine ou un don t’en donne.",
   "Temps": "Temps",
   "Tes personnages sont stockés séparément. Installer la PWA ne télécharge pas automatiquement ce catalogue.": "Tes personnages sont stockés séparément. Installer la PWA ne télécharge pas automatiquement ce catalogue.",
+  "content.banner": "Téléchargement du nouveau contenu et des règles",
+  "content.offer": "Précharger les données textuelles et règles",
+  "content.download": "Télécharger",
+  "content.decline": "Non",
+  "content.pause": "Mettre en pause",
+  "content.queued": "En attente",
+  "content.done": "Téléchargé",
+  "content.part.texts": "Textes et règles",
+  "content.part.images": "Images",
+  "content.texts": "Textes et règles téléchargés",
+  "content.note": "Tes personnages sont stockés séparément. Les textes et les règles se téléchargent à l’ouverture de l’application, les images ici.",
   "Texte anglais": "Texte anglais",
   "Thème": "Thème",
   "Ton choix": "Ton choix",
@@ -5199,7 +5210,42 @@ const UI_FR = Object.freeze({
   "Remplacée par un import": "Remplacée par un import",
   "Une fiche déjà présente peut être remplacée. Les sauvegardes de la version précédente sont converties.": "Une fiche déjà présente peut être remplacée. Les sauvegardes de la version précédente sont converties.",
   "Colle ici le texte d’une sauvegarde Compagnon.": "Colle ici le texte d’une sauvegarde Compagnon.",
-  "Importer ces personnages ?": "Importer ces personnages ?"
+  "Importer ces personnages ?": "Importer ces personnages ?",
+  "shop.buy": "Acheter",
+  "shop.catalogue": "Catalogue",
+  "shop.cart": "Panier",
+  "shop.cartCount": "Panier ({count})",
+  "shop.sort": "Trier",
+  "shop.sort.az": "A → Z",
+  "shop.sort.za": "Z → A",
+  "shop.sort.desc": "Plus cher",
+  "shop.sort.asc": "Moins cher",
+  "shop.full.open": "Chercher dans le catalogue complet",
+  "shop.full.close": "Revenir au catalogue rapide",
+  "shop.full.title": "Catalogue complet",
+  "shop.full.help": "Objets du Manuel des joueurs absents du catalogue rapide : montures, harnachement, nourriture, marchandises, véhicules…",
+  "shop.free": "Objet hors catalogue",
+  "shop.cartEmpty": "Ajoute des objets depuis le catalogue, ou un objet hors catalogue.",
+  "shop.remove": "Retirer du panier",
+  "shop.minus": "Un de moins",
+  "shop.plus": "Un de plus",
+  "shop.unitPrice": "Prix à l’unité",
+  "shop.priceMissing": "Prix à saisir",
+  "shop.cataloguePrice": "Prix du catalogue : {price}",
+  "shop.variablePrice": "Prix variable : indique celui du MJ.",
+  "shop.total": "Total",
+  "shop.missing": "Il manque {amount}",
+  "shop.review": "Vérifier l’achat",
+  "shop.label": "Acheter : {names}",
+  "shop.cost": "Coût total : {total}.",
+  "shop.unit": "{price} l’unité",
+  "shop.names.pair": "{first} et {second}",
+  "shop.names.one": "{names} et 1 autre",
+  "shop.names.more": "{names} et {count} autres",
+  "shop.detailMore": "Lire la suite",
+  "shop.detailRules": "Règles complémentaires",
+  "shop.loading": "Chargement…",
+  "shop.detailOffline": "Fiche indisponible hors ligne."
 });
 
 
@@ -5567,6 +5613,17 @@ const UI_EN = Object.freeze({
   "Ta classe ne lance pas de sorts, mais ton origine ou un don t’en donne.": "Your class does not cast spells, but your race or a feat grants you some.",
   "Temps": "Time",
   "Tes personnages sont stockés séparément. Installer la PWA ne télécharge pas automatiquement ce catalogue.": "Your characters are stored separately. Installing the PWA does not automatically download this catalogue.",
+  "content.banner": "Downloading new content and rules",
+  "content.offer": "Preload text data and rules",
+  "content.download": "Download",
+  "content.decline": "No",
+  "content.pause": "Pause",
+  "content.queued": "Queued",
+  "content.done": "Downloaded",
+  "content.part.texts": "Texts and rules",
+  "content.part.images": "Images",
+  "content.texts": "Texts and rules downloaded",
+  "content.note": "Your characters are stored separately. Texts and rules download when the app opens, images here.",
   "Texte anglais": "English text",
   "Thème": "Theme",
   "Ton choix": "Your choice",
@@ -10036,7 +10093,42 @@ const UI_EN = Object.freeze({
   "Remplacée par un import": "Replaced by an import",
   "Une fiche déjà présente peut être remplacée. Les sauvegardes de la version précédente sont converties.": "A character already here can be replaced. Previous-version backups are converted.",
   "Colle ici le texte d’une sauvegarde Compagnon.": "Paste a Compagnon backup here.",
-  "Importer ces personnages ?": "Import these characters?"
+  "Importer ces personnages ?": "Import these characters?",
+  "shop.buy": "Buy",
+  "shop.catalogue": "Catalogue",
+  "shop.cart": "Cart",
+  "shop.cartCount": "Cart ({count})",
+  "shop.sort": "Sort",
+  "shop.sort.az": "A → Z",
+  "shop.sort.za": "Z → A",
+  "shop.sort.desc": "Most expensive",
+  "shop.sort.asc": "Cheapest",
+  "shop.full.open": "Search the full catalogue",
+  "shop.full.close": "Back to the quick catalogue",
+  "shop.full.title": "Full catalogue",
+  "shop.full.help": "Player’s Handbook items missing from the quick catalogue: mounts, tack, food, trade goods, vehicles…",
+  "shop.free": "Item not in the catalogue",
+  "shop.cartEmpty": "Add items from the catalogue, or an item that is not in it.",
+  "shop.remove": "Remove from cart",
+  "shop.minus": "One less",
+  "shop.plus": "One more",
+  "shop.unitPrice": "Unit price",
+  "shop.priceMissing": "Enter a price",
+  "shop.cataloguePrice": "Catalogue price: {price}",
+  "shop.variablePrice": "Variable price: enter the DM’s.",
+  "shop.total": "Total",
+  "shop.missing": "{amount} short",
+  "shop.review": "Review purchase",
+  "shop.label": "Buy: {names}",
+  "shop.cost": "Total cost: {total}.",
+  "shop.unit": "{price} each",
+  "shop.names.pair": "{first} and {second}",
+  "shop.names.one": "{names} and 1 more",
+  "shop.names.more": "{names} and {count} more",
+  "shop.detailMore": "Read more",
+  "shop.detailRules": "Additional rules",
+  "shop.loading": "Loading…",
+  "shop.detailOffline": "Details unavailable offline."
 });
 
 
@@ -10145,6 +10237,17 @@ function formatGameMeasure(value, from, { system = unitSystem(), language = "fr"
 /** Le tri garde l'identité technique ; les accents et nombres sont comparables. */
 function compareUnitLabels(a, b, language = "fr") {
   return new Intl.Collator(language === "en" ? "en" : "fr", { sensitivity: "base", numeric: true }).compare(a, b);
+}
+
+/** Prix du catalogue (« 2 po », « 5 pa ») en pièces de cuivre ; null quand il n'est pas fixe (« 5 à 20 po »). */
+function parseCoins(text) {
+  const match = String(text ?? "").replace(/[\s\u202f]/g, "").match(/^(\d+(?:[.,]\d+)?)(po|pa|pc|gp|sp|cp)$/i);
+  return match ? Math.round(parseFloat(match[1].replace(",", ".")) * { po: 100, pa: 10, pc: 1, gp: 100, sp: 10, cp: 1 }[match[2].toLowerCase()]) : null;
+}
+/** Montant en pièces de cuivre, lu en pièces d'or, d'argent et de cuivre : « 24 po 5 pa ». */
+function formatCoins(copper, language = "fr") {
+  const total = Math.max(0, Math.round(copper)), names = language === "en" ? ["gp", "sp", "cp"] : ["po", "pa", "pc"];
+  return [[Math.floor(total / 100), names[0]], [Math.floor(total % 100 / 10), names[1]], [total % 10, names[2]]].filter(([count]) => count).map(([count, name]) => `${formatUnitNumber(count, language, 0)} ${name}`).join(" ") || `0 ${names[0]}`;
 }
 
 
@@ -46031,10 +46134,14 @@ function startingItems(c) {
   return items;
 }
 /** Applique le kit de départ : inventaire + équipement actif. */
-function _startingKitItem(runtimeId, ownerId, instanceId = uid()) {
+/** Référence du Manuel d'un objet du catalogue rapide, ou null quand il n'en a pas. */
+function runtimeItemReference(runtimeId) {
   const aliases = { padded: "padded armor", leather: "leather armor", studded: "studded leather armor", hide: "hide armor", chainshirt: "chain shirt", scale: "scale mail", halfplate: "half plate armor", ring: "ring mail", chain: "chain mail", splint: "splint armor", plate: "plate armor", "clothes-common": "common clothes", "clothes-costume": "costume clothes", "clothes-fine": "fine clothes", "clothes-travelers": "traveler's clothes", "map-case": "map or scroll case", "rope-silk": "silk rope (50 feet)", "rope-hemp": "hempen rope (50 feet)", "ink-pen": "ink pen", ink: "ink (1-ounce bottle)", rations: "rations (1 day)" };
   const normalize = (value) => value.toLowerCase().replace(/[’']/g, "").replaceAll(" ", "-");
-  const reference = KIT_ITEM_REFERENCES[`${aliases[runtimeId] || runtimeId.replaceAll("-", " ")}|phb`] || Object.entries(KIT_ITEM_REFERENCES).find(([key]) => normalize(key.split("|")[0]) === runtimeId)?.[1];
+  return KIT_ITEM_REFERENCES[`${aliases[runtimeId] || runtimeId.replaceAll("-", " ")}|phb`] || Object.entries(KIT_ITEM_REFERENCES).find(([key]) => normalize(key.split("|")[0]) === runtimeId)?.[1] || null;
+}
+function _startingKitItem(runtimeId, ownerId, instanceId = uid()) {
+  const reference = runtimeItemReference(runtimeId);
   return reference ? createCatalogueItem(reference, ownerId, { id: instanceId, name: itemInfo(runtimeId)?.name }) : createRuntimeItem(runtimeId, ownerId, { id: instanceId });
 }
 function applyStartingKit(c) {
@@ -48853,6 +48960,22 @@ async function validateContentManifest(manifest, appBuild, baseUrl) {
   return manifest;
 }
 
+/** Textes et règles du catalogue, par opposition aux fichiers et images de l’application. */
+const contentIsText = (file) => file.url.startsWith("./content/");
+const CONTENT_CACHE = /^compagnon-content-[a-f0-9]{64}$/, CONTENT_PARALLEL = 4;
+/** Les deux parties du contenu, téléchargées séparément : "texts" (textes et règles) et "images" (images et fichiers de l’application). */
+const partOf = (file) => contentIsText(file) ? "texts" : "images";
+function contentParts(files = []) {
+  const parts = { texts: { completed: 0, bytes: 0, total: 0, totalBytes: 0 }, images: { completed: 0, bytes: 0, total: 0, totalBytes: 0 } };
+  for (const file of files) { const part = parts[partOf(file)]; part.total++; part.totalBytes += file.bytes; }
+  return parts;
+}
+const partDone = (part) => part.completed === part.total;
+/** Avancement par partie et total, publiés ensemble. */
+function contentProgress(parts) {
+  const sum = (key) => parts.texts[key] + parts.images[key];
+  return { parts, completed: sum("completed"), bytes: sum("bytes"), total: sum("total"), totalBytes: sum("totalBytes"), texts: partDone(parts.texts) };
+}
 class ContentStore {
   constructor({ baseUrl, appBuild = "", caches = globalThis.caches, fetcher = (...args) => globalThis.fetch(...args), locks = globalThis.navigator?.locks,
     channel, onChange = () => {}, onClear = () => {} }) {
@@ -48880,8 +49003,10 @@ class ContentStore {
     this.active = null;
     this.controller = null;
     this.downloading = null;
-    this.state = { status: "missing", completed: 0, total: 0, bytes: 0, totalBytes: 0, error: "", activeVersion: null };
+    this.state = { status: "missing", scope: "", queued: "", ...this.emptyProgress(), error: "", activeVersion: null };
   }
+  /** Rien de téléchargé : les totaux du manifeste connu, aucun fichier compté. */
+  emptyProgress() { return { ...contentProgress(contentParts(this.manifest?.files)), texts: false }; }
   url(path) { return new URL(path, this.baseUrl).href; }
   cacheName(manifest) { return `compagnon-content-${manifest.id}`; }
   publish(patch) { Object.assign(this.state, patch); this.onChange({ ...this.state }); }
@@ -48897,7 +49022,7 @@ class ContentStore {
     this.generation = generation;
     if (!changed) return;
     this.pause(); this.controller = null; this.downloading = null; this.active = null;
-    this.publish({ status, completed: 0, bytes: 0, activeVersion: null, error: "" });
+    this.publish({ status, scope: "", queued: "", ...this.emptyProgress(), activeVersion: null, error: "" });
     this.onClear();
   }
   async syncGeneration() {
@@ -48928,9 +49053,11 @@ class ContentStore {
   }
   async inspect(manifest, generation) {
     const cache = generation === undefined ? await this.cache(manifest) : await this.guarded(generation, () => this.cache(manifest));
-    let completed = 0, bytes = 0;
-    for (const file of manifest.files) if (await this.verified(cache, file)) { completed++; bytes += file.bytes; }
-    return { completed, bytes, total: manifest.files.length, totalBytes: manifest.files.reduce((sum, file) => sum + file.bytes, 0) };
+    const parts = contentParts(manifest.files);
+    for (const file of manifest.files) {
+      if (await this.verified(cache, file)) { const part = parts[partOf(file)]; part.completed++; part.bytes += file.bytes; }
+    }
+    return contentProgress(parts);
   }
   async savedManifest() {
     const metadata = await this.caches.open("compagnon-content-state");
@@ -48978,7 +49105,7 @@ class ContentStore {
     if (complete) await this.activate(manifest, generation);
     await this.guarded(generation, () => {
       this.manifest = manifest; this.active = complete ? manifest : active;
-      this.publish({ ...progress, status: complete ? "ready" : activeReady ? "update" : progress.completed ? "interrupted" : "missing",
+      this.publish({ ...progress, status: complete ? "ready" : activeReady ? "update" : progress.texts ? "texts" : progress.completed ? "interrupted" : "missing",
         activeVersion: activeReady || complete ? this.active?.id : null, error: complete ? "" : connectionError });
     });
   }
@@ -48996,7 +49123,7 @@ class ContentStore {
       this.active = manifest;
     });
   }
-  pause() { this.controller?.abort(); }
+  pause() { this.controller?.abort(); this.stopping = this.downloading; }
   async preserveShell() {
     const unavailable = () => {
       const error = new Error(uiText("Le socle hors ligne n’a pas pu être vérifié. Télécharge le contenu avant de réessayer le nettoyage."));
@@ -49016,12 +49143,22 @@ class ContentStore {
       await shell.put(this.url(file.url), response);
     }
   }
+  /** Retire les versions locales de ce chemin, sauf celles à garder. À appeler sous le verrou d’écriture. */
+  async dropCaches(keep = []) {
+    for (const name of await this.caches.keys()) {
+      if (!CONTENT_CACHE.test(name) || keep.includes(name)) continue;
+      const cache = await this.caches.open(name), keys = await cache.keys();
+      const owned = keys.filter((key) => key.url.startsWith(this.baseUrl));
+      if (owned.length === keys.length) await this.caches.delete(name);
+      else for (const key of owned) await cache.delete(key);
+    }
+  }
   async clear() {
     if (!this.canClear) throw new Error(uiText("Ce navigateur ne permet pas de protéger le nettoyage entre plusieurs fenêtres."));
     if (this.clearing) return this.clearing;
     this.pause();
     this.clearing = this.locked(async () => {
-      this.publish({ status: "clearing", error: "" });
+      this.publish({ status: "clearing", queued: "", error: "" });
       let changed = false;
       try {
         await this.preserveShell();
@@ -49031,14 +49168,8 @@ class ContentStore {
         await metadata.put(this.url("_content/generation"), new Response(generation));
         this.observeGeneration(generation, "clearing"); changed = true;
         await metadata.delete(this.url("_content/active.json"));
-        for (const name of await this.caches.keys()) {
-          if (!/^compagnon-content-[a-f0-9]{64}$/.test(name)) continue;
-          const cache = await this.caches.open(name), keys = await cache.keys();
-          const owned = keys.filter((key) => key.url.startsWith(this.baseUrl));
-          if (owned.length === keys.length) await this.caches.delete(name);
-          else for (const key of owned) await cache.delete(key);
-        }
-        this.publish({ status: "missing", completed: 0, bytes: 0, activeVersion: null, error: "" });
+        await this.dropCaches();
+        this.publish({ status: "missing", ...this.emptyProgress(), activeVersion: null, error: "" });
       } catch (error) {
         const progress = this.manifest ? await this.inspect(this.manifest).catch(() => ({})) : {};
         this.publish({ ...progress, status: "clear-error", activeVersion: null, error: error.code === "SHELL_MISSING" ? error.message : uiText("Le nettoyage n’a pas pu être terminé. Réessaie ; tes personnages sont conservés.") });
@@ -49050,14 +49181,27 @@ class ContentStore {
     try { await this.clearing; }
     finally { this.clearing = null; }
   }
-  async download() {
-    if (this.downloading) return this.downloading;
-    const downloading = this.runDownload();
-    this.downloading = downloading;
+  /** `scope` : "texts", "images" ou "all". Les textes seuls rendent la bibliothèque lisible sans attendre les images.
+   * Une partie demandée pendant le téléchargement de l’autre attend son tour ; un échec ou un nettoyage annule cette attente, une pause non. */
+  async download({ scope = "all" } = {}) {
+    if (this.downloading) {
+      const current = this.downloading;
+      // Un téléchargement mis en pause finit de s’arrêter : la même partie redemandée aussitôt repart après lui.
+      if (this.stopping !== current && [scope, "all"].includes(this.downloadingScope)) return current;
+      this.publish({ queued: scope });
+      return current.then(() => true, (error) => error.name === "AbortError").then((proceed) => {
+        if (this.state.queued !== scope) return;
+        if (!proceed) { this.publish({ queued: "" }); return; }
+        if (this.downloading === current) this.downloading = null;
+        return this.download({ scope });
+      });
+    }
+    const downloading = this.runDownload(scope);
+    this.downloading = downloading; this.downloadingScope = scope;
     try { return await downloading; }
     finally { if (this.downloading === downloading) this.downloading = null; }
   }
-  async runDownload() {
+  async runDownload(scope) {
     const generation = await this.syncGeneration();
     if (!this.manifest) await this.load(generation);
     if (!this.manifest) throw new Error(this.state.error || uiText("Catalogue indisponible."));
@@ -49065,37 +49209,56 @@ class ContentStore {
       await this.load(generation);
       if (!this.manifest || this.manifest.appBuild !== this.appBuild) throw new Error(uiText("Connecte-toi pour télécharger le contenu de cette version. Le catalogue précédent reste consultable."));
     }
-    const manifest = this.manifest;
+    const manifest = this.manifest, files = manifest.files.filter((file) => scope === "all" || partOf(file) === scope);
+    // La partie demandée est recomptée depuis zéro, l’autre garde son avancement connu.
+    const parts = contentParts(manifest.files);
+    for (const [name, part] of Object.entries(parts)) if (scope !== "all" && scope !== name) Object.assign(part, { completed: this.state.parts[name].completed, bytes: this.state.parts[name].bytes });
     const cache = await this.guarded(generation, () => this.cache(manifest));
     const controller = new AbortController();
     this.controller = controller;
     try {
-      await this.guarded(generation, () => this.publish({ status: "downloading", completed: 0, bytes: 0, error: "" }));
-      const oldCache = this.active ? await this.guarded(generation, () => this.cache(this.active)) : null;
-      for (const file of manifest.files) {
-        if (controller.signal.aborted) throw new DOMException(uiText("Téléchargement interrompu."), "AbortError");
-        let response = await this.verified(cache, file);
-        if (!response && oldCache) response = await this.verified(oldCache, file);
-        if (!response) {
-          const incoming = await this.fetcher(this.url(file.url), { signal: controller.signal, cache: "no-store" });
-          if (!incoming.ok) throw new Error(uiText("Fichier indisponible : {url}", { url: file.url }));
-          const bytes = await incoming.arrayBuffer();
-          if (bytes.byteLength !== file.bytes || await contentDigest(bytes) !== file.sha256) throw new Error(uiText("Un fichier téléchargé est incomplet ou altéré. Reprends le téléchargement."));
-          response = new Response(bytes, { headers: incoming.headers });
-        }
-        await this.guarded(generation, async () => {
+      await this.guarded(generation, () => this.publish({ status: "downloading", scope, queued: this.state.queued === scope ? "" : this.state.queued, ...contentProgress(parts), error: "" }));
+      // Un fichier déjà vérifié dans une autre version locale n’est pas retéléchargé.
+      const others = [];
+      for (const name of await this.caches.keys()) if (CONTENT_CACHE.test(name) && name !== this.cacheName(manifest)) others.push(await this.caches.open(name));
+      const queue = files[Symbol.iterator]();
+      let failure = null;
+      const worker = async () => {
+        for (const file of queue) {
+          if (failure) return;
           if (controller.signal.aborted) throw new DOMException(uiText("Téléchargement interrompu."), "AbortError");
-          await cache.put(this.url(file.url), response);
-          this.publish({ completed: this.state.completed + 1, bytes: this.state.bytes + file.bytes });
-        });
-      }
+          let response = await this.verified(cache, file);
+          for (const other of others) response ||= await this.verified(other, file);
+          if (!response) {
+            const incoming = await this.fetcher(this.url(file.url), { signal: controller.signal, cache: "no-store" });
+            if (!incoming.ok) throw new Error(uiText("Fichier indisponible : {url}", { url: file.url }));
+            const bytes = await incoming.arrayBuffer();
+            if (bytes.byteLength !== file.bytes || await contentDigest(bytes) !== file.sha256) throw new Error(uiText("Un fichier téléchargé est incomplet ou altéré. Reprends le téléchargement."));
+            response = new Response(bytes, { headers: incoming.headers });
+          }
+          await this.guarded(generation, async () => {
+            if (controller.signal.aborted) throw new DOMException(uiText("Téléchargement interrompu."), "AbortError");
+            await cache.put(this.url(file.url), response);
+            const part = parts[partOf(file)];
+            part.completed++; part.bytes += file.bytes;
+            this.publish(contentProgress(parts));
+          });
+        }
+      };
+      // Quelques fichiers à la fois. Après une erreur, les fichiers en cours finissent d’être conservés, aucun autre n’est demandé.
+      await Promise.all(Array.from({ length: CONTENT_PARALLEL }, () => worker().catch((error) => { failure ||= error; })));
+      if (failure) throw failure;
       // Une autre fenêtre ou une éviction peut avoir modifié le cache entre les écritures.
       const checked = await this.inspect(manifest, generation);
-      if (checked.completed !== checked.total) throw new Error(uiText("Le navigateur n’a pas conservé tous les fichiers. Vérifie l’espace disponible et reprends."));
-      await this.activate(manifest, generation);
-      await this.guarded(generation, () => this.publish({ ...checked, status: "ready", activeVersion: manifest.id }));
+      if (scope === "all" ? checked.completed !== checked.total : !partDone(checked.parts[scope])) throw new Error(uiText("Le navigateur n’a pas conservé tous les fichiers. Vérifie l’espace disponible et reprends."));
+      const complete = checked.completed === checked.total;
+      if (complete) await this.activate(manifest, generation);
+      await this.guarded(generation, async () => {
+        await this.dropCaches([manifest, this.active].filter(Boolean).map((item) => this.cacheName(item)));
+        this.publish({ ...checked, scope: "", status: complete ? "ready" : this.state.activeVersion ? "update" : checked.texts ? "texts" : "interrupted", ...(complete && { activeVersion: manifest.id }) });
+      });
     } catch (error) {
-      await this.guarded(generation, () => this.publish({ status: error.name === "AbortError" ? "interrupted" : "error", error: error.name === "QuotaExceededError" ? uiText("L’espace disponible est insuffisant. Libère de la place puis reprends ; tes personnages sont conservés.") : error.message })).catch(() => {});
+      await this.guarded(generation, () => this.publish({ status: error.name === "AbortError" ? "interrupted" : "error", scope: "", error: error.name === "AbortError" ? "" : error.name === "QuotaExceededError" ? uiText("L’espace disponible est insuffisant. Libère de la place puis reprends ; tes personnages sont conservés.") : error.message })).catch(() => {});
       throw error;
     } finally { if (this.controller === controller) this.controller = null; }
   }
@@ -52474,7 +52637,7 @@ function renderCreationNextSpellDetails(c, spell, path) {
   ];
   return `<details class="choice-option-details" data-detail="${esc(`creation-next-${path}-${spell.id}`)}"><summary>${uiText("Détails")}</summary>
     <div class="spell-data">${facts.filter(([, value]) => value).map(([label, value]) => `<div><b>${uiText(label)}</b>${esc(value)}</div>`).join("")}</div>
-    ${renderSpellDescription(spell, c, { omitFacts: ["level", "school", "casting time", "range", "duration", "components"], fallbackNotice: false })}
+    <div data-spell-description="${esc(spell.id)}" data-spell-brief="1">${renderSpellDescription(spell, c, SPELL_BRIEF)}</div>
   </details>`;
 }
 /** Saisies d’une sous-classe ou d’un don maison, sous les options de leur ligne. */
@@ -53800,12 +53963,44 @@ function renderMore(c) {
   ].map(([route, ico, title]) => auditMenuRow(route, ico, title)).join("")}</div>${c ? `<details class="audit-character-actions"><summary>${uiText("audit.more.characterActions")}</summary><div class="actions">${button(uiText("Modifier"), "edit-character", "", "small-btn ghost")}${button(uiText("audit.more.export"), "export-one", "", "small-btn ghost")}${IS_ARTIFACT ? "" : button(uiText("Imprimer"), "print", "", "small-btn ghost")}</div></details><div class="audit-menu-list audit-delete">${auditMenuRow("", "trash", uiText("audit.more.delete"), { action: "delete-character" })}</div>` : ""}${appVersionLine()}</div>`;
 }
 function contentSize(bytes) { return uiText("{p0} Mo", { p0: (bytes / 1048576).toFixed(1).replace(".", ",") }); }
+const contentPartStatus = (part) => uiText("{p3} / {p4} fichiers vérifiés · {p5} sur {p6}", { p3: part.completed, p4: part.total, p5: contentSize(part.bytes), p6: contentSize(part.totalBytes) });
+/** Fait avancer sur place les barres et les compteurs de l’écran. Faux si l’écran n’affiche pas les deux parties. */
+function updateContentParts(state) {
+  const blocks = [...document.querySelectorAll("[data-content-part]")];
+  for (const block of blocks) {
+    const part = state.parts[block.dataset.contentPart];
+    block.querySelector("progress").value = contentPartPercent(part);
+    block.querySelector("[role=status]").textContent = contentPartStatus(part);
+  }
+  return blocks.length === 2;
+}
+/** Une partie du contenu hors ligne : sa barre, son avancement et son bouton (télécharger, mettre en pause, reprendre). */
+function renderContentPart(name, state, busy) {
+  const part = state.parts[name], percent = contentPartPercent(part), done = part.completed === part.total;
+  const running = state.status === "downloading" && [name, "all"].includes(state.scope);
+  // Un texte lu en ligne reste en cache sans qu’aucun téléchargement n’ait été lancé : « Reprendre » demande que les textes aient déjà été demandés.
+  const resumable = name === "texts" ? contentChoice() === "paused" || part.completed > 0 && (contentChoice() === "on" || !!state.error) : part.completed > 0;
+  const control = running ? button(uiText("content.pause"), "pause-content", `data-scope="${name}"`)
+    : busy || done ? ""
+    : state.queued === name ? button(uiText("content.queued"), "download-content", "disabled")
+    : button(uiText(resumable ? "Reprendre" : "content.download"), "download-content", `data-scope="${name}" ${state.status === "unavailable" ? "disabled" : ""}`, "primary");
+  return `<div class="content-part" data-content-part="${name}"><div class="content-part-head"><h3>${uiText(`content.part.${name}`)}</h3><span class="small muted">${done ? `${uiText("content.done")} · ` : ""}${contentSize(part.totalBytes)}</span></div>
+    <progress class="content-progress" max="100" value="${percent}" aria-label="${esc(uiText(`content.part.${name}`))}"></progress>
+    <p class="small" role="status" aria-live="polite">${contentPartStatus(part)}</p>
+    ${control ? `<div class="actions">${control}</div>` : ""}</div>`;
+}
 function renderOffline() {
   if (window.COMPANION_STANDALONE) return `<h1>${uiText("Contenu hors ligne")}</h1>${notice(uiText("Ce fichier autonome contient le socle jouable et son pilote. Ouvre la PWA hébergée pour télécharger le catalogue complet."))}`;
-  const state = contentStore.state, labels = { missing: uiText("Contenu à télécharger"), checking: uiText("Vérification du contenu…"), downloading: uiText("Téléchargement en cours"), interrupted: uiText("Téléchargement à reprendre"), error: uiText("Téléchargement interrompu"), clearing: uiText("Nettoyage en cours…"), "clear-error": uiText("Nettoyage à reprendre"), ready: navigator.serviceWorker?.controller || swRegistration?.active ? uiText("Disponible hors ligne") : uiText("Contenu téléchargé, activation hors ligne en attente"), update: uiText("Mise à jour disponible"), unavailable: uiText("Stockage hors ligne indisponible") };
-  const percent = state.totalBytes ? Math.floor(state.bytes * 100 / state.totalBytes) : 0;
-  const busy = ["checking", "clearing"].includes(state.status);
-  return `<div class="page-head"><div><h1>${uiText("Contenu hors ligne")}</h1></div></div><section class="panel"><h2>${labels[state.status]}</h2><p class="section-gap">${uiText("Catalogue, textes français et anglais, et ressources de l’application.")}</p>${state.total ? `<p>${uiText("{p0} entrées · {p1}", { p0: contentStore.manifest.count.toLocaleString(uiLocale()), p1: contentSize(state.totalBytes) })}</p><progress class="content-progress" max="100" value="${percent}" aria-label="${uiText("Progression du téléchargement")}"></progress><p class="small" role="status" aria-live="polite">${uiText("{p3} / {p4} fichiers vérifiés · {p5} sur {p6}", { p3: state.completed, p4: state.total, p5: contentSize(state.bytes), p6: contentSize(state.totalBytes) })}</p>` : ""}${state.error ? notice(esc(uiSystemText(state.error)), "warning") : ""}${state.activeVersion && !["ready", "clearing", "clear-error"].includes(state.status) ? notice(uiText("La version locale précédente reste disponible pendant cette mise à jour.")) : ""}<div class="actions section-gap">${state.status === "downloading" ? button(uiText("Suspendre"), "pause-content") : busy ? "" : button(state.status === "ready" ? uiText("Vérifier le contenu") : ["interrupted", "error"].includes(state.status) ? uiText("Reprendre") : state.status === "update" ? uiText("Télécharger la mise à jour") : uiText("Télécharger le contenu"), state.status === "ready" ? "check-content" : "download-content", state.status === "unavailable" ? "disabled" : "", "primary")}${button(uiText("Ouvrir la bibliothèque"), "navigate", `data-route="library" ${state.status === "clearing" ? "disabled" : ""}`)}</div>${state.activeVersion ? `<p class="tiny muted section-gap">${uiText("Version locale {p0} · règles 2014", { p0: esc(state.activeVersion.slice(0, 12)) })}</p>` : ""}<p class="small muted section-gap">${uiText("Tes personnages sont stockés séparément. Installer la PWA ne télécharge pas automatiquement ce catalogue.")}</p>${!busy && state.status !== "unavailable" ? `<div class="section-gap">${button(uiText("Nettoyer le contenu téléchargé"), "clear-content", contentStore.canClear ? "" : "disabled", "small-btn danger")}${!contentStore.canClear ? ("<p class=\"small muted section-gap\">" + uiText("Ce navigateur ne permet pas de protéger le nettoyage entre plusieurs fenêtres.") + "</p>") : ""}</div>` : ""}</section>`;
+  const state = contentStore.state, choice = contentChoice(), busy = ["checking", "clearing"].includes(state.status);
+  const started = !!state.error || choice === "paused" || state.parts.images.completed > 0;
+  const labels = { missing: uiText("Contenu à télécharger"), checking: uiText("Vérification du contenu…"), downloading: uiText("Téléchargement en cours"), interrupted: started ? uiText("Téléchargement à reprendre") : uiText("Contenu à télécharger"), texts: uiText("content.texts"), error: uiText("Téléchargement interrompu"), clearing: uiText("Nettoyage en cours…"), "clear-error": uiText("Nettoyage à reprendre"), ready: navigator.serviceWorker?.controller || swRegistration?.active ? uiText("Disponible hors ligne") : uiText("Contenu téléchargé, activation hors ligne en attente"), update: uiText("Mise à jour disponible"), unavailable: uiText("Stockage hors ligne indisponible") };
+  return `<div class="page-head"><div><h1>${uiText("Contenu hors ligne")}</h1></div></div><section class="panel"><h2>${labels[state.status]}</h2><p class="section-gap">${uiText("Catalogue, textes français et anglais, et ressources de l’application.")}</p>
+    ${state.total ? `<p>${uiText("{p0} entrées · {p1}", { p0: contentStore.manifest.count.toLocaleString(uiLocale()), p1: contentSize(state.totalBytes) })}</p>` : ""}
+    ${state.error ? notice(esc(uiSystemText(state.error)), "warning") : ""}${state.activeVersion && !["ready", "clearing", "clear-error"].includes(state.status) ? notice(uiText("La version locale précédente reste disponible pendant cette mise à jour.")) : ""}
+    ${state.total ? renderContentPart("texts", state, busy) + renderContentPart("images", state, busy) : ""}
+    <div class="actions section-gap">${state.status === "ready" ? button(uiText("Vérifier le contenu"), "check-content", "", "primary") : ""}${button(uiText("Ouvrir la bibliothèque"), "navigate", `data-route="library" ${state.status === "clearing" ? "disabled" : ""}`)}</div>
+    ${state.activeVersion ? `<p class="tiny muted section-gap">${uiText("Version locale {p0} · règles 2014", { p0: esc(state.activeVersion.slice(0, 12)) })}</p>` : ""}<p class="small muted section-gap">${choice === "on" ? uiText("content.note") : uiText("Tes personnages sont stockés séparément. Installer la PWA ne télécharge pas automatiquement ce catalogue.")}</p>
+    ${!busy && state.status !== "unavailable" ? `<div class="section-gap">${button(uiText("Nettoyer le contenu téléchargé"), "clear-content", contentStore.canClear ? "" : "disabled", "small-btn danger")}${!contentStore.canClear ? ("<p class=\"small muted section-gap\">" + uiText("Ce navigateur ne permet pas de protéger le nettoyage entre plusieurs fenêtres.") + "</p>") : ""}</div>` : ""}</section>`;
 }
 function renderSettings() {
   const c = activeCharacter(),
@@ -54047,10 +54242,18 @@ async function performMore(action, el, c, data, d) {
       break;
     case "export-recovery": downloadJson({ format: "compagnon-recovery", entries: appData.recovery }, "compagnon-recuperation.json"); break;
 
-    case "download-content":
-      void ensureContent().then(() => contentStore.download()).catch((error) => { if (error.name !== "AbortError") toast(error.message); });
+    case "download-content": {
+      const scope = el.dataset.scope || "all";
+      ui.contentOffer = false;
+      // Télécharger ou reprendre les textes vaut accord : ils seront tenus à jour à l’ouverture.
+      if (scope !== "images") setContentChoice("on");
+      void ensureContent().then(() => contentStore.download({ scope })).catch((error) => { if (error.name !== "AbortError") toast(error.message); });
       break;
-    case "pause-content": contentStore.pause(); break;
+    }
+    // La pause des textes est retenue : ils ne repartent pas seuls à l’ouverture suivante. Les images ne partent jamais seules.
+    case "pause-content": if (el.dataset.scope !== "images") setContentChoice("paused"); contentStore.pause(); break;
+    case "accept-content": ui.contentOffer = false; setContentChoice("on"); downloadTexts(); render(); break;
+    case "decline-content": ui.contentOffer = false; setContentChoice("off"); render(); break;
     case "clear-content":
       askConfirm(uiText("Nettoyer le contenu téléchargé ?"), uiText("Le catalogue, ses textes français et anglais et les ressources téléchargées avec lui seront retirés de cet appareil. Tu pourras les retélécharger.\n\nTes personnages, brouillons, photos, historique et références sauvegardées restent conservés. L’application et tes fiches restent utilisables hors ligne."), "clear-content", null, { label: uiText("Nettoyer le contenu"), danger: true });
       break;
@@ -55808,7 +56011,7 @@ function renderInventory(c) {
       ({ attack: a, count }) =>
         `<div class="equipment-summary"><div><div class="item-label">${uiText("Arme")}</div><div class="item-name">${esc(attackGroupName({ attack: a, count }))}</div></div><span class="pill">${signed(a.attack)} · ${esc(a.damageDice)} ${signed(a.damageBonus)}</span></div>`,
     )
-    .join("")}<p class="small section-gap">${esc(uiText("equipment.mainHand"))} : ${esc(hands.main ? weaponOf(hands.main.id)?.name : uiText("equipment.free"))} · ${esc(uiText("equipment.offHand"))} : ${esc(c.equipment.shield ? uiText("equipment.shield") : hands.off ? weaponOf(hands.off.id)?.name : uiText("equipment.free"))}</p><p class="tiny muted section-gap">${uiText("CA : {p16}.", { p16: esc(d.acExplanation) })}</p>${d.stealthDisadvantage ? notice(armorerStatus(c).active && armorerStatus(c).model === "infiltrator" ? uiText("Discrétion : l’avantage du Champ d’atténuation annule le désavantage de cette armure.") : uiText("Cette armure impose le désavantage aux tests de Discrétion."), "warning") : ""}${!d.armorProficient ? notice(uiText("Armure ou bouclier non maîtrisé : tu ne peux pas lancer de sorts avec cet équipement."), "warning") : ""}${d.strTooLow ? notice(uiText("Force insuffisante pour {p0} : vitesse réduite de 3 m.", { p0: esc(armor.name) }), "warning") : ""}<section class="panel"><h2 class="panel-title">${uiText("Harmonisations : {p25}/{p26}", { p25: inventoryAttunementStatus(c).count, p26: inventoryAttunementStatus(c).limit })}</h2>${button(uiText("Corriger les harmonisations"), "attunements", "", "small-btn ghost")}</section></details><div class="stack"><details class="carnet-coins" data-detail="inventory-coins"><summary><strong>${uiText("Bourse")}</strong><span>${c.gold.toLocaleString(uiLocale())} PO</span></summary><div class="coins">${icon("gem", 28)}<div><strong>${c.gold.toLocaleString(uiLocale())}</strong><span>${uiText(" pièces d’or")}</span></div><button class="link-btn" style="margin-left:auto;color:inherit" data-action="gold">${uiText("Ajuster")}</button></div></details></div></div>${renderRunePanel(c)}</div><section class="section-gap carnet-inventory-list">${
+    .join("")}<p class="small section-gap">${esc(uiText("equipment.mainHand"))} : ${esc(hands.main ? weaponOf(hands.main.id)?.name : uiText("equipment.free"))} · ${esc(uiText("equipment.offHand"))} : ${esc(c.equipment.shield ? uiText("equipment.shield") : hands.off ? weaponOf(hands.off.id)?.name : uiText("equipment.free"))}</p><p class="tiny muted section-gap">${uiText("CA : {p16}.", { p16: esc(d.acExplanation) })}</p>${d.stealthDisadvantage ? notice(armorerStatus(c).active && armorerStatus(c).model === "infiltrator" ? uiText("Discrétion : l’avantage du Champ d’atténuation annule le désavantage de cette armure.") : uiText("Cette armure impose le désavantage aux tests de Discrétion."), "warning") : ""}${!d.armorProficient ? notice(uiText("Armure ou bouclier non maîtrisé : tu ne peux pas lancer de sorts avec cet équipement."), "warning") : ""}${d.strTooLow ? notice(uiText("Force insuffisante pour {p0} : vitesse réduite de 3 m.", { p0: esc(armor.name) }), "warning") : ""}<section class="panel"><h2 class="panel-title">${uiText("Harmonisations : {p25}/{p26}", { p25: inventoryAttunementStatus(c).count, p26: inventoryAttunementStatus(c).limit })}</h2>${button(uiText("Corriger les harmonisations"), "attunements", "", "small-btn ghost")}</section></details><div class="stack"><details class="carnet-coins" data-detail="inventory-coins" open><summary><strong>${uiText("Bourse")}</strong><span>${shopCoins(shopPurse(c))}</span></summary><div class="coins">${icon("gem", 28)}<div><strong>${shopCoins(shopPurse(c))}</strong></div></div><div class="purse-actions">${button(uiText("shop.buy"), "shop-open", "", "primary")}${button(uiText("Ajuster"), "gold", "", "ghost")}</div></details></div></div>${renderRunePanel(c)}</div><section class="section-gap carnet-inventory-list">${
     c.inventory.length
       ? `<div class="search-wrap">${icon("search", 18)}<input id="inventory-search" class="search-input" data-bind="ui.inventoryQuery" value="${esc(ui.inventoryQuery)}" placeholder="${uiText("Rechercher dans le sac…")}" aria-label="${uiText("Rechercher dans le sac")}"></div><div class="inventory-list">${items
           .map(
@@ -56093,6 +56296,8 @@ async function performInventory(action, el, c, data, d) {
       if (ui.form.pactWeaponId === removedWeapon?.instanceId) ui.form.pactWeaponId = null;
       render();
       break;
+    case "shop-open": case "shop-tab": case "shop-view": case "shop-full": case "shop-add": case "shop-free": case "shop-remove": case "shop-minus": case "shop-plus": case "shop-detail": case "shop-review":
+      await performShop(action, c, data); break;
     case "catalog-item":
       ui.catalogQuery = "";
       ui.catalogTab = ui.catalogTab || "gear";
@@ -56106,13 +56311,239 @@ async function performInventory(action, el, c, data, d) {
       const info = itemInfo(data.id);
       if (!info) break;
       if (equipmentPack(data.id)) { ui.packLibraryBack = null; ui.form = { packId: data.id, quantity: 1, mode: "free", totalCost: equipmentPack(data.id).raw.value / 100, convertId: null }; openModal("equipment-pack"); break; }
-      await sessionChange((n) => {
-        const existing = n.inventory.find((x) => x.ref === data.id && !x.instance?.container && !["weapon", "armor", "shield"].includes(info.kind) && !x.instance?.equippedSlot && !x.instance?.charges);
-        if (existing) existing.qty += info.kind === "ammo" && existing.instance?.ammunition ? info.count : 1;
-        else n.inventory.push(createRuntimeItem(data.id, n.id, { id: uid() }));
-      }, uiText("Sac : {p0}", { p0: info.name }));
+      await sessionChange((n) => addRuntimeItem(n, data.id), uiText("Sac : {p0}", { p0: info.name }));
       toast(uiText("{p0} ajouté au sac.", { p0: info.name }), null, true);
       break;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------- Achats */
+// Un panier d'objets du catalogue ou hors catalogue : la bourse est débitée et les objets rejoignent le sac à la validation.
+const SHOP_TABS = [["gear", "Matériel"], ["weapons", "Armes"], ["armor", "Armures"], ["tools", "Outils"]];
+const SHOP_SORTS = ["az", "za", "desc", "asc"];
+// Objets du catalogue rapide que l'équipement de départ garde hors de la Bibliothèque : leur fiche s'y lit quand même.
+const SHOP_REFERENCES = {
+  arrows: "baseitem|phb|arrows (20)", "crossbow-bolts": "baseitem|phb|crossbow bolts (20)", "sling-bullets": "baseitem|phb|sling bullets (20)", "blowgun-needles": "baseitem|phb|blowgun needles (50)",
+  oil: "item|phb|oil (flask)", "hempen-rope": "item|phb|hempen rope (50 feet)", "silk-rope": "item|phb|silk rope (50 feet)", "ball-bearings": "item|phb|ball bearings (bag of 1,000)",
+  parchment: "item|phb|parchment (one sheet)", paper: "item|phb|paper (one sheet)", perfume: "item|phb|perfume (vial)", "potion-of-healing": "item|dmg|potion of healing",
+  "double-bladed-scimitar": "baseitem|erlw|double-bladed scimitar", spiked: "baseitem|scag|spiked armor",
+};
+// Champs d'une référence qui donnent plus à lire que le prix et le poids déjà affichés sur la ligne.
+const SHOP_DETAIL_FIELDS = ["entries", "additionalEntries", "property", "ac", "dmg1", "range", "reload", "strength", "stealth", "speed"];
+let shopCatalogueCache = null;
+const shopCoins = (copper) => formatCoins(copper, uiLanguage());
+const shopCoinNames = () => uiLanguage() === "en" ? { po: "gp", pa: "sp", pc: "cp" } : { po: "po", pa: "pa", pc: "pc" };
+const shopId = (prefix, key) => `${prefix}-${String(key).replace(/[^a-z0-9]+/gi, "-")}`;
+/** Catalogue rapide par onglet et reste du Manuel des joueurs, avec prix en pièces de cuivre et référence de la Bibliothèque. */
+function shopCatalogue() {
+  const language = uiLanguage();
+  if (shopCatalogueCache?.language === language) return shopCatalogueCache;
+  const quick = {}, kit = Object.values(KIT_ITEM_REFERENCES);
+  for (const [tab, source] of Object.entries({ gear: uiGear, weapons: uiWeapons, armor: uiArmors, tools: uiTools }))
+    quick[tab] = Object.entries(source).filter(([id]) => id !== "unarmed" && id !== "none").map(([id, x]) => {
+      const alias = SHOP_REFERENCES[id], reference = alias ? kit.find((entry) => entry.id === alias) || { id: alias, raw: null } : runtimeItemReference(id);
+      return { key: `${tab}:${id}`, kind: tab, id, name: x.name, search: librarySearchText([x.name, x.englishName, x.referenceEnglishName].filter(Boolean).join(" ")), copper: parseCoins(itemInfo(id)?.cost), cost: x.cost || "", weight: x.weight || 0,
+        facts: x.damage ? `${x.damage} ${x.type}` : x.base ? uiText("CA {p0}", { p0: x.base }) : "", referenceId: reference?.id || null, raw: reference?.raw || null, note: x.contents || x.note || x.special || "" };
+    });
+  const used = new Set(Object.values(quick).flat().map((row) => row.referenceId));
+  // Hors pièces de monnaie et prix inférieurs à une pièce de cuivre, qui ne s'achètent pas à l'unité.
+  const complete = kit.filter((entry) => !used.has(entry.id) && entry.raw.type?.split("|")[0] !== "$C" && Number.isInteger(entry.raw.value) && entry.raw.value > 0)
+    .map((entry) => ({ key: `ref:${entry.id}`, kind: "ref", id: entry.id, name: entry.raw.name, search: librarySearchText(entry.raw.name), copper: entry.raw.value, cost: "", weight: (entry.raw.weight || 0) * 0.5, facts: "", referenceId: entry.id, raw: entry.raw, note: "" }));
+  return shopCatalogueCache = { language, quick, complete, named: language === "en" };
+}
+function shopRow(key) {
+  const catalogue = shopCatalogue();
+  return [...Object.values(catalogue.quick).flat(), ...catalogue.complete].find((row) => row.key === key) || null;
+}
+const shopHasDetail = (row) => !!row.note || (row.raw ? SHOP_DETAIL_FIELDS.some((field) => row.raw[field] !== undefined) : !!row.referenceId);
+/** Prix à l'unité d'une ligne du panier en pièces de cuivre, ou null tant qu'aucun des trois champs n'est rempli. */
+function shopLineUnit(line) {
+  const coins = ["po", "pa", "pc"].map((coin) => String(line[coin] ?? "").trim());
+  if (coins.every((value) => value === "")) return null;
+  const [po, pa, pc] = coins.map((value) => Math.max(0, Math.floor(Number(value.replace(",", ".")) || 0)));
+  return po * 100 + pa * 10 + pc;
+}
+const shopLineQty = (line) => Math.max(0, Math.floor(Number(line.qty) || 0));
+const shopTotal = () => ui.shop.cart.reduce((sum, line) => sum + (shopLineUnit(line) ?? 0) * shopLineQty(line), 0);
+const shopCount = () => ui.shop.cart.reduce((sum, line) => sum + shopLineQty(line), 0);
+const shopPurse = (c) => Math.round(c.gold * 100);
+function shopReady(c) {
+  const cart = ui.shop.cart;
+  return cart.length > 0 && cart.every((line) => shopLineQty(line) >= 1 && shopLineQty(line) <= 999 && shopLineUnit(line) !== null && line.name.trim() && Number(line.weight || 0) >= 0) && shopTotal() <= shopPurse(c);
+}
+function shopRowsHtml() {
+  const shop = ui.shop, catalogue = shopCatalogue(), q = librarySearchText(shop.query.trim()), tabs = Object.fromEntries(SHOP_TABS);
+  // Une recherche couvre les quatre onglets : on cherche une dague sans savoir qu'elle est rangée dans Armes.
+  const list = shop.full ? catalogue.complete : q ? SHOP_TABS.flatMap(([tab]) => catalogue.quick[tab]) : catalogue.quick[shop.tab];
+  const byName = (a, b) => compareUnitLabels(a.name, b.name, uiLanguage()), price = (row, direction) => row.copper === null ? Infinity : direction * row.copper;
+  // Prix variable : en fin de liste dans les deux tris par prix.
+  const order = { az: byName, za: (a, b) => byName(b, a), desc: (a, b) => price(a, -1) - price(b, -1) || byName(a, b), asc: (a, b) => price(a, 1) - price(b, 1) || byName(a, b) }[shop.sort] || byName;
+  return list.filter((row) => row.search.includes(q)).sort(order).map((row) => {
+    const inCart = shop.cart.filter((line) => line.row === row.key).reduce((sum, line) => sum + shopLineQty(line), 0), open = shop.opened.includes(row.key);
+    const meta = [row.copper === null ? row.cost : shopCoins(row.copper), row.weight ? formatCarriedWeight(row.weight) : "", row.facts, q && !shop.full ? uiText(tabs[row.kind]) : ""].filter(Boolean).map(esc).join(" · ");
+    const title = `<span class="shop-title"><strong>${esc(row.name)}${inCart ? ` <span class="pill outline">×${inCart}</span>` : ""}</strong><small>${meta}</small></span>`;
+    const head = shopHasDetail(row) ? `<button type="button" id="${shopId("shop-detail", row.key)}" class="shop-info" data-action="shop-detail" data-id="${esc(row.key)}" aria-expanded="${open}">${title}<span class="shop-chevron">${icon("chevron", 16)}</span></button>` : `<div class="shop-text">${title}</div>`;
+    return `<div class="catalog-row shop-row${open ? " open" : ""}">${head}${button(uiText("{p0} Ajouter", { p0: icon("plus", 14) }), "shop-add", `id="${shopId("shop-add", row.key)}" data-id="${esc(row.key)}"`, "small-btn")}${open ? `<div class="shop-detail">${shopDetailHtml(row)}</div>` : ""}</div>`;
+  }).join("") || `<p class="small muted section-gap">${uiText("Aucun objet.")}</p>`;
+}
+function shopDetailHtml(row) {
+  const detail = ui.shop.details[row.key], key = esc(shopId("shop-more", row.key));
+  if (!detail) return `<p class="small muted">${uiText("shop.loading")}</p>`;
+  let more = "";
+  // Les longues règles restent repliées : la liste garde sa hauteur.
+  if (detail.extra && detail.html) more = `<details class="shop-more" data-detail="${key}"><summary>${uiText("shop.detailRules")}</summary>${detail.extra}</details>`;
+  else if (detail.extra) { const parts = detail.extra.match(/^(<p>.*?<\/p>)(.+)$/s); more = parts ? `${parts[1]}<details class="shop-more" data-detail="${key}"><summary>${uiText("shop.detailMore")}</summary>${parts[2]}</details>` : detail.extra; }
+  return `${detail.html || (more ? "" : `<p class="small muted">${uiText("shop.detailOffline")}</p>`)}${more}${detail.source ? `<p class="tiny muted shop-source">${esc(detail.source)}</p>` : ""}`;
+}
+/** Fiche d'un objet telle que la Bibliothèque la rend, sans le prix ni le poids déjà sur la ligne. Les renvois ouvrent leur référence. */
+async function shopLoadDetail(row) {
+  const language = uiLanguage();
+  let entry = null, definitions = new Map(), raw = row.raw;
+  if (row.referenceId && !window.COMPANION_STANDALONE) {
+    try {
+      await ensureContent(); entry = await contentLibrary.entry(row.referenceId);
+      definitions = (await contentLibrary.readingEntries(entry)).definitions; raw = libraryReading(entry, definitions, language);
+    } catch { entry = null; }
+  }
+  // Sans Bibliothèque (hors ligne, fichier autonome) : les faits du Manuel embarqués ; leur texte de règle n'existe qu'en anglais.
+  if (!entry && raw && language === "fr") raw = Object.fromEntries(Object.entries(raw).filter(([field]) => !["entries", "additionalEntries"].includes(field)));
+  const { additionalEntries, ...main } = raw || {}, type = entry?.type || String(row.referenceId || "item").split("|")[0];
+  const labels = contentLibrary.labels(), options = { entry: entry || { id: row.referenceId || "" }, definitions, context: {}, omitFacts: ["weight", "cost"] };
+  // Mesure d'origine entre parenthèses retirée : « 6 m (20 ft) » se lit « 6 m ».
+  let html = raw ? referenceDocumentHtml(main, type, language, { ...options, labels }).replace(/ \(\d[\d\s .,]* (?:ft|lb|mi)\)/g, "") : "";
+  if (row.note && !/reference-section/.test(html)) html += `<p>${esc(row.note)}</p>`;
+  return { html, extra: additionalEntries ? referenceEntriesHtml(additionalEntries, language, { ...options, context: raw, labels }) : "", source: raw?.source ? [raw.source, raw.page ? uiText("p. {p0}", { p0: raw.page }) : "", "D&D 2014"].filter(Boolean).join(" · ") : "" };
+}
+function shopLineNote(line) {
+  const row = line.row && shopRow(line.row), unit = shopLineUnit(line);
+  if (!row) return "";
+  return row.copper === null ? uiText("shop.variablePrice") : unit !== null && unit !== row.copper ? uiText("shop.cataloguePrice", { price: shopCoins(row.copper) }) : "";
+}
+const shopLineTotal = (line) => shopLineUnit(line) === null ? uiText("shop.priceMissing") : shopCoins(shopLineUnit(line) * shopLineQty(line));
+function shopCartHtml() {
+  const names = shopCoinNames();
+  if (!ui.shop.cart.length) return `<p class="small muted">${uiText("shop.cartEmpty")}</p>`;
+  return ui.shop.cart.map((line, index) => {
+    const base = `ui.shop.cart.${index}`, id = `shop-line-${line.key}`;
+    return `<div class="shop-line" data-line="${line.key}"><div class="shop-line-head">${line.row ? `<strong>${esc(line.name)}</strong>` : `<input id="${id}-name" class="shop-line-name" type="text" data-bind="${base}.name" value="${esc(line.name)}" placeholder="${uiText("Nom de l’objet")}" aria-label="${uiText("Nom de l’objet")}" maxlength="120">`}${smallIcon("x", "shop-remove", uiText("shop.remove"), `id="${id}-remove" data-id="${line.key}"`)}</div><div class="shop-line-body"><div class="shop-stepper"><button type="button" id="${id}-minus" data-action="shop-minus" data-id="${line.key}" aria-label="${uiText("shop.minus")}">−</button><input id="${id}-qty" type="number" inputmode="numeric" min="1" max="999" step="1" data-bind="${base}.qty" value="${esc(line.qty)}" aria-label="${uiText("Quantité")}"><button type="button" id="${id}-plus" data-action="shop-plus" data-id="${line.key}" aria-label="${uiText("shop.plus")}">+</button></div><div class="shop-price" role="group" aria-label="${uiText("shop.unitPrice")}">${["po", "pa", "pc"].map((coin) => `<label><input id="${id}-${coin}" type="number" inputmode="numeric" min="0" step="1" data-bind="${base}.${coin}" value="${esc(line[coin])}" aria-label="${names[coin]}"><span>${names[coin]}</span></label>`).join("")}</div><strong class="shop-line-total">${esc(shopLineTotal(line))}</strong></div>${line.row ? `<small class="muted shop-line-note">${esc(shopLineNote(line))}</small>` : `<label class="shop-weight">${uiText("Poids unitaire (kg)")} <input id="${id}-weight" type="number" inputmode="decimal" min="0" max="10000" step="0.1" data-bind="${base}.weight" value="${esc(line.weight)}"></label>`}</div>`;
+  }).join("");
+}
+function shopSummaryHtml(c) {
+  const purse = shopPurse(c), total = shopTotal();
+  if (!ui.shop.cart.length) return `<div class="shop-summary"><span>${uiText("Bourse")} : <strong>${shopCoins(purse)}</strong></span></div>`;
+  return `<div class="shop-summary"><span>${uiText("shop.total")} <strong>${shopCoins(total)}</strong></span>${total > purse ? `<span class="shop-missing">${uiText("shop.missing", { amount: shopCoins(total - purse) })}</span>` : `<span>${uiText("Bourse")} : ${shopCoins(purse)} ${icon("arrow", 15)} <strong>${shopCoins(purse - total)}</strong></span>`}</div>`;
+}
+const shopCartLabel = () => shopCount() ? uiText("shop.cartCount", { count: shopCount() }) : uiText("shop.cart");
+function renderShop(c, cancel) {
+  const shop = ui.shop, count = shopCount();
+  const head = shop.full ? `<div class="shop-full-head"><strong>${uiText("shop.full.title")}</strong><small class="muted">${uiText("shop.full.help")}</small></div>` : `<div class="segmented four">${SHOP_TABS.map(([id, label]) => `<button type="button" data-action="shop-tab" data-value="${id}" class="${shop.tab === id ? "active" : ""}">${uiText(label)}</button>`).join("")}</div>`;
+  const catalog = `<div class="shop-catalog">${head}<div class="spell-toolbar shop-toolbar"><div class="search-wrap">${icon("search", 18)}<input id="shop-search" class="search-input" type="search" data-bind="ui.shop.query" value="${esc(shop.query)}" placeholder="${uiText("Chercher…")}" aria-label="${uiText("Chercher un objet")}"></div><select id="shop-sort" class="select-plain" data-bind="ui.shop.sort" aria-label="${uiText("shop.sort")}">${SHOP_SORTS.map((id) => `<option value="${id}" ${shop.sort === id ? "selected" : ""}>${uiText(`shop.sort.${id}`)}</option>`).join("")}</select></div><div class="shop-rows">${shopRowsHtml()}</div>${window.COMPANION_STANDALONE ? "" : button(uiText(shop.full ? "shop.full.close" : "shop.full.open"), "shop-full", "", "ghost shop-switch")}</div>`;
+  const cart = `<div class="shop-cart"><h3 class="shop-cart-title">${uiText("shop.cart")}${count ? ` <span class="pill">${count}</span>` : ""}</h3>${shopCartHtml()}${button(`${icon("plus", 14)} ${uiText("shop.free")}`, "shop-free", "", "ghost shop-free")}</div>`;
+  const views = `<div class="shop-views segmented">${[["catalog", uiText("shop.catalogue")], ["cart", shopCartLabel()]].map(([id, label]) => `<button type="button" data-action="shop-view" data-value="${id}" class="${shop.view === id ? "active" : ""}" aria-pressed="${shop.view === id}">${esc(label)}</button>`).join("")}</div>`;
+  return modalShell(uiText("shop.buy"), `${views}<div class="shop-body" data-view="${shop.view}">${catalog}${cart}</div>`, `${shopSummaryHtml(c)}<div class="shop-buttons">${cancel}${button(uiText("shop.review"), "shop-review", shopReady(c) ? "" : "disabled", "primary")}</div>`, true, "", "shop-modal");
+}
+/** Saisie dans la fenêtre d'achat : la liste ou les totaux changent, le champ en cours garde le focus. */
+function shopInput(path, el) {
+  // En quittant un champ, « change » répète une valeur déjà lue : redessiner la liste ferait perdre l'appui sur « Ajouter ».
+  if (boundValue(path) === el.value) return;
+  setBinding(path, el.value);
+  if (["ui.shop.query", "ui.shop.sort"].includes(path)) { const rows = modalRoot.querySelector(".shop-rows"); if (rows) rows.innerHTML = shopRowsHtml(); return; }
+  const c = activeCharacter();
+  for (const line of ui.shop.cart) {
+    const node = modalRoot.querySelector(`.shop-line[data-line="${line.key}"]`);
+    if (!node) continue;
+    node.querySelector(".shop-line-total").textContent = shopLineTotal(line);
+    const note = node.querySelector(".shop-line-note"); if (note) note.textContent = shopLineNote(line);
+  }
+  const summary = modalRoot.querySelector(".shop-summary"); if (summary) summary.outerHTML = shopSummaryHtml(c);
+  const review = modalRoot.querySelector('[data-action="shop-review"]'); if (review) review.disabled = !shopReady(c);
+  const view = modalRoot.querySelector('[data-action="shop-view"][data-value="cart"]'); if (view) view.textContent = shopCartLabel();
+}
+function shopCartLine(row) {
+  const coins = row?.copper == null ? { po: "", pa: "", pc: "" } : { po: String(Math.floor(row.copper / 100)), pa: String(Math.floor(row.copper % 100 / 10)), pc: String(row.copper % 10) };
+  return { key: String(ui.shop.nextKey++), row: row?.key || null, name: row?.name || "", qty: "1", ...coins, weight: "0" };
+}
+/** Ajoute au sac un objet du catalogue rapide comme le fait « Objet du catalogue » : une pile par objet, un exemplaire par arme ou armure. */
+function addRuntimeItem(character, id) {
+  const info = itemInfo(id);
+  const existing = character.inventory.find((x) => x.ref === id && !x.instance?.container && !["weapon", "armor", "shield"].includes(info.kind) && !x.instance?.equippedSlot && !x.instance?.charges);
+  if (existing) existing.qty += info.kind === "ammo" && existing.instance?.ammunition ? info.count : 1;
+  else character.inventory.push(createRuntimeItem(id, character.id, { id: uid() }));
+}
+/** Fiche après l'achat du panier, avec les lignes de la revue : bourse puis quantité de chaque objet. */
+function shopPurchase(c) {
+  const next = clone(c), unitOf = new Map();
+  for (const line of ui.shop.cart) {
+    const row = line.row && shopRow(line.row), qty = shopLineQty(line), before = new Map(next.inventory.map((item) => [item.id, item.qty]));
+    if (!row) {
+      const item = { id: uid(), name: line.name.trim(), qty, weight: Math.round((Number(line.weight) || 0) * 100) / 100, description: "" };
+      normalizeInventory({ id: next.id, inventory: [item] }); next.inventory.push(item);
+    } else if (row.kind === "ref") {
+      const item = createCatalogueItem(Object.values(KIT_ITEM_REFERENCES).find((entry) => entry.id === row.id), next.id, { id: uid(), name: row.name });
+      const existing = next.inventory.find((x) => x.ref === row.id && !x.instance?.container && !x.instance?.equippedSlot && !x.instance?.charges);
+      if (existing) existing.qty += item.qty * qty; else { item.qty *= qty; next.inventory.push(item); }
+    } else for (let count = 0; count < qty; count++) addRuntimeItem(next, row.id);
+    const unit = uiText("shop.unit", { price: shopCoins(shopLineUnit(line)) });
+    for (const item of next.inventory) if (before.get(item.id) !== item.qty) unitOf.set(item.id, unit);
+  }
+  next.gold = (shopPurse(c) - shopTotal()) / 100;
+  // Une ligne par pile ; les armes et armures, ajoutées à l'unité, sont regroupées par nom.
+  const groups = new Map();
+  for (const item of next.inventory) {
+    const before = c.inventory.find((old) => old.id === item.id)?.qty || 0;
+    if (before === item.qty) continue;
+    const group = groups.get(before ? item.id : `${item.name}|${unitOf.get(item.id)}`) || { label: item.name, before: 0, after: 0, source: unitOf.get(item.id) };
+    group.before += before; group.after += item.qty; groups.set(before ? item.id : `${item.name}|${unitOf.get(item.id)}`, group);
+  }
+  return { next, impactRows: [{ label: uiText("Bourse"), before: shopCoins(shopPurse(c)), after: shopCoins(shopPurse(c) - shopTotal()) }, ...groups.values()] };
+}
+function shopLabel() {
+  const names = ui.shop.cart.map((line) => line.name.trim());
+  return uiText("shop.label", { names: names.length === 1 ? names[0] : names.length === 2 ? uiText("shop.names.pair", { first: names[0], second: names[1] }) : uiText(names.length === 3 ? "shop.names.one" : "shop.names.more", { names: names.slice(0, 2).join(", "), count: names.length - 2 }) });
+}
+async function performShop(action, c, data) {
+  const shop = ui.shop, line = shop?.cart.find((entry) => entry.key === data.id);
+  // Après le rendu, le focus revient à la commande actionnée, ou à celle indiquée.
+  const redraw = (focusId = null) => { render(); if (focusId) document.getElementById(focusId)?.focus({ preventScroll: true }); };
+  switch (action) {
+    case "shop-open":
+      ui.shop = { view: "catalog", tab: "gear", full: false, query: "", sort: "az", opened: [], details: {}, cart: [], nextKey: 1 };
+      openModal("shop"); break;
+    case "shop-tab": shop.tab = data.value; shop.query = ""; redraw(); break;
+    case "shop-view": shop.view = data.value; redraw(); break;
+    case "shop-full": {
+      const catalogue = shopCatalogue();
+      if (!shop.full && !catalogue.named) {
+        // Les noms français du Manuel viennent de l'index de la Bibliothèque.
+        await ensureContent(); await contentLibrary.open();
+        for (const row of catalogue.complete) { row.name = contentLibrary.labels().get(row.id) || row.name; row.search = librarySearchText(`${row.name} ${row.raw.name}`); }
+        catalogue.named = true;
+      }
+      shop.full = !shop.full; shop.query = ""; redraw(); break;
+    }
+    case "shop-add": {
+      const row = shopRow(data.id), existing = shop.cart.find((entry) => entry.row === row.key);
+      if (existing) existing.qty = String(Math.min(999, shopLineQty(existing) + 1)); else shop.cart.push(shopCartLine(row));
+      redraw(shopId("shop-add", row.key)); break;
+    }
+    case "shop-free": { const added = shopCartLine(null); shop.cart.push(added); shop.view = "cart"; redraw(`shop-line-${added.key}-name`); break; }
+    case "shop-remove": shop.cart = shop.cart.filter((entry) => entry !== line); redraw(); break;
+    case "shop-minus": if (line && shopLineQty(line) > 1) { line.qty = String(shopLineQty(line) - 1); redraw(`shop-line-${line.key}-minus`); } break;
+    case "shop-plus": if (line && shopLineQty(line) < 999) { line.qty = String(shopLineQty(line) + 1); redraw(`shop-line-${line.key}-plus`); } break;
+    case "shop-detail": {
+      const row = shopRow(data.id), focusId = shopId("shop-detail", row.key);
+      if (shop.opened.includes(row.key)) shop.opened = shop.opened.filter((key) => key !== row.key);
+      else {
+        shop.opened.push(row.key);
+        if (!shop.details[row.key]) { redraw(focusId); const detail = await shopLoadDetail(row); if (ui.shop !== shop || ui.modal !== "shop") { shop.details[row.key] = detail; break; } shop.details[row.key] = detail; }
+      }
+      redraw(focusId); break;
+    }
+    case "shop-review": {
+      if (!shopReady(c)) break;
+      const { next, impactRows } = shopPurchase(c);
+      openReview(next, shopLabel(), uiText("shop.cost", { total: shopCoins(shopTotal()) }), "session", { impactRows, shop: true }); break;
     }
   }
 }
@@ -56150,6 +56581,7 @@ function renderInventoryModals(c, d, cancel) {
       `${field(uiText("Nom de l’objet"), "form.name", ui.form.name, "text", "", 'maxlength="120"')}<div class="form-grid">${field(uiText("Quantité"), "form.qty", ui.form.qty, "number", "", 'min="0" max="99999" step="1"')}${field(uiText("Poids unitaire (kg)"), "form.weight", ui.form.weight, "number", "", 'min="0" max="10000" step="0.01"')}</div>${field(uiText("Notes et propriétés"), "form.description", ui.form.description, "textarea", uiText("Les objets du sac n’appliquent pas de bonus automatiquement."), 'maxlength="4000"')}${renderInstanceFields(ui.form)}`,
       cancel + button(uiText(ui.form.editing ? "Vérifier" : "Vérifier l’ajout"), "review-item", "", "primary"),
     );
+  if (ui.modal === "shop") return renderShop(c, cancel);
   if (ui.modal === "catalog") {
     const q = librarySearchText(ui.catalogQuery || ""),
       tab = ui.catalogTab || "gear";
@@ -56215,6 +56647,8 @@ function uiSpellRange(spell, c = ui.wizard?.draft || ui.levelFlow?.draft || ui.m
   const range = SPELL_ACCESS[spell.id]?.range || referenceEntity(spell.referenceId)?.en?.range;
   return range ? referenceSpellRange(range, uiLanguage()) : spell.range;
 }
+/** Détail d’un sort proposé au choix : ses faits sont déjà affichés au-dessus du texte. */
+const SPELL_BRIEF = { omitFacts: ["level", "school", "casting time", "range", "duration", "components"], fallbackNotice: false };
 function renderSpellDescription(spell, c = ui.wizard?.draft || ui.levelFlow?.draft || ui.magic?.draft || activeCharacter(), options = {}) {
   const personal = uiIsPersonalSpell(c, spell);
   if (personal) return `<p class="preserve">${esc(spell.description || "")}</p><p class="tiny muted">${uiText("Contenu personnalisé de ta table.")}</p>`;
@@ -59663,6 +60097,7 @@ function handleBinding(el, redraw) {
   }
   const path = el.dataset.bind;
   if (!path || (el.type === "radio" && !el.checked)) return;
+  if (path.startsWith("ui.shop.")) { shopInput(path, el); return; }
   if (path === "form.armorSource") {
     equipmentArmorSource(activeCharacter(), el.value);
     render();
@@ -59791,6 +60226,7 @@ let portraitSession = null;
 let diceRenderer = null, diceRendererRoll = null;
 const ui = {
   route: "home",
+  contentOffer: false,
   wizard: null,
   levelFlow: null,
   modal: null,
@@ -59835,6 +60271,7 @@ const ui = {
   cast: null,
   imported: null,
   catalogQuery: "",
+  shop: null,
   catalogTab: "gear",
   editorClass: null,
   attackIndex: 0,
@@ -59866,9 +60303,45 @@ const ui = {
 };
 const contentStore = new ContentStore({ baseUrl: location.href, appBuild: document.querySelector('meta[name="compagnon-build"]')?.content || "",
   onClear: () => { contentLibrary.index = []; contentLibrary.chunks.clear(); contentLibrary.version = null; contentReady = null; },
-  onChange: () => { if (["offline", "settings"].includes(ui.route) && !ui.wizard && !ui.levelFlow) render(); } });
+  onChange: (state) => {
+    // Le bandeau avance sur place ; l’écran n’est redessiné que lorsqu’il apparaît ou disparaît.
+    const banner = document.getElementById("content-banner"), percent = contentPercent(state);
+    if (banner) { banner.querySelector("progress").value = percent; banner.querySelector(".content-banner-percent").textContent = `${percent} %`; }
+    // Pendant un téléchargement, l’écran Contenu hors ligne garde ses boutons en place : seuls ses barres et ses compteurs avancent.
+    const shape = [state.status, state.scope, state.queued, state.error, state.activeVersion].join("|");
+    const steady = state.status === "downloading" && shape === contentShape && ui.route === "offline" && updateContentParts(state);
+    contentShape = shape;
+    if (!!banner !== contentBannerShown(state) || !!document.getElementById("content-offer") !== contentOffered(state) || ["offline", "settings"].includes(ui.route) && !ui.wizard && !ui.levelFlow && !steady) render();
+  } });
+let contentShape = "";
 const contentLibrary = new CatalogueLibrary(contentStore);
 let contentReady = null;
+const contentPartPercent = (part) => part.totalBytes ? Math.floor(part.bytes * 100 / part.totalBytes) : 0;
+const contentPercent = (state) => contentPartPercent(state.parts.texts);
+const contentBannerShown = (state) => state.status === "downloading" && state.scope === "texts";
+const contentOffered = (state) => !!ui.contentOffer && ["missing", "interrupted"].includes(state.status);
+function contentBannerHtml() {
+  const state = contentStore.state, percent = contentPercent(state);
+  if (contentBannerShown(state)) return `<div class="update-banner content-banner" id="content-banner"><span role="status">${uiText("content.banner")}</span><progress class="content-progress" max="100" value="${percent}" aria-label="${esc(uiText("content.banner"))}"></progress><span class="content-banner-percent" aria-hidden="true">${percent} %</span></div>`;
+  return contentOffered(state) ? `<div class="update-banner content-offer" id="content-offer"><span>${uiText("content.offer")}</span><span class="content-offer-actions">${button(uiText("content.download"), "accept-content", "", "small-btn primary")}${button(uiText("content.decline"), "decline-content", "", "small-btn")}</span></div>` : "";
+}
+/** Choix pour les textes et les règles : "on" (téléchargés et tenus à jour à l’ouverture), "paused" (mis en pause, jusqu’à « Reprendre »),
+ * "off" (refusés au bandeau), ou null tant que la personne n’a pas répondu. Nettoyer le contenu remet ce choix à null. */
+function contentChoice() {
+  try { return localStorage.getItem("compagnon-content-auto"); } catch { return null; }
+}
+function setContentChoice(choice) {
+  try { if (choice) localStorage.setItem("compagnon-content-auto", choice); else localStorage.removeItem("compagnon-content-auto"); } catch {}
+}
+const downloadTexts = () => void contentStore.download({ scope: "texts" }).catch(() => {});
+/** Quand les textes et les règles manquent ou ont changé : ils se téléchargent sans bloquer l’écran si la personne l’a accepté, et un bandeau le lui propose si elle n’a pas encore répondu.
+ * Un navigateur piloté (recettes, robots) ne propose ni ne télécharge rien. */
+function startContentTexts() {
+  const state = contentStore.state, choice = contentChoice();
+  if (window.COMPANION_STANDALONE || navigator.webdriver || state.texts || state.error) return;
+  if (choice === "on" && ["missing", "interrupted", "update"].includes(state.status)) downloadTexts();
+  else if (!choice && ["missing", "interrupted"].includes(state.status)) { ui.contentOffer = true; render(); }
+}
 function ensureContent() {
   if (window.COMPANION_STANDALONE) return Promise.resolve();
   return contentReady ||= contentStore.load().catch((error) => { if (error.name !== "AbortError") contentStore.publish({ status: "error", error: error.message }); });
@@ -60018,7 +60491,7 @@ function renderNow() {
   const saveLabel = ui.saving ? uiText("save.saving") : localStore.readOnly ? uiText("save.readonly") : localStore.mode === "memory" ? uiText("save.memory") : ui.online ? uiText("save.local") : uiText("save.offline");
   const mobileStatus = ui.saving ? uiText("save.saving") : localStore.readOnly ? uiText("save.readonly") : localStore.mode === "memory" ? uiText("save.unsaved") : ui.online ? uiText("save.saved") : uiText("save.offlineShort");
   clearDashboardMount();
-  root.innerHTML = `<a class="skip" href="#main-content">${uiText("shell.skip")}</a><div class="app-shell ${emptyHome ? "empty-home" : ""}" style="--livery:${liveryOf(c)}"><aside class="sidebar"><button class="brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 30)}</span><span><span class="brand-name">Compagnon</span></span></button><div class="sidebar-label">${uiText("shell.table")}</div>${navFor(c).map(([route, ico, label]) => `<button class="nav-btn ${ui.route === route && !wizardActive ? "active" : ""}" data-action="navigate" data-route="${route}" ${ui.route === route && !wizardActive ? 'aria-current="page"' : ""} ${!c ? "disabled" : ""}>${icon(ico, 20)}${uiText(`nav.${route}`)}</button>`).join("")}<div class="sidebar-bottom"><button class="nav-btn ${ui.route === "library" ? "active" : ""}" data-action="navigate" data-route="library">${uiText("{p6}Bibliothèque", { p6: icon("book", 20) })}</button><button class="nav-btn ${ui.route === "offline" ? "active" : ""}" data-action="navigate" data-route="offline">${uiText("{p8}Contenu hors ligne", { p8: icon("download", 20) })}</button><button class="nav-btn ${ui.route === "home" && !wizardActive ? "active" : ""}" data-action="navigate" data-route="home">${uiText("{p10}Mes personnages", { p10: icon("users", 20) })}</button><button class="nav-btn ${ui.route === "settings" ? "active" : ""}" data-action="navigate" data-route="settings">${uiText("{p12}Réglages & sauvegardes", { p12: icon("settings", 20) })}</button><div class="local-note">${icon("lock", 19)}<div>${uiText("shell.local")}</div></div><div class="side-footer"><span>${uiText("shell.rules")}</span><span>v${APP_VERSION}</span></div></div></aside><div class="main-shell"><header class="topbar"><div class="top-title"><strong>${wizardActive ? uiText("shell.creation") : uiText(`nav.${ui.route}`)}</strong></div><button class="brand mobile-brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 26)}</span><span><span class="brand-name">Compagnon</span><span class="brand-sub">${uiText("shell.rules")}</span></span></button><div class="top-actions"><span class="save-status" title="${esc(saveLabel)}" role="status"><span class="status-dot" style="${localStore.mode === "memory" || localStore.readOnly ? "background:var(--warning)" : ""}" aria-hidden="true"></span><span class="status-text">${esc(saveLabel)}</span><span class="status-mobile">${esc(mobileStatus)}</span></span>${c && !wizardActive ? renderCharacterMenu(c) : !isInstalledApp() ? `<span class="top-utility">${smallIcon("phone", "install", uiText("shell.install"))}</span>` : ""}</div></header>${ui.languageWarning ? notice(uiText("language.failure"), "warning") : ""}${ui.update ? `<div class="update-banner">${uiText("Une nouvelle version est prête. Tes fiches seront conservées.{p0}", { p0: button(uiText("Mettre à jour"), "update-app", "", "small-btn") })}</div>` : ui.updateDownloading ? `<div class="update-banner" role="status">${uiText("update.downloading")}</div>` : ""}${localStore.mode === "memory" ? notice(("Le navigateur bloque le stockage. <strong>" + uiText("Les changements ne survivront pas à la fermeture.") + "</strong> Exporte tes fiches et ouvre l’application hors navigation privée."), "error") : ""}${localStore.readOnly ? notice(uiText("Le stockage de ce navigateur est en lecture seule. Exporte tes fiches pour les conserver dans un navigateur compatible."), "warning") : ""}${localStore.pendingState ? notice(uiText("Une modification n’a pas été enregistrée. {p0}", { p0: button(uiText("Exporter les modifications en attente"), "export-pending", "", "small-btn") }), "warning") : ""}${appData.recovery?.length ? notice(uiText("{p0} fiche(s) nécessitent une récupération. Les autres restent accessibles. {p1}", { p0: appData.recovery.length, p1: button(uiText("Exporter les données à récupérer"), "export-recovery", "", "small-btn") }), "warning") : ""}<main class="main ${wizardActive ? "wizard-active" : ""}" id="main-content" tabindex="-1">${ui.wizard ? renderWizard() : ui.levelFlow ? renderLevelFlow() : renderPage(c)}${c ? printSheet(c) : ""}</main></div></div><nav class="mobile-nav" aria-label="${esc(uiText("shell.navigation"))}">${[
+  root.innerHTML = `<a class="skip" href="#main-content">${uiText("shell.skip")}</a><div class="app-shell ${emptyHome ? "empty-home" : ""}" style="--livery:${liveryOf(c)}"><aside class="sidebar"><button class="brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 30)}</span><span><span class="brand-name">Compagnon</span></span></button><div class="sidebar-label">${uiText("shell.table")}</div>${navFor(c).map(([route, ico, label]) => `<button class="nav-btn ${ui.route === route && !wizardActive ? "active" : ""}" data-action="navigate" data-route="${route}" ${ui.route === route && !wizardActive ? 'aria-current="page"' : ""} ${!c ? "disabled" : ""}>${icon(ico, 20)}${uiText(`nav.${route}`)}</button>`).join("")}<div class="sidebar-bottom"><button class="nav-btn ${ui.route === "library" ? "active" : ""}" data-action="navigate" data-route="library">${uiText("{p6}Bibliothèque", { p6: icon("book", 20) })}</button><button class="nav-btn ${ui.route === "offline" ? "active" : ""}" data-action="navigate" data-route="offline">${uiText("{p8}Contenu hors ligne", { p8: icon("download", 20) })}</button><button class="nav-btn ${ui.route === "home" && !wizardActive ? "active" : ""}" data-action="navigate" data-route="home">${uiText("{p10}Mes personnages", { p10: icon("users", 20) })}</button><button class="nav-btn ${ui.route === "settings" ? "active" : ""}" data-action="navigate" data-route="settings">${uiText("{p12}Réglages & sauvegardes", { p12: icon("settings", 20) })}</button><div class="local-note">${icon("lock", 19)}<div>${uiText("shell.local")}</div></div><div class="side-footer"><span>${uiText("shell.rules")}</span><span>v${APP_VERSION}</span></div></div></aside><div class="main-shell"><header class="topbar"><div class="top-title"><strong>${wizardActive ? uiText("shell.creation") : uiText(`nav.${ui.route}`)}</strong></div><button class="brand mobile-brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 26)}</span><span><span class="brand-name">Compagnon</span><span class="brand-sub">${uiText("shell.rules")}</span></span></button><div class="top-actions"><span class="save-status" title="${esc(saveLabel)}" role="status"><span class="status-dot" style="${localStore.mode === "memory" || localStore.readOnly ? "background:var(--warning)" : ""}" aria-hidden="true"></span><span class="status-text">${esc(saveLabel)}</span><span class="status-mobile">${esc(mobileStatus)}</span></span>${c && !wizardActive ? renderCharacterMenu(c) : !isInstalledApp() ? `<span class="top-utility">${smallIcon("phone", "install", uiText("shell.install"))}</span>` : ""}</div></header>${ui.languageWarning ? notice(uiText("language.failure"), "warning") : ""}${ui.update ? `<div class="update-banner">${uiText("Une nouvelle version est prête. Tes fiches seront conservées.{p0}", { p0: button(uiText("Mettre à jour"), "update-app", "", "small-btn") })}</div>` : ui.updateDownloading ? `<div class="update-banner" role="status">${uiText("update.downloading")}</div>` : ""}${contentBannerHtml()}${localStore.mode === "memory" ? notice(("Le navigateur bloque le stockage. <strong>" + uiText("Les changements ne survivront pas à la fermeture.") + "</strong> Exporte tes fiches et ouvre l’application hors navigation privée."), "error") : ""}${localStore.readOnly ? notice(uiText("Le stockage de ce navigateur est en lecture seule. Exporte tes fiches pour les conserver dans un navigateur compatible."), "warning") : ""}${localStore.pendingState ? notice(uiText("Une modification n’a pas été enregistrée. {p0}", { p0: button(uiText("Exporter les modifications en attente"), "export-pending", "", "small-btn") }), "warning") : ""}${appData.recovery?.length ? notice(uiText("{p0} fiche(s) nécessitent une récupération. Les autres restent accessibles. {p1}", { p0: appData.recovery.length, p1: button(uiText("Exporter les données à récupérer"), "export-recovery", "", "small-btn") }), "warning") : ""}<main class="main ${wizardActive ? "wizard-active" : ""}" id="main-content" tabindex="-1">${ui.wizard ? renderWizard() : ui.levelFlow ? renderLevelFlow() : renderPage(c)}${c ? printSheet(c) : ""}</main></div></div><nav class="mobile-nav" aria-label="${esc(uiText("shell.navigation"))}">${[
     ["sheet", "clipboard", uiText("Fiche")],
     ["spells", "book", uiText("Sorts")],
     ["features", "swords", uiText("Aptitudes")],
@@ -60168,7 +60641,7 @@ function renderModal() {
   if (["journal-editor", "journal-photo", "journal-discard"].includes(ui.modal)) return renderJournalModals(c, d, cancel);
   if (["rune-inscriptions", "rune-expense", "copy-spell", "magic", "sheet-slot-correction", "sheet-slot", "cast", "cast-target", "spell-stock-consume"].includes(ui.modal)) return renderSpellModals(c, d, cancel);
   if (["rest", "resource-uses", "resource-conversions", "dawn-item", "resource-event"].includes(ui.modal)) return renderResourceModals(c, d, cancel);
-  if (["use-inventory-item", "resolve-last-charge", "declare-item-result", "item-spell-stock", "item-spell-deposit", "item-spell-remove", "item-slot-recovery", "equipment", "equip-instance", "item", "catalog", "attunements"].includes(ui.modal)) return renderInventoryModals(c, d, cancel);
+  if (["use-inventory-item", "resolve-last-charge", "declare-item-result", "item-spell-stock", "item-spell-deposit", "item-spell-remove", "item-slot-recovery", "equipment", "equip-instance", "item", "catalog", "shop", "attunements"].includes(ui.modal)) return renderInventoryModals(c, d, cancel);
   if (ui.modal.startsWith("creation-")) return renderCreationModal(c, cancel);
   if (["replace-spell", "replace-choice", "calculation-details", "acquisition-history", "rule-options", "adjustments"].includes(ui.modal)) return renderLevelModals(c, d, cancel);
   if (["conditions"].includes(ui.modal)) return renderEffectModals(c, d, cancel);
@@ -60356,6 +60829,8 @@ function closeModal() {
     ui.libraryBrowseReturn = null; ui.libraryContext = null;
     restoreLibraryOrigin(origin); return;
   }
+  // Revue d'un achat refermée sans valider : retour au panier.
+  if (ui.modal === "review" && ui.pending?.shop && ui.shop) { ui.pending = null; ui.modal = "shop"; render(); return; }
   if (ui.modal === "review" && ui.pending?.libraryBack) {
     const origin = ui.pending.libraryBack;
     ui.pending = null; restoreLibraryOrigin(origin); return;
@@ -60533,7 +61008,7 @@ async function perform(action, el) {
     case "portrait-cancel-upload": case "portrait-save": case "dashboard-organize": case "damage": case "heal": case "gold": case "xp": case "hp-details":
     case "temporary-hp": case "quick-amount": case "apply-amount": case "print": case "print-select-all": case "confirm-print": case "ac-info":
       await performSheet(action, el, c, data, d); break;
-    case "export-pending": case "export-repair-draft": case "export-recovery": case "download-content": case "pause-content": case "clear-content": case "check-content":
+    case "export-pending": case "export-repair-draft": case "export-recovery": case "download-content": case "pause-content": case "accept-content": case "decline-content": case "clear-content": case "check-content":
     case "set-units": case "set-list-order": case "set-language": case "audit-settings-open": case "audit-more-companions": case "audit-more-back": case "demo": case "new-trait":
     case "edit-trait": case "review-trait": case "toggle-trait": case "delete-trait": case "new-custom-spell": case "edit-custom-spell": case "review-custom-spell":
     case "delete-custom-spell": case "export-one": case "export-all": case "aidedd-same-class": case "aidedd-resolve": case "aidedd-open": case "aidedd-back":
@@ -60611,7 +61086,8 @@ async function perform(action, el) {
     case "review-item-slot-recovery": case "review-reset-item-recovery": case "declare-item-result": case "use-inventory-item": case "resolve-last-charge":
     case "review-use-inventory-item": case "review-item-result": case "review-last-charge": case "consume-ammunition": case "new-item": case "convert-equipment-pack":
     case "review-equipment-pack": case "edit-item": case "review-item": case "delete-item": case "equip-add-weapon": case "equip-remove-weapon": case "catalog-item":
-    case "catalog-tab": case "add-catalog-item": case "toggle-item-effect":
+    case "catalog-tab": case "add-catalog-item": case "toggle-item-effect": case "shop-open": case "shop-tab": case "shop-view": case "shop-full": case "shop-add":
+    case "shop-free": case "shop-remove": case "shop-minus": case "shop-plus": case "shop-detail": case "shop-review":
       await performInventory(action, el, c, data, d); break;
     case "campaign-new": case "campaign-personal-new": case "campaign-language": case "campaign-edit": case "campaign-proposal": case "campaign-track-new":
     case "campaign-track-edit": case "campaign-track-review": case "campaign-acquisition-review": case "campaign-personal-review": case "campaign-toggle":
@@ -60630,6 +61106,7 @@ async function perform(action, el) {
       }
       const announcement = resourceChangeAnnouncement(p.original, p.character);
       await saveCharacter(p.character, p.label, p.mode || "settings", p.original, { description: p.description, impactRows: p.impactRows, undoSnapshotId: p.undoSnapshotId });
+      if (p.shop) ui.shop = null;
       closeModal();
       // Le jet déclaré par la ressource suit la validation : sa fenêtre tient lieu de confirmation, sans message par-dessus.
       if (p.spendRoll) openSpendRoll(p.spendRoll);
@@ -60709,8 +61186,13 @@ async function perform(action, el) {
         localStorage.removeItem(CREATION_NEXT_KEY);
         startWizard(null, f.key);
       } else if (f.action === "clear-content") {
-        try { await contentStore.clear(); toast(uiText("Contenu téléchargé supprimé.")); }
-        catch { toast(contentStore.state.error || uiText("Le nettoyage n’a pas pu être effectué.")); }
+        try {
+          await contentStore.clear();
+          // Nettoyer n’est pas refuser : le choix est oublié et le bandeau repropose les textes.
+          setContentChoice(null);
+          toast(uiText("Contenu téléchargé supprimé."));
+          startContentTexts();
+        } catch { toast(contentStore.state.error || uiText("Le nettoyage n’a pas pu être effectué.")); }
         render();
       } else if (f.action === "discard-repair-conflict") {
         delete ui.pending.conflict;
@@ -60859,15 +61341,16 @@ document.addEventListener("error", (event) => {
 }, true);
 document.addEventListener("toggle", async (event) => {
   const detail = event.target;
-  if (!detail.matches?.(".spell-card > details") || !detail.open) return;
+  if (!detail.matches?.(".spell-card > details, .choice-option-details") || !detail.open) return;
   const holder = detail.querySelector("[data-spell-description]"), character = ui.wizard?.draft || ui.levelFlow?.draft || ui.magic?.draft || activeCharacter();
   const spell = holder && character && uiSpellById(character, holder.dataset.spellDescription);
   if (!spell?.referenceId || spell.custom) return;
-  if (cachedSpellReference(spell.referenceId)) { holder.innerHTML = renderSpellDescription(spell); return; }
+  const options = holder.dataset.spellBrief ? SPELL_BRIEF : {};
+  if (cachedSpellReference(spell.referenceId)) { holder.innerHTML = renderSpellDescription(spell, character, options); return; }
   try {
     await ensureContent();
     await contentLibrary.entry(spell.referenceId);
-    if (holder.isConnected && detail.open) holder.innerHTML = renderSpellDescription(spell);
+    if (holder.isConnected && detail.open) holder.innerHTML = renderSpellDescription(spell, character, options);
   } catch { /* La description embarquée reste consultable hors catalogue. */ }
 }, true);
 document.addEventListener("toggle", (event) => {
@@ -61064,7 +61547,7 @@ async function setupServiceWorker() {
     }
     render();
     await setupServiceWorker();
-    void ensureContent();
+    void ensureContent().then(startContentTexts);
     void importSharedSave();
   } catch (error) {
     ui.fatal = error.message;
