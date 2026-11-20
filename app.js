@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-candidate-4";
+const APP_VERSION = "2.0.0-candidate-5";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -43197,7 +43197,8 @@ function beginCharacterRepair(c, { revision = c.revision ?? 0 } = {}) {
 }
 function previewCharacterRepair(transaction, draft = transaction.draft) {
   const next = clone(draft);
-  _reconcileBackgroundKit(transaction.original, next);
+  // Seul l’échange du kit d’historique remplit le bloc « Équipement d’historique » : un achat ou un retrait n’y paraît pas.
+  const inventoryChanges = _reconcileBackgroundKit(transaction.original, next);
   next.acquisitions = mergeRuleAcquisitionHistory(transaction.original, next);
   const diagnostics = ruleDiagnostics(next);
   if (levelOf(next) > levelOf(transaction.original)) diagnostics.push(...runeReplacementIssues(transaction.original, next).map((message) => ruleDiagnostic("rune.replacement", "picks", message)));
@@ -43211,7 +43212,7 @@ function previewCharacterRepair(transaction, draft = transaction.draft) {
   const featureChanges = compare(features(transaction.original).map(({ level, name, source }) => ({ level, name, source })), features(next).map(({ level, name, source }) => ({ level, name, source })), (entry) => `${entry.level}|${entry.name}|${entry.source}`);
   const choiceChanges = compare(acquisitionHistory(transaction.original).filter((entry) => entry.endedAtLevel == null).map((entry) => ({ key: entry.id, label: acquisitionLabel(transaction.original, entry), level: entry.totalLevel })), next.acquisitions.filter((entry) => entry.endedAtLevel == null).map((entry) => ({ key: entry.id, label: acquisitionLabel(next, entry), level: entry.totalLevel })), (entry) => entry.key);
   const magicChanges = compare(_repairMagicAccess(transaction.original), _repairMagicAccess(next), (entry) => entry.key);
-  return { attunementCorrection: { before: inventoryAttunementStatus(transaction.original), after: inventoryAttunementStatus(next) }, draft: next, diagnostics, changes, affected, sourceChanges, featureChanges, choiceChanges, magicChanges, resourceChanges, dependencies, dependencyChanges, inventoryChanges: { removed: transaction.original.inventory.filter((entry) => !next.inventory.some((item) => item.id === entry.id)), added: next.inventory.filter((entry) => !transaction.original.inventory.some((item) => item.id === entry.id)) }, acquisitions: next.acquisitions, status: diagnostics.some((entry) => entry.severity === "error") ? "incomplete" : diagnostics.some((entry) => entry.status === "exception-mj") ? "exception-mj" : "valid" };
+  return { attunementCorrection: { before: inventoryAttunementStatus(transaction.original), after: inventoryAttunementStatus(next) }, draft: next, diagnostics, changes, affected, sourceChanges, featureChanges, choiceChanges, magicChanges, resourceChanges, dependencies, dependencyChanges, inventoryChanges, acquisitions: next.acquisitions, status: diagnostics.some((entry) => entry.severity === "error") ? "incomplete" : diagnostics.some((entry) => entry.status === "exception-mj") ? "exception-mj" : "valid" };
 }
 function finishCharacterRepair(transaction, draft = transaction.draft, { expectedRevision = transaction.baseRevision } = {}) {
   if (expectedRevision !== transaction.baseRevision) throw Object.assign(new Error(uiText("La fiche a changé depuis le début de la correction. Le brouillon est conservé.")), { code: "CONFLICT", draft: clone(draft) });
@@ -43526,13 +43527,15 @@ function _backgroundKitItem(c, descriptor, instanceId = uid()) {
   item.instance.origin = { kind: "feature", sourceId: descriptor.referenceId, sourceKey: descriptor.sourceKey, revision: descriptor.revision, grantedQuantity: descriptor.qty, itemKey: item.ref || descriptor.special || descriptor.item };
   return item;
 }
+/** Échange le kit de l’ancien historique contre celui du nouveau, dans `next` ; rend les objets retirés du sac et ceux ajoutés. */
 function _reconcileBackgroundKit(before, next) {
-  if (before.startKit?.mode !== "done") return next;
+  const none = { removed: [], added: [] };
+  if (before.startKit?.mode !== "done") return none;
   const oldDescriptors = backgroundEquipment(before), descriptors = backgroundEquipment(next);
-  if (JSON.stringify(oldDescriptors) === JSON.stringify(descriptors)) return next;
+  if (JSON.stringify(oldDescriptors) === JSON.stringify(descriptors)) return none;
   const sourceKeys = new Set(oldDescriptors.map((entry) => entry.sourceKey));
   const candidates = next.inventory.filter((item) => sourceKeys.has(item.instance?.origin?.sourceKey) && item.instance.ownerId === next.id);
-  if (!candidates.length) return next;
+  if (!candidates.length) return none;
   const desired = descriptors.map((descriptor, index) => _backgroundKitItem(next, descriptor, `kit:${next.id}:${next.background.id}:${next.background.variantId || "base"}:${next.acquisitions?.length || 0}:${index}`)).filter(Boolean).flatMap((item) => equipmentPack(item) ? expandEquipmentPack(item, next.id, { quantity: item.qty, template: item }) : [item]);
   const remaining = [...desired], removed = [], retained = [], key = (item) => item.instance?.origin?.itemKey || item.ref || item.name;
   for (const item of candidates) {
@@ -43552,7 +43555,8 @@ function _reconcileBackgroundKit(before, next) {
   next.inventory = [...next.inventory.filter((item) => !candidateIds.has(item.id)), ...retained, ...remaining];
   if (removed.length) next.background.kitArchive = [...(next.background.kitArchive || []), ...removed];
   applyInventoryEquipment(next);
-  return next;
+  const kept = new Set(retained.map((item) => item.id));
+  return { removed: candidates.filter((item) => !kept.has(item.id)), added: remaining };
 }
 
 /** Fenêtres de remplacement de classe ; les choix d’origine restent conservés. */
