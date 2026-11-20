@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-candidate-3";
+const APP_VERSION = "2.0.0-candidate-4";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -535,7 +535,6 @@ const UI_FR = Object.freeze({
   "Caractéristiques": "Caractéristiques",
   "Caractéristiques, maîtrises, expertise, langues et outils ; PV, CA (armures, défense sans armure, styles), initiative, vitesse ; attaques de chaque arme ; emplacements de sorts y compris multiclasse et pacte ; sorts connus, préparés et toujours préparés ; ressources de classe, de sous-classe, d’origine et de dons ; repos et dés de vie.": "Caractéristiques, maîtrises, expertise, langues et outils ; PV, CA (armures, défense sans armure, styles), initiative, vitesse ; attaques de chaque arme ; emplacements de sorts y compris multiclasse et pacte ; sorts connus, préparés et toujours préparés ; ressources de classe, de sous-classe, d’origine et de dons ; repos et dés de vie.",
   "Catalogue de ma classe": "Catalogue de ma classe",
-  "Catalogue, textes français et anglais, et ressources de l’application.": "Catalogue, textes français et anglais, et ressources de l’application.",
   "Ce sort n’est plus actif.": "Ce sort n’est plus actif.",
   "Ce travail comprend du contenu du Document de Référence du Système 5.1 (« SRD 5.1 ») de Wizards of the Coast LLC, disponible à l’adresse ": "Ce travail comprend du contenu du Document de Référence du Système 5.1 (« SRD 5.1 ») de Wizards of the Coast LLC, disponible à l’adresse ",
   "Certaines illustrations ne sont pas disponibles. Retrouve une connexion et rouvre cette galerie. Pour toutes les garder, prépare le Contenu hors ligne.": "Certaines illustrations ne sont pas disponibles. Retrouve une connexion et rouvre cette galerie. Pour toutes les garder, prépare le Contenu hors ligne.",
@@ -734,13 +733,18 @@ const UI_FR = Object.freeze({
   "content.offer": "Précharger les données textuelles et règles",
   "content.download": "Télécharger",
   "content.decline": "Non",
+  "content.updateOffer": "Nouvelle version des ressources disponible",
+  "content.update": "Mettre à jour",
+  "content.updating": "Mise à jour des ressources",
+  "content.version": "Version {p0}",
+  "content.scope": "Catalogue, textes français et anglais, et portraits.",
   "content.pause": "Mettre en pause",
   "content.queued": "En attente",
   "content.done": "Téléchargé",
   "content.part.texts": "Textes et règles",
   "content.part.images": "Images",
   "content.texts": "Textes et règles téléchargés",
-  "content.note": "Tes personnages sont stockés séparément. Les textes et les règles se téléchargent à l’ouverture de l’application, les images ici.",
+  "content.note": "Tes personnages sont stockés séparément. Une nouvelle version des textes ou des images téléchargés t’est proposée par un bandeau.",
   "Texte anglais": "Texte anglais",
   "Thème": "Thème",
   "Ton choix": "Ton choix",
@@ -1639,7 +1643,7 @@ const UI_FR = Object.freeze({
   "Vulnérabilités": "Vulnérabilités",
   "Vérification du contenu…": "Vérification du contenu…",
   "Vérifier": "Vérifier",
-  "Vérifier avant d’appliquer": "Vérifier avant d’appliquer",
+  "Récapitulatif": "Récapitulatif",
   "Vérifier et appliquer": "Vérifier et appliquer",
   "Vérifier la copie": "Vérifier la copie",
   "Vérifier la correction": "Vérifier la correction",
@@ -1993,7 +1997,6 @@ const UI_FR = Object.freeze({
   "{p0} utilisation(s)": "{p0} utilisation(s)",
   "{p0} entrées · {p1}": "{p0} entrées · {p1}",
   "{p3} / {p4} fichiers vérifiés · {p5} sur {p6}": "{p3} / {p4} fichiers vérifiés · {p5} sur {p6}",
-  "Version locale {p0} · règles 2014": "Version locale {p0} · règles 2014",
   "{p6} résultats · page {p7} / {p8}": "{p6} résultats · page {p7} / {p8}",
   "{p1} · Référence retirée du catalogue": "{p1} · Référence retirée du catalogue",
   "{p1} résultat(s).{p2}": "{p1} résultat(s).{p2}",
@@ -4936,6 +4939,10 @@ const UI_FR = Object.freeze({
   "creations.action.count": "{count} attaques",
   "creations.error.cast": "Lance d’abord le sort qui crée cette créature.",
   "creations.concentration.ends": "Ta concentration sur {spell} prend fin.",
+  "concentration.effects.ended": "Retiré de ta fiche : {names}.",
+  "concentration.ally.ends": "{spell} prend fin pour ton allié.",
+  "concentration.ally.before": "Sur ton allié",
+  "concentration.ally.after": "Prend fin",
   "Notes": "Notes",
   "reminder.zeroHp.instantDeath": "Mort instantanée : à 0 PV, les {rest} dégâts restants atteignent ton maximum de PV ({max}).",
   "damage.step": "{name} : {before} → {after}",
@@ -5418,7 +5425,6 @@ const UI_EN = Object.freeze({
   "Caractéristiques": "Ability scores",
   "Caractéristiques, maîtrises, expertise, langues et outils ; PV, CA (armures, défense sans armure, styles), initiative, vitesse ; attaques de chaque arme ; emplacements de sorts y compris multiclasse et pacte ; sorts connus, préparés et toujours préparés ; ressources de classe, de sous-classe, d’origine et de dons ; repos et dés de vie.": "Ability scores, proficiencies, expertise, languages and tools; HP, AC (armor, Unarmored Defense, styles), initiative, speed; each weapon's attacks; spell slots including multiclassing and Pact Magic; known, prepared and always prepared spells; class, subclass, race and feat resources; rests and Hit Dice.",
   "Catalogue de ma classe": "My class catalogue",
-  "Catalogue, textes français et anglais, et ressources de l’application.": "Catalogue, French and English texts, and app resources.",
   "Ce sort n’est plus actif.": "This spell is no longer active.",
   "Ce travail comprend du contenu du Document de Référence du Système 5.1 (« SRD 5.1 ») de Wizards of the Coast LLC, disponible à l’adresse ": "This work includes material from the System Reference Document 5.1 (\"SRD 5.1\") by Wizards of the Coast LLC, available at ",
   "Certaines illustrations ne sont pas disponibles. Retrouve une connexion et rouvre cette galerie. Pour toutes les garder, prépare le Contenu hors ligne.": "Some illustrations are unavailable. Reconnect and reopen this gallery. To keep them all, prepare Offline content.",
@@ -5617,13 +5623,18 @@ const UI_EN = Object.freeze({
   "content.offer": "Preload text data and rules",
   "content.download": "Download",
   "content.decline": "No",
+  "content.updateOffer": "New version of the resources available",
+  "content.update": "Update",
+  "content.updating": "Updating resources",
+  "content.version": "Version {p0}",
+  "content.scope": "Catalogue, French and English texts, and portraits.",
   "content.pause": "Pause",
   "content.queued": "Queued",
   "content.done": "Downloaded",
   "content.part.texts": "Texts and rules",
   "content.part.images": "Images",
   "content.texts": "Texts and rules downloaded",
-  "content.note": "Your characters are stored separately. Texts and rules download when the app opens, images here.",
+  "content.note": "Your characters are stored separately. A new version of downloaded texts or images is offered in a banner.",
   "Texte anglais": "English text",
   "Thème": "Theme",
   "Ton choix": "Your choice",
@@ -6522,7 +6533,7 @@ const UI_EN = Object.freeze({
   "Vulnérabilités": "Vulnerabilities",
   "Vérification du contenu…": "Checking content…",
   "Vérifier": "Check",
-  "Vérifier avant d’appliquer": "Review before applying",
+  "Récapitulatif": "Summary",
   "Vérifier et appliquer": "Review and apply",
   "Vérifier la copie": "Review copy",
   "Vérifier la correction": "Review correction",
@@ -6876,7 +6887,6 @@ const UI_EN = Object.freeze({
   "{p0} utilisation(s)": "{p0} use(s)",
   "{p0} entrées · {p1}": "{p0} entries · {p1}",
   "{p3} / {p4} fichiers vérifiés · {p5} sur {p6}": "{p3} / {p4} verified files · {p5} of {p6}",
-  "Version locale {p0} · règles 2014": "Local version {p0} · 2014 rules",
   "{p6} résultats · page {p7} / {p8}": "{p6} results · page {p7} / {p8}",
   "{p1} · Référence retirée du catalogue": "{p1} · Reference removed from the catalogue",
   "{p1} résultat(s).{p2}": "{p1} result(s).{p2}",
@@ -9819,6 +9829,10 @@ const UI_EN = Object.freeze({
   "creations.action.count": "{count} attacks",
   "creations.error.cast": "Cast the spell that creates this creature first.",
   "creations.concentration.ends": "Your concentration on {spell} ends.",
+  "concentration.effects.ended": "Removed from your sheet: {names}.",
+  "concentration.ally.ends": "{spell} ends for your ally.",
+  "concentration.ally.before": "On your ally",
+  "concentration.ally.after": "Ends",
   "Notes": "Notes",
   "reminder.zeroHp.instantDeath": "Instant death: at 0 HP, the {rest} remaining damage reaches your HP maximum ({max}).",
   "damage.step": "{name}: {before} → {after}",
@@ -25554,8 +25568,17 @@ function libraryScopeAvailability(entry) {
 const libraryIncomplete = (entry) => entry.inheritance?.status === "blocked" || entry.composition?.status === "blocked";
 class CatalogueLibrary {
   constructor(content) { this.content = content; this.index = []; this.chunks = new Map(); this.version = null; }
+  /** Si le réseau se perd pendant la lecture, le contenu repasse sur sa copie téléchargée : la lecture est refaite une fois depuis elle. */
   async open() {
-    const manifest = this.content.active || this.content.manifest;
+    const manifest = this.content.reading;
+    try { await this.openManifest(manifest); }
+    catch (error) {
+      const fallback = this.content.reading;
+      if (!fallback || fallback === manifest) throw error;
+      await this.openManifest(fallback);
+    }
+  }
+  async openManifest(manifest) {
     if (!manifest) throw new Error("Le catalogue n’est pas encore disponible. Connecte-toi pour le charger.");
     if (this.version === manifest.id) return;
     const index = await this.content.readJson(manifest.indexUrl, manifest);
@@ -25586,6 +25609,13 @@ class CatalogueLibrary {
     return { total: found.length, queryTotal: this.index.filter(matches).length, pages, page: current, entries: found.slice(current * pageSize, (current + 1) * pageSize) };
   }
   async entry(id) {
+    try { return await this.readEntry(id); }
+    catch (error) {
+      if (!this.content.reading || this.content.reading.id === this.version) throw error;
+      return this.readEntry(id);
+    }
+  }
+  async readEntry(id) {
     await this.open();
     const row = this.index.find((item) => item.id === id);
     if (!row) throw new Error("Cette référence n’existe pas dans le catalogue disponible.");
@@ -37963,6 +37993,17 @@ function receivedModeApplies(rule, kind, ability, line) {
 function receivedDamageType(type) {
   return uiLanguage() === "en" ? type : DAMAGE_TYPE_LABELS[type] || type;
 }
+/** Effets et compteurs posés sur soi par un sort de concentration : ils quittent la fiche quand elle prend fin ou passe à un autre sort. Modifie c. */
+function dropConcentrationEffects(c) {
+  const ended = (entry) => !!entry.concentration && entry.concentration !== c.state.concentration;
+  if ((c.receivedEffects || []).some(ended)) c.receivedEffects = c.receivedEffects.filter((entry) => !ended(entry));
+  const counters = (c.receivedCounters || []).filter(ended);
+  if (counters.length) {
+    c.receivedCounters = c.receivedCounters.filter((entry) => !ended(entry));
+    for (const entry of counters) delete c.state.resourcesUsed[entry.id];
+  }
+  return c;
+}
 function receivedContribution(entry) {
   const guide = RECEIVED_GUIDES[entry.spellId];
   return guide ? { target: guide.target, value: entry.spellId === "aid" ? 5 * (entry.level - 1) : guide.value, formula: guide.formula } : { target: entry.target, value: entry.value };
@@ -38033,7 +38074,9 @@ function validateReceivedEffects(entries) {
       || abilities !== undefined && (!abilities || typeof abilities !== "object" || !Object.keys(abilities).length || Object.entries(abilities).some(([key, score]) => !Object.hasOwn(ABILITIES, key) || !Number.isInteger(score) || score < 1 || score > 30))
       || ["weapon", "item"].some((key) => entry?.[key] !== undefined && (typeof entry[key] !== "string" || !entry[key] || entry[key].length > 300))
       || entry?.strike !== undefined && entry.strike !== true || entry?.ends !== undefined && entry.ends !== "attack"
-      || entry?.variant !== undefined && !(guide?.variants && Object.hasOwn(guide.variants, entry.variant))) throw new Error(uiText("Effet reçu invalide."));
+      || entry?.variant !== undefined && !(guide?.variants && Object.hasOwn(guide.variants, entry.variant))
+      // Sort de concentration lancé sur soi : l'effet part avec la concentration qui porte ce nom.
+      || entry?.concentration !== undefined && (typeof entry.concentration !== "string" || !entry.concentration || entry.concentration.length > 300)) throw new Error(uiText("Effet reçu invalide."));
     if (entry?.affection !== undefined && typeof entry.affection !== "boolean" || entry?.conditions !== undefined && (!Array.isArray(entry.conditions) || entry.conditions.length > Object.keys(CONDITIONS).length || new Set(entry.conditions).size !== entry.conditions.length || entry.conditions.some((name) => !Object.hasOwn(CONDITIONS, name)))) throw new Error(uiText("États d’affection invalides."));
     if (!entry || typeof entry !== "object" || ["id", "name", "source", "caster", "duration", "description", "referenceId", "spellId"].some((key) => typeof entry[key] !== "string" || entry[key].length > (key === "description" ? 6000 : 300)) || !entry.id || !entry.name.trim() || !Number.isInteger(entry.level) || entry.level < (RECEIVED_GUIDES[entry.spellId]?.level || 0) || entry.level > 9 || !(entry.target === "" || Object.hasOwn(RECEIVED_TARGETS, entry.target)) || !Number.isFinite(entry.value) || Math.abs(entry.value) > 10000) throw new Error(uiText("Effet reçu invalide."));
   }
@@ -38188,7 +38231,8 @@ function validateReceivedCounters(entries) {
       && RECEIVED_COUNTER_RESETS.includes(entry.reset) && Object.hasOwn(RECEIVED_COUNTER_VALUES, entry.gives) && RECEIVED_COUNTER_VALUES[entry.gives](entry.value)
       && Array.isArray(entry.rolls) && new Set(entry.rolls).size === entry.rolls.length && entry.rolls.every((roll) => RECEIVED_ROLLS.includes(roll) && !(entry.gives === "advantage" && roll === "damage"))
       && (entry.gives === "none") === !entry.rolls.length
-      && [["referenceId", 300], ["note", 6000]].every(([key, length]) => entry[key] === undefined || typeof entry[key] === "string" && entry[key].length <= length);
+      && [["referenceId", 300], ["note", 6000], ["concentration", 300]].every(([key, length]) => entry[key] === undefined || typeof entry[key] === "string" && entry[key].length <= length)
+      && entry.concentration !== "";
     if (!valid) throw new Error(uiText("received.counter.invalid"));
   }
 }
@@ -41511,8 +41555,10 @@ function reconcileState(c, previous = null) {
   c.state.pactUsed = Math.max(0, Number(c.state.pactUsed) || 0);
   if (!_wildShapeCanAct(c))
     c.state.concentration = null;
-  // Après la concentration : un stock épuisé met fin à son sort, un stock dont le sort a pris fin part ; une création liée part avec elle.
+  // Après la concentration : un stock épuisé met fin à son sort, un stock dont le sort a pris fin part ; une création liée part avec elle,
+  // comme un effet ou un compteur reçu posé sur soi par ce sort.
   settleSpellStocks(c);
+  dropConcentrationEffects(c);
   syncCreations(c);
   c.classId = primaryClassId(c);
   c.updatedAt = new Date().toISOString();
@@ -42973,7 +43019,7 @@ function validateImport(input) {
     const m = event.material;
     if (!plain(m) || !["item", "gold", "table", "untracked"].includes(m.method) || typeof m.consumed !== "boolean" || m.method === "item" && (typeof m.itemId !== "string" || typeof m.name !== "string" || !Number.isInteger(m.quantity) || m.quantity < 1 || !Number.isFinite(m.value) || m.value < 0) || m.method === "gold" && (!m.consumed || !Number.isFinite(m.amount) || m.amount <= 0) || m.method === "table" && m.note !== undefined && (typeof m.note !== "string" || !m.note.trim() || m.note.length > 1000)) throw new Error(uiText("Déclaration de composante invalide."));
   }
-  for (const event of c.state.spellEvents) if (!plain(event) || typeof event.id !== "string" || typeof event.spellId !== "string" || !Number.isInteger(event.effectiveLevel) || event.effectiveLevel < 0 || event.effectiveLevel > 9 || !plain(event.costs) || event.noConcentration !== undefined && typeof event.noConcentration !== "boolean" || event.ongoing !== undefined && event.ongoing !== true || event.stock !== undefined && !(Number.isInteger(event.stock) && event.stock >= 1 && event.stock <= 99) || event.struck !== undefined && event.struck !== true || event.weaponId !== undefined && !(typeof event.weaponId === "string" && event.weaponId.length <= 200) || event.form !== undefined && !["beast", "tree"].includes(event.form) || event.personalActions !== undefined && (!Array.isArray(event.personalActions) || event.personalActions.some((action) => !["concentration", "ward", "recovery", "tempHp"].includes(action)) || new Set(event.personalActions).size !== event.personalActions.length)) throw new Error(uiText("Événement de lancement invalide."));
+  for (const event of c.state.spellEvents) if (!plain(event) || typeof event.id !== "string" || typeof event.spellId !== "string" || !Number.isInteger(event.effectiveLevel) || event.effectiveLevel < 0 || event.effectiveLevel > 9 || !plain(event.costs) || event.noConcentration !== undefined && typeof event.noConcentration !== "boolean" || event.ongoing !== undefined && event.ongoing !== true || event.ally !== undefined && event.ally !== true || event.stock !== undefined && !(Number.isInteger(event.stock) && event.stock >= 1 && event.stock <= 99) || event.struck !== undefined && event.struck !== true || event.weaponId !== undefined && !(typeof event.weaponId === "string" && event.weaponId.length <= 200) || event.form !== undefined && !["beast", "tree"].includes(event.form) || event.personalActions !== undefined && (!Array.isArray(event.personalActions) || event.personalActions.some((action) => !["concentration", "ward", "recovery", "tempHp"].includes(action)) || new Set(event.personalActions).size !== event.personalActions.length)) throw new Error(uiText("Événement de lancement invalide."));
   if (c.state.pactPearlSlots !== undefined && (!Number.isInteger(c.state.pactPearlSlots) || c.state.pactPearlSlots < 0 || c.state.pactPearlSlots > Math.min(pactMagic(c)?.count || 0, c.state.pactUsed || 0) || c.state.pactPearlSlots > 0 && (pactMagic(c)?.slotLevel || 0) <= 3)) throw new Error(uiText("Réserve de pacte abaissé invalide."));
   if (c.state.pearlSlotOrigins !== undefined && (!Array.isArray(c.state.pearlSlotOrigins) || c.state.pearlSlotOrigins.length > (c.state.temporarySlots[3] || 0) || c.state.pearlSlotOrigins.some((level) => !Number.isInteger(level) || level < 4 || level > 9))) throw new Error(uiText("Origine d’emplacement abaissé invalide."));
   for (const event of c.state.spellEvents) if (event.costs.pactPearl !== undefined && (event.costs.pactPearl !== true || event.costs.pact || event.costs.slot || event.effectiveLevel !== 3)) throw new Error(uiText("Coût de pacte abaissé invalide."));
@@ -44159,6 +44205,17 @@ function spellDurationText(minutes, concentration = false) {
   const [count, unit] = minutes < 1 ? [Math.round(minutes * 10), "round"] : minutes % 1440 === 0 && minutes > 1440 ? [minutes / 1440, "day"] : minutes % 60 === 0 ? [minutes / 60, "hour"] : [minutes, "minute"];
   const text = uiText(`spell.duration.${unit}${count > 1 ? "s" : ""}`, { count });
   return concentration ? uiText("stock.concentration", { duration: text }) : text;
+}
+/**
+ * Ce qui prend fin quand la concentration suivie s'arrête ou passe à un autre sort, entre deux états de la fiche : les effets et compteurs reçus
+ * posés sur soi par ce sort (concentration), et l'allié qui en profitait (ally, posé « Sur un allié » au lancement). null si elle continue.
+ */
+function concentrationEndings(before, after) {
+  const spell = before?.state.concentration;
+  if (!spell || after?.state.concentration === spell) return null;
+  const effects = [...(before.receivedEffects || []), ...(before.receivedCounters || [])].filter((entry) => entry.concentration === spell).map((entry) => entry.name);
+  const event = (before.state.spellEvents || []).findLast((row) => spellById(before, row.spellId)?.name === spell);
+  return { spell, effects, ally: !!event?.ally };
 }
 /** Sort sur lequel porte la concentration suivie, d'après le dernier lancement qui le nomme ; null si la fiche ne le connaît pas. */
 function concentrationSpell(c) {
@@ -48960,22 +49017,29 @@ async function validateContentManifest(manifest, appBuild, baseUrl) {
   return manifest;
 }
 
-/** Textes et règles du catalogue, par opposition aux fichiers et images de l’application. */
-const contentIsText = (file) => file.url.startsWith("./content/");
-const CONTENT_CACHE = /^compagnon-content-[a-f0-9]{64}$/, CONTENT_PARALLEL = 4;
-/** Les deux parties du contenu, téléchargées séparément : "texts" (textes et règles) et "images" (images et fichiers de l’application). */
-const partOf = (file) => contentIsText(file) ? "texts" : "images";
-function contentParts(files = []) {
-  const parts = { texts: { completed: 0, bytes: 0, total: 0, totalBytes: 0 }, images: { completed: 0, bytes: 0, total: 0, totalBytes: 0 } };
-  for (const file of files) { const part = parts[partOf(file)]; part.total++; part.totalBytes += file.bytes; }
-  return parts;
+/** Les deux parties téléchargeables : "texts" (textes et règles) et "images" (portraits). Le code de l’application, ses polices, icônes et illustrations
+ * restent au service worker, qui les met à jour avec chaque version. Le manifeste les liste aussi, sans qu’ils fassent partie du contenu téléchargé. */
+const CONTENT_PARTS = ["texts", "images"];
+const contentPartOf = (file) => file.url.startsWith("./content/") ? "texts" : file.url.startsWith("./portraits/") ? "images" : "";
+/** Une version par partie : l’empreinte de ses fichiers. Elle ne change que si l’un d’eux change, quelle que soit la version du code. */
+async function contentPartVersion(manifest, name) {
+  const files = manifest.files.filter((file) => contentPartOf(file) === name).map((file) => [file.url, file.sha256]).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0);
+  return contentDigest(contentBytes(files));
 }
-const partDone = (part) => part.completed === part.total;
-/** Avancement par partie et total, publiés ensemble. */
-function contentProgress(parts) {
-  const sum = (key) => parts.texts[key] + parts.images[key];
-  return { parts, completed: sum("completed"), bytes: sum("bytes"), total: sum("total"), totalBytes: sum("totalBytes"), texts: partDone(parts.texts) };
-}
+/** version : celle du dernier téléchargement complet de la partie ; latest : celle du serveur, ou de la copie locale hors connexion. */
+const emptyPart = () => ({ completed: 0, bytes: 0, total: 0, totalBytes: 0, version: "", latest: "", stopped: false });
+const contentPartDone = (part) => !!part.version && part.version === part.latest && part.completed === part.total;
+const contentPartOutdated = (part) => !!part.version && !!part.latest && part.version !== part.latest;
+/** Un cache par partie, toutes versions confondues : un fichier inchangé n’est jamais retéléchargé, une image lue à la demande remplace l’ancienne. */
+const CONTENT_CACHES = { texts: "compagnon-content-texts", images: "compagnon-content-images" };
+/** Caches des builds précédents, un par manifeste : relus tant qu’ils gardent un fichier utile, vidés par le téléchargement suivant de la partie. */
+const LEGACY_CACHE = /^compagnon-content-[a-f0-9]{64}$/, CONTENT_PARALLEL = 4;
+/** Copie de secours du code, gardée pour qui a téléchargé les images (comme sur main) : le service worker s’en sert si le socle a été effacé,
+ * et le nettoyage la remet dans le socle avant de tout retirer. Elle n’est jamais comptée dans une version du contenu. */
+const CODE_CACHE = "compagnon-content-code";
+const codeFile = (file) => file.kind === "application" && file.url !== "./sw.js" && !contentPartOf(file);
+const ownedCache = (name) => Object.values(CONTENT_CACHES).includes(name) || name === CODE_CACHE || LEGACY_CACHE.test(name);
+
 class ContentStore {
   constructor({ baseUrl, appBuild = "", caches = globalThis.caches, fetcher = (...args) => globalThis.fetch(...args), locks = globalThis.navigator?.locks,
     channel, onChange = () => {}, onClear = () => {} }) {
@@ -48996,43 +49060,41 @@ class ContentStore {
     if (channel) channel.onmessage = ({ data }) => {
       if (data?.type === "cleared" && data.baseUrl === this.baseUrl) void this.syncGeneration().catch(() => {
         this.pause();
-        this.publish({ status: "interrupted", activeVersion: null, error: uiText("Le contenu a changé dans une autre fenêtre. Vérifie son état.") });
+        this.publish({ status: "error", error: uiText("Le contenu a changé dans une autre fenêtre. Vérifie son état.") });
       });
     };
+    /** manifest : celui du serveur, ou le dernier connu hors connexion. local : le manifeste du dernier téléchargement complet de chaque partie. */
     this.manifest = null;
-    this.active = null;
+    this.local = { texts: null, images: null };
+    this.online = false;
     this.controller = null;
     this.downloading = null;
-    this.state = { status: "missing", scope: "", queued: "", ...this.emptyProgress(), error: "", activeVersion: null };
+    this.writes = 0;
+    this.state = { status: "idle", online: false, scope: "", queued: "", error: "", parts: { texts: emptyPart(), images: emptyPart() } };
   }
-  /** Rien de téléchargé : les totaux du manifeste connu, aucun fichier compté. */
-  emptyProgress() { return { ...contentProgress(contentParts(this.manifest?.files)), texts: false }; }
+  /** Manifeste de lecture des textes : celui du serveur en ligne (un fichier changé se lit à la demande), la copie téléchargée hors connexion. */
+  get reading() { return this.online ? this.manifest : this.local.texts || this.manifest; }
   url(path) { return new URL(path, this.baseUrl).href; }
-  cacheName(manifest) { return `compagnon-content-${manifest.id}`; }
   publish(patch) { Object.assign(this.state, patch); this.onChange({ ...this.state }); }
   get canClear() { return typeof this.locks?.request === "function" && (typeof window === "undefined" || !!this.channel); }
   locked(action) { return typeof this.locks?.request === "function" ? this.locks.request("compagnon-content-write", { mode: "exclusive" }, action) : action(); }
-  async storedGeneration() {
-    const metadata = await this.caches.open("compagnon-content-state");
-    return (await metadata.match(this.url("_content/generation")))?.text() || "0";
-  }
-  observeGeneration(generation, status = "missing") {
+  async metadata() { return this.caches.open("compagnon-content-state"); }
+  async storedGeneration() { return (await (await this.metadata()).match(this.url("_content/generation")))?.text() || "0"; }
+  observeGeneration(generation, status = "idle") {
     if (this.generation === generation) return;
     const changed = this.generation !== null;
     this.generation = generation;
     if (!changed) return;
-    this.pause(); this.controller = null; this.downloading = null; this.active = null;
-    this.publish({ status, scope: "", queued: "", ...this.emptyProgress(), activeVersion: null, error: "" });
+    this.pause(); this.controller = null; this.downloading = null; this.local = { texts: null, images: null };
+    const zero = (part) => ({ ...part, completed: 0, bytes: 0, version: "", stopped: false });
+    this.publish({ status, scope: "", queued: "", parts: { texts: zero(this.state.parts.texts), images: zero(this.state.parts.images) }, error: "" });
     this.onClear();
   }
   async syncGeneration() {
     return this.locked(async () => {
       const generation = await this.storedGeneration(), changed = this.generation !== null && this.generation !== generation;
       this.observeGeneration(generation);
-      if (changed && this.manifest) {
-        const progress = await this.inspect(this.manifest);
-        this.publish({ ...progress, status: progress.completed ? "interrupted" : "missing" });
-      }
+      if (changed && this.manifest) this.publish({ status: "idle", parts: await this.inspect(this) });
       return generation;
     });
   }
@@ -49044,114 +49106,192 @@ class ContentStore {
       return action();
     });
   }
-  async cache(manifest) { return this.caches.open(this.cacheName(manifest)); }
+  /** Les caches où chercher une copie locale : celui de chaque partie, puis ceux des builds précédents. */
+  async sources() {
+    const legacy = [];
+    for (const name of await this.caches.keys()) if (LEGACY_CACHE.test(name)) legacy.push({ name, cache: await this.caches.open(name) });
+    return { texts: await this.caches.open(CONTENT_CACHES.texts), images: await this.caches.open(CONTENT_CACHES.images), legacy };
+  }
   async verified(cache, file) {
     const response = await cache.match(this.url(file.url));
     if (!response?.ok) return null;
     const bytes = await response.arrayBuffer();
     return bytes.byteLength === file.bytes && await contentDigest(bytes) === file.sha256 ? new Response(bytes, { headers: response.headers }) : null;
   }
-  async inspect(manifest, generation) {
-    const cache = generation === undefined ? await this.cache(manifest) : await this.guarded(generation, () => this.cache(manifest));
-    const parts = contentParts(manifest.files);
-    for (const file of manifest.files) {
-      if (await this.verified(cache, file)) { const part = parts[partOf(file)]; part.completed++; part.bytes += file.bytes; }
+  /** Copie locale identique au fichier attendu, où qu’elle soit rangée. */
+  async find(file, sources) {
+    const part = contentPartOf(file);
+    if (!part) return null;
+    for (const cache of [sources[part], ...sources.legacy.map((item) => item.cache)]) {
+      const response = await this.verified(cache, file);
+      if (response) return response;
     }
-    return contentProgress(parts);
+    return null;
   }
-  async savedManifest() {
-    const metadata = await this.caches.open("compagnon-content-state");
-    const saved = await metadata.match(this.url("_content/active.json"));
+  /** Le manifeste qui compte une partie : celui du serveur en ligne, sa copie téléchargée hors connexion. */
+  partManifest(name, view = this) { return view.online ? view.manifest : view.local[name] || view.manifest; }
+  /** Avancement de chaque partie : fichiers présents et vérifiés, version téléchargée et version attendue. */
+  async inspect(view, generation) {
+    const sources = generation === undefined ? await this.sources() : await this.guarded(generation, () => this.sources()), parts = {};
+    for (const name of CONTENT_PARTS) {
+      const manifest = this.partManifest(name, view), part = parts[name] = emptyPart();
+      part.version = view.local[name] ? await contentPartVersion(view.local[name], name) : "";
+      part.latest = await contentPartVersion(manifest, name);
+      part.stopped = this.state.parts[name].stopped;
+      for (const file of manifest.files) {
+        if (contentPartOf(file) !== name) continue;
+        part.total++; part.totalBytes += file.bytes;
+        if (await this.find(file, sources)) { part.completed++; part.bytes += file.bytes; }
+      }
+    }
+    return parts;
+  }
+  async savedPart(name) {
+    const saved = await (await this.metadata()).match(this.url(`_content/${name}.json`));
     if (!saved) return null;
-    // Le schéma de lecture est compatible entre builds V2. La coquille précédente
-    // ne doit pas rendre son catalogue inutilisable pendant une mise à jour.
-    return validateContentManifest(await saved.json(), "", this.baseUrl);
+    // Le schéma de lecture est compatible entre builds V2 : une partie téléchargée par un build précédent reste lisible.
+    try { return await validateContentManifest(await saved.json(), "", this.baseUrl); } catch { return null; }
   }
-  async load(generation = null) {
+  /** Contenu complet téléchargé par un build précédent (un seul manifeste actif) : ses deux parties deviennent téléchargées à sa version. */
+  /** Contenu téléchargé par un build précédent, qui gardait un manifeste par cache : une partie complète dans l’un d’eux devient téléchargée à sa version.
+   * Sans cela, des textes déjà téléchargés seraient vus comme jamais téléchargés et repartiraient seuls. */
+  async migrate() {
+    const metadata = await this.metadata(), active = await metadata.match(this.url("_content/active.json"));
+    if (await this.savedPart("texts") || await this.savedPart("images")) { if (active) await metadata.delete(this.url("_content/active.json")); return; }
+    const names = new Set(await this.caches.keys()), stored = [];
+    if (active) stored.push(active);
+    for (const key of await metadata.keys()) if (key.url.startsWith(this.url("_content/candidate-"))) stored.push(await metadata.match(key.url));
+    for (const response of stored) {
+      let manifest;
+      try { manifest = await validateContentManifest(await response.json(), "", this.baseUrl); } catch { continue; }
+      if (!names.has(`compagnon-content-${manifest.id}`)) continue;
+      const cache = await this.caches.open(`compagnon-content-${manifest.id}`);
+      for (const name of CONTENT_PARTS) {
+        if (await this.savedPart(name)) continue;
+        let complete = true;
+        for (const file of manifest.files) if (contentPartOf(file) === name && !await cache.match(this.url(file.url))) { complete = false; break; }
+        if (complete) await metadata.put(this.url(`_content/${name}.json`), new Response(JSON.stringify(manifest)));
+      }
+    }
+    if (active) await metadata.delete(this.url("_content/active.json"));
+  }
+  /** `inside` : appelé par un téléchargement. Une vérification lancée à côté d’un téléchargement ne remplace pas l’état qu’il publie.
+   * `quiet` : sans l’étape « Vérification du contenu… », pour une vérification de fond qui ne doit pas masquer l’écran. */
+  async load(generation = null, { inside = false, quiet = false } = {}) {
     if (!this.caches || !globalThis.crypto?.subtle) {
       this.publish({ status: "unavailable", error: uiText("Le téléchargement hors ligne nécessite un navigateur avec stockage local, sur HTTPS.") });
       return;
     }
     generation ??= await this.syncGeneration();
-    await this.guarded(generation, () => this.publish({ status: "checking", error: "" }));
-    let active = null, manifest = null;
-    try { active = await this.savedManifest(); } catch { /* La vérification suivante conserve un état explicite. */ }
-    let connectionError = "";
+    const writes = this.writes, busy = () => !inside && (!!this.downloading || this.writes !== writes);
+    await this.guarded(generation, async () => { if (!busy() && !quiet) this.publish({ status: "checking", error: "" }); await this.migrate(); });
+    const local = { texts: await this.savedPart("texts"), images: await this.savedPart("images") };
+    let manifest = null, online = false, connectionError = "";
     try {
       const response = await this.fetcher(this.url("content-manifest.json"), { cache: "no-store" });
       if (!response.ok) throw new Error(uiText("Le catalogue n’est pas disponible sur le serveur."));
       manifest = await validateContentManifest(await response.json(), this.appBuild, this.baseUrl);
-      await this.guarded(generation, async () => {
-        const metadata = await this.caches.open("compagnon-content-state");
-        await metadata.put(this.url(`_content/candidate-${this.appBuild}.json`), new Response(JSON.stringify(manifest)));
-      });
+      await this.guarded(generation, async () => (await this.metadata()).put(this.url(`_content/candidate-${this.appBuild}.json`), new Response(JSON.stringify(manifest))));
+      online = true;
     } catch (error) {
       if (error.name === "AbortError") throw error;
       connectionError = error.message;
       try {
-        const metadata = await this.caches.open("compagnon-content-state");
-        const candidate = await metadata.match(this.url(`_content/candidate-${this.appBuild}.json`));
-        manifest = candidate ? await validateContentManifest(await candidate.json(), this.appBuild, this.baseUrl) : active;
-      } catch { manifest = active; }
+        const candidate = await (await this.metadata()).match(this.url(`_content/candidate-${this.appBuild}.json`));
+        if (candidate) manifest = await validateContentManifest(await candidate.json(), this.appBuild, this.baseUrl);
+      } catch { /* Copie illisible : la partie téléchargée prend le relais. */ }
+      manifest ||= local.texts || local.images;
     }
-    if (!manifest) { await this.guarded(generation, () => this.publish({ status: "missing", error: connectionError || uiText("Connecte-toi pour préparer le contenu hors ligne.") })); return; }
-    const progress = await this.inspect(manifest, generation);
-    let activeReady = false;
-    if (active) {
-      const old = active.id === manifest.id ? progress : await this.inspect(active, generation);
-      activeReady = old.completed === old.total;
+    if (!manifest) {
+      await this.guarded(generation, () => busy() || this.publish({ status: "idle", online: false, error: connectionError || uiText("Connecte-toi pour préparer le contenu hors ligne.") }));
+      return;
     }
-    const complete = progress.completed === progress.total && manifest.appBuild === this.appBuild;
-    if (complete) await this.activate(manifest, generation);
+    const parts = await this.inspect({ manifest, local, online }, generation);
     await this.guarded(generation, () => {
-      this.manifest = manifest; this.active = complete ? manifest : active;
-      this.publish({ ...progress, status: complete ? "ready" : activeReady ? "update" : progress.texts ? "texts" : progress.completed ? "interrupted" : "missing",
-        activeVersion: activeReady || complete ? this.active?.id : null, error: complete ? "" : connectionError });
+      this.manifest = manifest; this.online = online;
+      if (busy()) return;
+      this.local = local;
+      const complete = CONTENT_PARTS.every((name) => contentPartDone(parts[name]));
+      this.publish({ status: "idle", online, parts, error: complete ? "" : connectionError });
     });
+    // Après une mise à jour du code, la copie de secours suit, en arrière-plan.
+    this.codeRefresh = this.refreshCode(generation).catch(() => {});
   }
-  async activate(manifest, generation = null) {
-    generation ??= await this.syncGeneration();
-    await validateContentManifest(manifest, "", this.baseUrl);
-    if (manifest.rulesUrl) {
-      const rules = await this.readJson(manifest.rulesUrl, manifest, generation);
-      if (rules.schemaVersion !== 1 || rules.engineSchemaVersion !== 1 || rules.edition !== "2014" || rules.sourceVersion !== manifest.sourceVersion)
-        throw new Error(uiText("Les adaptations du catalogue sont incompatibles. Le contenu précédent est conservé."));
-    }
-    await this.guarded(generation, async () => {
-      const metadata = await this.caches.open("compagnon-content-state");
-      await metadata.put(this.url("_content/active.json"), new Response(JSON.stringify(manifest)));
-      this.active = manifest;
-    });
+  /** Règles du catalogue compatibles avec ce moteur, vérifiées avant d’adopter des textes téléchargés. */
+  async checkRules(manifest, generation = null) {
+    if (!manifest.rulesUrl) return;
+    const rules = await this.readJson(manifest.rulesUrl, manifest, generation);
+    if (rules.schemaVersion !== 1 || rules.engineSchemaVersion !== 1 || rules.edition !== "2014" || rules.sourceVersion !== manifest.sourceVersion)
+      throw new Error(uiText("Les adaptations du catalogue sont incompatibles. Le contenu précédent est conservé."));
   }
   pause() { this.controller?.abort(); this.stopping = this.downloading; }
+  /** Réseau perdu sans rechargement : la lecture repasse sur la copie téléchargée, même ancienne, jusqu’à la prochaine vérification en ligne. */
+  goOffline() { if (this.online) { this.online = false; this.publish({ online: false }); } }
+  /** Recopie le code de ce build depuis le socle vers la copie de secours, sur l’appareil et sans téléchargement. Rien à faire si elle est déjà à ce build. */
+  async refreshCode(generation = null) {
+    generation ??= await this.syncGeneration();
+    const manifest = this.manifest, metadata = await this.metadata();
+    if (!this.local.images || manifest?.appBuild !== this.appBuild) return;
+    if (await (await metadata.match(this.url("_content/code")))?.text() === this.appBuild) return;
+    const shell = await this.caches.open(`compagnon-cache-${this.appBuild.slice(0, 12)}`), copy = await this.caches.open(CODE_CACHE), files = manifest.files.filter(codeFile);
+    for (const file of files) {
+      if (await this.verified(copy, file)) continue;
+      const response = await this.verified(shell, file);
+      // Socle incomplet : la copie sera complétée à une ouverture suivante, sans rien télécharger.
+      if (!response) return;
+      await this.guarded(generation, () => copy.put(this.url(file.url), response));
+    }
+    const wanted = new Set(files.map((file) => this.url(file.url)));
+    await this.guarded(generation, async () => {
+      for (const key of await copy.keys()) if (key.url.startsWith(this.baseUrl) && !wanted.has(key.url)) await copy.delete(key);
+      await metadata.put(this.url("_content/code"), new Response(this.appBuild));
+    });
+  }
+  /** Avant un nettoyage : un fichier du socle effacé est repris de la copie de secours. Sans socle complet ni copie, le nettoyage est refusé (comme sur main). */
   async preserveShell() {
     const unavailable = () => {
       const error = new Error(uiText("Le socle hors ligne n’a pas pu être vérifié. Télécharge le contenu avant de réessayer le nettoyage."));
       error.code = "SHELL_MISSING"; throw error;
     };
-    const manifest = [this.manifest, this.active].find((item) => item?.appBuild === this.appBuild);
+    const manifest = [this.manifest, this.local.images, this.local.texts].find((item) => item?.appBuild === this.appBuild);
     if (!manifest) unavailable();
-    const files = manifest.files.filter((file) => file.kind === "application" && file.url !== "./sw.js" && !file.url.startsWith("./portraits/"));
+    const files = manifest.files.filter(codeFile);
     if (!files.length) return;
-    // Même nom que le précache du service worker ; seuls ses fichiers de socle
-    // sont recopiés si leur copie a été évincée, avant de retirer le catalogue.
-    const shell = await this.caches.open(`compagnon-cache-${this.appBuild.slice(0, 12)}`), content = await this.cache(manifest);
+    // Même nom que le précache du service worker ; seuls ses fichiers effacés sont recopiés, avant de retirer le contenu.
+    const shell = await this.caches.open(`compagnon-cache-${this.appBuild.slice(0, 12)}`), copy = await this.caches.open(CODE_CACHE);
     for (const file of files) {
       if (await this.verified(shell, file)) continue;
-      const response = await this.verified(content, file);
+      const response = await this.verified(copy, file);
       if (!response) unavailable();
       await shell.put(this.url(file.url), response);
     }
   }
-  /** Retire les versions locales de ce chemin, sauf celles à garder. À appeler sous le verrou d’écriture. */
-  async dropCaches(keep = []) {
+  /** Retire les copies de ce chemin dans les caches du contenu, sauf celles que keep(url) garde. À appeler sous le verrou d’écriture. */
+  async dropCaches(keep = () => false) {
     for (const name of await this.caches.keys()) {
-      if (!CONTENT_CACHE.test(name) || keep.includes(name)) continue;
+      if (!ownedCache(name)) continue;
       const cache = await this.caches.open(name), keys = await cache.keys();
-      const owned = keys.filter((key) => key.url.startsWith(this.baseUrl));
+      const owned = keys.filter((key) => key.url.startsWith(this.baseUrl) && !keep(key.url, name));
       if (owned.length === keys.length) await this.caches.delete(name);
       else for (const key of owned) await cache.delete(key);
     }
+  }
+  /** Après le téléchargement complet d’une partie : ses anciennes versions sont retirées, et un cache d’un build précédent sans texte ni image disparaît. */
+  async prune(name, manifest) {
+    const wanted = new Set(manifest.files.filter((file) => contentPartOf(file) === name).map((file) => this.url(file.url)));
+    const partOfUrl = (url) => contentPartOf({ url: "./" + url.slice(this.baseUrl.length) });
+    const legacyParts = new Map();
+    for (const cacheName of await this.caches.keys()) {
+      if (!LEGACY_CACHE.test(cacheName)) continue;
+      legacyParts.set(cacheName, new Set((await (await this.caches.open(cacheName)).keys()).filter((key) => key.url.startsWith(this.baseUrl)).map((key) => partOfUrl(key.url)).filter((part) => part && part !== name)));
+    }
+    await this.dropCaches((url, cacheName) => {
+      if (cacheName === CONTENT_CACHES[name]) return wanted.has(url);
+      if (Object.values(CONTENT_CACHES).includes(cacheName) || cacheName === CODE_CACHE) return true;
+      // Cache d’un build précédent : il garde les fichiers de l’autre partie tant qu’elle en a.
+      const part = partOfUrl(url);
+      return part ? part !== name : legacyParts.get(cacheName).size > 0;
+    });
   }
   async clear() {
     if (!this.canClear) throw new Error(uiText("Ce navigateur ne permet pas de protéger le nettoyage entre plusieurs fenêtres."));
@@ -49162,17 +49302,18 @@ class ContentStore {
       let changed = false;
       try {
         await this.preserveShell();
-        const metadata = await this.caches.open("compagnon-content-state");
+        const metadata = await this.metadata();
         this.generation ??= await this.storedGeneration();
         const generation = globalThis.crypto.randomUUID();
         await metadata.put(this.url("_content/generation"), new Response(generation));
         this.observeGeneration(generation, "clearing"); changed = true;
-        await metadata.delete(this.url("_content/active.json"));
+        for (const name of ["active", ...CONTENT_PARTS]) await metadata.delete(this.url(`_content/${name}.json`));
+        await metadata.delete(this.url("_content/code"));
         await this.dropCaches();
-        this.publish({ status: "missing", ...this.emptyProgress(), activeVersion: null, error: "" });
+        this.publish({ status: "idle", error: "" });
       } catch (error) {
-        const progress = this.manifest ? await this.inspect(this.manifest).catch(() => ({})) : {};
-        this.publish({ ...progress, status: "clear-error", activeVersion: null, error: error.code === "SHELL_MISSING" ? error.message : uiText("Le nettoyage n’a pas pu être terminé. Réessaie ; tes personnages sont conservés.") });
+        const parts = this.manifest ? await this.inspect(this).catch(() => null) : null;
+        this.publish({ ...(parts && { parts }), status: "clear-error", error: error.code === "SHELL_MISSING" ? error.message : uiText("Le nettoyage n’a pas pu être terminé. Réessaie ; tes personnages sont conservés.") });
         throw error;
       } finally {
         if (changed) this.channel?.postMessage({ type: "cleared", baseUrl: this.baseUrl });
@@ -49181,8 +49322,7 @@ class ContentStore {
     try { await this.clearing; }
     finally { this.clearing = null; }
   }
-  /** `scope` : "texts", "images" ou "all". Les textes seuls rendent la bibliothèque lisible sans attendre les images.
-   * Une partie demandée pendant le téléchargement de l’autre attend son tour ; un échec ou un nettoyage annule cette attente, une pause non. */
+  /** `scope` : "texts", "images" ou "all". Une partie demandée pendant le téléchargement de l’autre attend son tour ; un échec ou un nettoyage annule cette attente, une pause non. */
   async download({ scope = "all" } = {}) {
     if (this.downloading) {
       const current = this.downloading;
@@ -49201,34 +49341,32 @@ class ContentStore {
     try { return await downloading; }
     finally { if (this.downloading === downloading) this.downloading = null; }
   }
+  /** Télécharge la version du serveur d’une partie : les fichiers déjà présents, même rangés par un build précédent, ne sont pas redemandés. */
   async runDownload(scope) {
     const generation = await this.syncGeneration();
-    if (!this.manifest) await this.load(generation);
+    if (!this.online || this.manifest?.appBuild !== this.appBuild) await this.load(generation, { inside: true });
     if (!this.manifest) throw new Error(this.state.error || uiText("Catalogue indisponible."));
-    if (this.manifest.appBuild !== this.appBuild) {
-      await this.load(generation);
-      if (!this.manifest || this.manifest.appBuild !== this.appBuild) throw new Error(uiText("Connecte-toi pour télécharger le contenu de cette version. Le catalogue précédent reste consultable."));
-    }
-    const manifest = this.manifest, files = manifest.files.filter((file) => scope === "all" || partOf(file) === scope);
-    // La partie demandée est recomptée depuis zéro, l’autre garde son avancement connu.
-    const parts = contentParts(manifest.files);
-    for (const [name, part] of Object.entries(parts)) if (scope !== "all" && scope !== name) Object.assign(part, { completed: this.state.parts[name].completed, bytes: this.state.parts[name].bytes });
-    const cache = await this.guarded(generation, () => this.cache(manifest));
+    // Le manifeste de ce build, même gardé d’une ouverture précédente, suffit : chaque fichier est vérifié par son empreinte.
+    if (this.manifest.appBuild !== this.appBuild) throw new Error(uiText("Connecte-toi pour télécharger le contenu de cette version. Le catalogue précédent reste consultable."));
+    const manifest = this.manifest, names = scope === "all" ? CONTENT_PARTS : [scope];
+    const files = manifest.files.filter((file) => names.includes(contentPartOf(file)));
+    const parts = { texts: { ...this.state.parts.texts }, images: { ...this.state.parts.images } };
+    for (const name of names) Object.assign(parts[name], { completed: 0, bytes: 0, stopped: false });
+    const sources = await this.guarded(generation, () => this.sources());
     const controller = new AbortController();
     this.controller = controller;
     try {
-      await this.guarded(generation, () => this.publish({ status: "downloading", scope, queued: this.state.queued === scope ? "" : this.state.queued, ...contentProgress(parts), error: "" }));
-      // Un fichier déjà vérifié dans une autre version locale n’est pas retéléchargé.
-      const others = [];
-      for (const name of await this.caches.keys()) if (CONTENT_CACHE.test(name) && name !== this.cacheName(manifest)) others.push(await this.caches.open(name));
+      await this.guarded(generation, () => this.publish({ status: "downloading", scope, queued: this.state.queued === scope ? "" : this.state.queued, parts, error: "" }));
       const queue = files[Symbol.iterator]();
       let failure = null;
       const worker = async () => {
         for (const file of queue) {
           if (failure) return;
           if (controller.signal.aborted) throw new DOMException(uiText("Téléchargement interrompu."), "AbortError");
-          let response = await this.verified(cache, file);
-          for (const other of others) response ||= await this.verified(other, file);
+          const name = contentPartOf(file), target = sources[name];
+          let response = await this.verified(target, file);
+          const stored = !!response;
+          for (const legacy of sources.legacy) response ||= await this.verified(legacy.cache, file);
           if (!response) {
             const incoming = await this.fetcher(this.url(file.url), { signal: controller.signal, cache: "no-store" });
             if (!incoming.ok) throw new Error(uiText("Fichier indisponible : {url}", { url: file.url }));
@@ -49238,10 +49376,9 @@ class ContentStore {
           }
           await this.guarded(generation, async () => {
             if (controller.signal.aborted) throw new DOMException(uiText("Téléchargement interrompu."), "AbortError");
-            await cache.put(this.url(file.url), response);
-            const part = parts[partOf(file)];
-            part.completed++; part.bytes += file.bytes;
-            this.publish(contentProgress(parts));
+            if (!stored) await target.put(this.url(file.url), response);
+            parts[name].completed++; parts[name].bytes += file.bytes;
+            this.publish({ parts });
           });
         }
       };
@@ -49249,51 +49386,50 @@ class ContentStore {
       await Promise.all(Array.from({ length: CONTENT_PARALLEL }, () => worker().catch((error) => { failure ||= error; })));
       if (failure) throw failure;
       // Une autre fenêtre ou une éviction peut avoir modifié le cache entre les écritures.
-      const checked = await this.inspect(manifest, generation);
-      if (scope === "all" ? checked.completed !== checked.total : !partDone(checked.parts[scope])) throw new Error(uiText("Le navigateur n’a pas conservé tous les fichiers. Vérifie l’espace disponible et reprends."));
-      const complete = checked.completed === checked.total;
-      if (complete) await this.activate(manifest, generation);
+      for (const file of files) if (!await this.verified(sources[contentPartOf(file)], file))
+        throw new Error(uiText("Le navigateur n’a pas conservé tous les fichiers. Vérifie l’espace disponible et reprends."));
+      if (names.includes("texts")) await this.checkRules(manifest, generation);
       await this.guarded(generation, async () => {
-        await this.dropCaches([manifest, this.active].filter(Boolean).map((item) => this.cacheName(item)));
-        this.publish({ ...checked, scope: "", status: complete ? "ready" : this.state.activeVersion ? "update" : checked.texts ? "texts" : "interrupted", ...(complete && { activeVersion: manifest.id }) });
+        const metadata = await this.metadata();
+        for (const name of names) {
+          await metadata.put(this.url(`_content/${name}.json`), new Response(JSON.stringify(manifest)));
+          this.local[name] = manifest; this.writes++; parts[name].version = parts[name].latest = await contentPartVersion(manifest, name);
+          await this.prune(name, manifest);
+        }
       });
+      if (names.includes("images")) await this.refreshCode(generation);
+      await this.guarded(generation, () => this.publish({ status: "idle", scope: "", parts }));
     } catch (error) {
-      await this.guarded(generation, () => this.publish({ status: error.name === "AbortError" ? "interrupted" : "error", scope: "", error: error.name === "AbortError" ? "" : error.name === "QuotaExceededError" ? uiText("L’espace disponible est insuffisant. Libère de la place puis reprends ; tes personnages sont conservés.") : error.message })).catch(() => {});
+      for (const name of names) parts[name].stopped = true;
+      await this.guarded(generation, () => this.publish({ status: error.name === "AbortError" ? "idle" : "error", scope: "", parts, error: error.name === "AbortError" ? "" : error.name === "QuotaExceededError" ? uiText("L’espace disponible est insuffisant. Libère de la place puis reprends ; tes personnages sont conservés.") : error.message })).catch(() => {});
       throw error;
     } finally { if (this.controller === controller) this.controller = null; }
   }
-  async readJson(url, manifest = this.active || this.manifest, generation = null) {
+  /** Lit un texte du catalogue : la copie locale si elle est identique, sinon le serveur, et la nouvelle copie est gardée pour la prochaine fois. */
+  async readJson(url, manifest = this.reading, generation = null) {
     generation ??= await this.syncGeneration();
     if (!manifest) throw new Error(uiText("Connecte-toi pour charger le catalogue ou télécharge le contenu hors ligne."));
     const file = manifest.files.find((item) => item.url === url);
     if (!file) throw new Error(uiText("Cette référence ne figure pas dans le catalogue courant."));
-    const cache = await this.guarded(generation, () => this.cache(manifest));
-    let response = await this.verified(cache, file);
+    const sources = await this.guarded(generation, () => this.sources());
+    let response = await this.find(file, sources);
     if (!response) {
-      const repair = this.active?.id === manifest.id;
-      if (repair) await this.guarded(generation, () => this.publish({ status: "interrupted", activeVersion: null, error: uiText("Un fichier local manque. Vérification de sa disponibilité…") }));
+      let reached = false;
       try {
         const incoming = await this.fetcher(this.url(url), { cache: "no-store" });
+        reached = true;
         const bytes = await incoming.arrayBuffer();
         if (!incoming.ok || bytes.byteLength !== file.bytes || await contentDigest(bytes) !== file.sha256) throw new Error(uiText("Fichier invalide."));
         response = new Response(bytes, { headers: incoming.headers });
-        try {
-          await this.guarded(generation, () => cache.put(this.url(url), response.clone()));
-          if (repair) {
-            const progress = await this.inspect(manifest, generation);
-            const complete = progress.completed === progress.total;
-            await this.guarded(generation, () => this.publish({ ...progress, status: complete ? manifest.appBuild === this.appBuild ? "ready" : "update" : "interrupted",
-              activeVersion: complete ? manifest.id : null, error: "" }));
-          }
-        } catch (error) {
-          if (error.name === "AbortError") throw error;
-          if (repair) await this.guarded(generation, () => this.publish({ status: "interrupted", error: uiText("Ce contenu est lisible en ligne mais n’a pas pu être conservé. Vérifie l’espace disponible.") }));
-        }
       } catch (error) {
         if (error.name === "AbortError") throw error;
-        await this.guarded(generation, () => this.publish({ status: "interrupted", error: uiText("Ce contenu manque sur ton appareil. Reprends le téléchargement une fois connecté.") }));
-        throw new Error(this.state.error);
+        // Seulement si le navigateur se dit hors ligne : un échec passager ne fige pas la session sur l’ancienne copie.
+        if (!reached && globalThis.navigator?.onLine !== true && this.local.texts && manifest !== this.local.texts) this.goOffline();
+        throw new Error(uiText("Ce contenu manque sur ton appareil. Reprends le téléchargement une fois connecté."));
       }
+      const target = sources[contentPartOf(file)];
+      try { if (target) await this.guarded(generation, () => target.put(this.url(url), response.clone())); }
+      catch (error) { if (error.name === "AbortError") throw error; }
     }
     return this.guarded(generation, () => response.json());
   }
@@ -51946,7 +52082,7 @@ function creationLevelLines(c, level, specs = uiPickSpecs(c)) {
     }, "feat");
     for (const spec of specs.filter((spec) => spec.source.key === `feat|L${level}`)) add(`pick:${spec.path}`, creationPickLine(c, spec), "feat");
   }
-  creationLinesFinish(lines, new Map(), () => backgroundReplaceable(c));
+  creationSpellDoubles(c, creationLinesFinish(lines, new Map(), () => backgroundReplaceable(c)));
   // Un don maison se nomme : la validation finale le refuse sans nom.
   for (const line of lines) if (line.kind === "feat" && line.selected.includes("custom") && !entry.asi.featName?.trim()) line.done = false;
   return lines;
@@ -52017,9 +52153,46 @@ function creationSpellLines(c) {
   return creationSpellMemo.lines;
 }
 
+/**
+ * Sorts que la fiche tient déjà et source qui les donne : race et dons (sorts mineurs et innés), puis sorts appris ou préparés de chaque classe.
+ * `key` vaut `class|<classe>` pour une classe : sa propre liste ne se barre pas elle-même.
+ */
+function creationHeldSpells(c) {
+  const acc = collect(c), sources = new Map(grantSources(c).map((source) => [source.key, source])), held = new Map();
+  const add = (id, key, name) => { if (id && !held.has(id)) held.set(id, { key, name }); };
+  for (const entry of [...acc.cantrips, ...acc.innate]) add(entry.id, entry.sourceKey, sources.has(entry.sourceKey) ? creationLineSource(c, sources.get(entry.sourceKey)).name : entry.source);
+  for (const entry of spellAcquisitions(c)) if (entry.known || entry.prepared) add(entry.spellId, `class|${entry.classId}`, uiClasses[entry.classId]?.name || entry.source);
+  return held;
+}
+
+/**
+ * Lignes de sorts (étape Magie, dons d’un niveau) : un sort déjà acquis ou coché sur une autre ligne est barré avec sa raison, comme une maîtrise.
+ * Demande de Luca du 19 novembre 2026. Les lignes d’une même classe se recoupent par construction (grimoire et sorts préparés) :
+ * elles ne se barrent pas entre elles. Un sort déjà coché sur deux lignes reste coché.
+ */
+function creationSpellDoubles(c, lines) {
+  const spellLines = lines.filter((line) => line.kind === "spell");
+  if (!spellLines.length) return lines;
+  const held = creationHeldSpells(c);
+  for (const line of spellLines) {
+    for (const entry of line.options) {
+      if (entry.on || entry.off) continue;
+      const holder = spellLines.find((other) => other !== line && !(other.classId && other.classId === line.classId) && other.selected.includes(entry.id));
+      const owner = held.get(entry.id);
+      if (holder) Object.assign(entry, { off: true, why: uiText("creation.reason.takenByM", { source: holder.source }) });
+      else if (owner && owner.key !== `class|${line.classId}`) Object.assign(entry, { off: true, why: uiText("creation.reason.ownedByM", { source: owner.name }) });
+    }
+    // Comme pour les maîtrises, une ligne ne demande jamais plus que ce qui peut encore être coché.
+    line.free = line.options.filter((entry) => !entry.on && !entry.off).length;
+    line.done = !line.required || (line.bind === "text" ? !!line.text.trim() : line.selected.length >= Math.min(line.count, line.options.filter((entry) => entry.on || !entry.off).length));
+  }
+  return lines;
+}
+
 /** Lignes d’une étape hors écran Choix : bonus de race aux Caracs ; sorts de race, de don et de classe à la Magie. */
 function creationStageLines(c, stage) {
-  return [...creationLines(c).filter((line) => line.stage === stage), ...(stage === "magic" ? creationSpellLines(c) : [])];
+  const lines = [...creationLines(c).filter((line) => line.stage === stage), ...(stage === "magic" ? creationSpellLines(c) : [])];
+  return stage === "magic" ? creationSpellDoubles(c, lines) : lines;
 }
 
 /** Champs et choix que portent la race, l’historique et la classe d’une fiche ; les choix de classe sont tous ceux qui ne viennent ni de la race ni de l’historique. */
@@ -53061,7 +53234,7 @@ function librarySearchField() {
 function renderLibrary(embedded = false) {
   const head = embedded ? "" : `<div class="page-head library-page-head"><h1>${uiText("Bibliothèque")}</h1></div>`;
   if (ui.libraryLoading) return head + ("<p role=\"status\">" + uiText("Chargement de l’index…") + "</p>");
-  if (ui.libraryError) return head + notice(`${esc(uiSystemText(ui.libraryError))}${contentStore.state.status !== "ready" && !window.COMPANION_STANDALONE ? uiText(" L’index n’est pas téléchargé sur cet appareil.") : ""}`, "warning") + button(uiText("Réessayer"), "reload-library");
+  if (ui.libraryError) return head + notice(`${esc(uiSystemText(ui.libraryError))}${!contentPartDone(contentStore.state.parts.texts) && !window.COMPANION_STANDALONE ? uiText(" L’index n’est pas téléchargé sur cet appareil.") : ""}`, "warning") + button(uiText("Réessayer"), "reload-library");
   const favorites = appData.libraryFavorites || [], favoriteIds = new Set(favorites.map((entry) => entry.id));
   const result = contentLibrary.search(ui.libraryQuery, ui.libraryType, ui.libraryPage, 40, { filters: ui.libraryFilters, favorites, favoritesOnly: ui.libraryFavoritesOnly }), types = [...new Set(contentLibrary.index.map((row) => row.type))].sort();
   if (!embedded && !ui.libraryQuery.trim() && ui.libraryType === "all" && !ui.libraryFavoritesOnly && !ui.libraryShowAll && !Object.values(ui.libraryFilters).some(Boolean)) {
@@ -53404,15 +53577,17 @@ async function performLibrary(action, el, c, data, d) {
 
 // Module : app-effects
 // Effets reçus et états : effets appliqués par d'autres, compteurs, états et leurs annotations.
-function openReceivedEffect(c, { spellId = "", id = "", referenceId = "", name = "", description = "", level, affection = false } = {}) {
+function openReceivedEffect(c, { spellId = "", id = "", referenceId = "", name = "", description = "", level, affection = false, concentration = "" } = {}) {
   // Un dé qui se dépense (Assistance, Résistance, Inspiration bardique) est une ressource reçue : sa fenêtre est celle des Ressources.
-  if (RECEIVED_PRESETS[spellId]) { openReceivedCounter(c, spellId); return; }
+  if (RECEIVED_PRESETS[spellId]) { openReceivedCounter(c, spellId, { concentration }); return; }
   const saved = (c.receivedEffects || []).find((entry) => entry.id === id), spell = uiSpellById(c, spellId), guide = RECEIVED_GUIDES[spellId];
   ui.receivedQuery = "";
   ui.receivedAll = false;
   ui.receivedSelected = !!(saved || spellId || name || affection);
   ui.form = saved ? clone(saved) : { ...(affection ? { affection: true, conditions: [] } : {}), ...(guide?.dice ? { dice: clone(guide.dice) } : {}), id: "", spellId, referenceId: referenceId || spell?.referenceId || "", name: name || spell?.name || (guide?.name ? uiText(guide.name) : ""), description, source: spell ? `${spell.name} (${spell.source.toUpperCase()})` : name, caster: "", duration: spell?.duration || "", target: "", value: 0, level: level ?? spell?.level ?? 0 };
   // Effet guidé à choisir (Agrandi ou Rapetissé, maladie de Contagion) ou porté par une arme (Arme magique) : la fenêtre le demande.
+  // Sort de concentration lancé « Sur moi » : l'effet part avec la concentration.
+  if (concentration && !saved) ui.form.concentration = concentration;
   if (guide?.variants && !ui.form.variant) ui.form.variant = Object.keys(guide.variants)[0];
   if (guide?.weapon && !ui.form.weapon) ui.form.weapon = Object.keys(receivedWeaponChoices(c))[0] || "";
   openModal("received-effect");
@@ -53443,19 +53618,19 @@ function receivedPresetLabel(c, preset) {
  * Fenêtre unique de ce qu’on reçoit pour le dépenser : vide pour un compteur libre, remplie par un réglage tout prêt (preset),
  * retouchable avant l’ajout. Le formulaire garde un bonus et un dé à part, pour ne rien perdre en changeant « Ce que donne une utilisation ».
  */
-function openReceivedCounter(c, preset = "") {
+function openReceivedCounter(c, preset = "", { concentration = "" } = {}) {
   const rule = RECEIVED_PRESETS[preset], spell = rule?.spell ? uiSpellById(c, preset) : null;
   ui.form = {
     preset, name: !rule ? "" : preset === "inspiration" ? uiText("received.preset.inspiration.name") : receivedPresetLabel(c, preset), max: rule?.max || 1, reset: rule?.reset || "manual", gives: rule?.gives || "none",
     bonus: 2, die: rule?.gives === "die" ? rule.value : 6, rolls: Object.fromEntries(RECEIVED_ROLL_ORDER.map((roll) => [roll, !!rule?.rolls.includes(roll)])),
-    referenceId: spell?.referenceId || (preset === "bardic-inspiration" ? bardReference("Bardic Inspiration").referenceId : ""),
+    referenceId: spell?.referenceId || (preset === "bardic-inspiration" ? bardReference("Bardic Inspiration").referenceId : ""), concentration,
   };
   if (ui.modal === "received-counter") render(); else openModal("received-counter");
 }
 /** Compteur que décrit la fenêtre, tel que le moteur l’enregistre. L’avantage ne porte pas sur les dégâts. */
 function receivedCounterDraft(f) {
   const rolls = f.gives === "none" ? [] : RECEIVED_ROLL_ORDER.filter((roll) => f.rolls[roll] && !(f.gives === "advantage" && roll === "damage"));
-  return { name: String(f.name).trim(), max: Number(f.max), reset: f.reset, gives: f.gives, value: f.gives === "bonus" ? Number(f.bonus) : f.gives === "die" ? Number(f.die) : 0, rolls, ...(f.referenceId && { referenceId: f.referenceId }) };
+  return { name: String(f.name).trim(), max: Number(f.max), reset: f.reset, gives: f.gives, value: f.gives === "bonus" ? Number(f.bonus) : f.gives === "die" ? Number(f.die) : 0, rolls, ...(f.referenceId && { referenceId: f.referenceId }), ...(f.concentration && { concentration: f.concentration }) };
 }
 function receivedCounterModal(c) {
   const f = ui.form, pill = (id) => `<button type="button" class="add-pill" data-action="received-counter-preset" data-id="${id}" aria-pressed="${f.preset === id}"><span class="pill outline source-pill">${esc(receivedPresetLabel(c, id))}</span></button>`;
@@ -53526,8 +53701,8 @@ async function performEffects(action, el, c, data, d) {
       openReceivedEffect(c, { spellId: spell?.id || "", referenceId: entry.id, name: localized.name }); break;
     }
     case "received-cast": {
-      const event = c.state.spellEvents.find((row) => row.id === ui.cast.eventId);
-      openReceivedEffect(c, { spellId: ui.cast.id, level: event?.effectiveLevel }); break;
+      const event = c.state.spellEvents.find((row) => row.id === ui.cast.eventId), spell = spellById(c, ui.cast.id);
+      openReceivedEffect(c, { spellId: ui.cast.id, level: event?.effectiveLevel, concentration: spell?.concentration && c.state.concentration === spell.name ? spell.name : "" }); break;
     }
     case "received-save":
       await saveCharacter(setReceivedEffect(c, ui.form, ui.form.id), "Effet reçu", "session", c); closeModal(); break;
@@ -53974,32 +54149,46 @@ function updateContentParts(state) {
   }
   return blocks.length === 2;
 }
-/** Une partie du contenu hors ligne : sa barre, son avancement et son bouton (télécharger, mettre en pause, reprendre). */
+/** Une partie du contenu hors ligne : sa barre, son avancement, sa version et son bouton (télécharger, mettre en pause, reprendre, mettre à jour). */
 function renderContentPart(name, state, busy) {
-  const part = state.parts[name], percent = contentPartPercent(part), done = part.completed === part.total;
+  const part = state.parts[name], percent = contentPartPercent(part), done = contentPartDone(part);
   const running = state.status === "downloading" && [name, "all"].includes(state.scope);
-  // Un texte lu en ligne reste en cache sans qu’aucun téléchargement n’ait été lancé : « Reprendre » demande que les textes aient déjà été demandés.
-  const resumable = name === "texts" ? contentChoice() === "paused" || part.completed > 0 && (contentChoice() === "on" || !!state.error) : part.completed > 0;
+  // « Reprendre » : un téléchargement de la partie a été interrompu, les textes ont été mis en pause, ou leur téléchargement accepté n'est pas fini (comme sur main).
+  // Un fichier lu à la demande ne compte pas seul : sans téléchargement accepté, les textes déjà lus laissent « Télécharger ».
+  const resumable = part.stopped || !!part.version || name === "texts" && (contentChoice() === "paused" || contentChoice() === "on" && part.completed > 0);
+  const label = contentOutdated(state).includes(name) ? "content.update" : resumable ? "Reprendre" : "content.download";
   const control = running ? button(uiText("content.pause"), "pause-content", `data-scope="${name}"`)
     : busy || done ? ""
     : state.queued === name ? button(uiText("content.queued"), "download-content", "disabled")
-    : button(uiText(resumable ? "Reprendre" : "content.download"), "download-content", `data-scope="${name}" ${state.status === "unavailable" ? "disabled" : ""}`, "primary");
+    : button(uiText(label), "download-content", `data-scope="${name}" ${state.status === "unavailable" ? "disabled" : ""}`, "primary");
   return `<div class="content-part" data-content-part="${name}"><div class="content-part-head"><h3>${uiText(`content.part.${name}`)}</h3><span class="small muted">${done ? `${uiText("content.done")} · ` : ""}${contentSize(part.totalBytes)}</span></div>
     <progress class="content-progress" max="100" value="${percent}" aria-label="${esc(uiText(`content.part.${name}`))}"></progress>
     <p class="small" role="status" aria-live="polite">${contentPartStatus(part)}</p>
+    ${part.version ? `<p class="tiny muted">${uiText("content.version", { p0: esc(part.version.slice(0, 12)) })}</p>` : ""}
     ${control ? `<div class="actions">${control}</div>` : ""}</div>`;
+}
+/** Titre de l’écran : l’opération en cours, sinon l’état des deux parties. */
+function contentHeading(state) {
+  const fixed = { unavailable: "Stockage hors ligne indisponible", checking: "Vérification du contenu…", clearing: "Nettoyage en cours…", "clear-error": "Nettoyage à reprendre", downloading: "Téléchargement en cours", error: "Téléchargement interrompu" };
+  if (fixed[state.status]) return uiText(fixed[state.status]);
+  const parts = CONTENT_PARTS.map((name) => state.parts[name]);
+  if (contentOutdated(state).length) return uiText("Mise à jour disponible");
+  if (parts.every(contentPartDone)) return navigator.serviceWorker?.controller || swRegistration?.active ? uiText("Disponible hors ligne") : uiText("Contenu téléchargé, activation hors ligne en attente");
+  if (parts.some((part) => part.stopped && !contentPartDone(part)) || contentChoice() === "paused" && !contentPartDone(state.parts.texts)) return uiText("Téléchargement à reprendre");
+  if (contentPartDone(state.parts.texts)) return uiText("content.texts");
+  return parts.some((part) => part.version) ? uiText("Téléchargement à reprendre") : uiText("Contenu à télécharger");
 }
 function renderOffline() {
   if (window.COMPANION_STANDALONE) return `<h1>${uiText("Contenu hors ligne")}</h1>${notice(uiText("Ce fichier autonome contient le socle jouable et son pilote. Ouvre la PWA hébergée pour télécharger le catalogue complet."))}`;
-  const state = contentStore.state, choice = contentChoice(), busy = ["checking", "clearing"].includes(state.status);
-  const started = !!state.error || choice === "paused" || state.parts.images.completed > 0;
-  const labels = { missing: uiText("Contenu à télécharger"), checking: uiText("Vérification du contenu…"), downloading: uiText("Téléchargement en cours"), interrupted: started ? uiText("Téléchargement à reprendre") : uiText("Contenu à télécharger"), texts: uiText("content.texts"), error: uiText("Téléchargement interrompu"), clearing: uiText("Nettoyage en cours…"), "clear-error": uiText("Nettoyage à reprendre"), ready: navigator.serviceWorker?.controller || swRegistration?.active ? uiText("Disponible hors ligne") : uiText("Contenu téléchargé, activation hors ligne en attente"), update: uiText("Mise à jour disponible"), unavailable: uiText("Stockage hors ligne indisponible") };
-  return `<div class="page-head"><div><h1>${uiText("Contenu hors ligne")}</h1></div></div><section class="panel"><h2>${labels[state.status]}</h2><p class="section-gap">${uiText("Catalogue, textes français et anglais, et ressources de l’application.")}</p>
-    ${state.total ? `<p>${uiText("{p0} entrées · {p1}", { p0: contentStore.manifest.count.toLocaleString(uiLocale()), p1: contentSize(state.totalBytes) })}</p>` : ""}
-    ${state.error ? notice(esc(uiSystemText(state.error)), "warning") : ""}${state.activeVersion && !["ready", "clearing", "clear-error"].includes(state.status) ? notice(uiText("La version locale précédente reste disponible pendant cette mise à jour.")) : ""}
-    ${state.total ? renderContentPart("texts", state, busy) + renderContentPart("images", state, busy) : ""}
-    <div class="actions section-gap">${state.status === "ready" ? button(uiText("Vérifier le contenu"), "check-content", "", "primary") : ""}${button(uiText("Ouvrir la bibliothèque"), "navigate", `data-route="library" ${state.status === "clearing" ? "disabled" : ""}`)}</div>
-    ${state.activeVersion ? `<p class="tiny muted section-gap">${uiText("Version locale {p0} · règles 2014", { p0: esc(state.activeVersion.slice(0, 12)) })}</p>` : ""}<p class="small muted section-gap">${choice === "on" ? uiText("content.note") : uiText("Tes personnages sont stockés séparément. Installer la PWA ne télécharge pas automatiquement ce catalogue.")}</p>
+  const state = contentStore.state, busy = ["checking", "clearing"].includes(state.status), known = !!contentStore.manifest;
+  const updating = state.status === "downloading" && (state.scope === "all" ? CONTENT_PARTS : [state.scope]).some((name) => state.parts[name].version);
+  const downloaded = CONTENT_PARTS.some((name) => state.parts[name].version);
+  return `<div class="page-head"><div><h1>${uiText("Contenu hors ligne")}</h1></div></div><section class="panel"><h2>${contentHeading(state)}</h2><p class="section-gap">${uiText("content.scope")}</p>
+    ${known ? `<p>${uiText("{p0} entrées · {p1}", { p0: contentStore.manifest.count.toLocaleString(uiLocale()), p1: contentSize(state.parts.texts.totalBytes + state.parts.images.totalBytes) })}</p>` : ""}
+    ${state.error ? notice(esc(uiSystemText(state.error)), "warning") : ""}${updating ? notice(uiText("La version locale précédente reste disponible pendant cette mise à jour.")) : ""}
+    ${known ? renderContentPart("texts", state, busy) + renderContentPart("images", state, busy) : ""}
+    <div class="actions section-gap">${CONTENT_PARTS.every((name) => contentPartDone(state.parts[name])) ? button(uiText("Vérifier le contenu"), "check-content", "", "primary") : ""}${button(uiText("Ouvrir la bibliothèque"), "navigate", `data-route="library" ${state.status === "clearing" ? "disabled" : ""}`)}</div>
+    <p class="small muted section-gap">${downloaded ? uiText("content.note") : uiText("Tes personnages sont stockés séparément. Installer la PWA ne télécharge pas automatiquement ce catalogue.")}</p>
     ${!busy && state.status !== "unavailable" ? `<div class="section-gap">${button(uiText("Nettoyer le contenu téléchargé"), "clear-content", contentStore.canClear ? "" : "disabled", "small-btn danger")}${!contentStore.canClear ? ("<p class=\"small muted section-gap\">" + uiText("Ce navigateur ne permet pas de protéger le nettoyage entre plusieurs fenêtres.") + "</p>") : ""}</div>` : ""}</section>`;
 }
 function renderSettings() {
@@ -54254,6 +54443,15 @@ async function performMore(action, el, c, data, d) {
     case "pause-content": if (el.dataset.scope !== "images") setContentChoice("paused"); contentStore.pause(); break;
     case "accept-content": ui.contentOffer = false; setContentChoice("on"); downloadTexts(); render(); break;
     case "decline-content": ui.contentOffer = false; setContentChoice("off"); render(); break;
+    // Mise à jour acceptée au bandeau : les parties téléchargées qui ont changé ; leurs fichiers inchangés restent sur l’appareil.
+    case "update-content": {
+      const outdated = contentOutdated(contentStore.state);
+      if (!outdated.length) { render(); break; }
+      ui.contentUpdating = true;
+      void contentStore.download({ scope: outdated.length > 1 ? "all" : outdated[0] }).catch((error) => { if (error.name !== "AbortError") toast(error.message); });
+      render(); break;
+    }
+    case "decline-update": declineContentUpdate(contentStore.state); render(); break;
     case "clear-content":
       askConfirm(uiText("Nettoyer le contenu téléchargé ?"), uiText("Le catalogue, ses textes français et anglais et les ressources téléchargées avec lui seront retirés de cet appareil. Tu pourras les retélécharger.\n\nTes personnages, brouillons, photos, historique et références sauvegardées restent conservés. L’application et tes fiches restent utilisables hors ligne."), "clear-content", null, { label: uiText("Nettoyer le contenu"), danger: true });
       break;
@@ -56668,7 +56866,8 @@ async function loadSpellCastReference(cast, spell) {
     if (ui.cast === cast && ui.modal === "cast") { cast.entry = entry; render(); }
   } catch { /* Le pilote reste consultable hors catalogue. */ }
 }
-function spellCard(c, s, { editor = false, target = "", scope = "main", classId = null, editorModel = null } = {}) {
+/** `held` : sorts déjà tenus par la fiche (creationHeldSpells), pour barrer dans l’éditeur de la montée de niveau un sort qu’une autre source donne déjà. */
+function spellCard(c, s, { editor = false, target = "", scope = "main", classId = null, editorModel = null, held = null } = {}) {
   const st = spellStatus(c, s, editor ? classId : null),
     limits = classId ? spellLimits(c, classId) : spellLimits(c, st.owner),
     multi = spellcasters(c).length > 1;
@@ -56678,7 +56877,9 @@ function spellCard(c, s, { editor = false, target = "", scope = "main", classId 
   const knownInBook = spellAcquisitions(c, s.id).some((entry) => entry.known && entry.classId === "wizard" && (!entry.sourceType || entry.sourceType === "class"));
   const selected = editor ? st.known || st.prepared || st.always || classId === "warlock" && st.arcanum : st.knownAny || st.preparedAny || st.always || st.arcanum || !!st.innate;
   let controls = "";
-  if (editor) {
+  const owner = editor && !selected ? held?.get(s.id) : null, elsewhere = owner && owner.key !== `class|${classId}` ? owner : null;
+  if (elsewhere) controls = `<span class="choice-option-why">${esc(uiText("creation.reason.ownedByM", { source: elsewhere.name }))}</span>`;
+  else if (editor) {
     const isArcanum = classId === "warlock" && s.level >= 6 && s.classes.includes("warlock") && limits.arcana.includes(s.level);
     if (st.always) controls = ("<span class=\"pill purple\">" + uiText("Toujours préparé") + "</span>");
     else if (isArcanum)
@@ -56721,7 +56922,7 @@ function spellCard(c, s, { editor = false, target = "", scope = "main", classId 
   }
   if (editorModel) {
     const detailId = `editor-${target}-spell-${s.id}`;
-    return `<article class="spell-card magic-list-entry ${selected ? "selected" : ""} ${limits.mode === "book" ? "magic-book-entry" : ""}"><details data-detail="${esc(detailId)}"><summary id="${esc(detailId)}"><span class="magic-entry-name"><strong>${esc(s.name)}</strong><small>${[st.always ? "Toujours préparé" : st.prepared ? "Préparé" : st.known ? limits.mode === "book" && s.level ? "Au grimoire" : "Appris" : s.school, s.concentration ? "Concentration" : "", s.ritual ? "Rituel" : ""].filter(Boolean).map(esc).join(" · ")}</small></span><span class="magic-entry-casting">${esc(s.casting || "1 action")}</span><span class="magic-entry-range">${esc(uiSpellRange(s, c))}</span><span class="magic-entry-duration">${esc(uiSpellDuration(s))}</span></summary><div class="spell-copy"><div class="magic-entry-facts"><span><b>${uiText("Portée")}</b> ${esc(uiSpellRange(s, c))}</span><span><b>${uiText("Durée")}</b> ${esc(uiSpellDuration(s))}</span><span><b>${uiText("Composantes")}</b> ${esc(s.components || "À préciser")}</span></div><div data-spell-description="${esc(s.id)}">${renderSpellDescription(s)}</div>${sourceLink(s.name, s.referenceId, [s.source])}</div></details><div class="spell-controls">${controls}</div></article>`;
+    return `<article class="spell-card magic-list-entry ${selected ? "selected" : ""} ${elsewhere ? "off" : ""} ${limits.mode === "book" ? "magic-book-entry" : ""}"><details data-detail="${esc(detailId)}"><summary id="${esc(detailId)}"><span class="magic-entry-name"><strong>${esc(s.name)}</strong><small>${[st.always ? "Toujours préparé" : st.prepared ? "Préparé" : st.known ? limits.mode === "book" && s.level ? "Au grimoire" : "Appris" : s.school, s.concentration ? "Concentration" : "", s.ritual ? "Rituel" : ""].filter(Boolean).map(esc).join(" · ")}</small></span><span class="magic-entry-casting">${esc(s.casting || "1 action")}</span><span class="magic-entry-range">${esc(uiSpellRange(s, c))}</span><span class="magic-entry-duration">${esc(uiSpellDuration(s))}</span></summary><div class="spell-copy"><div class="magic-entry-facts"><span><b>${uiText("Portée")}</b> ${esc(uiSpellRange(s, c))}</span><span><b>${uiText("Durée")}</b> ${esc(uiSpellDuration(s))}</span><span><b>${uiText("Composantes")}</b> ${esc(s.components || "À préciser")}</span></div><div data-spell-description="${esc(s.id)}">${renderSpellDescription(s)}</div>${sourceLink(s.name, s.referenceId, [s.source])}</div></details><div class="spell-controls">${controls}</div></article>`;
   }
   const copies = spellAcquisitions(c, s.id).filter((entry) => entry.copy);
   const copyNotes = copies.map((entry) => {
@@ -56836,6 +57037,8 @@ function renderMagicEditor(c, target) {
     ui.editorContext = context;
   }
   const level = Number(ui.editorLevel), available = model.rows.filter((spell) => spell.level === level);
+  // Montée de niveau : un sort que la race, un don ou une autre classe donne déjà est barré, comme à la création.
+  const held = target === "level" ? creationHeldSpells(c) : null;
   const list = available.filter((spell) => magicEditorMatches(spell, ui.editorQuery));
   const prefix = target === "level" ? "lvl" : "magic";
   const tabs = casters.length > 1 ? `<div class="segmented magic-class-tabs" aria-label="${uiText("Classe de lanceur de sorts")}">${casters.map((caster) => `<button type="button" data-action="editor-class" data-value="${caster.classId}" class="${caster.classId === classId ? "active" : ""}" aria-pressed="${caster.classId === classId}">${esc(caster.label)} ${caster.level}</button>`).join("")}</div>` : "";
@@ -56844,7 +57047,7 @@ function renderMagicEditor(c, target) {
   const workflow = target === "level";
   const selectedList = (label, ids) => ids.length ? `<div class="magic-selection-group"><strong>${label}</strong><div>${[...new Set(ids)].map((id) => { const spell = uiSpellById(c, id); return spell ? button(`${esc(spell.name)}<small>${spell.level ? `N${spell.level}` : uiText("Mineur")}</small>`, "editor-reveal", `data-id="${esc(id)}" data-target="${target}"`, "small-btn ghost") : ""; }).join("")}</div></div>` : "";
   const chosen = `<details class="magic-selected" data-detail="magic-selected-${target}-${classId}"><summary>${uiText("Sorts sélectionnés ")}<span>${model.selected.size}</span></summary>${selectedList(uiText("Mineurs"), model.entries.filter((entry) => entry.known && !entry.always && uiSpellById(c, entry.spellId)?.level === 0).map((entry) => entry.spellId))}${selectedList(limits.mode === "book" ? uiText("Grimoire") : uiText("Connus"), model.entries.filter((entry) => entry.known && !entry.always && !entry.prepared && uiSpellById(c, entry.spellId)?.level > 0).map((entry) => entry.spellId))}${selectedList(uiText("Préparés"), model.entries.filter((entry) => entry.prepared && !entry.always).map((entry) => entry.spellId))}${selectedList(uiText("Toujours préparés"), [...model.always])}${classId === "warlock" ? selectedList("Arcanums", Object.values(c.spells.arcana)) : ""}</details>`;
-  return `<div class="workflow-magic-editor magic-list-editor"><div class="workflow-magic-tools">${tabs}<div class="magic-level-tabs" role="group" aria-label="${uiText("Niveau des sorts")}">${model.levels.map((n) => `<button type="button" id="editor-level-${n}" data-action="editor-level" data-value="${n}" class="${level === n ? "active" : ""}" aria-pressed="${level === n}" aria-label="${n === 0 ? uiText("Mineurs") : limits.arcana.includes(n) ? uiText("Arcanum {p0}", { p0: n }) : uiText("Niveau {p0}", { p0: n })}">${n === 0 ? uiText("Mineurs") : n}${model.unlocked.includes(n) ? ("<small>" + uiText("Nouveau") + "</small>") : ""}</button>`).join("")}</div><div class="magic-counts" role="status">${counters}</div><div class="magic-search-line">${libraryBrowseButton("spell", target)}<div class="search-wrap">${icon("search", 18)}<input id="editor-search" class="search-input" data-bind="ui.editorQuery" value="${esc(ui.editorQuery)}" placeholder="${uiText("Rechercher un sort…")}" aria-label="${uiText("Rechercher un sort")}">${ui.editorQuery ? button(icon("x", 16), "clear-editor-search", 'aria-label="Effacer la recherche"', "ghost magic-search-clear") : ""}</div><span role="status">${uiText("{p7} sort{p8}", { p7: ui.editorQuery ? `${list.length} / ${available.length}` : available.length, p8: available.length > 1 ? "s" : "" })}</span></div><div class="magic-list-columns" aria-hidden="true"><span>${uiText("Sort")}</span><span>${uiText("Incantation")}</span><span>${uiText("Portée")}</span><span>${uiText("Durée")}</span><span></span></div></div><div class="${workflow ? "workflow-spell-scroll" : "magic-modal-list"}" ${workflow ? `id="workflow-spell-scroll" role="region" tabindex="0" aria-label="${uiText("Choix de sorts")}" data-scroll-key="${esc(`${target}|${classId}|${ui.editorQuery}|${ui.editorLevel}`)}"` : ""}>${list.length ? `<div class="magic-spell-list">${list.map((spell) => spellCard(c, spell, { editor: true, target, scope: "editor-" + target, classId, editorModel: model })).join("")}</div>` : `<p class="magic-empty">${uiText("Aucun sort trouvé.{p0}", { p0: ui.editorQuery ? ` ${button(uiText("Effacer la recherche"), "clear-editor-search", "", "small-btn ghost")}` : "" })}</p>`}${chosen}<details class="magic-options" data-detail="magic-options-${target}"><summary>Options</summary>${limits.mode === "known" || model.secrets || (classId === "cleric" && clericCantripVersatilityAvailable(c) || classId === "druid" && druidCantripVersatilityAvailable(c) || classId === "wizard" && wizardCantripFormulasAvailable(c)) ? button(["cleric", "druid", "wizard"].includes(classId) ? uiText("Remplacer un sort mineur") : uiText("Remplacer un sort ou corriger un Secret"), "replace-spell", `data-target="${target}"`, "small-btn") : ""}${checkField(uiText("Autoriser les exceptions du MJ"), `${prefix}.spells.allowExceptions`, c.spells.allowExceptions, "")}</details></div></div>`;
+  return `<div class="workflow-magic-editor magic-list-editor"><div class="workflow-magic-tools">${tabs}<div class="magic-level-tabs" role="group" aria-label="${uiText("Niveau des sorts")}">${model.levels.map((n) => `<button type="button" id="editor-level-${n}" data-action="editor-level" data-value="${n}" class="${level === n ? "active" : ""}" aria-pressed="${level === n}" aria-label="${n === 0 ? uiText("Mineurs") : limits.arcana.includes(n) ? uiText("Arcanum {p0}", { p0: n }) : uiText("Niveau {p0}", { p0: n })}">${n === 0 ? uiText("Mineurs") : n}${model.unlocked.includes(n) ? ("<small>" + uiText("Nouveau") + "</small>") : ""}</button>`).join("")}</div><div class="magic-counts" role="status">${counters}</div><div class="magic-search-line">${libraryBrowseButton("spell", target)}<div class="search-wrap">${icon("search", 18)}<input id="editor-search" class="search-input" data-bind="ui.editorQuery" value="${esc(ui.editorQuery)}" placeholder="${uiText("Rechercher un sort…")}" aria-label="${uiText("Rechercher un sort")}">${ui.editorQuery ? button(icon("x", 16), "clear-editor-search", 'aria-label="Effacer la recherche"', "ghost magic-search-clear") : ""}</div><span role="status">${uiText("{p7} sort{p8}", { p7: ui.editorQuery ? `${list.length} / ${available.length}` : available.length, p8: available.length > 1 ? "s" : "" })}</span></div><div class="magic-list-columns" aria-hidden="true"><span>${uiText("Sort")}</span><span>${uiText("Incantation")}</span><span>${uiText("Portée")}</span><span>${uiText("Durée")}</span><span></span></div></div><div class="${workflow ? "workflow-spell-scroll" : "magic-modal-list"}" ${workflow ? `id="workflow-spell-scroll" role="region" tabindex="0" aria-label="${uiText("Choix de sorts")}" data-scroll-key="${esc(`${target}|${classId}|${ui.editorQuery}|${ui.editorLevel}`)}"` : ""}>${list.length ? `<div class="magic-spell-list">${list.map((spell) => spellCard(c, spell, { editor: true, target, scope: "editor-" + target, classId, editorModel: model, held })).join("")}</div>` : `<p class="magic-empty">${uiText("Aucun sort trouvé.{p0}", { p0: ui.editorQuery ? ` ${button(uiText("Effacer la recherche"), "clear-editor-search", "", "small-btn ghost")}` : "" })}</p>`}${chosen}<details class="magic-options" data-detail="magic-options-${target}"><summary>Options</summary>${limits.mode === "known" || model.secrets || (classId === "cleric" && clericCantripVersatilityAvailable(c) || classId === "druid" && druidCantripVersatilityAvailable(c) || classId === "wizard" && wizardCantripFormulasAvailable(c)) ? button(["cleric", "druid", "wizard"].includes(classId) ? uiText("Remplacer un sort mineur") : uiText("Remplacer un sort ou corriger un Secret"), "replace-spell", `data-target="${target}"`, "small-btn") : ""}${checkField(uiText("Autoriser les exceptions du MJ"), `${prefix}.spells.allowExceptions`, c.spells.allowExceptions, "")}</details></div></div>`;
 }
 
 function componentTracking() {
@@ -57000,10 +57203,18 @@ async function performSpells(action, el, c, data, d) {
       const next = correctRuneExpense(c, option?.id, spent);
       openReview(next, "Correction d’une dépense de rune", uiText("{p0} : {p1} → {p2} utilisation(s) dépensée(s).", { p0: option.name, p1: option.spent, p2: spent }), "session"); break;
     }
+    // « Sur un allié » : le lancement le retient, pour rappeler à la fin de la concentration que l'effet s'arrête aussi pour lui.
+    case "cast-ally": {
+      const s = spellById(c, ui.cast?.id);
+      if (s?.concentration && c.state.concentration === s.name && c.state.spellEvents.some((event) => event.id === ui.cast.eventId))
+        await sessionChange((n) => { n.state.spellEvents.find((event) => event.id === ui.cast.eventId).ally = true; }, uiText("Sort : {p0}", { p0: s.name }));
+      closeModal(); break;
+    }
     case "end-concentration": {
       if (ui.modal === "info") closeModal();
-      // Une création liée à la concentration part avec elle : la fin se vérifie alors, et la vérification la nomme.
-      if (creationCards(c).some((card) => card.concentration)) { const next = clone(c); next.state.concentration = null; openReview(next, "Fin de concentration", uiText("creations.concentration.ends", { spell: c.state.concentration }), "session"); break; }
+      // Une création, un effet posé sur soi ou un allié liés à la concentration partent avec elle : la fin se vérifie alors, et la vérification les nomme.
+      const ending = concentrationEndings(c, { state: { concentration: null } });
+      if (creationCards(c).some((card) => card.concentration) || ending?.effects.length || ending?.ally) { const next = clone(c); next.state.concentration = null; dropConcentrationEffects(next); openReview(next, "Fin de concentration", uiText("creations.concentration.ends", { spell: c.state.concentration }), "session"); break; }
       await sessionChange((n) => {
         n.state.concentration = null;
       }, "Fin de concentration");
@@ -57030,7 +57241,7 @@ async function performSpells(action, el, c, data, d) {
       const build = (c, d) => { const model = castDiceModel(c, d, event); return spellAttackProfile(s, event, model, option?.spellAttack ?? null, model ? attackOptions(c, d, { spell: { id: s.id, school: s.school, attack: !!model.attack } }) : []); };
       const profile = build(after, afterD);
       const item = after.inventory.find((entry) => entry.id === event.costs?.itemId), material = castMaterialText(event);
-      const message = [uiText("Sort lancé : {p0}.", { p0: s.name }), material && `${material}.`, item?.instance?.lastUse?.decision === "pending" && uiText("Dernière charge à résoudre dans l’inventaire.")].filter(Boolean).join(" ");
+      const message = [uiText("Sort lancé : {p0}.", { p0: s.name }), material && `${material}.`, item?.instance?.lastUse?.decision === "pending" && uiText("Dernière charge à résoudre dans l’inventaire."), concentrationEndingText(c, after)].filter(Boolean).join(" ");
       const heal = spellHealRoll(s.id, { slotLevel: event.effectiveLevel, modifier: event.ability ? afterD.mods[event.ability] : 0 }), temp = spellTempHpRoll(s.id, { slotLevel: event.effectiveLevel });
       // Convocation, familier, destrier : le sort est payé, la fenêtre d'ajout demande la variante ou la forme, et le nom.
       const creates = (ui.cast.actions.creation ?? true) ? creationOfSpell(s.id) : "";
@@ -57173,11 +57384,11 @@ function renderSpellModals(c, d, cancel) {
   }
   if (ui.modal === "spell-stock-consume") {
     const line = resources(c).find((entry) => entry.id === ui.form.resourceId);
-    return modalShell(uiText("Vérifier avant d’appliquer"), line ? `<p class="modal-copy" data-stock-consume><strong>${esc(line.name)}</strong><br>${esc(uiText("stock.consume.review", { before: line.remaining, after: line.remaining - 1 }))}</p>` : "", line ? button(uiText("Sur un allié"), "consume-spell-stock", 'data-target="ally"', "ghost") + button(uiText("Sur moi"), "consume-spell-stock", 'data-target="self"', "primary") : cancel);
+    return modalShell(uiText("Récapitulatif"), line ? `<p class="modal-copy" data-stock-consume><strong>${esc(line.name)}</strong><br>${esc(uiText("stock.consume.review", { before: line.remaining, after: line.remaining - 1 }))}</p>` : "", line ? button(uiText("Sur un allié"), "consume-spell-stock", 'data-target="ally"', "ghost") + button(uiText("Sur moi"), "consume-spell-stock", 'data-target="self"', "primary") : cancel);
   }
   if (ui.modal === "cast-target") {
     const s = uiSpellById(c, ui.cast.id), guide = RECEIVED_GUIDES[s.id] || RECEIVED_PRESETS[s.id];
-    return modalShell(s.name, `<p class="modal-copy">${esc(uiSystemText(guide?.summary || ""))}</p>`, button(uiText("Sur un allié"), "close-modal", "", "ghost") + button(uiText("Sur moi"), "received-cast", "", "primary"));
+    return modalShell(s.name, `<p class="modal-copy">${esc(uiSystemText(guide?.summary || ""))}</p>`, button(uiText("Sur un allié"), "cast-ally", "", "ghost") + button(uiText("Sur moi"), "received-cast", "", "primary"));
   }
 }
 
@@ -58669,12 +58880,13 @@ function renderAttacks(c, d) {
 
 /**
  * Sauvegarde de Constitution pour garder la concentration, ouverte une fois les dégâts validés : la sauvegarde de la fiche, son DD affiché,
- * ses aides comptées d'office (Mage de guerre, Esprit occulte, Chantelame, constellation du Dragon). Le joueur la ferme sans lancer si la table l'a déjà jouée ; rien ne change sur la fiche.
+ * ses aides comptées d'office (Mage de guerre, Esprit occulte, Chantelame, constellation du Dragon). Ratée, elle met fin à la concentration à la fermeture
+ * de la fenêtre (concentrationSaveLost). Le joueur la ferme sans lancer si la table l'a déjà jouée ; rien ne change alors sur la fiche.
  */
 function openConcentrationSave(c, { spell, dc }) {
   rollCheck(uiText("Jet de sauvegarde de {p0}", { p0: uiAbilities.con.name }), uiDerive(c).saves.con, "check", {
     modeRoll: { kind: "save", ability: "con", concentration: true }, received: "save", launchLabel: uiText("Lancer la sauvegarde"),
-    dc: { value: dc, label: uiText("roll.concentration.dc", { spell, dc }), success: uiText("roll.concentration.success", { spell, dc }), failure: uiText("roll.concentration.failure", { spell, dc }) },
+    dc: { value: dc, concentration: spell, label: uiText("roll.concentration.dc", { spell, dc }), success: uiText("roll.concentration.success", { spell, dc }), failure: uiText("roll.concentration.failure", { spell, dc }) },
   });
 }
 /** Test d'une compétence par le chemin de la fiche ; title nomme l'action de combat qui le demande (lutte, bousculade). */
@@ -58696,6 +58908,10 @@ function rollCheck(name, bonus, kind = "check", options = {}) {
     reminders: options.modeRoll?.kind === "save" ? saveReminders(c, options.modeRoll.ability, { concentration: !!options.modeRoll.concentration }, uiDerive(c)) : [],
     ...(options.dc && { dc: options.dc }), ...(options.launchLabel && { launchLabel: options.launchLabel }), ...(options.failRoll && { failRoll: options.failRoll }),
   });
+}
+/** Sort dont la concentration est perdue : sauvegarde de concentration lancée et ratée au seuil ; null sinon (gardée, ou fermée sans lancer). */
+function concentrationSaveLost(r) {
+  return r?.dc?.concentration && r.result && !r.result.groups && !thresholdPassed({ atLeast: r.dc.value }, r.result.total) ? r.dc.concentration : null;
 }
 // Jet qui suit un échec au seuil d'un test (Forçage de portail : les dégâts subis), ouvert à la fermeture de sa fenêtre.
 function rollFailureFollow(r) {
@@ -59982,7 +60198,8 @@ async function performSheet(action, el, c, data, d) {
       const standing = type === "damage" ? zeroHpSpend(c, next) : null;
       if (standing) reviewResourceSpend(activeCharacter(), standing, { lead: uiText("Tu tombes à 0 PV.") });
       else if (focus?.dc) openConcentrationSave(activeCharacter(), focus);
-      else toast(message);
+      // Dégâts qui font perdre la concentration (0 PV) : le message dit ce qui prend fin avec elle.
+      else toast([message, concentrationEndingText(c, activeCharacter())].filter(Boolean).join(" "));
       break;
     }
     case "print":
@@ -60227,6 +60444,7 @@ let diceRenderer = null, diceRendererRoll = null;
 const ui = {
   route: "home",
   contentOffer: false,
+  contentUpdating: false,
   wizard: null,
   levelFlow: null,
   modal: null,
@@ -60304,28 +60522,47 @@ const ui = {
 const contentStore = new ContentStore({ baseUrl: location.href, appBuild: document.querySelector('meta[name="compagnon-build"]')?.content || "",
   onClear: () => { contentLibrary.index = []; contentLibrary.chunks.clear(); contentLibrary.version = null; contentReady = null; },
   onChange: (state) => {
+    if (state.status !== "downloading") ui.contentUpdating = false;
     // Le bandeau avance sur place ; l’écran n’est redessiné que lorsqu’il apparaît ou disparaît.
     const banner = document.getElementById("content-banner"), percent = contentPercent(state);
     if (banner) { banner.querySelector("progress").value = percent; banner.querySelector(".content-banner-percent").textContent = `${percent} %`; }
     // Pendant un téléchargement, l’écran Contenu hors ligne garde ses boutons en place : seuls ses barres et ses compteurs avancent.
-    const shape = [state.status, state.scope, state.queued, state.error, state.activeVersion].join("|");
+    const shape = [state.status, state.scope, state.queued, state.error, state.online, ...CONTENT_PARTS.flatMap((name) => [state.parts[name].version, state.parts[name].latest])].join("|");
     const steady = state.status === "downloading" && shape === contentShape && ui.route === "offline" && updateContentParts(state);
     contentShape = shape;
-    if (!!banner !== contentBannerShown(state) || !!document.getElementById("content-offer") !== contentOffered(state) || ["offline", "settings"].includes(ui.route) && !ui.wizard && !ui.levelFlow && !steady) render();
+    if (!!banner !== contentBannerShown(state) || !!document.getElementById("content-offer") !== contentOffered(state) || !!document.getElementById("content-update") !== contentUpdateOffered(state) || ["offline", "settings"].includes(ui.route) && !ui.wizard && !ui.levelFlow && !steady) render();
   } });
 let contentShape = "";
 const contentLibrary = new CatalogueLibrary(contentStore);
 let contentReady = null;
 const contentPartPercent = (part) => part.totalBytes ? Math.floor(part.bytes * 100 / part.totalBytes) : 0;
-const contentPercent = (state) => contentPartPercent(state.parts.texts);
-const contentBannerShown = (state) => state.status === "downloading" && state.scope === "texts";
-const contentOffered = (state) => !!ui.contentOffer && ["missing", "interrupted"].includes(state.status);
-function contentBannerHtml() {
-  const state = contentStore.state, percent = contentPercent(state);
-  if (contentBannerShown(state)) return `<div class="update-banner content-banner" id="content-banner"><span role="status">${uiText("content.banner")}</span><progress class="content-progress" max="100" value="${percent}" aria-label="${esc(uiText("content.banner"))}"></progress><span class="content-banner-percent" aria-hidden="true">${percent} %</span></div>`;
-  return contentOffered(state) ? `<div class="update-banner content-offer" id="content-offer"><span>${uiText("content.offer")}</span><span class="content-offer-actions">${button(uiText("content.download"), "accept-content", "", "small-btn primary")}${button(uiText("content.decline"), "decline-content", "", "small-btn")}</span></div>` : "";
+/** Avancement du bandeau : la partie téléchargée, ou les deux pendant une mise à jour complète. */
+const contentPercent = (state) => {
+  const parts = (state.scope === "all" ? CONTENT_PARTS : [state.scope || "texts"]).map((name) => state.parts[name]);
+  return contentPartPercent({ bytes: parts.reduce((sum, part) => sum + part.bytes, 0), totalBytes: parts.reduce((sum, part) => sum + part.totalBytes, 0) });
+};
+/** Parties téléchargées dont le serveur publie une autre version : connues seulement en ligne. */
+const contentOutdated = (state) => state.online ? CONTENT_PARTS.filter((name) => contentPartOutdated(state.parts[name])) : [];
+const contentBannerShown = (state) => state.status === "downloading" && (state.scope === "texts" || ui.contentUpdating);
+const contentOffered = (state) => !!ui.contentOffer && state.status === "idle" && !state.parts.texts.version;
+/** « Non » au bandeau de mise à jour vaut, partie par partie, pour la version refusée : il revient avec la version suivante (décision de Luca du 20 novembre 2026). */
+function contentUpdateDeclined() {
+  try { const declined = JSON.parse(localStorage.getItem("compagnon-content-update-declined") || "{}"); return declined && typeof declined === "object" ? declined : {}; } catch { return {}; }
 }
-/** Choix pour les textes et les règles : "on" (téléchargés et tenus à jour à l’ouverture), "paused" (mis en pause, jusqu’à « Reprendre »),
+function setContentUpdateDeclined(declined) {
+  try { if (declined) localStorage.setItem("compagnon-content-update-declined", JSON.stringify(declined)); else localStorage.removeItem("compagnon-content-update-declined"); } catch {}
+}
+const declineContentUpdate = (state) => setContentUpdateDeclined({ ...contentUpdateDeclined(), ...Object.fromEntries(contentOutdated(state).map((name) => [name, state.parts[name].latest])) });
+/** Une nouvelle version d’une partie téléchargée : le bandeau la propose, rien ne se télécharge sans accord (décision de Luca du 20 novembre 2026). */
+const contentUpdateOffered = (state) => state.status === "idle" && contentOutdated(state).some((name) => contentUpdateDeclined()[name] !== state.parts[name].latest) && !navigator.webdriver && !window.COMPANION_STANDALONE;
+function contentBannerHtml() {
+  const state = contentStore.state, percent = contentPercent(state), label = uiText(ui.contentUpdating ? "content.updating" : "content.banner");
+  const offer = (id, text, accept, decline) => `<div class="update-banner content-offer" id="${id}"><span>${text}</span><span class="content-offer-actions">${button(uiText(accept[0]), accept[1], "", "small-btn primary")}${button(uiText("content.decline"), decline, "", "small-btn")}</span></div>`;
+  if (contentBannerShown(state)) return `<div class="update-banner content-banner" id="content-banner"><span role="status">${label}</span><progress class="content-progress" max="100" value="${percent}" aria-label="${esc(label)}"></progress><span class="content-banner-percent" aria-hidden="true">${percent} %</span></div>`;
+  if (contentOffered(state)) return offer("content-offer", uiText("content.offer"), ["content.download", "accept-content"], "decline-content");
+  return contentUpdateOffered(state) ? offer("content-update", uiText("content.updateOffer"), ["content.update", "update-content"], "decline-update") : "";
+}
+/** Choix pour les textes et les règles : "on" (téléchargement accepté, repris à l’ouverture tant qu’il n’est pas terminé), "paused" (mis en pause, jusqu’à « Reprendre »),
  * "off" (refusés au bandeau), ou null tant que la personne n’a pas répondu. Nettoyer le contenu remet ce choix à null. */
 function contentChoice() {
   try { return localStorage.getItem("compagnon-content-auto"); } catch { return null; }
@@ -60334,13 +60571,13 @@ function setContentChoice(choice) {
   try { if (choice) localStorage.setItem("compagnon-content-auto", choice); else localStorage.removeItem("compagnon-content-auto"); } catch {}
 }
 const downloadTexts = () => void contentStore.download({ scope: "texts" }).catch(() => {});
-/** Quand les textes et les règles manquent ou ont changé : ils se téléchargent sans bloquer l’écran si la personne l’a accepté, et un bandeau le lui propose si elle n’a pas encore répondu.
- * Un navigateur piloté (recettes, robots) ne propose ni ne télécharge rien. */
+/** Textes jamais téléchargés en entier : le téléchargement accepté reprend sans bloquer l’écran, et un bandeau le propose si la personne n’a pas encore répondu.
+ * Une fois téléchargés, ils ne changent plus que par le bandeau de mise à jour. Un navigateur piloté (recettes, robots) ne propose ni ne télécharge rien. */
 function startContentTexts() {
   const state = contentStore.state, choice = contentChoice();
-  if (window.COMPANION_STANDALONE || navigator.webdriver || state.texts || state.error) return;
-  if (choice === "on" && ["missing", "interrupted", "update"].includes(state.status)) downloadTexts();
-  else if (!choice && ["missing", "interrupted"].includes(state.status)) { ui.contentOffer = true; render(); }
+  if (window.COMPANION_STANDALONE || navigator.webdriver || !state.online || state.status !== "idle" || state.parts.texts.version) return;
+  if (choice === "on") downloadTexts();
+  else if (!choice) { ui.contentOffer = true; render(); }
 }
 function ensureContent() {
   if (window.COMPANION_STANDALONE) return Promise.resolve();
@@ -60449,8 +60686,29 @@ function issueList(issues, type = "warning") {
     type,
   );
 }
+/** Lignes d'une vérification pour ce qui prend fin avec la concentration : l'effet posé sur soi, puis l'allié qui en profitait. */
+function concentrationEndingRows(before, after) {
+  const ending = concentrationEndings(before, after);
+  if (!ending) return [];
+  return [...ending.effects.map((name) => ({ label: name, before: uiText("creations.present"), after: uiText("creations.removed") })),
+    ...(ending.ally ? [{ label: ending.spell, before: uiText("concentration.ally.before"), after: uiText("concentration.ally.after") }] : [])];
+}
+/** Message de ce qui prend fin avec la concentration, pour un changement validé sans vérification (sauvegarde ratée, dégâts, nouveau sort). */
+function concentrationEndingText(before, after) {
+  const ending = concentrationEndings(before, after);
+  if (!ending) return "";
+  return [uiText("creations.concentration.ends", { spell: ending.spell }), ending.effects.length && uiText("concentration.effects.ended", { names: ending.effects.join(", ") }),
+    ending.ally && uiText("concentration.ally.ends", { spell: ending.spell })].filter(Boolean).join(" ");
+}
+/** Sauvegarde de concentration ratée : la concentration prend fin d'office, avec ses effets, et un message dit ce qui s'arrête (décision de Luca du 20 novembre 2026). */
+async function endLostConcentration(spell) {
+  const before = activeCharacter();
+  if (!before || before.state.concentration !== spell) return;
+  await sessionChange((n) => { n.state.concentration = null; }, "Fin de concentration");
+  toast(concentrationEndingText(before, activeCharacter()));
+}
 function impactHtml(before, after, extraRows = []) {
-  const rows = [...uiStatDiff(before, after), ...extraRows];
+  const rows = [...uiStatDiff(before, after), ...extraRows, ...concentrationEndingRows(before, after).filter((row) => !extraRows.some((extra) => extra.label === row.label))];
   // Une création liée à la concentration part quand celle-ci prend fin ou passe à un autre sort : toute vérification qui la change le dit.
   if (before?.state.concentration && after.state.concentration !== before.state.concentration)
     for (const card of creationCards(before)) if (card.concentration && !rows.some((row) => row.label === card.name)) rows.push({ label: card.name, before: uiText("creations.present"), after: uiText("creations.removed") });
@@ -60656,7 +60914,7 @@ function renderModal() {
       issues = characterIssues(p.character),
       repair = previewCharacterRepair(beginCharacterRepair(p.original, { revision: p.baseRevision }), p.character);
     return modalShell(
-      uiText("Vérifier avant d’appliquer"),
+      uiText("Récapitulatif"),
       `${renderRepairConflict()}<p class="modal-copy"><strong>${esc(uiStoredText(p.label))}</strong><br>${esc(uiStoredText(p.description) || uiText("La fiche n’a pas encore été modifiée. Sa version précédente restera dans les réglages."))}</p>${p.ask ? `<label class="field" for="review-ask"><span>${esc(p.ask.label)}</span><select id="review-ask" data-review-ask>${Array.from({ length: p.ask.max - p.ask.min + 1 }, (_, index) => `<option value="${p.ask.min + index}" ${p.ask.value === p.ask.min + index ? "selected" : ""}>${p.ask.min + index}</option>`).join("")}</select></label>` : ""}${p.campaignDetails || ""}${renderRuneChanges(p.original, p.character)}${impactHtml(p.original, p.character, p.impactRows)}${renderRepairConsequences(repair)}${p.magicSummary ? `<div class="section-gap">${esc(p.magicSummary)}</div>` : ""}<div class="section-gap">${issueList(issues.errors, "error")}${issueList(issues.warnings)}</div>`,
       // choices : la revue se valide par l'un de ses choix (Présage : « Sur une autre créature » ou « Sur moi »), chacun avec sa fiche.
       p.choices ? p.choices.map((choice, index) => button(esc(choice.label), "commit-review", `data-choice="${index}" ${issues.errors.length ? "disabled" : ""}`, index === p.choices.length - 1 ? "primary" : "ghost")).join("")
@@ -60848,8 +61106,10 @@ function closeModal() {
   }
   if (ui.modal === "roll") {
     if (ui.roll?.phase === "applying") return;
-    const back = ui.roll?.returnModal, following = ui.roll?.nextRoll || rollFailureFollow(ui.roll);
+    const back = ui.roll?.returnModal, following = ui.roll?.nextRoll || rollFailureFollow(ui.roll), lost = concentrationSaveLost(ui.roll);
     ui.roll = null;
+    // Sauvegarde de concentration ratée : elle prend fin en fermant la fenêtre, après d'éventuelles relances (Chanceux, Inspiration).
+    if (lost) void endLostConcentration(lost);
     if (back) { ui.modal = back; render(); modalRoot.querySelector("button")?.focus({ preventScroll: true }); return; }
     // Jet suivant d'une même dépense (élixir : soins, puis PV temporaires).
     if (following) { openSpendRoll(following); return; }
@@ -61008,7 +61268,7 @@ async function perform(action, el) {
     case "portrait-cancel-upload": case "portrait-save": case "dashboard-organize": case "damage": case "heal": case "gold": case "xp": case "hp-details":
     case "temporary-hp": case "quick-amount": case "apply-amount": case "print": case "print-select-all": case "confirm-print": case "ac-info":
       await performSheet(action, el, c, data, d); break;
-    case "export-pending": case "export-repair-draft": case "export-recovery": case "download-content": case "pause-content": case "accept-content": case "decline-content": case "clear-content": case "check-content":
+    case "export-pending": case "export-repair-draft": case "export-recovery": case "download-content": case "pause-content": case "accept-content": case "decline-content": case "update-content": case "decline-update": case "clear-content": case "check-content":
     case "set-units": case "set-list-order": case "set-language": case "audit-settings-open": case "audit-more-companions": case "audit-more-back": case "demo": case "new-trait":
     case "edit-trait": case "review-trait": case "toggle-trait": case "delete-trait": case "new-custom-spell": case "edit-custom-spell": case "review-custom-spell":
     case "delete-custom-spell": case "export-one": case "export-all": case "aidedd-same-class": case "aidedd-resolve": case "aidedd-open": case "aidedd-back":
@@ -61062,7 +61322,7 @@ async function perform(action, el) {
       await performLevels(action, el, c, data, d); break;
     case "select-spell": case "spell-level": case "spell-tab": case "copy-spell": case "review-spell-copy": case "edit-magic": case "review-magic": case "slot-help":
     case "sheet-slot": case "sheet-slot-correction": case "toggle-slot": case "rune-inscriptions": case "review-rune-inscriptions": case "rune-expense":
-    case "review-rune-expense": case "end-concentration": case "cast": case "confirm-cast": case "cast-language": case "end-ongoing-spell": case "editor-level":
+    case "review-rune-expense": case "end-concentration": case "cast-ally": case "cast": case "confirm-cast": case "cast-language": case "end-ongoing-spell": case "editor-level":
     case "clear-editor-search": case "editor-reveal": case "editor-class": case "toggle-pact":
     case "consume-spell-stock": case "roll-spell-card":
       await performSpells(action, el, c, data, d); break;
@@ -61188,8 +61448,8 @@ async function perform(action, el) {
       } else if (f.action === "clear-content") {
         try {
           await contentStore.clear();
-          // Nettoyer n’est pas refuser : le choix est oublié et le bandeau repropose les textes.
-          setContentChoice(null);
+          // Nettoyer n’est pas refuser : les choix sont oubliés et le bandeau repropose les textes.
+          setContentChoice(null); setContentUpdateDeclined(null);
           toast(uiText("Contenu téléchargé supprimé."));
           startContentTexts();
         } catch { toast(contentStore.state.error || uiText("Le nettoyage n’a pas pu être effectué.")); }
@@ -61548,6 +61808,10 @@ async function setupServiceWorker() {
     render();
     await setupServiceWorker();
     void ensureContent().then(startContentTexts);
+    // De retour en ligne : les versions du serveur sont relues, et une partie téléchargée qui a changé est proposée au bandeau.
+    // Vérification à part : une réponse lente du réseau qui revient ne retient ni la lecture ni un téléchargement demandé.
+    window.addEventListener("offline", () => contentStore.goOffline());
+    window.addEventListener("online", () => { if (contentReady && contentStore.state.status === "idle" && !contentStore.downloading) void contentReady.then(() => contentStore.load(null, { quiet: true })).then(startContentTexts).catch(() => {}); });
     void importSharedSave();
   } catch (error) {
     ui.fatal = error.message;
