@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-candidate-7";
+const APP_VERSION = "2.0.0-candidate-8";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -4850,6 +4850,7 @@ const UI_FR = Object.freeze({
   "creations.error.command": "Commande inconnue.",
   "creations.error.empty": "Il n’en reste plus.",
   "creations.error.revive": "Ce compagnon ne peut pas être ranimé maintenant.",
+  "creations.error.healDead": "À 0 PV, ce compagnon revient avec « Ranimer », contre un emplacement de sort.",
   "creations.error.row": "Cette utilisation n’est pas disponible.",
   "creations.error.list": "Liste de créations trop longue (600 maximum).",
   "creations.error.entry": "Création invalide : {name}.",
@@ -5254,7 +5255,9 @@ const UI_FR = Object.freeze({
   "shop.loading": "Chargement…",
   "shop.detailOffline": "Fiche indisponible hors ligne.",
   "Non maîtrisé": "Non maîtrisé",
-  "Masquer les non maîtrisés": "Masquer les non maîtrisés"
+  "Masquer les non maîtrisés": "Masquer les non maîtrisés",
+  "Aucun vol terminé à rétablir.": "Aucun vol terminé à rétablir.",
+  "Lancé par un allié": "Lancé par un allié"
 });
 
 
@@ -9742,6 +9745,7 @@ const UI_EN = Object.freeze({
   "creations.error.command": "Unknown command.",
   "creations.error.empty": "None left.",
   "creations.error.revive": "This companion cannot be revived right now.",
+  "creations.error.healDead": "At 0 HP, this companion comes back with “Revive”, for a spell slot.",
   "creations.error.row": "This use is not available.",
   "creations.error.list": "Too many creations (600 at most).",
   "creations.error.entry": "Invalid creation: {name}.",
@@ -10146,7 +10150,9 @@ const UI_EN = Object.freeze({
   "shop.loading": "Loading…",
   "shop.detailOffline": "Details unavailable offline.",
   "Non maîtrisé": "Not proficient",
-  "Masquer les non maîtrisés": "Hide non-proficient items"
+  "Masquer les non maîtrisés": "Hide non-proficient items",
+  "Aucun vol terminé à rétablir.": "No ended flight to restore.",
+  "Lancé par un allié": "Cast by an ally"
 });
 
 
@@ -39648,6 +39654,8 @@ function clericFlight(c) {
 function setClericFlight(c, { action = "start", darknessConfirmed = false } = {}) {
   if (!hasSubclass(c, "cleric", "twilight") || classLevel(c, "cleric") < 6 || !["start", "end", "restore"].includes(action)) throw new Error(uiText("Pas de la nuit indisponibles."));
   if (action === "start" && darknessConfirmed !== true) throw new Error(uiText("Confirme que tu es dans une lumière faible ou dans l’obscurité."));
+  // Rétablir corrige un vol terminé par erreur, comme les autres « rétablir » : sans vol commencé puis terminé, il n'y a rien à corriger.
+  if (action === "restore" && c.state.cleric?.flight !== false) throw new Error(uiText("Aucun vol terminé à rétablir."));
   const next = action === "start" ? spendResources(c, [{ id: "cleric-steps-night", amount: 1 }]) : clone(c);
   next.state.cleric ||= {};
   next.state.cleric.flight = action !== "end";
@@ -47463,7 +47471,7 @@ function creationCards(c) {
           : actions.length ? { verb: "act", enabled: true } : null;
     const rows = actor.origin === "defender" ? [{ id: "repairs", name: uiText("creations.repairs"), remaining: CREATION_REPAIRS - (actor.repairsUsed || 0), max: CREATION_REPAIRS, enabled: usable && hp > 0 && (actor.repairsUsed || 0) < CREATION_REPAIRS }] : [];
     return { id: actor.id, origin: actor.origin, kind: origin.kind, name: _creationTitle(c, actor), givenName: actor.name || _creationDefaultName(c, actor.origin, actor), present: actor.present, lost, excess: excess.has(actor.id),
-      hp, maxHp, ac: values.ac, stock: stock ? actor.stock : null, tappable: !stock && usable, pills, button, rows, actions, virtual: !!actor.virtual, concentration: !!actor.concentration };
+      hp, maxHp, ac: values.ac, stock: stock ? actor.stock : null, tappable: !stock && usable && !(hp === 0 && origin.revive), pills, button, rows, actions, virtual: !!actor.virtual, concentration: !!actor.concentration };
   });
 }
 function creationCard(c, id) {
@@ -47668,6 +47676,8 @@ function addCreation(c, originId, form = {}) {
  */
 function creationHpOutcome(c, id, mode, amount) {
   const card = creationCard(c, id), value = Math.floor(Number(amount));
+  // Un compagnon à ranimer (défenseur d'acier, compagnon primal) ne revient pas par des soins : « Ranimer » dépense un emplacement (TCE).
+  if (card && card.hp === 0 && CREATION_ORIGINS[card.origin].revive) throw new Error(uiText("creations.error.healDead"));
   if (!card || !card.tappable) throw new Error(uiText("creations.error.missing"));
   if (!["damage", "heal"].includes(mode) || !Number.isFinite(value) || value < 0 || value > 1e6) throw new Error(uiText("Saisis un montant positif et raisonnable."));
   const after = mode === "damage" ? Math.max(0, card.hp - value) : Math.min(card.maxHp, card.hp + value), removed = after === 0 && card.hp > 0 && CREATION_ORIGINS[card.origin].zero === "gone";
@@ -53386,6 +53396,16 @@ function libraryRuleTablePanel(raw) {
   }).join("");
 }
 
+/**
+ * Boutons d'une fiche de la Bibliothèque pour le personnage ouvert. Un sort qu'il sait lancer passe par son lancement, qui dépense
+ * (emplacement, utilisation d'un don, à volonté) : chemin unique, décision de Luca du 21 novembre 2026 ; « Lancé par un allié » garde
+ * l'accès aux effets reçus (B3-C3-06), sans dépense. Sinon, « Appliquer sur ma fiche » pose l'effet d'un sort d'un autre ou d'une aptitude.
+ */
+function libraryApplyButton(entry) {
+  const c = activeCharacter(), spell = entry.type === "spell" ? SPELLS.find((row) => row.referenceId === entry.id) : null, known = spell && uiSpellById(c, spell.id);
+  if (known && Object.keys(spellCastOptions(c, known).modes || {}).length) return button(uiText("Lancer"), "cast", `data-id="${esc(spell.id)}"`, "small-btn") + button(uiText("Lancé par un allié"), "received-library", "", "small-btn");
+  return button(uiText("Appliquer sur ma fiche"), "received-library", "", "small-btn");
+}
 function libraryDetail() {
   const entry = ui.libraryEntry, lang = ui.libraryLanguage, sourceEntry = ui.libraryRaw ? { ...entry, enDerived: null, texts: [] } : entry;
   const archived = ui.libraryReading?.archiveDefinitions || [];
@@ -53414,7 +53434,7 @@ function libraryDetail() {
   const description = referenceDocumentHtml(raw, entry.type, lang, { entry, definitions, context, labels });
   const source = raw.inherits || raw, sourceLabel = [source.source, source.page ? uiText("p. {p0}", { p0: source.page }) : "", "D&D 2014"].filter(Boolean).join(" · ");
   const selection = librarySelection(entry), favorite = (appData.libraryFavorites || []).some((row) => row.id === entry.id);
-  return modalShell(entry.type === "table" ? raw.caption || raw.name || entry.id : raw.name || entry.id, `${ui.libraryArchived ? notice(uiText("Référence conservée dans ta sauvegarde, disponible hors ligne.")) : ""}<p class="tiny muted">${esc(sourceLabel)}${libraryScopeLabel(entry) ? ` · ${esc(uiSystemText(libraryScopeLabel(entry)))}` : ""}</p>${libraryScopeAvailability(entry) ? `<p class="small">${esc(uiSystemText(libraryScopeAvailability(entry)))}</p>` : ""}<div class="segmented">${[["fr", uiText("Français")], ["en", "English"]].map(([value, name]) => `<button data-action="library-language" data-value="${value}" class="${lang === value ? "active" : ""}" aria-pressed="${lang === value}">${name}</button>`).join("")}</div>${entry.enDerived ? button(ui.libraryRaw ? uiText("Voir le profil complet") : uiText("Voir la source EN originale"), "library-source", "", "small-btn ghost") : ""}${lang === "fr" && libraryNeedsReview(sourceEntry) ? `<p class="tiny muted">${LIBRARY_TRANSLATION_REVIEW}</p>` : ""}${libraryIncomplete(entry) ? notice("Cette référence reste incomplète. Vérifie les données manquantes ci-dessous.", "warning") : ""}${entry.role === "composition-template" || entry.type === "magicvariant" ? notice(uiText("Ce modèle s’applique aux bases admissibles. Ouvre un exemplaire composé dans les références associées pour l’ajouter au sac.")) : ""}${libraryRuleTablePanel(raw)}<div class="library-description" lang="${lang}">${description || notice("Cette entrée renvoie aux références associées ci-dessous.")}</div>${diagnostics.length ? `<details class="section-gap"><summary>${uiText("{p0} référence(s) à vérifier", { p0: diagnostics.length })}</summary>${diagnostics.map((diagnostic) => `<p class="small">${esc(diagnostic.message || diagnostic.reason || diagnostic.code)} <code>${esc(diagnostic.path || "")}</code></p>${(diagnostic.candidates || []).map((row) => button(`${esc(libraryRowName(row))} (${esc(row.source)})`, "library-entry", referenceLinkAttributes(libraryDependencyReference(entry, row.id)), "small-btn")).join("")}`).join("")}</details>` : ""}${links.length ? `<h3 class="section-gap">${uiText("Références associées")}</h3><div class="library-list">${links.map((link) => `<button class="library-row" data-action="library-entry" ${referenceLinkAttributes({ ...link, ...libraryDependencyReference(entry, link.id) })}><span>${esc(uiCatalogueName(link.name, link.id))}<small>${esc(link.source)} · ${esc(uiLibraryTypes[link.type] || link.type)}</small></span>${icon("chevron", 16)}</button>`).join("")}</div>` : ""}<details class="section-gap"><summary>${uiText("Source et données techniques")}</summary><p class="tiny preserve" style="overflow-wrap:anywhere">${esc(entry.id)}<br>${esc(entry.revision || "")}</p><pre class="small preserve" style="overflow-wrap:anywhere;white-space:pre-wrap">${esc(JSON.stringify({ provenance: entry.provenance, scope: entry.scope, inheritance: entry.inheritance, composition: entry.composition && { baseId: entry.composition.baseId, variantId: entry.composition.variantId, status: entry.composition.status }, raw: entry.en }, null, 2))}</pre></details>`, back + (activeCharacter() && !ui.wizard && !ui.levelFlow && ["spell", "classFeature", "subclassFeature", "optionalfeature", "feat", "reward"].includes(entry.type) ? button(uiText("Appliquer sur ma fiche"), "received-library", "", "small-btn") : "") + (!ui.libraryArchived ? button(favorite ? uiText("★ Favori") : uiText("☆ Favori"), "library-favorite", `data-id="${esc(entry.id)}" aria-pressed="${favorite}"`, "small-btn") : "") + (selection ? button(selection.label, selection.type === "item" ? "add-library-item" : "library-select", "", "primary") : "") + button(ui.libraryReturn?.modal ? uiText("Retour aux choix") : uiText("Fermer"), "close-modal"));
+  return modalShell(entry.type === "table" ? raw.caption || raw.name || entry.id : raw.name || entry.id, `${ui.libraryArchived ? notice(uiText("Référence conservée dans ta sauvegarde, disponible hors ligne.")) : ""}<p class="tiny muted">${esc(sourceLabel)}${libraryScopeLabel(entry) ? ` · ${esc(uiSystemText(libraryScopeLabel(entry)))}` : ""}</p>${libraryScopeAvailability(entry) ? `<p class="small">${esc(uiSystemText(libraryScopeAvailability(entry)))}</p>` : ""}<div class="segmented">${[["fr", uiText("Français")], ["en", "English"]].map(([value, name]) => `<button data-action="library-language" data-value="${value}" class="${lang === value ? "active" : ""}" aria-pressed="${lang === value}">${name}</button>`).join("")}</div>${entry.enDerived ? button(ui.libraryRaw ? uiText("Voir le profil complet") : uiText("Voir la source EN originale"), "library-source", "", "small-btn ghost") : ""}${lang === "fr" && libraryNeedsReview(sourceEntry) ? `<p class="tiny muted">${LIBRARY_TRANSLATION_REVIEW}</p>` : ""}${libraryIncomplete(entry) ? notice("Cette référence reste incomplète. Vérifie les données manquantes ci-dessous.", "warning") : ""}${entry.role === "composition-template" || entry.type === "magicvariant" ? notice(uiText("Ce modèle s’applique aux bases admissibles. Ouvre un exemplaire composé dans les références associées pour l’ajouter au sac.")) : ""}${libraryRuleTablePanel(raw)}<div class="library-description" lang="${lang}">${description || notice("Cette entrée renvoie aux références associées ci-dessous.")}</div>${diagnostics.length ? `<details class="section-gap"><summary>${uiText("{p0} référence(s) à vérifier", { p0: diagnostics.length })}</summary>${diagnostics.map((diagnostic) => `<p class="small">${esc(diagnostic.message || diagnostic.reason || diagnostic.code)} <code>${esc(diagnostic.path || "")}</code></p>${(diagnostic.candidates || []).map((row) => button(`${esc(libraryRowName(row))} (${esc(row.source)})`, "library-entry", referenceLinkAttributes(libraryDependencyReference(entry, row.id)), "small-btn")).join("")}`).join("")}</details>` : ""}${links.length ? `<h3 class="section-gap">${uiText("Références associées")}</h3><div class="library-list">${links.map((link) => `<button class="library-row" data-action="library-entry" ${referenceLinkAttributes({ ...link, ...libraryDependencyReference(entry, link.id) })}><span>${esc(uiCatalogueName(link.name, link.id))}<small>${esc(link.source)} · ${esc(uiLibraryTypes[link.type] || link.type)}</small></span>${icon("chevron", 16)}</button>`).join("")}</div>` : ""}<details class="section-gap"><summary>${uiText("Source et données techniques")}</summary><p class="tiny preserve" style="overflow-wrap:anywhere">${esc(entry.id)}<br>${esc(entry.revision || "")}</p><pre class="small preserve" style="overflow-wrap:anywhere;white-space:pre-wrap">${esc(JSON.stringify({ provenance: entry.provenance, scope: entry.scope, inheritance: entry.inheritance, composition: entry.composition && { baseId: entry.composition.baseId, variantId: entry.composition.variantId, status: entry.composition.status }, raw: entry.en }, null, 2))}</pre></details>`, back + (activeCharacter() && !ui.wizard && !ui.levelFlow && ["spell", "classFeature", "subclassFeature", "optionalfeature", "feat", "reward"].includes(entry.type) ? libraryApplyButton(entry) : "") + (!ui.libraryArchived ? button(favorite ? uiText("★ Favori") : uiText("☆ Favori"), "library-favorite", `data-id="${esc(entry.id)}" aria-pressed="${favorite}"`, "small-btn") : "") + (selection ? button(selection.label, selection.type === "item" ? "add-library-item" : "library-select", "", "primary") : "") + button(ui.libraryReturn?.modal ? uiText("Retour aux choix") : uiText("Fermer"), "close-modal"));
 }
 /** Année de parution des livres de campagne, affichée après leur code. */
 const SOURCE_CAMPAIGN_YEARS = { aag: "2022", ai: "2019", dmg: "2014", dsotdq: "2022", egw: "2020", erlw: "2019", ftd: "2021", ggr: "2018", mot: "2020", scc: "2021", tce: "2020", ttp: "2017", vrgr: "2021", wbtw: "2021" };
@@ -56306,11 +56326,14 @@ function renderEquipmentFields(c) {
   const weaponCharacter = { ...c, equipment: f }, weaponTraining = collect(c);
   // L’armure et le bouclier viennent aussi du sac ; une armure enregistrée avant l’inventaire reste affichée telle quelle.
   const armorLabel = (a, name = a.name) => a.type === "none" ? name : uiText("{p0} · CA {p1}{p2}", { p0: name, p1: a.base, p2: a.type === "light" ? " + DEX" : a.type === "medium" ? " + DEX (max 2)" : "" });
+  // Une liste déroulante n'affiche que du texte : l'objet non maîtrisé y porte « · Non maîtrisé » (décision de Luca du 21 novembre 2026).
+  const unskilled = (label, proficient) => proficient === false ? `${label} · ${uiText("Non maîtrisé")}` : label;
   const carriedArmors = inventoryEquipmentChoices(c, "armor"), carriedShields = inventoryEquipmentChoices(c, "shield");
   const armorCurrent = f.armor === "none" ? "none" : carriedArmors.some(({ item }) => item.id === f.armorInventoryId) ? f.armorInventoryId : "kept";
-  const armorOptions = { none: armorLabel(uiArmors.none), ...Object.fromEntries(carriedArmors.map(({ item, adapter }) => [item.id, armorLabel(uiArmors[adapter.id], item.name)])), ...(armorCurrent === "kept" ? { kept: uiText("equipment.outsideInventory", { name: armorLabel(uiArmors[f.armor] || { type: "none", name: f.armor }) }) } : {}) };
+  const armorOptions = { none: armorLabel(uiArmors.none), ...Object.fromEntries(carriedArmors.map(({ item, adapter }) => [item.id, unskilled(armorLabel(uiArmors[adapter.id], item.name), itemProficiency(c, { item }, weaponTraining))])), ...(armorCurrent === "kept" ? { kept: unskilled(uiText("equipment.outsideInventory", { name: armorLabel(uiArmors[f.armor] || { type: "none", name: f.armor }) }), itemProficiency(c, { kind: "armor", id: f.armor }, weaponTraining)) } : {}) };
   const shieldKept = f.shield && !carriedShields.some(({ item }) => item.id === f.shieldInventoryId);
-  const shieldField = carriedShields.length || f.shield ? checkField(uiText("Bouclier équipé (+2 CA)"), "form.shield", f.shield, shieldKept && !carriedShields.length ? esc(uiText("equipment.shieldOutsideInventory")) : "") : `<p class="small muted" data-shield-missing>${esc(uiText("equipment.noShield"))}</p>`;
+  const shieldHelp = [shieldKept && !carriedShields.length ? esc(uiText("equipment.shieldOutsideInventory")) : "", proficiencyPill(itemProficiency(c, { kind: "armor", id: "shield" }, weaponTraining)).trim()].filter(Boolean).join(" ");
+  const shieldField = carriedShields.length || f.shield ? checkField(uiText("Bouclier équipé (+2 CA)"), "form.shield", f.shield, shieldHelp) : `<p class="small muted" data-shield-missing>${esc(uiText("equipment.noShield"))}</p>`;
   const instanceOptions = { "": uiText("equipment.freeHand"), ...Object.fromEntries(f.weapons.filter((w) => w.id !== "unarmed").map((w, i) => [w.instanceId, `${weaponOf(w.id)?.name || w.id} · ${uiText("equipment.instance").replace("{number}", i + 1)}`])) };
   const pactAvailable = allChoices(c, "pact").includes("blade") && classLevel(c, "warlock") >= 3;
   // Une arme à portée de main est un exemplaire de l’inventaire : la liste ne propose que ce que le personnage porte.
@@ -56326,16 +56349,25 @@ function renderEquipmentFields(c) {
       for (const entry of carried) {
         // Le filtre ne retire jamais l’arme de la rangée ; un exemplaire ne sert qu’à une rangée.
         if (entry.item.id !== w.inventoryId && (taken.has(entry.item.id) || ui.equipmentProficientOnly && !weaponProficiency(weaponCharacter, { id: entry.adapter.id, instanceId: entry.item.id }, weaponTraining).proficient)) continue;
-        options[entry.item.id] = carriedLabel(entry);
+        options[entry.item.id] = unskilled(carriedLabel(entry), weaponProficiency(weaponCharacter, { id: entry.adapter.id, instanceId: entry.item.id }, weaponTraining).proficient);
       }
       // Une arme enregistrée avant l’inventaire, ou qui n’est plus portée, reste affichée telle quelle.
       if (!Object.hasOwn(options, current)) options[current] = uiText("equipment.outsideInventory", { name: uiWeapons[w.id]?.name || info?.name || w.id });
       for (const id of conjured) options[`pact:${id}`] = uiText("equipment.weaponConjured", { name: uiWeapons[id]?.name || id });
       const free = !w.inventoryId;
-      return `<div class="weapon-row"><div class="form-grid">${selectField(i === 0 ? uiText("Arme principale") : uiText("Arme {p0}", { p0: i + 1 }), `form.weapons.${i}.source`, current, options)}${free ? field(uiText("Bonus magique"), `form.weapons.${i}.magic`, w.magic || 0, "number", "", 'min="-5" max="10" step="1"') : ""}</div>${free ? checkField(uiText("Autre propriété magique"), `form.weapons.${i}.isMagical`, !!w.isMagical, uiText("Pour une arme magique sans bonus chiffré, notamment lors du lien de pacte.")) : ""}${info?.versatile ? checkField(uiText("Tenue à deux mains ({p0})", { p0: info.versatile }), `form.weapons.${i}.twoHands`, w.twoHands) : ""}${f.weapons.length > 1 ? button(uiText("{p0} Retirer", { p0: icon("trash", 14) }), "equip-remove-weapon", `data-index="${i}"`, "small-btn ghost") : ""}</div>`;
+      // Le texte d'une liste fermée peut être coupé : l'arme choisie non maîtrisée porte aussi la pastille sous la liste.
+      const chosen = w.id === "unarmed" ? "" : proficiencyPill(weaponProficiency(weaponCharacter, { id: w.id, instanceId: w.instanceId }, weaponTraining).proficient).trim();
+      return `<div class="weapon-row"><div class="form-grid">${selectField(i === 0 ? uiText("Arme principale") : uiText("Arme {p0}", { p0: i + 1 }), `form.weapons.${i}.source`, current, options, chosen)}${free ? field(uiText("Bonus magique"), `form.weapons.${i}.magic`, w.magic || 0, "number", "", 'min="-5" max="10" step="1"') : ""}</div>${free ? checkField(uiText("Autre propriété magique"), `form.weapons.${i}.isMagical`, !!w.isMagical, uiText("Pour une arme magique sans bonus chiffré, notamment lors du lien de pacte.")) : ""}${info?.versatile ? checkField(uiText("Tenue à deux mains ({p0})", { p0: info.versatile }), `form.weapons.${i}.twoHands`, w.twoHands) : ""}${f.weapons.length > 1 ? button(uiText("{p0} Retirer", { p0: icon("trash", 14) }), "equip-remove-weapon", `data-index="${i}"`, "small-btn ghost") : ""}</div>`;
     })
     .join("");
-  return `<div class="form-grid">${selectField(uiText("Armure"), "form.armorSource", armorCurrent, armorOptions, esc(uiText("equipment.armorHelp")))}${field(uiText("Bonus magique de CA"), "form.armorBonus", f.armorBonus, "number", uiText("Armure, bouclier ou objets magiques."), 'min="-5" max="20" step="1"')}</div>${shieldField}${checkField(uiText("Armure de mage active"), "form.mageArmor", f.mageArmor, uiText("Sans armure : CA de 13 + DEX. Les formules de défense ne s’additionnent pas."))}<h3 style="margin:14px 0 8px">${uiText("Armes à portée de main")}</h3><p class="small muted" data-weapons-help>${esc(uiText("equipment.weaponsHelp"))}</p>${checkField(uiText("Maîtrisées uniquement"), "ui.equipmentProficientOnly", ui.equipmentProficientOnly)}${rows}${f.weapons.length < 6 && carried.some(({ item }) => !taken.has(item.id)) ? button(uiText("{p0} Ajouter une arme", { p0: icon("plus", 15) }), "equip-add-weapon", "", "small-btn") : ""}<h3 class="section-gap">${esc(uiText("equipment.heldWeapons"))}</h3><p class="small muted">${esc(uiText("equipment.handsHelp"))}</p><div class="form-grid">${selectField(uiText("equipment.mainHand"), "form.hands.main", f.hands?.main || "", instanceOptions)}${selectField(uiText("equipment.offHand"), "form.hands.off", f.hands?.off || "", instanceOptions)}</div>${hasSubclass(c, "warlock", "hexblade") ? selectField(uiText("Guerrier maudit : arme choisie"), "form.hexWeaponId", f.hexWeaponId || "", { "": uiText("Aucune"), ...Object.fromEntries(f.weapons.filter((w) => w.id !== "unarmed" && !weaponOf(w.id)?.two && weaponProficiency(c, w, weaponTraining).proficient).map((w, index) => [w.instanceId, `${weaponOf(w.id).name} · ${uiText("equipment.instance").replace("{number}", index + 1)}`])) }, uiText("Une arme maîtrisée sans propriété à deux mains, choisie après le repos long. CHA est utilisé s’il est plus avantageux, y compris pour l’arme de pacte.")) : ""}${classLevel(c, "warlock") ? [ ["pactBook", uiText("Livre des ombres : nom et notes")], ["pactFamiliar", uiText("Familier : nom, forme et notes")], ["pactTalisman", uiText("Talisman : porteur et notes")], ["genieVessel", uiText("Réceptacle du génie : objet et notes")] ].filter(([key]) => f[key] || key === "pactBook" && allChoices(c, "pact").includes("tome") || key === "pactFamiliar" && allChoices(c, "pact").includes("chain") || key === "pactTalisman" && allChoices(c, "pact").includes("talisman") || key === "genieVessel" && hasSubclass(c, "warlock", "genie")).map(([key, label]) => field(label, `form.${key}`, f[key] || "")).join("") : ""}${pactAvailable ? selectField(uiText("Arme de pacte"), "form.pactWeaponId", f.pactWeaponId || "", { ...instanceOptions, "": uiText("Aucune arme liée") }, uiText("Après l’acquisition ou le rituel de lien prévu par le Pacte de la lame.")) : ""}`;
+  // Armure de mage : chemin unique, son lancement (emplacement, utilisation d'un don ou à volonté), décision de Luca du 21 novembre 2026.
+  // La case ne sert plus qu'à mettre fin à une armure posée par l'ancienne case ; posée par un sort reçu, elle se termine dans États et effets.
+  const mageSpell = uiSpellById(c, "mage-armor"), mageCastable = !!mageSpell && Object.keys(spellCastOptions(c, mageSpell).modes || {}).length > 0;
+  const mageField = c.equipment.mageArmor ? checkField(uiText("Armure de mage active"), "form.mageArmor", f.mageArmor, uiText("Sans armure : CA de 13 + DEX. Les formules de défense ne s’additionnent pas."))
+    : activeReceivedEffects(c).some((entry) => entry.spellId === "mage-armor") ? `<p class="small" data-mage-armor="active">${uiText("Armure de mage active")}</p>`
+      : mageCastable ? `<div class="section-gap">${button(uiText("Lancer {p0}", { p0: mageSpell.name }), "equip-cast-mage-armor", "", "small-btn")}</div>` : "";
+  const armorChosen = armorCurrent === "none" ? null : itemProficiency(c, armorCurrent === "kept" ? { kind: "armor", id: f.armor } : { item: carriedArmors.find(({ item }) => item.id === armorCurrent).item }, weaponTraining);
+  return `<div class="form-grid">${selectField(uiText("Armure"), "form.armorSource", armorCurrent, armorOptions, [proficiencyPill(armorChosen).trim(), esc(uiText("equipment.armorHelp"))].filter(Boolean).join("<br>"))}${field(uiText("Bonus magique de CA"), "form.armorBonus", f.armorBonus, "number", uiText("Armure, bouclier ou objets magiques."), 'min="-5" max="20" step="1"')}</div>${shieldField}${mageField}<h3 style="margin:14px 0 8px">${uiText("Armes à portée de main")}</h3><p class="small muted" data-weapons-help>${esc(uiText("equipment.weaponsHelp"))}</p>${checkField(uiText("Maîtrisées uniquement"), "ui.equipmentProficientOnly", ui.equipmentProficientOnly)}${rows}${f.weapons.length < 6 && carried.some(({ item }) => !taken.has(item.id)) ? button(uiText("{p0} Ajouter une arme", { p0: icon("plus", 15) }), "equip-add-weapon", "", "small-btn") : ""}<h3 class="section-gap">${esc(uiText("equipment.heldWeapons"))}</h3><p class="small muted">${esc(uiText("equipment.handsHelp"))}</p><div class="form-grid">${selectField(uiText("equipment.mainHand"), "form.hands.main", f.hands?.main || "", instanceOptions)}${selectField(uiText("equipment.offHand"), "form.hands.off", f.hands?.off || "", instanceOptions)}</div>${hasSubclass(c, "warlock", "hexblade") ? selectField(uiText("Guerrier maudit : arme choisie"), "form.hexWeaponId", f.hexWeaponId || "", { "": uiText("Aucune"), ...Object.fromEntries(f.weapons.filter((w) => w.id !== "unarmed" && !weaponOf(w.id)?.two && weaponProficiency(c, w, weaponTraining).proficient).map((w, index) => [w.instanceId, `${weaponOf(w.id).name} · ${uiText("equipment.instance").replace("{number}", index + 1)}`])) }, uiText("Une arme maîtrisée sans propriété à deux mains, choisie après le repos long. CHA est utilisé s’il est plus avantageux, y compris pour l’arme de pacte.")) : ""}${classLevel(c, "warlock") ? [ ["pactBook", uiText("Livre des ombres : nom et notes")], ["pactFamiliar", uiText("Familier : nom, forme et notes")], ["pactTalisman", uiText("Talisman : porteur et notes")], ["genieVessel", uiText("Réceptacle du génie : objet et notes")] ].filter(([key]) => f[key] || key === "pactBook" && allChoices(c, "pact").includes("tome") || key === "pactFamiliar" && allChoices(c, "pact").includes("chain") || key === "pactTalisman" && allChoices(c, "pact").includes("talisman") || key === "genieVessel" && hasSubclass(c, "warlock", "genie")).map(([key, label]) => field(label, `form.${key}`, f[key] || "")).join("") : ""}${pactAvailable ? selectField(uiText("Arme de pacte"), "form.pactWeaponId", f.pactWeaponId || "", { ...instanceOptions, "": uiText("Aucune arme liée") }, uiText("Après l’acquisition ou le rituel de lien prévu par le Pacte de la lame.")) : ""}`;
 }
 /** Rangée du formulaire pour un exemplaire de l’inventaire. */
 function equipmentInventoryWeapon({ item, adapter }) {
@@ -56366,6 +56398,7 @@ function candidateEquipment() {
   c.equipment.pactWeaponId = ids.has(ui.form.pactWeaponId) ? ui.form.pactWeaponId : null;
   c.equipment.hexWeaponId = ids.has(ui.form.hexWeaponId) ? ui.form.hexWeaponId : null;
   c.equipment.armorBonus = Number(c.equipment.armorBonus) || 0;
+  c.equipment.mageArmor = !!ui.form.mageArmor && !!activeCharacter().equipment.mageArmor;
   // Le bouclier coché est celui du sac.
   const shields = inventoryEquipmentChoices(c, "shield");
   if (!c.equipment.shield) c.equipment.shieldInventoryId = null;
@@ -56384,6 +56417,9 @@ function candidateEquipment() {
 /** Actions de l'inventaire et de l'équipement, appelées par perform. */
 async function performInventory(action, el, c, data, d) {
   switch (action) {
+    case "equip-cast-mage-armor":
+      await perform("cast", { dataset: { id: "mage-armor" } });
+      break;
     case "equipment":
       ui.form = clone(c.equipment);
       ui.form.weapons = weaponInstances(c);
@@ -56860,12 +56896,14 @@ function renderInventoryModals(c, d, cancel) {
     const q = librarySearchText(ui.catalogQuery || ""),
       tab = ui.catalogTab || "gear";
     const source = { weapons: uiWeapons, armor: uiArmors, gear: uiGear, tools: uiTools }[tab] || uiGear;
+    // Pastille rouge « Non maîtrisé » sur les armes, armures et outils, comme dans l'achat (décision de Luca du 21 novembre 2026).
+    const acc = collect(c), kind = { weapons: "weapon", armor: "armor", tools: "tool" }[tab], unskilled = (id) => kind ? proficiencyPill(itemProficiency(c, { kind, id }, acc)) : "";
     const rows = Object.entries(source)
       .filter(([id, x]) => id !== "unarmed" && id !== "none" && librarySearchText([x.name, x.englishName, x.referenceEnglishName].filter(Boolean).join(" ")).includes(q))
       .sort((a, b) => compareUnitLabels(a[1].name, b[1].name, uiLanguage()))
       .map(
         ([id, x]) =>
-          `<div class="catalog-row"><div><strong>${esc(x.name)}</strong><small>${[x.cost, x.weight ? formatCarriedWeight(x.weight) : "", x.damage ? `${x.damage} ${x.type}` : "", x.base ? uiText("CA {p0}", { p0: x.base }) : "", x.contents || ""].filter(Boolean).map(esc).join(" · ")}</small></div>${button(uiText("{p0} Ajouter", { p0: icon("plus", 14) }), "add-catalog-item", `data-id="${esc(id)}" data-tab="${tab}"`, "small-btn")}</div>`,
+          `<div class="catalog-row"><div><strong>${esc(x.name)}${unskilled(id)}</strong><small>${[x.cost, x.weight ? formatCarriedWeight(x.weight) : "", x.damage ? `${x.damage} ${x.type}` : "", x.base ? uiText("CA {p0}", { p0: x.base }) : "", x.contents || ""].filter(Boolean).map(esc).join(" · ")}</small></div>${button(uiText("{p0} Ajouter", { p0: icon("plus", 14) }), "add-catalog-item", `data-id="${esc(id)}" data-tab="${tab}"`, "small-btn")}</div>`,
       )
       .join("");
     return modalShell(
@@ -58746,7 +58784,7 @@ function renderClassModals(c, d, cancel) {
     const f = ui.form, ref = clericReference("Steps of Night", "Twilight", 6);
     let error = "", preview = c;
     try { preview = setClericFlight(c, f); } catch (problem) { error = problem.message; }
-    return modalShell(ref.name, `${selectField(uiText("Opération"), "form.action", f.action, { start: uiText("Commencer un vol (1 utilisation)"), end: uiText("Terminer le vol"), restore: uiText("Corriger : rétablir le vol sans dépenser") })}${f.action === "start" ? checkField(uiText("Je suis dans une lumière faible ou dans l’obscurité"), "form.darknessConfirmed", f.darknessConfirmed) : ""}<p class="small">${uiText("Action bonus : vol égal à ta marche pendant 1 minute. Termine le vol quand sa durée est écoulée.")}</p>${error ? notice(esc(error), "warning") : impactHtml(c, preview, f.action === "start" ? clericResourceImpact(c, ["cleric-steps-night"]) : [])}${sourceLink(ref.name, ref.referenceId)}`, cancel + button(uiText("Comparer les conséquences"), "review-cleric-flight", error ? "disabled" : "", "primary"));
+    return modalShell(ref.name, `${selectField(uiText("Opération"), "form.action", f.action, { start: uiText("Commencer un vol (1 utilisation)"), end: uiText("Terminer le vol"), ...(c.state.cleric?.flight === false ? { restore: uiText("Corriger : rétablir le vol sans dépenser") } : {}) })}${f.action === "start" ? checkField(uiText("Je suis dans une lumière faible ou dans l’obscurité"), "form.darknessConfirmed", f.darknessConfirmed) : ""}<p class="small">${uiText("Action bonus : vol égal à ta marche pendant 1 minute. Termine le vol quand sa durée est écoulée.")}</p>${error ? notice(esc(error), "warning") : impactHtml(c, preview, f.action === "start" ? clericResourceImpact(c, ["cleric-steps-night"]) : [])}${sourceLink(ref.name, ref.referenceId)}`, cancel + button(uiText("Comparer les conséquences"), "review-cleric-flight", error ? "disabled" : "", "primary"));
   }
   if (ui.modal === "cleric-harness") {
     // Même fenêtre pour Restauration magique et Récupération naturelle (form.resourceId) : une combinaison d'emplacements au lieu d'un seul.
@@ -61416,7 +61454,7 @@ async function perform(action, el) {
     case "dice-lucky": case "dice-keep": case "dice-keep-options": case "dice-after-option": case "dice-part": case "dice-portent": case "roll-mode": case "dice-pick": case "roll-external": case "roll-start":
     case "roll-accept": case "reroll": case "death-roll": case "death-mark": case "roll-initiative":
       await performDice(action, el, c, data, d); break;
-    case "equipment": case "review-equipment": case "add-library-item": case "instance-reference": case "attunements": case "toggle-repair-attunement":
+    case "equipment": case "review-equipment": case "equip-cast-mage-armor": case "add-library-item": case "instance-reference": case "attunements": case "toggle-repair-attunement":
     case "review-attunements": case "equip-instance": case "review-equip-instance": case "unequip-instance": case "convert-ammunition": case "item-spell-stock":
     case "item-slot-recovery": case "item-spell-deposit": case "review-item-spell-deposit": case "item-spell-remove": case "review-item-spell-remove":
     case "review-item-slot-recovery": case "review-reset-item-recovery": case "declare-item-result": case "use-inventory-item": case "resolve-last-charge":
