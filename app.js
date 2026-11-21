@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-candidate-5";
+const APP_VERSION = "2.0.0-candidate-6";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -49037,7 +49037,7 @@ const contentPartOutdated = (part) => !!part.version && !!part.latest && part.ve
 /** Un cache par partie, toutes versions confondues : un fichier inchangé n’est jamais retéléchargé, une image lue à la demande remplace l’ancienne. */
 const CONTENT_CACHES = { texts: "compagnon-content-texts", images: "compagnon-content-images" };
 /** Caches des builds précédents, un par manifeste : relus tant qu’ils gardent un fichier utile, vidés par le téléchargement suivant de la partie. */
-const LEGACY_CACHE = /^compagnon-content-[a-f0-9]{64}$/, CONTENT_PARALLEL = 4;
+const LEGACY_CACHE = /^compagnon-content-[a-f0-9]{64}$/, CONTENT_PARALLEL = 4, CONTENT_RETRY_DELAY = 5000;
 /** Copie de secours du code, gardée pour qui a téléchargé les images (comme sur main) : le service worker s’en sert si le socle a été effacé,
  * et le nettoyage la remet dans le socle avant de tout retirer. Elle n’est jamais comptée dans une version du contenu. */
 const CODE_CACHE = "compagnon-content-code";
@@ -49046,7 +49046,7 @@ const ownedCache = (name) => Object.values(CONTENT_CACHES).includes(name) || nam
 
 class ContentStore {
   constructor({ baseUrl, appBuild = "", caches = globalThis.caches, fetcher = (...args) => globalThis.fetch(...args), locks = globalThis.navigator?.locks,
-    channel, onChange = () => {}, onClear = () => {} }) {
+    channel, onChange = () => {}, onClear = () => {}, retryDelay = CONTENT_RETRY_DELAY }) {
     if (channel === undefined) {
       try { channel = typeof window !== "undefined" && typeof BroadcastChannel === "function" ? new BroadcastChannel("compagnon-content") : null; }
       catch { channel = null; }
@@ -49055,6 +49055,7 @@ class ContentStore {
     this.appBuild = appBuild;
     this.caches = caches;
     this.fetcher = fetcher;
+    this.retryDelay = retryDelay;
     this.onChange = onChange;
     this.onClear = onClear;
     this.locks = locks;
@@ -49361,34 +49362,55 @@ class ContentStore {
     this.controller = controller;
     try {
       await this.guarded(generation, () => this.publish({ status: "downloading", scope, queued: this.state.queued === scope ? "" : this.state.queued, parts, error: "" }));
-      const queue = files[Symbol.iterator]();
+      const aborted = () => { if (controller.signal.aborted) throw new DOMException(uiText("Téléchargement interrompu."), "AbortError"); };
+      const fetchFile = async (file) => {
+        const incoming = await this.fetcher(this.url(file.url), { signal: controller.signal, cache: "no-store" });
+        if (!incoming.ok) throw new Error(uiText("Fichier indisponible : {url}", { url: file.url }));
+        const bytes = await incoming.arrayBuffer();
+        if (bytes.byteLength !== file.bytes || await contentDigest(bytes) !== file.sha256) throw new Error(uiText("Un fichier téléchargé est incomplet ou altéré. Reprends le téléchargement."));
+        return new Response(bytes, { headers: incoming.headers });
+      };
+      /** `retry` : dernier essai d’un fichier refusé ; sinon un refus du serveur ou du réseau le renvoie en fin de téléchargement. */
+      const fetchOne = async (file, retry = false) => {
+        aborted();
+        const name = contentPartOf(file), target = sources[name];
+        let response = await this.verified(target, file);
+        const stored = !!response;
+        for (const legacy of sources.legacy) response ||= await this.verified(legacy.cache, file);
+        if (!response) {
+          try { response = await fetchFile(file); }
+          catch (error) {
+            if (retry || error.name === "AbortError") throw error;
+            deferred.push(file); return;
+          }
+        }
+        await this.guarded(generation, async () => {
+          aborted();
+          if (!stored) await target.put(this.url(file.url), response);
+          parts[name].completed++; parts[name].bytes += file.bytes;
+          this.publish({ parts });
+        });
+      };
+      const queue = files[Symbol.iterator](), deferred = [];
       let failure = null;
       const worker = async () => {
         for (const file of queue) {
           if (failure) return;
-          if (controller.signal.aborted) throw new DOMException(uiText("Téléchargement interrompu."), "AbortError");
-          const name = contentPartOf(file), target = sources[name];
-          let response = await this.verified(target, file);
-          const stored = !!response;
-          for (const legacy of sources.legacy) response ||= await this.verified(legacy.cache, file);
-          if (!response) {
-            const incoming = await this.fetcher(this.url(file.url), { signal: controller.signal, cache: "no-store" });
-            if (!incoming.ok) throw new Error(uiText("Fichier indisponible : {url}", { url: file.url }));
-            const bytes = await incoming.arrayBuffer();
-            if (bytes.byteLength !== file.bytes || await contentDigest(bytes) !== file.sha256) throw new Error(uiText("Un fichier téléchargé est incomplet ou altéré. Reprends le téléchargement."));
-            response = new Response(bytes, { headers: incoming.headers });
-          }
-          await this.guarded(generation, async () => {
-            if (controller.signal.aborted) throw new DOMException(uiText("Téléchargement interrompu."), "AbortError");
-            if (!stored) await target.put(this.url(file.url), response);
-            parts[name].completed++; parts[name].bytes += file.bytes;
-            this.publish({ parts });
-          });
+          await fetchOne(file);
         }
       };
       // Quelques fichiers à la fois. Après une erreur, les fichiers en cours finissent d’être conservés, aucun autre n’est demandé.
       await Promise.all(Array.from({ length: CONTENT_PARALLEL }, () => worker().catch((error) => { failure ||= error; })));
       if (failure) throw failure;
+      // Les fichiers refusés (limite du serveur, réseau instable) sont retentés une dernière fois, un par un, après une pause.
+      if (deferred.length) {
+        aborted();
+        await new Promise((resolve, reject) => {
+          const timer = setTimeout(resolve, this.retryDelay);
+          controller.signal.addEventListener("abort", () => { clearTimeout(timer); reject(new DOMException(uiText("Téléchargement interrompu."), "AbortError")); }, { once: true });
+        });
+        for (const file of deferred) await fetchOne(file, true);
+      }
       // Une autre fenêtre ou une éviction peut avoir modifié le cache entre les écritures.
       for (const file of files) if (!await this.verified(sources[contentPartOf(file)], file))
         throw new Error(uiText("Le navigateur n’a pas conservé tous les fichiers. Vérifie l’espace disponible et reprends."));
