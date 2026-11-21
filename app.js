@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-candidate-6";
+const APP_VERSION = "2.0.0-candidate-7";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -5252,7 +5252,9 @@ const UI_FR = Object.freeze({
   "shop.detailMore": "Lire la suite",
   "shop.detailRules": "Règles complémentaires",
   "shop.loading": "Chargement…",
-  "shop.detailOffline": "Fiche indisponible hors ligne."
+  "shop.detailOffline": "Fiche indisponible hors ligne.",
+  "Non maîtrisé": "Non maîtrisé",
+  "Masquer les non maîtrisés": "Masquer les non maîtrisés"
 });
 
 
@@ -10142,7 +10144,9 @@ const UI_EN = Object.freeze({
   "shop.detailMore": "Read more",
   "shop.detailRules": "Additional rules",
   "shop.loading": "Loading…",
-  "shop.detailOffline": "Details unavailable offline."
+  "shop.detailOffline": "Details unavailable offline.",
+  "Non maîtrisé": "Not proficient",
+  "Masquer les non maîtrisés": "Hide non-proficient items"
 });
 
 
@@ -46201,6 +46205,39 @@ function runtimeItemReference(runtimeId) {
   const normalize = (value) => value.toLowerCase().replace(/[’']/g, "").replaceAll(" ", "-");
   return KIT_ITEM_REFERENCES[`${aliases[runtimeId] || runtimeId.replaceAll("-", " ")}|phb`] || Object.entries(KIT_ITEM_REFERENCES).find(([key]) => normalize(key.split("|")[0]) === runtimeId)?.[1] || null;
 }
+/** Arme, armure, bouclier ou outil de l'app désigné par une référence du catalogue ; une variante magique (…|variant|…) suit son objet de base. */
+let _proficiencyTargets = null;
+function proficiencyTarget(referenceId) {
+  if (!referenceId) return null;
+  if (!_proficiencyTargets) {
+    _proficiencyTargets = new Map();
+    for (const [kind, source] of [["weapon", WEAPONS], ["armor", ARMORS], ["tool", TOOLS]]) for (const id of Object.keys(source)) {
+      const reference = id === "unarmed" || id === "none" ? null : runtimeItemReference(id);
+      if (reference) _proficiencyTargets.set(reference.id.toLowerCase(), { kind, id });
+    }
+  }
+  const base = String(referenceId).toLowerCase().split("|").slice(0, 3);
+  const weapon = base[0] === "baseitem" ? (base[2] || "").replaceAll(" ", "-") : "";
+  return _proficiencyTargets.get(base.join("|")) || (Object.hasOwn(WEAPONS, weapon) && weapon !== "unarmed" ? { kind: "weapon", id: weapon } : null);
+}
+/**
+ * Maîtrise d'un objet par le personnage : true, false, ou null quand l'objet n'en demande pas (ni arme, ni armure, ni bouclier, ni outil).
+ * target : { kind: "weapon" | "armor" | "tool", id } d'un objet de l'app, { reference } d'une entrée du catalogue, ou { item } du sac.
+ * Règles 2014 (Manuel des joueurs, chapitre 5) : sans maîtrise, pas de bonus de maîtrise à l'attaque ni au test d'outil ;
+ * l'armure ou le bouclier donnent le désavantage aux jets de FOR et DEX et empêchent de lancer des sorts.
+ */
+function itemProficiency(c, target, acc = collect(c)) {
+  let found = target.kind ? { kind: target.kind, id: target.id } : null, instanceId;
+  if (target.item) {
+    const adapter = itemRuntimeAdapter(target.item, c);
+    instanceId = target.item.id;
+    found = adapter.kind === "weapon" ? { kind: "weapon", id: adapter.id } : ["armor", "shield"].includes(adapter.kind) ? { kind: "armor", id: adapter.id } : proficiencyTarget(target.item.ref);
+  } else if (target.reference) found = proficiencyTarget(target.reference);
+  if (!found) return null;
+  if (found.kind === "weapon") return Object.hasOwn(WEAPONS, found.id) && found.id !== "unarmed" ? weaponProficiency(c, { id: found.id, instanceId }, acc).proficient : null;
+  if (found.kind === "armor") return Object.hasOwn(ARMORS, found.id) && found.id !== "none" ? acc.armor.has(ARMORS[found.id].type) : null;
+  return Object.hasOwn(TOOLS, found.id) ? acc.tools.has(found.id) : null;
+}
 function _startingKitItem(runtimeId, ownerId, instanceId = uid()) {
   const reference = runtimeItemReference(runtimeId);
   return reference ? createCatalogueItem(reference, ownerId, { id: instanceId, name: itemInfo(runtimeId)?.name }) : createRuntimeItem(runtimeId, ownerId, { id: instanceId });
@@ -53270,8 +53307,10 @@ function renderLibrary(embedded = false) {
   }
   const facets = contentLibrary.facets(ui.libraryType).map(({ key, label, values }) => `<label class="library-facet"><span>${esc(label)}</span><select id="library-${key}" class="select-plain" data-bind="ui.libraryFilters.${key}"><option value="">${uiText("Tous")}</option>${values.map((value) => `<option value="${esc(value)}" ${ui.libraryFilters[key] === value ? "selected" : ""}>${esc(key === "level" && value === "0" ? uiText("Mineur") : value)}</option>`).join("")}</select></label>`).join("");
   const restricted = ui.libraryType !== "all" || ui.libraryFavoritesOnly || Object.values(ui.libraryFilters).some(Boolean);
+  // Pastille de maîtrise des armes, armures, boucliers et outils pour le personnage ouvert ; sans personnage, aucune.
+  const character = activeCharacter(), acc = character && collect(character), proficient = (id) => character ? itemProficiency(character, { reference: id }, acc) : null;
   const empty = ui.libraryFavoritesOnly && !favorites.length ? uiText("Aucun favori.") : result.queryTotal && restricted ? uiText("Aucune référence avec ces filtres. {p0}", { p0: button(uiText("Effacer les filtres"), "library-clear-filters", "", "small-btn") }) : uiText("Aucune référence ne correspond à ce nom dans le catalogue disponible.");
-  return head + `${embedded ? "" : button(`${icon("back", 16)} ${uiText("Toutes les catégories")}`, "library-home", "", "small-btn ghost")}<div class="spell-toolbar">${librarySearchField()}<select id="library-filter" class="select-plain" data-bind="ui.libraryType" aria-label="${uiText("Type de contenu")}"><option value="all">${uiText("Toutes les catégories")}</option>${types.map((type) => `<option value="${esc(type)}" ${ui.libraryType === type ? "selected" : ""}>${esc(uiLibraryTypes[type] || type)}</option>`).join("")}</select></div><div class="library-filters">${facets}${activeCharacter() ? button(uiText("library.table.history"), "rule-table-history", "", "small-btn") : ""}${button(uiText("Favoris"), "library-favorites", `aria-pressed="${ui.libraryFavoritesOnly}"`, "small-btn" + (ui.libraryFavoritesOnly ? " active" : ""))}</div><p class="small muted" role="status">${uiText("{p6} résultats · page {p7} / {p8}", { p6: result.total.toLocaleString(uiLocale()), p7: result.page + 1, p8: result.pages })}</p><div class="library-list">${result.entries.map((row) => `<div class="library-result">${row.removed ? `<div class="library-row"><span><strong>${esc(libraryRowName(row))}</strong><small>${uiText("{p1} · Référence retirée du catalogue", { p1: esc(row.source) })}</small></span></div>` : `<button class="library-row" data-action="library-entry" data-id="${esc(row.id)}"><span><strong>${esc(libraryRowName(row))}</strong><small>${esc(uiLibraryTypes[row.type] || row.type)} · ${esc(row.source)}${libraryScopeLabel(row) ? ` · ${esc(uiSystemText(libraryScopeLabel(row)))}` : ""}${row.translated ? " · FR" : " · EN"}${row.inherited ? uiText(" · variante") : ""}</small></span>${icon("chevron", 18)}</button>`}${button(favoriteIds.has(row.id) ? "★" : "☆", "library-favorite", `data-id="${esc(row.id)}" aria-label="${favoriteIds.has(row.id) ? uiText("Retirer des favoris") : uiText("Ajouter aux favoris")} : ${esc(libraryRowName(row))}" aria-pressed="${favoriteIds.has(row.id)}"`, "library-favorite ghost")}</div>`).join("") || notice(empty)}</div><div class="actions section-gap">${button(uiText("Précédent"), "library-page", `data-value="${result.page - 1}" ${result.page === 0 ? "disabled" : ""}`)}${button(uiText("Suivant"), "library-page", `data-value="${result.page + 1}" ${result.page + 1 === result.pages ? "disabled" : ""}`)}</div>`;
+  return head + `${embedded ? "" : button(`${icon("back", 16)} ${uiText("Toutes les catégories")}`, "library-home", "", "small-btn ghost")}<div class="spell-toolbar">${librarySearchField()}<select id="library-filter" class="select-plain" data-bind="ui.libraryType" aria-label="${uiText("Type de contenu")}"><option value="all">${uiText("Toutes les catégories")}</option>${types.map((type) => `<option value="${esc(type)}" ${ui.libraryType === type ? "selected" : ""}>${esc(uiLibraryTypes[type] || type)}</option>`).join("")}</select></div><div class="library-filters">${facets}${activeCharacter() ? button(uiText("library.table.history"), "rule-table-history", "", "small-btn") : ""}${button(uiText("Favoris"), "library-favorites", `aria-pressed="${ui.libraryFavoritesOnly}"`, "small-btn" + (ui.libraryFavoritesOnly ? " active" : ""))}</div><p class="small muted" role="status">${uiText("{p6} résultats · page {p7} / {p8}", { p6: result.total.toLocaleString(uiLocale()), p7: result.page + 1, p8: result.pages })}</p><div class="library-list">${result.entries.map((row) => `<div class="library-result">${row.removed ? `<div class="library-row"><span><strong>${esc(libraryRowName(row))}</strong><small>${uiText("{p1} · Référence retirée du catalogue", { p1: esc(row.source) })}</small></span></div>` : `<button class="library-row" data-action="library-entry" data-id="${esc(row.id)}"><span><strong>${esc(libraryRowName(row))}${proficiencyPill(proficient(row.id))}</strong><small>${esc(uiLibraryTypes[row.type] || row.type)} · ${esc(row.source)}${libraryScopeLabel(row) ? ` · ${esc(uiSystemText(libraryScopeLabel(row)))}` : ""}${row.translated ? " · FR" : " · EN"}${row.inherited ? uiText(" · variante") : ""}</small></span>${icon("chevron", 18)}</button>`}${button(favoriteIds.has(row.id) ? "★" : "☆", "library-favorite", `data-id="${esc(row.id)}" aria-label="${favoriteIds.has(row.id) ? uiText("Retirer des favoris") : uiText("Ajouter aux favoris")} : ${esc(libraryRowName(row))}" aria-pressed="${favoriteIds.has(row.id)}"`, "library-favorite ghost")}</div>`).join("") || notice(empty)}</div><div class="actions section-gap">${button(uiText("Précédent"), "library-page", `data-value="${result.page - 1}" ${result.page === 0 ? "disabled" : ""}`)}${button(uiText("Suivant"), "library-page", `data-value="${result.page + 1}" ${result.page + 1 === result.pages ? "disabled" : ""}`)}</div>`;
 }
 function libraryRowName(row) {
   return uiLanguage() === "en" ? row.en || uiCatalogueName(row.name, row.id) : row.name || row.en;
@@ -56120,9 +56159,16 @@ function inventorySource(item) {
   if (!reference) return "";
   return sourceLink(item.name, reference.id, [reference.source], item.instance.snapshot || inventoryReferenceText(item) ? { action: "instance-reference", id: item.id } : false);
 }
-function renderInventoryRow(c, item) {
+/**
+ * Pastille rouge « Non maîtrisé » d'une arme, armure, bouclier ou outil que le personnage ne maîtrise pas (décision de Luca du 21 novembre 2026).
+ * Rien sinon : sans rouge, pas de pénalité, que l'objet soit maîtrisé ou que la maîtrise ne le concerne pas (potion, corde).
+ */
+function proficiencyPill(proficient) {
+  return proficient === false ? ` <span class="pill red" data-proficiency="no">${uiText("Non maîtrisé")}</span>` : "";
+}
+function renderInventoryRow(c, item, acc = collect(c)) {
   const state = item.instance, slots = inventoryItemSlots(item), adapter = itemRuntimeAdapter(item);
-  return `<details class="inventory-item carnet-item-row" data-detail="inventory-item-${esc(item.id)}"><summary>${icon(["armor", "shield"].includes(state?.equippedSlot) ? "shield" : state?.equippedSlot === "ready" ? "swords" : "bag", 18)}<span><span class="inventory-name">${esc(item.name)} <span class="pill outline">×${item.qty}</span></span><span class="inventory-meta">${item.weightUnknown ? uiText("Poids non renseigné") : uiText("units.perItem", { value: formatCarriedWeight(item.weight) })}${state?.charges ? ` · ${state.charges.current} / ${state.charges.max} ${esc(inventoryChargesLabel(item))}` : ""}${state?.equippedSlot ? ` · ${esc(inventorySlotLabel(state.equippedSlot))}` : ""}${state && !state.carried ? ` · ${esc(uiText("items.leftAtCamp"))}` : ""}${state?.container === "holding" && item.qty > 0 && inventoryItemCarried(c, item) ? ` · ${esc(uiText("items.unlimitedCarry"))}` : ""}</span></span>${icon("chevron", 16)}</summary><div class="carnet-item-detail">${item.description ? `<p class="small preserve">${esc(item.description)}</p>` : ""}${adapter.personal ? `<p class="small muted">${uiText("{p0} : {p1} · {p2} · Autres propriétés : voir la référence.", { p0: inventoryPersonalBonuses(c).some((bonus) => bonus.itemId === item.id) ? uiText("Actif") : uiText("Inactif"), p1: esc(inventoryBonusSummary(adapter.personal)), p2: esc(state.reference.source) })}</p>` : ""}${adapter.textual && !adapter.personal ? `<p class="small muted">${uiText("Propriétés textuelles : voir la référence.")}</p>` : ""}${adapter.kind === "unsupported" ? `<p class="small muted">${esc(adapter.reason)}</p>` : ""}<div class="actions section-gap">${renderInventorySpellActions(c, item)}${renderInventoryUseActions(c, item)}${equipmentPack(item) ? button(uiText("Convertir en objets"), "convert-equipment-pack", `data-id="${esc(item.id)}"`, "small-btn ghost") : ""}${state?.ammunition && ammunitionTracking() && item.qty >= 1 ? button(uiText("Consommer 1"), "consume-ammunition", `data-id="${esc(item.id)}"`, "small-btn ghost") : ""}${!state?.ammunition && uiGear[item.ref]?.kind === "ammo" ? button(uiText("Convertir en {p0} unités par lot", { p0: uiGear[item.ref].count }), "convert-ammunition", `data-id="${esc(item.id)}"`, "small-btn ghost") : ""}${slots.length && item.qty >= 1 ? button(uiText(state?.equippedSlot ? "items.unequip" : "items.equip"), state?.equippedSlot ? "unequip-instance" : "equip-instance", `data-id="${esc(item.id)}"`, "small-btn ghost") : ""}</div><div class="item-actions">${smallIcon("edit", "edit-item", uiText("Modifier cet objet"), `data-id="${esc(item.id)}"`)}${smallIcon("trash", "delete-item", uiText("Retirer cet objet"), `data-id="${esc(item.id)}"`)}</div>${inventorySource(item)}</div></details>`;
+  return `<details class="inventory-item carnet-item-row" data-detail="inventory-item-${esc(item.id)}"><summary>${icon(["armor", "shield"].includes(state?.equippedSlot) ? "shield" : state?.equippedSlot === "ready" ? "swords" : "bag", 18)}<span><span class="inventory-name">${esc(item.name)} <span class="pill outline">×${item.qty}</span>${proficiencyPill(itemProficiency(c, { item }, acc))}</span><span class="inventory-meta">${item.weightUnknown ? uiText("Poids non renseigné") : uiText("units.perItem", { value: formatCarriedWeight(item.weight) })}${state?.charges ? ` · ${state.charges.current} / ${state.charges.max} ${esc(inventoryChargesLabel(item))}` : ""}${state?.equippedSlot ? ` · ${esc(inventorySlotLabel(state.equippedSlot))}` : ""}${state && !state.carried ? ` · ${esc(uiText("items.leftAtCamp"))}` : ""}${state?.container === "holding" && item.qty > 0 && inventoryItemCarried(c, item) ? ` · ${esc(uiText("items.unlimitedCarry"))}` : ""}</span></span>${icon("chevron", 16)}</summary><div class="carnet-item-detail">${item.description ? `<p class="small preserve">${esc(item.description)}</p>` : ""}${adapter.personal ? `<p class="small muted">${uiText("{p0} : {p1} · {p2} · Autres propriétés : voir la référence.", { p0: inventoryPersonalBonuses(c).some((bonus) => bonus.itemId === item.id) ? uiText("Actif") : uiText("Inactif"), p1: esc(inventoryBonusSummary(adapter.personal)), p2: esc(state.reference.source) })}</p>` : ""}${adapter.textual && !adapter.personal ? `<p class="small muted">${uiText("Propriétés textuelles : voir la référence.")}</p>` : ""}${adapter.kind === "unsupported" ? `<p class="small muted">${esc(adapter.reason)}</p>` : ""}<div class="actions section-gap">${renderInventorySpellActions(c, item)}${renderInventoryUseActions(c, item)}${equipmentPack(item) ? button(uiText("Convertir en objets"), "convert-equipment-pack", `data-id="${esc(item.id)}"`, "small-btn ghost") : ""}${state?.ammunition && ammunitionTracking() && item.qty >= 1 ? button(uiText("Consommer 1"), "consume-ammunition", `data-id="${esc(item.id)}"`, "small-btn ghost") : ""}${!state?.ammunition && uiGear[item.ref]?.kind === "ammo" ? button(uiText("Convertir en {p0} unités par lot", { p0: uiGear[item.ref].count }), "convert-ammunition", `data-id="${esc(item.id)}"`, "small-btn ghost") : ""}${slots.length && item.qty >= 1 ? button(uiText(state?.equippedSlot ? "items.unequip" : "items.equip"), state?.equippedSlot ? "unequip-instance" : "equip-instance", `data-id="${esc(item.id)}"`, "small-btn ghost") : ""}</div><div class="item-actions">${smallIcon("edit", "edit-item", uiText("Modifier cet objet"), `data-id="${esc(item.id)}"`)}${smallIcon("trash", "delete-item", uiText("Retirer cet objet"), `data-id="${esc(item.id)}"`)}</div>${inventorySource(item)}</div></details>`;
 }
 function renderInventorySpellActions(c, item) {
   const storage = itemSpellStorageDefinition(item), recovery = itemSlotRecoveryDefinition(item), state = item.instance;
@@ -56229,6 +56275,7 @@ function renderInventory(c) {
   const d = uiDerive(c),
     armor = uiArmors[c.equipment.armor] || uiArmors.none,
     hands = heldWeapons(c),
+    acc = collect(c),
     items = c.inventory.filter((item) => `${item.name} ${item.description || ""}`.toLocaleLowerCase().includes(ui.inventoryQuery.trim().toLocaleLowerCase()));
   return `<div class="page-head mobile-stack carnet-inventory-head"><div><h1>${uiText("nav.inventory")}</h1></div><div class="actions">${classLevel(c, "artificer") >= 2 || infusionStatus(c).active.length ? button(uiText("Infusions"), "infusions", "", "ghost") : ""}<details class="carnet-add"><summary aria-label="${uiText("Ajouter un objet")}" title="${uiText("Ajouter un objet")}">${icon("plus", 18)}</summary><div class="carnet-add-menu">${button(uiText("Objet du catalogue"), "catalog-item", "", "primary")}${button(uiText("Objet libre"), "new-item", "", "ghost")}</div></details></div></div><div class="grid-2 desktop-inventory-layout"><div class="desktop-inventory-summary">${renderInventoryCarrySummary(c, d)}<div class="carnet-inventory-disclosures"><details class="panel carnet-equipment" data-detail="inventory-equipment"><summary><strong>${uiText("Équipement")}</strong><span>${uiText("CA {p10}", { p10: d.ac })}</span></summary><div class="panel-head"><button class="link-btn" data-action="equipment">${uiText("Modifier {p6}", { p6: icon("edit", 14) })}</button></div><div class="equipment-summary"><div><div class="item-label">${uiText("Armure")}</div><div class="item-name">${esc(armor.name)}${c.equipment.shield ? uiText(" + bouclier") : ""}</div></div><span class="pill">${uiText("CA {p10}", { p10: d.ac })}</span></div>${attackGroups(d.attacks)
     .map(
@@ -56240,7 +56287,7 @@ function renderInventory(c) {
       ? `<div class="search-wrap">${icon("search", 18)}<input id="inventory-search" class="search-input" data-bind="ui.inventoryQuery" value="${esc(ui.inventoryQuery)}" placeholder="${uiText("Rechercher dans le sac…")}" aria-label="${uiText("Rechercher dans le sac")}"></div><div class="inventory-list">${items
           .map(
             (item) =>
-              renderInventoryRow(c, item),
+              renderInventoryRow(c, item, acc),
           )
           .join("")}</div>`
       : `<div class="panel empty"><span class="empty-icon">${icon("bag", 28)}</span><h3>${uiText("Le sac est vide")}</h3>${button(uiText("Ajouter un objet"), "catalog-item", "", "small-btn")}</div>`
@@ -56603,10 +56650,12 @@ function shopRowsHtml() {
   const byName = (a, b) => compareUnitLabels(a.name, b.name, uiLanguage()), price = (row, direction) => row.copper === null ? Infinity : direction * row.copper;
   // Prix variable : en fin de liste dans les deux tris par prix.
   const order = { az: byName, za: (a, b) => byName(b, a), desc: (a, b) => price(a, -1) - price(b, -1) || byName(a, b), asc: (a, b) => price(a, 1) - price(b, 1) || byName(a, b) }[shop.sort] || byName;
-  return list.filter((row) => row.search.includes(q)).sort(order).map((row) => {
+  const c = activeCharacter(), acc = c && collect(c), kinds = { weapons: "weapon", armor: "armor", tools: "tool" };
+  const proficient = (row) => c ? itemProficiency(c, kinds[row.kind] ? { kind: kinds[row.kind], id: row.id } : { reference: row.referenceId }, acc) : null;
+  return list.filter((row) => row.search.includes(q) && !(shop.proficientOnly && proficient(row) === false)).sort(order).map((row) => {
     const inCart = shop.cart.filter((line) => line.row === row.key).reduce((sum, line) => sum + shopLineQty(line), 0), open = shop.opened.includes(row.key);
     const meta = [row.copper === null ? row.cost : shopCoins(row.copper), row.weight ? formatCarriedWeight(row.weight) : "", row.facts, q && !shop.full ? uiText(tabs[row.kind]) : ""].filter(Boolean).map(esc).join(" · ");
-    const title = `<span class="shop-title"><strong>${esc(row.name)}${inCart ? ` <span class="pill outline">×${inCart}</span>` : ""}</strong><small>${meta}</small></span>`;
+    const title = `<span class="shop-title"><strong>${esc(row.name)}${inCart ? ` <span class="pill outline">×${inCart}</span>` : ""}${proficiencyPill(proficient(row))}</strong><small>${meta}</small></span>`;
     const head = shopHasDetail(row) ? `<button type="button" id="${shopId("shop-detail", row.key)}" class="shop-info" data-action="shop-detail" data-id="${esc(row.key)}" aria-expanded="${open}">${title}<span class="shop-chevron">${icon("chevron", 16)}</span></button>` : `<div class="shop-text">${title}</div>`;
     return `<div class="catalog-row shop-row${open ? " open" : ""}">${head}${button(uiText("{p0} Ajouter", { p0: icon("plus", 14) }), "shop-add", `id="${shopId("shop-add", row.key)}" data-id="${esc(row.key)}"`, "small-btn")}${open ? `<div class="shop-detail">${shopDetailHtml(row)}</div>` : ""}</div>`;
   }).join("") || `<p class="small muted section-gap">${uiText("Aucun objet.")}</p>`;
@@ -56662,7 +56711,7 @@ const shopCartLabel = () => shopCount() ? uiText("shop.cartCount", { count: shop
 function renderShop(c, cancel) {
   const shop = ui.shop, count = shopCount();
   const head = shop.full ? `<div class="shop-full-head"><strong>${uiText("shop.full.title")}</strong><small class="muted">${uiText("shop.full.help")}</small></div>` : `<div class="segmented four">${SHOP_TABS.map(([id, label]) => `<button type="button" data-action="shop-tab" data-value="${id}" class="${shop.tab === id ? "active" : ""}">${uiText(label)}</button>`).join("")}</div>`;
-  const catalog = `<div class="shop-catalog">${head}<div class="spell-toolbar shop-toolbar"><div class="search-wrap">${icon("search", 18)}<input id="shop-search" class="search-input" type="search" data-bind="ui.shop.query" value="${esc(shop.query)}" placeholder="${uiText("Chercher…")}" aria-label="${uiText("Chercher un objet")}"></div><select id="shop-sort" class="select-plain" data-bind="ui.shop.sort" aria-label="${uiText("shop.sort")}">${SHOP_SORTS.map((id) => `<option value="${id}" ${shop.sort === id ? "selected" : ""}>${uiText(`shop.sort.${id}`)}</option>`).join("")}</select></div><div class="shop-rows">${shopRowsHtml()}</div>${window.COMPANION_STANDALONE ? "" : button(uiText(shop.full ? "shop.full.close" : "shop.full.open"), "shop-full", "", "ghost shop-switch")}</div>`;
+  const catalog = `<div class="shop-catalog">${head}<div class="spell-toolbar shop-toolbar"><div class="search-wrap">${icon("search", 18)}<input id="shop-search" class="search-input" type="search" data-bind="ui.shop.query" value="${esc(shop.query)}" placeholder="${uiText("Chercher…")}" aria-label="${uiText("Chercher un objet")}"></div><select id="shop-sort" class="select-plain" data-bind="ui.shop.sort" aria-label="${uiText("shop.sort")}">${SHOP_SORTS.map((id) => `<option value="${id}" ${shop.sort === id ? "selected" : ""}>${uiText(`shop.sort.${id}`)}</option>`).join("")}</select></div>${checkField(uiText("Masquer les non maîtrisés"), "ui.shop.proficientOnly", shop.proficientOnly)}<div class="shop-rows">${shopRowsHtml()}</div>${window.COMPANION_STANDALONE ? "" : button(uiText(shop.full ? "shop.full.close" : "shop.full.open"), "shop-full", "", "ghost shop-switch")}</div>`;
   const cart = `<div class="shop-cart"><h3 class="shop-cart-title">${uiText("shop.cart")}${count ? ` <span class="pill">${count}</span>` : ""}</h3>${shopCartHtml()}${button(`${icon("plus", 14)} ${uiText("shop.free")}`, "shop-free", "", "ghost shop-free")}</div>`;
   const views = `<div class="shop-views segmented">${[["catalog", uiText("shop.catalogue")], ["cart", shopCartLabel()]].map(([id, label]) => `<button type="button" data-action="shop-view" data-value="${id}" class="${shop.view === id ? "active" : ""}" aria-pressed="${shop.view === id}">${esc(label)}</button>`).join("")}</div>`;
   return modalShell(uiText("shop.buy"), `${views}<div class="shop-body" data-view="${shop.view}">${catalog}${cart}</div>`, `${shopSummaryHtml(c)}<div class="shop-buttons">${cancel}${button(uiText("shop.review"), "shop-review", shopReady(c) ? "" : "disabled", "primary")}</div>`, true, "", "shop-modal");
@@ -56670,9 +56719,10 @@ function renderShop(c, cancel) {
 /** Saisie dans la fenêtre d'achat : la liste ou les totaux changent, le champ en cours garde le focus. */
 function shopInput(path, el) {
   // En quittant un champ, « change » répète une valeur déjà lue : redessiner la liste ferait perdre l'appui sur « Ajouter ».
-  if (boundValue(path) === el.value) return;
-  setBinding(path, el.value);
-  if (["ui.shop.query", "ui.shop.sort"].includes(path)) { const rows = modalRoot.querySelector(".shop-rows"); if (rows) rows.innerHTML = shopRowsHtml(); return; }
+  const value = el.type === "checkbox" ? el.checked : el.value;
+  if (boundValue(path) === value) return;
+  setBinding(path, value);
+  if (["ui.shop.query", "ui.shop.sort", "ui.shop.proficientOnly"].includes(path)) { const rows = modalRoot.querySelector(".shop-rows"); if (rows) rows.innerHTML = shopRowsHtml(); return; }
   const c = activeCharacter();
   for (const line of ui.shop.cart) {
     const node = modalRoot.querySelector(`.shop-line[data-line="${line.key}"]`);
@@ -56732,7 +56782,7 @@ async function performShop(action, c, data) {
   const redraw = (focusId = null) => { render(); if (focusId) document.getElementById(focusId)?.focus({ preventScroll: true }); };
   switch (action) {
     case "shop-open":
-      ui.shop = { view: "catalog", tab: "gear", full: false, query: "", sort: "az", opened: [], details: {}, cart: [], nextKey: 1 };
+      ui.shop = { view: "catalog", tab: "gear", full: false, query: "", sort: "az", proficientOnly: false, opened: [], details: {}, cart: [], nextKey: 1 };
       openModal("shop"); break;
     case "shop-tab": shop.tab = data.value; shop.query = ""; redraw(); break;
     case "shop-view": shop.view = data.value; redraw(); break;
