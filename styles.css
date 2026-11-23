@@ -1388,6 +1388,23 @@ button.state-active::after{content:"";position:absolute;inset:-11px 0}
 .adjustment-calculation dd { margin: 5px 0 0; font-size: 1.15rem; font-weight: 700; }
 .adjustment-field .form-grid { margin: 14px 0; }
 
+/* Lumières tenues et objets au sol (maquette validée par Luca le 23 novembre 2026). */
+.eq-slot.light .eq-ico{color:var(--warning);background:var(--warning-bg);border-color:var(--warning)}
+.eq-pick.light{border-color:var(--warning)}
+.eq-pick.light strong{color:var(--warning)}
+.attack-card.light{border-color:var(--warning)}
+.attack-card.light .attack-title{color:var(--warning)}
+.attack-card.light .attack-title svg{vertical-align:-2px;margin-right:6px}
+.attack-card.blocked .attack-main{opacity:.55}
+.attack-card.blocked>.btn{align-self:center;white-space:nowrap}
+.ground-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 2px;border-top:1px solid var(--line);font-size:13px}
+.ground-act{display:flex;align-items:center;gap:8px}
+.light-badge{font-family:inherit;font-size:13px;vertical-align:middle;margin-left:10px;letter-spacing:0;border:0;cursor:pointer}
+.light-toggle{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--muted);cursor:pointer}
+.eq-grp-tools,.attack-group-tools{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.light-actions{display:grid;gap:8px;margin-top:14px}
+.light-actions .btn{display:flex;justify-content:space-between;align-items:center;width:100%}
+
 /* Parcours de création de personnage. */
 .creation-next .next-navigation { display: grid; gap: 8px; align-content: start; }
 .creation-next .next-navigation h2 { font-size: 19px; margin: 0 0 5px; }

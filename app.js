@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-candidate-9";
+const APP_VERSION = "2.0.0-candidate-10";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -5327,7 +5327,56 @@ const UI_FR = Object.freeze({
   "shop.price.add": "Ajouter au panier",
   "{p0} Vendre": "{p0} Vendre",
   "weaponSwap.pair": "{first} et {second}",
-  "weaponSwap.pairSame": "{name} ×2"
+  "weaponSwap.pairSame": "{name} ×2",
+  "light.torch": "Torche",
+  "light.candle": "Bougie",
+  "light.lamp": "Lampe",
+  "light.hooded-lantern": "Lanterne à capote",
+  "light.lower.torch": "torche",
+  "light.lower.candle": "bougie",
+  "light.lower.lamp": "lampe",
+  "light.lower.hooded-lantern": "lanterne à capote",
+  "light.drop.torch": "Lâcher la torche",
+  "light.drop.candle": "Lâcher la bougie",
+  "light.drop.lamp": "Lâcher la lampe",
+  "light.drop.hooded-lantern": "Lâcher la lanterne",
+  "light.torch.improvised": "arme improvisée",
+  "light.lit": "{name} allumée",
+  "light.range": "Lumière vive {bright}, faible {dim} de plus",
+  "light.rangeHooded": "Capote baissée : lumière faible sur {dim}",
+  "light.stock.self": "{count} dans le sac",
+  "light.stock.oil": "{count} flasque(s) d’huile",
+  "light.blocked.two": "{name} en main : l’arme se tient à deux mains.",
+  "light.blocked.hand": "{name} en main : il faut cette main.",
+  "light.blocked.pair": "{name} en main : il faut les deux mains.",
+  "light.toggle": "Éclairage",
+  "light.none": "Rien pour allumer : {name}.",
+  "light.menu.bright": "Lumière vive",
+  "light.menu.dim": "Lumière faible",
+  "light.menu.dimMore": "{dim} de plus",
+  "light.menu.duration": "Durée",
+  "light.menu.oneHour": "1 heure",
+  "light.menu.oil": "Huile",
+  "light.menu.oilValue": "6 h par flasque · {count} dans le sac",
+  "light.menu.drop": "Lâcher au sol",
+  "light.menu.extinguish": "Éteindre",
+  "light.menu.hoodLower": "Baisser la capote",
+  "light.menu.hoodRaise": "Lever la capote",
+  "light.menu.aria": "{name} allumée : lumière et gestes",
+  "light.dropped": "{name} au sol",
+  "light.extinguished": "{name} éteinte",
+  "light.hooded": "Capote baissée",
+  "light.unhooded": "Capote levée",
+  "weaponSwap.step.light": "Allumer",
+  "weaponSwap.actions": "{count} actions",
+  "ground.title": "Au sol",
+  "ground.pick": "Ramasser",
+  "ground.picked": "Ramassé : {name}",
+  "ground.modalTitle": "Ramasser : {name}",
+  "ground.step.pick": "Ramasser : {name}",
+  "error.heldLight": "Lumière tenue invalide.",
+  "error.groundLights": "Lumières au sol invalides.",
+  "light.swap.stock": "Dans le sac"
 });
 
 
@@ -10292,7 +10341,56 @@ const UI_EN = Object.freeze({
   "shop.price.add": "Add to cart",
   "{p0} Vendre": "{p0} Sell",
   "weaponSwap.pair": "{first} and {second}",
-  "weaponSwap.pairSame": "{name} ×2"
+  "weaponSwap.pairSame": "{name} ×2",
+  "light.torch": "Torch",
+  "light.candle": "Candle",
+  "light.lamp": "Lamp",
+  "light.hooded-lantern": "Hooded lantern",
+  "light.lower.torch": "torch",
+  "light.lower.candle": "candle",
+  "light.lower.lamp": "lamp",
+  "light.lower.hooded-lantern": "hooded lantern",
+  "light.drop.torch": "Drop the torch",
+  "light.drop.candle": "Drop the candle",
+  "light.drop.lamp": "Drop the lamp",
+  "light.drop.hooded-lantern": "Drop the lantern",
+  "light.torch.improvised": "improvised weapon",
+  "light.lit": "{name}, lit",
+  "light.range": "Bright light {bright}, dim light {dim} beyond",
+  "light.rangeHooded": "Hood lowered: dim light within {dim}",
+  "light.stock.self": "{count} in the pack",
+  "light.stock.oil": "{count} flask(s) of oil",
+  "light.blocked.two": "{name} in hand: this weapon takes both hands.",
+  "light.blocked.hand": "{name} in hand: this hand is needed.",
+  "light.blocked.pair": "{name} in hand: both hands are needed.",
+  "light.toggle": "Lighting",
+  "light.none": "Nothing to light: {name}.",
+  "light.menu.bright": "Bright light",
+  "light.menu.dim": "Dim light",
+  "light.menu.dimMore": "{dim} beyond",
+  "light.menu.duration": "Duration",
+  "light.menu.oneHour": "1 hour",
+  "light.menu.oil": "Oil",
+  "light.menu.oilValue": "6 h per flask · {count} in the pack",
+  "light.menu.drop": "Drop on the ground",
+  "light.menu.extinguish": "Put out",
+  "light.menu.hoodLower": "Lower the hood",
+  "light.menu.hoodRaise": "Raise the hood",
+  "light.menu.aria": "{name}, lit: light and actions",
+  "light.dropped": "{name} on the ground",
+  "light.extinguished": "{name} put out",
+  "light.hooded": "Hood lowered",
+  "light.unhooded": "Hood raised",
+  "weaponSwap.step.light": "Light it",
+  "weaponSwap.actions": "{count} actions",
+  "ground.title": "On the ground",
+  "ground.pick": "Pick up",
+  "ground.picked": "Picked up: {name}",
+  "ground.modalTitle": "Pick up: {name}",
+  "ground.step.pick": "Pick up: {name}",
+  "error.heldLight": "Invalid held light.",
+  "error.groundLights": "Invalid lights on the ground.",
+  "light.swap.stock": "In the pack"
 });
 
 
@@ -36598,6 +36696,8 @@ function validateInventory(character) {
     if (state.snapshot !== null && !itemPlain(state.snapshot)) throw itemError("reference");
     if (!itemPlain(state.attunement) || typeof state.attunement.required !== "boolean" || typeof state.attunement.active !== "boolean") throw itemError("attunement");
     if (state.destroyed !== undefined && typeof state.destroyed !== "boolean") throw itemError("state");
+    // Arme ou lanterne lâchée au sol (lights.js) : toujours à soi, plus portée ni équipée.
+    if (state.onGround !== undefined && (typeof state.onGround !== "boolean" || state.onGround && (state.carried || state.equippedSlot))) throw itemError("state");
     if (state.container !== undefined && state.container !== "holding") throw itemError("state");
     if (state.ammunition !== undefined && typeof state.ammunition !== "boolean") throw itemError("state");
     for (const key of ["lastUse", "lastRecovery"]) if (state[key] !== undefined) {
@@ -37059,6 +37159,204 @@ function declareInventoryUseResult(character, id, result) {
   item.instance.lastUse.result = result;
   validateInventory(next);
   return next;
+}
+
+
+// Module : lights
+
+/**
+ * Lumières tenues en main (Manuel des joueurs 2014, chapitre 5 ; maquette validée par Luca le 23 novembre 2026).
+ * Portées en mètres. « self » : l'objet brûle lui-même et allumer en consomme un (torche, bougie) ; « oil » : l'objet reste,
+ * allumer consomme une flasque d'huile (lampe, lanterne à capote). Allumer avec la boîte d'allume-feu prend une action.
+ * Lumière tenue : c.equipment.light = { ref, hand: "main" | "off", inventoryId (lampe ou lanterne, sinon null), hooded }.
+ * Lumières lâchées : c.state.groundLights = [{ id, ref, inventoryId, hooded }] ; une arme lâchée garde son exemplaire, instance.onGround.
+ */
+const LIGHT_SOURCES = {
+  torch: { bright: 6, dim: 6, hours: 1, burns: "self", attack: true },
+  candle: { bright: 1.5, dim: 1.5, hours: 1, burns: "self" },
+  lamp: { bright: 4.5, dim: 9, hours: 6, burns: "oil" },
+  "hooded-lantern": { bright: 9, dim: 9, hours: 6, burns: "oil", hood: 1.5 },
+};
+const OIL_REFS = ["oil", "item|phb|oil (flask)"];
+let _lightRefs = null;
+/** Identifiant de lumière d'un objet de l'inventaire (torch, candle, lamp, hooded-lantern), "oil" pour une flasque d'huile, sinon null. */
+function lightRefOf(item) {
+  if (!_lightRefs) {
+    _lightRefs = new Map(OIL_REFS.map((ref) => [ref, "oil"]));
+    for (const id of Object.keys(LIGHT_SOURCES)) {
+      _lightRefs.set(id, id);
+      const reference = runtimeItemReference(id)?.id;
+      if (reference) _lightRefs.set(reference, id);
+    }
+  }
+  return _lightRefs.get(item?.ref) || _lightRefs.get(item?.instance?.reference?.id) || null;
+}
+const heldLight = (c) => c.equipment?.light || null;
+const groundLights = (c) => c.state?.groundLights || [];
+const _onHand = (c, item) => item.qty >= 1 && inventoryItemCarried(c, item) && !item.instance?.onGround;
+/** Ce qu'allumer cette lumière consomme : { item, fuel } (la lampe et sa flasque, ou la torche elle-même), null s'il en manque. */
+function lightFuel(c, ref) {
+  const source = LIGHT_SOURCES[ref];
+  if (!source) return null;
+  const items = c.inventory.filter((item) => _onHand(c, item));
+  if (source.burns === "self") {
+    const item = items.find((entry) => lightRefOf(entry) === ref);
+    return item ? { item, fuel: item } : null;
+  }
+  const held = heldLight(c)?.inventoryId, item = items.find((entry) => lightRefOf(entry) === ref && entry.id !== held);
+  const fuel = items.find((entry) => lightRefOf(entry) === "oil");
+  return item && fuel ? { item, fuel } : null;
+}
+/** Lumières que le personnage peut allumer, dans l'ordre du tableau. */
+const availableLights = (c) => Object.keys(LIGHT_SOURCES).filter((ref) => lightFuel(c, ref));
+/** Combien il en reste dans le sac : torches ou bougies, flasques d'huile pour une lampe. */
+function lightStock(c, ref) {
+  const want = LIGHT_SOURCES[ref]?.burns === "self" ? ref : "oil";
+  return c.inventory.filter((item) => _onHand(c, item) && lightRefOf(item) === want).reduce((sum, item) => sum + item.qty, 0);
+}
+const lightName = (ref) => uiText(`light.${ref}`);
+
+/**
+ * Place une lumière dans une main de l'équipement (objet c.equipment ou brouillon d'Équiper) : l'arme de cette main la quitte,
+ * une arme à deux mains quitte les deux, une arme polyvalente passe à une main ; le bouclier libère la seconde main.
+ * Renvoie les exemplaires d'armes qui ont quitté les mains.
+ */
+function fitLightInHand(equipment, ref, hand, inventoryId = null) {
+  const hands = equipment.hands ||= { main: null, off: null }, other = hand === "main" ? "off" : "main", left = [];
+  if (hands[hand]) {
+    left.push(hands[hand]);
+    if (hands[other] === hands[hand]) hands[other] = null;
+    hands[hand] = null;
+  }
+  if (hand === "off" && equipment.shield) equipment.shield = false;
+  for (const weapon of equipment.weapons || []) if (weapon.instanceId === hands[other]) weapon.twoHands = false;
+  equipment.light = { ref, hand, inventoryId, hooded: false };
+  return left;
+}
+/** Lumière quittée quand sa main est prise : l'arme choisie pour cette main, une arme à deux mains ou le bouclier en seconde main. */
+function releaseLightForHands(equipment) {
+  const light = equipment.light, hands = equipment.hands || {};
+  if (light && (hands[light.hand] || light.hand === "off" && equipment.shield)) equipment.light = null;
+  return equipment;
+}
+
+/** Consomme ce que coûte l'allumage (une torche, une bougie, une flasque d'huile) ; renvoie l'exemplaire de lampe ou de lanterne tenu, ou null. */
+function consumeLightFuel(c, ref) {
+  const found = lightFuel(c, ref);
+  if (!found) throw new Error(uiText("light.none", { name: lightName(ref) }));
+  const fuel = c.inventory.find((item) => item.id === found.fuel.id);
+  fuel.qty -= 1;
+  if (fuel.qty <= 0) c.inventory = c.inventory.filter((item) => item.id !== fuel.id);
+  return LIGHT_SOURCES[ref].burns === "oil" ? found.item.id : null;
+}
+/** Allume une lumière dans une main de la fiche. displaced : "carried" (Équiper, l'arme reste portée) ou "ground" (en combat, elle tombe). */
+function takeLight(c, ref, hand, { displaced = "carried" } = {}) {
+  const next = clone(c), inventoryId = consumeLightFuel(next, ref);
+  const left = fitLightInHand(next.equipment, ref, hand, inventoryId);
+  if (displaced === "ground") _weaponsToGround(next, left);
+  return syncInventoryEquipmentChoices(next);
+}
+/** Armes liées à l'inventaire posées au sol : l'exemplaire reste à toi, n'est plus porté et quitte les mains. */
+function _weaponsToGround(c, instanceIds) {
+  for (const instanceId of new Set(instanceIds)) {
+    const weapon = c.equipment.weapons.find((entry) => entry.instanceId === instanceId), item = weapon?.inventoryId && c.inventory.find((entry) => entry.id === weapon.inventoryId);
+    if (!item?.instance) continue;
+    item.instance.carried = false;
+    item.instance.onGround = true;
+    item.instance.equippedSlot = null;
+    for (const hand of ["main", "off"]) if (c.equipment.hands[hand] === instanceId) c.equipment.hands[hand] = null;
+  }
+}
+function dropWeaponsToGround(c, instanceIds) {
+  const next = clone(c);
+  _weaponsToGround(next, instanceIds);
+  return syncInventoryEquipmentChoices(next);
+}
+/** Lâcher la lumière tenue : elle reste allumée au sol. */
+function dropLight(c) {
+  const light = heldLight(c);
+  if (!light) return c;
+  const next = clone(c);
+  next.state.groundLights = [...groundLights(next), { id: uid(), ref: light.ref, inventoryId: light.inventoryId, hooded: !!light.hooded }];
+  const item = light.inventoryId && next.inventory.find((entry) => entry.id === light.inventoryId);
+  if (item?.instance) { item.instance.carried = false; item.instance.onGround = true; }
+  next.equipment.light = null;
+  return next;
+}
+/** Éteindre : la torche ou la bougie est consumée ; la lampe ou la lanterne reste dans le sac, sa flasque est perdue. */
+function extinguishLight(c) {
+  if (!heldLight(c)) return c;
+  const next = clone(c);
+  next.equipment.light = null;
+  return next;
+}
+/** Lanterne à capote : baisser la capote réduit la lumière à une lumière faible sur 1,50 m (une action) ; la lever la rend. */
+function toggleLightHood(c) {
+  const light = heldLight(c);
+  if (!light || !LIGHT_SOURCES[light.ref].hood) return c;
+  const next = clone(c);
+  next.equipment.light.hooded = !light.hooded;
+  return next;
+}
+/** Portée affichée : { bright, dim } en mètres (capote baissée : faible seulement). */
+function lightRange(light) {
+  const source = LIGHT_SOURCES[light.ref];
+  return light.hooded ? { bright: 0, dim: source.hood } : { bright: source.bright, dim: source.dim };
+}
+
+/** Armes posées au sol : les exemplaires de l'inventaire marqués onGround, hors lampes et lanternes (suivies avec leur lumière). */
+function groundWeapons(c) {
+  const lamps = new Set(groundLights(c).map((light) => light.inventoryId).filter(Boolean));
+  return c.inventory.filter((item) => item.instance?.onGround && !lamps.has(item.id));
+}
+/** Ramasser une arme : elle redevient portée (pas en main ; on la prend avec « En changeant d'arme »). */
+function pickUpWeapon(c, itemId) {
+  const next = clone(c), item = next.inventory.find((entry) => entry.id === itemId && entry.instance?.onGround);
+  if (!item) return c;
+  item.instance.carried = true;
+  delete item.instance.onGround;
+  return syncInventoryEquipmentChoices(next);
+}
+/**
+ * Ramasser une lumière au sol : elle revient dans une main libre (seconde main d'abord, la principale avec un bouclier).
+ * Sans main libre, l'arme de cette main tombe au sol. Renvoie { hand, drops, apply() }.
+ */
+function lightPickUpPlan(c, groundId) {
+  const entry = groundLights(c).find((light) => light.id === groundId);
+  if (!entry || heldLight(c)) return null;
+  const hands = c.equipment.hands || {}, free = ["off", "main"].find((hand) => !hands[hand] && !(hand === "off" && c.equipment.shield));
+  const hand = free || (c.equipment.shield ? "main" : "off"), drops = free ? [] : [hands[hand]];
+  return {
+    entry, hand, drops,
+    apply() {
+      const next = clone(c);
+      next.state.groundLights = groundLights(next).filter((light) => light.id !== groundId);
+      const item = entry.inventoryId && next.inventory.find((row) => row.id === entry.inventoryId);
+      if (item?.instance) { item.instance.carried = true; delete item.instance.onGround; }
+      const left = fitLightInHand(next.equipment, entry.ref, hand, entry.inventoryId);
+      next.equipment.light.hooded = !!entry.hooded;
+      _weaponsToGround(next, left);
+      return syncInventoryEquipmentChoices(next);
+    },
+  };
+}
+/** Contrôle de la fiche : lumière tenue et lumières au sol. */
+function validateLights(c) {
+  const ids = new Set(c.inventory.map((item) => item.id)), shape = (light, keys) => light && typeof light === "object" && !Array.isArray(light) &&
+    Object.keys(light).every((key) => keys.includes(key)) && Object.hasOwn(LIGHT_SOURCES, light.ref) && typeof light.hooded === "boolean" &&
+    (light.inventoryId === null || typeof light.inventoryId === "string" && ids.has(light.inventoryId));
+  const light = c.equipment.light;
+  if (light !== undefined && light !== null && (!shape(light, ["ref", "hand", "inventoryId", "hooded"]) || !["main", "off"].includes(light.hand) ||
+    c.equipment.hands?.[light.hand] || light.hand === "off" && c.equipment.shield)) throw new Error(uiText("error.heldLight"));
+  const ground = c.state.groundLights;
+  if (ground !== undefined && (!Array.isArray(ground) || ground.length > 50 || ground.some((entry) => !shape(entry, ["id", "ref", "inventoryId", "hooded"]) || typeof entry.id !== "string" || !entry.id || entry.id.length > 120)))
+    throw new Error(uiText("error.groundLights"));
+}
+/** Nettoyage à chaque enregistrement : une lumière dont la lampe a quitté l'inventaire, ou dont la main est prise, s'éteint. */
+function _normalizeLights(c) {
+  const ids = new Set((c.inventory || []).map((item) => item.id)), light = c.equipment?.light;
+  if (light && (!Object.hasOwn(LIGHT_SOURCES, light.ref) || light.inventoryId && !ids.has(light.inventoryId) || c.equipment.hands?.[light.hand] || light.hand === "off" && c.equipment.shield)) c.equipment.light = null;
+  if (Array.isArray(c.state?.groundLights)) c.state.groundLights = c.state.groundLights.filter((entry) => Object.hasOwn(LIGHT_SOURCES, entry?.ref) && (!entry.inventoryId || ids.has(entry.inventoryId)));
 }
 
 
@@ -41778,6 +42076,7 @@ function reconcileState(c, previous = null) {
   normalizeInventory(c);
   applyInventoryEquipment(c);
   _normalizeWeaponState(c);
+  _normalizeLights(c);
   // La fin de la forme est déclarée par le joueur, y compris après un repos ou un changement d’état.
   const d = _deriveBody(receivedProjection(c));
   if (previous) {
@@ -43107,6 +43406,7 @@ function validateImport(input) {
   if (new Set(weaponIds).size !== weaponIds.length) throw new Error(uiText("error.weaponDuplicate"));
   if (!plain(c.equipment.hands) || Object.keys(c.equipment.hands).some((key) => !["main", "off"].includes(key)) ||
       ["main", "off"].some((key) => c.equipment.hands[key] !== null && !weaponIds.includes(c.equipment.hands[key]))) throw new Error(uiText("error.heldWeapon"));
+  validateLights(c);
   if (c.equipment.pactWeaponId !== null && !weaponIds.includes(c.equipment.pactWeaponId)) throw new Error(uiText("Référence d’arme de pacte invalide."));
   if (c.equipment.hexWeaponId !== null && !weaponIds.includes(c.equipment.hexWeaponId)) throw new Error(uiText("Référence d’arme de guerrier maudit invalide."));
   validateAlchemistState(c);
@@ -45634,6 +45934,10 @@ function _deriveBody(c, overrides = {}) {
       properties: [uiText("attack.polearm.bonusAction"), ...butt.properties],
     });
   }
+  // Torche allumée tenue (Manuel des joueurs, Équipement d'aventurier) : 1 dégât de feu au corps à corps, comme arme improvisée,
+  // donc sans bonus de maîtrise sauf avec Bagarreur de tavernes (décision de Luca du 23 novembre 2026).
+  if (c.equipment.light?.ref === "torch")
+    attacks.push({ ..._attack(c, { id: "improvised-weapon", instanceId: "light|torch", magic: 0 }, ctx, { name: uiText("light.torch"), damage: "1", type: "feu", ability: "str", ownProficiency: !tavernBrawler }), damageBonus: 0, flatDamage: true, light: "torch", properties: [uiText("light.torch.improvised")] });
   // Bagarreur de tavernes : les armes improvisées sont maîtrisées ; le type de dégâts dépend de l'objet.
   if (tavernBrawler) attacks.push(_attack(c, { id: "improvised-weapon", instanceId: "feat|tavernBrawler|improvised", magic: 0 }, ctx, { name: uiText("attack.improvised"), damage: "1d4", type: uiText("attack.improvised.type") }));
   // Modification d'apparence, forme « armes naturelles » : frappe à mains nues magique, tant que la concentration porte sur le sort.
@@ -47301,13 +47605,23 @@ const _readyWeapons = (c) => weaponInstances(c).filter((entry) => entry.id !== "
 // Exemplaires interchangeables : la même arme, au même bonus. Un exemplaire identique à une arme tenue reste avec elle (« Hachette ×2 »).
 const _sameWeapon = (entry) => JSON.stringify([entry.id, Number(entry.magic) || 0, !!entry.isMagical, !!entry.twoHands]);
 
-/** Mains du personnage. Sans main réglée, la première arme à portée de main (l'« Arme principale » d'Équiper) est tenue, avec le bouclier s'il est porté. */
+/**
+ * Mains du personnage. Sans main réglée, la première arme à portée de main (l'« Arme principale » d'Équiper) est tenue, avec le bouclier s'il est porté.
+ * light : la lumière tenue (lights.js) ; sa main ne tient ni arme ni bouclier.
+ */
 function swapHands(c) {
-  const held = heldWeapons(c);
-  if (held.main || held.off) return { main: held.main, off: held.off, shield: !!c.equipment.shield, assumed: false };
-  const main = _readyWeapons(c).find((entry) => !c.equipment.shield || !_twoHanded(entry)) || null;
-  return { main, off: _twoHanded(main) ? main : null, shield: !!c.equipment.shield, assumed: true };
+  const held = heldWeapons(c), light = heldLight(c), shield = !!c.equipment.shield;
+  if (held.main || held.off) return { main: held.main, off: held.off, shield, light, assumed: false };
+  if (light) {
+    // L'autre main prend la première arme à une main, sauf si c'est celle du bouclier.
+    const free = light.hand === "off" ? "main" : shield ? null : "off", weapon = free && _readyWeapons(c).find((entry) => !_twoHanded(entry)) || null;
+    return { main: free === "main" ? weapon : null, off: free === "off" ? weapon : null, shield, light, assumed: !!weapon };
+  }
+  const main = _readyWeapons(c).find((entry) => !shield || !_twoHanded(entry)) || null;
+  return { main, off: _twoHanded(main) ? main : null, shield, light: null, assumed: true };
 }
+// La même fiche sans lumière en main : une option qui demande sa main se calcule ainsi, puis attend « Lâcher la torche ».
+const _withoutLight = (c) => ({ ...c, equipment: { ...c.equipment, light: null } });
 
 /**
  * Ligne d'attaque montrée en haut des Attaques : une arme tenue, ou une attaque qui ne vient pas d'une arme (mains nues, arme naturelle).
@@ -47320,7 +47634,10 @@ function attackInHand(c, attack, hands = swapHands(c)) {
   return !entry || [hands.main, hands.off].some((held) => held?.instanceId === entry.instanceId);
 }
 
-/** Fiche après le changement : mains et bouclier, inventaire synchronisé (bouclier rangé ou porté, armes tenues ou à portée). */
+/**
+ * Fiche après le changement : mains et bouclier, inventaire synchronisé (bouclier rangé ou porté, armes tenues ou à portée).
+ * Les armes lâchées tombent au sol (option.drops, demande de Luca du 23 novembre 2026) ; option.light allume une lumière dans sa main.
+ */
 function applyWeaponSwap(c, option) {
   const next = clone(c);
   next.equipment.hands = { main: option.hands.main, off: option.hands.off };
@@ -47330,24 +47647,41 @@ function applyWeaponSwap(c, option) {
     const item = option.shield && next.inventory.find((entry) => entry.id === option.shieldItemId);
     if (item?.instance) item.instance.equippedSlot = "shield";
   }
+  if (option.light) {
+    const inventoryId = consumeLightFuel(next, option.light.ref);
+    next.equipment.light = { ref: option.light.ref, hand: option.light.hand, inventoryId, hooded: false };
+    for (const weapon of next.equipment.weapons) if (weapon.instanceId === option.hands.main) weapon.twoHands = false;
+  }
+  _weaponsToGround(next, option.drops || []);
   return syncInventoryEquipmentChoices(next);
 }
+// Coût affiché d'un changement : « 1× par tour » sans action, sinon le nombre d'actions (allumer en prend une).
+const _cost = (steps) => { const actions = steps.filter((step) => step.cost === "action").length; return { cost: actions ? "action" : "free", actions }; };
 
 function _swapOption(c, d, hands, entry, withShield, shieldItemId) {
-  const two = _twoHanded(entry), keepsMain = hands.main?.instanceId === entry.instanceId, mainTwoHanded = !!hands.main && hands.off?.instanceId === hands.main.instanceId;
+  const light = hands.light;
+  // La main de la lumière est nécessaire (arme à deux mains, bouclier, lumière en main principale avec un bouclier) : calcul sans elle, carte bloquée.
+  if (light && (_twoHanded(entry) || withShield || light.hand === "main" && hands.shield)) {
+    const bare = _withoutLight(c);
+    return { ..._swapOption(bare, d, swapHands(bare), entry, withShield, shieldItemId), blockedBy: light.ref };
+  }
+  // near : la main qui prend l'arme (la principale, ou la seconde quand la lumière tient la principale) ; far : l'autre.
+  const near = light?.hand === "main" ? "off" : "main", far = near === "main" ? "off" : "main";
+  const two = _twoHanded(entry), keepsMain = hands[near]?.instanceId === entry.instanceId, mainTwoHanded = !!hands.main && hands.off?.instanceId === hands.main.instanceId;
   const steps = [], dropped = [];
-  let off = two ? entry : mainTwoHanded ? null : hands.off, shield = hands.shield;
+  let other = two ? entry : mainTwoHanded ? null : hands[far], shield = hands.shield;
   if (two && hands.shield) { steps.push({ kind: "shieldOff", cost: "action" }); shield = false; }
-  if (withShield) { off = null; shield = true; }
-  if (!keepsMain && hands.main) dropped.push(hands.main);
-  if ((two || withShield) && hands.off && !mainTwoHanded && hands.off.instanceId !== hands.main?.instanceId) dropped.push(hands.off);
+  if (withShield) { other = null; shield = true; }
+  if (!keepsMain && hands[near]) dropped.push(hands[near]);
+  if ((two || withShield) && hands[far] && !mainTwoHanded && hands[far].instanceId !== hands[near]?.instanceId) dropped.push(hands[far]);
   // Nom de la ligne d'attaque (« Hachette +1 »), celui du catalogue à défaut.
   const named = (weapon) => d.attacks.find((attack) => attack.instanceId === weapon.instanceId && !attack.twoWeapon)?.name || weaponOf(weapon.id).name;
   for (const weapon of dropped) steps.push({ kind: "drop", name: named(weapon), cost: "none" });
   if (!keepsMain) steps.push({ kind: "take", name: named(entry), cost: "free" });
   if (withShield) steps.push({ kind: "shieldOn", cost: "action" });
-  const option = { id: withShield ? `${entry.instanceId}|shield` : entry.instanceId, instanceId: entry.instanceId, withShield, name: named(entry), steps,
-    cost: steps.some((step) => step.cost === "action") ? "action" : "free", hands: { main: entry.instanceId, off: off?.instanceId || null }, shield, shieldItemId };
+  const option = { id: withShield ? `${entry.instanceId}|shield` : entry.instanceId, instanceId: entry.instanceId, withShield, name: named(entry), steps, ..._cost(steps),
+    hands: near === "main" ? { main: entry.instanceId, off: other?.instanceId || null } : { main: null, off: entry.instanceId }, shield, shieldItemId,
+    drops: dropped.map((weapon) => weapon.instanceId) };
   const after = applyWeaponSwap(c, option), dAfter = derive(after);
   const before = twoWeaponStatus(c)?.allowed && !hands.assumed, gained = !!twoWeaponStatus(after)?.allowed;
   // index : la ligne de l'arme dans les attaques de la fiche, comme le data-index des boutons d'une arme en main.
@@ -47362,7 +47696,12 @@ function _swapOption(c, d, hands, entry, withShield, shieldItemId) {
  * la seconde demande une action, sauf avec Ambidextre, qui dégaine deux armes à une main d'un coup (demande de Luca du 23 novembre 2026).
  */
 function _pairOption(c, d, hands, first, second, dualWielder) {
-  const named = (weapon) => d.attacks.find((attack) => attack.instanceId === weapon.instanceId && !attack.twoWeapon)?.name || weaponOf(weapon.id).name;
+  // Une paire prend les deux mains : avec une lumière tenue, la carte attend « Lâcher la torche ».
+  if (hands.light) {
+    const bare = _withoutLight(c), option = _pairOption(bare, d, swapHands(bare), first, second, dualWielder);
+    return option && { ...option, blockedBy: hands.light.ref };
+  }
+  const named =(weapon) => d.attacks.find((attack) => attack.instanceId === weapon.instanceId && !attack.twoWeapon)?.name || weaponOf(weapon.id).name;
   const held = [hands.main, hands.off].filter((weapon, i, all) => weapon && all.findIndex((other) => other?.instanceId === weapon.instanceId) === i);
   const kept = new Set([first.instanceId, second.instanceId]), steps = [];
   if (hands.shield) steps.push({ kind: "shieldOff", cost: "action" });
@@ -47370,7 +47709,8 @@ function _pairOption(c, d, hands, first, second, dualWielder) {
   [first, second].filter((weapon) => !held.some((entry) => entry.instanceId === weapon.instanceId))
     .forEach((weapon, i) => steps.push({ kind: "take", name: named(weapon), cost: i === 0 || dualWielder ? "free" : "action" }));
   const option = { id: `${first.instanceId}+${second.instanceId}`, instanceId: first.instanceId, pair: true, withShield: false, name: _pairName(first, second, named), steps,
-    cost: steps.some((step) => step.cost === "action") ? "action" : "free", hands: { main: first.instanceId, off: second.instanceId }, shield: false, shieldItemId: null };
+    ..._cost(steps), hands: { main: first.instanceId, off: second.instanceId }, shield: false, shieldItemId: null,
+    drops: held.filter((weapon) => !kept.has(weapon.instanceId)).map((weapon) => weapon.instanceId) };
   const after = applyWeaponSwap(c, option), dAfter = derive(after);
   if (!twoWeaponStatus(after)?.allowed) return null;
   return { ...option, unskilledShield: false, ac: [d.ac, dAfter.ac], twoWeapon: twoWeaponStatus(c)?.allowed && !hands.assumed ? "" : "gained",
@@ -47414,6 +47754,34 @@ function weaponSwapOptions(c, d) {
   _swapCache.set(c, { language, options });
   return options;
 }
+/**
+ * Combinaisons qui prennent une lumière (maquette validée le 23 novembre 2026), affichées avec la case « Éclairage » :
+ * l'arme principale à une main et la lumière (bouclier retiré), la lumière et le bouclier, ou la lumière seule.
+ * Prendre la lumière est l'interaction du tour, l'allumer prend une action. option.light : { ref, hand }.
+ */
+function _lightOptions(c, d, hands) {
+  if (hands.light) return [];
+  const named = (weapon) => d.attacks.find((attack) => attack.instanceId === weapon.instanceId && !attack.twoWeapon)?.name || weaponOf(weapon.id).name;
+  const main = hands.main && !weaponOf(hands.main.id)?.two ? hands.main : null, offWeapon = hands.off && hands.off.instanceId !== hands.main?.instanceId ? hands.off : null;
+  const options = [];
+  for (const ref of availableLights(c)) {
+    const take = [{ kind: "take", name: lightName(ref), cost: "free" }, { kind: "light", cost: "action" }];
+    const variants = [];
+    if (main) variants.push({ key: "keep", name: uiText("weaponSwap.pair", { first: named(main), second: uiText(`light.lower.${ref}`) }), drops: [offWeapon].filter(Boolean),
+      pre: hands.shield ? [{ kind: "shieldOff", cost: "action" }] : [], hands: { main: main.instanceId, off: null }, shield: false, hand: "off", instanceId: main.instanceId });
+    if (hands.shield) variants.push({ key: "shield", name: uiText("weaponSwap.withShield", { name: lightName(ref) }), drops: [hands.main].filter(Boolean), pre: [], hands: { main: null, off: null }, shield: true, hand: "main" });
+    else if (!main) variants.push({ key: "alone", name: lightName(ref), drops: [hands.main, offWeapon].filter(Boolean), pre: [], hands: { main: null, off: null }, shield: false, hand: "off" });
+    for (const variant of variants) {
+      const steps = [...variant.pre, ...variant.drops.map((weapon) => ({ kind: "drop", name: named(weapon), cost: "none" })), ...take];
+      const option = { id: `light|${ref}|${variant.key}`, instanceId: variant.instanceId || (ref === "torch" ? "light|torch" : null), withShield: false, name: variant.name, steps, ..._cost(steps),
+        hands: variant.hands, shield: variant.shield, shieldItemId: c.equipment.shieldInventoryId || null, drops: variant.drops.map((weapon) => weapon.instanceId), light: { ref, hand: variant.hand } };
+      const after = applyWeaponSwap(c, option), dAfter = derive(after);
+      options.push({ ...option, unskilledShield: false, ac: [d.ac, dAfter.ac], twoWeapon: twoWeaponStatus(c)?.allowed && !hands.assumed ? "lost" : "",
+        index: -1, line: option.instanceId ? dAfter.attacks.find((attack) => attack.instanceId === option.instanceId && !attack.twoWeapon) || null : null });
+    }
+  }
+  return options;
+}
 function _weaponSwapOptions(c, d) {
   const hands = swapHands(c), seen = new Set([hands.main, hands.off].filter(Boolean).map(_sameWeapon)), options = [];
   for (const entry of _readyWeapons(c)) {
@@ -47425,7 +47793,7 @@ function _weaponSwapOptions(c, d) {
   const shieldItem = hands.shield ? null : inventoryEquipmentChoices(c, "shield")[0]?.item;
   const melee = shieldItem && [hands.main, ..._readyWeapons(c)].find((entry) => entry && !_twoHanded(entry) && !weaponOf(entry.id).ranged);
   if (melee) options.push(_swapOption(c, d, hands, melee, true, shieldItem.id));
-  return [...options, ..._pairOptions(c, d, hands)];
+  return [...options, ..._pairOptions(c, d, hands), ..._lightOptions(c, d, hands)];
 }
 
 
@@ -56704,6 +57072,17 @@ function renderInventory(c) {
 function ammunitionTracking() {
   try { return localStorage.getItem("compagnon-ammunition") !== "off"; } catch { return true; }
 }
+/** Case « Éclairage » (demande de Luca du 23 novembre 2026) : les combinaisons qui prennent une lumière restent cachées tant qu'elle n'est pas cochée. */
+function lightingShown() {
+  try { return localStorage.getItem("compagnon-lighting") === "on"; } catch { return false; }
+}
+const lightingToggle = () => `<label class="light-toggle"><input type="checkbox" data-action="toggle-lighting"${lightingShown() ? " checked" : ""}> ${esc(uiText("light.toggle"))}</label>`;
+/** « Lumière vive 6 m, faible 6 m de plus », ou la capote baissée. */
+function lightRangeText(light) {
+  const range = lightRange(light);
+  return range.bright ? uiText("light.range", { bright: uiMeters(range.bright), dim: uiMeters(range.dim) }) : uiText("light.rangeHooded", { dim: uiMeters(range.dim) });
+}
+const lightStockText = (c, ref) => uiText(LIGHT_SOURCES[ref].burns === "self" ? "light.stock.self" : "light.stock.oil", { count: lightStock(c, ref) });
 
 function renderAttunementChoices(c) {
   const status = inventoryAttunementStatus(c);
@@ -56736,7 +57115,7 @@ function renderEquipmentSummary(c, next) {
   const meta = (entry) => { const a = line(entry); return a ? `${signed(a.attack)} · ${a.damageDice} ${signed(a.damageBonus)} ${a.type}` : ""; };
   const unskilled = (entry) => entry ? proficiencyPill(weaponProficiency(next, { id: entry.id, instanceId: entry.instanceId }, acc).proficient) : "";
   const row = (slot, label, title, detail, iconName, pill = "", tap = true) => `<${tap ? "button" : "div"} ${tap ? `type="button" data-action="equip-pick-open" data-slot="${slot}" aria-expanded="${open === slot}"` : ""} class="eq-slot${tap ? "" : " still"}" data-equip-slot="${slot}"><span class="eq-ico">${icon(iconName, 22)}</span><span class="eq-text"><small>${esc(label)}</small><strong>${esc(title)}</strong>${detail || pill ? `<span class="eq-meta">${esc(detail)}${pill}</span>` : ""}</span>${tap ? `<span class="eq-chev">${icon("chevron", 16)}</span>` : ""}</${tap ? "button" : "div"}>`;
-  const picks = (slot, options) => open !== slot ? "" : `<div class="eq-picks" data-picks="${slot}">${options.map((option) => `<button type="button" class="eq-pick${option.on ? " on" : ""}" data-action="equip-pick" data-slot="${slot}" data-value="${esc(option.value)}"><span><strong>${esc(option.title)}</strong>${option.detail ? `<small>${esc(option.detail)}</small>` : ""}</span>${option.pill || ""}</button>`).join("")}</div>`;
+  const picks = (slot, options) => open !== slot ? "" : `<div class="eq-picks" data-picks="${slot}">${options.map((option) => `<button type="button" class="eq-pick${option.on ? " on" : ""}${option.light ? " light" : ""}" data-action="equip-pick" data-slot="${slot}" data-value="${esc(option.value)}"><span><strong>${esc(option.title)}</strong>${option.detail ? `<small>${esc(option.detail)}</small>` : ""}</span>${option.pill || ""}</button>`).join("")}</div>`;
   // Protection.
   const formula = (armor) => armor.type === "none" ? uiText("equipment.unarmored") : uiText("{p0} · CA {p1}{p2}", { p0: uiText(`equipment.armorType.${armor.type}`), p1: armor.base, p2: armor.type === "light" ? " + DEX" : armor.type === "medium" ? " + DEX (max 2)" : "" });
   const carriedArmors = inventoryEquipmentChoices(c, "armor"), carriedShields = inventoryEquipmentChoices(c, "shield");
@@ -56749,13 +57128,21 @@ function renderEquipmentSummary(c, next) {
   // En main.
   const ready = f.weapons.filter((entry) => entry.id !== "unarmed"), twoHanded = !!hands.main && hands.off?.instanceId === hands.main.instanceId;
   const free = { value: "", title: uiText("equipment.freeHand"), detail: "" };
-  const handOptions = (hand) => [...ready.filter((entry) => hand === "main" || !(weaponOf(entry.id)?.two || entry.twoHands)).map((entry) => ({ value: entry.instanceId, title: name(entry), detail: meta(entry), on: hands[hand]?.instanceId === entry.instanceId, pill: unskilled(entry) })), { ...free, on: !hands[hand] }];
-  const mainRow = row("main", uiText(twoHanded ? "equipment.bothHands" : "equipment.mainHand"), hands.main ? name(hands.main) : uiText("equipment.freeHand"), meta(hands.main), hands.main ? equipmentWeaponIcon(hands.main.id) : "hand", unskilled(hands.main)) + picks("main", handOptions("main"));
+  // Lumières du sac en ambre, sous les armes (maquette validée par Luca le 23 novembre 2026). La lumière tenue reste proposée dans sa main.
+  const light = next.equipment.light, lightRefs = [...new Set([...(light ? [light.ref] : []), ...availableLights(next)])];
+  const lightOptions = (hand) => lightRefs.filter((ref) => hand !== "off" || !f.shield).map((ref) => ({ value: `light:${ref}`, title: lightName(ref), detail: `${lightStockText(next, ref)} · ${lightRangeText({ ref, hooded: false })}`, on: light?.ref === ref && light.hand === hand, light: true }));
+  const handOptions = (hand) => [...ready.filter((entry) => hand === "main" || !(weaponOf(entry.id)?.two || entry.twoHands)).map((entry) => ({ value: entry.instanceId, title: name(entry), detail: meta(entry), on: hands[hand]?.instanceId === entry.instanceId, pill: unskilled(entry) })), ...lightOptions(hand), { ...free, on: !hands[hand] && light?.hand !== hand }];
+  const lightRow = (slot, label) => `<button type="button" data-action="equip-pick-open" data-slot="${slot}" aria-expanded="${open === slot}" class="eq-slot light" data-equip-slot="${slot}" data-light="${esc(light.ref)}"><span class="eq-ico">${icon("flame", 22)}</span><span class="eq-text"><small>${esc(label)}</small><strong>${esc(uiText("light.lit", { name: lightName(light.ref) }))}</strong><span class="eq-meta">${esc(`${lightRangeText(light)} · ${lightStockText(next, light.ref)}`)}</span></span><span class="eq-chev">${icon("chevron", 16)}</span></button>` + picks(slot, handOptions(slot));
+  const mainRow = light?.hand === "main" ? lightRow("main", uiText("equipment.mainHand"))
+    : row("main", uiText(twoHanded ? "equipment.bothHands" : "equipment.mainHand"), hands.main ? name(hands.main) : uiText("equipment.freeHand"), meta(hands.main), hands.main ? equipmentWeaponIcon(hands.main.id) : "hand", unskilled(hands.main)) + picks("main", handOptions("main"));
   const offRow = twoHanded ? "" : f.shield ? row("off", uiText("equipment.offHand"), uiText("equipment.offShield"), "", "shield", "", false)
+    : light?.hand === "off" ? lightRow("off", uiText("equipment.offHand"))
     : row("off", uiText("equipment.offHand"), hands.off ? name(hands.off) : uiText("equipment.freeHand"), meta(hands.off), hands.off ? equipmentWeaponIcon(hands.off.id) : "hand", unskilled(hands.off)) + picks("off", handOptions("off"));
-  // Autres combinaisons : les mêmes changements que dans les Attaques, avec « Choisir ».
-  const combos = weaponSwapOptions(next, d).filter((option) => option.line).map((option) => `<div class="attack-card" data-equip-combo="${esc(option.id)}"><div class="attack-main"><div class="attack-title">${esc(weaponSwapName(option))}${weaponSwapCost(option.cost)}${option.line.proficient ? "" : (" <span class=\"pill red\">" + uiText("non maîtrisée") + "</span>")}</div><div class="attack-meta">${attackMeta(option.line)}</div>${weaponSwapEffects(option).map((text) => `<div class="attack-effect">${esc(text)}</div>`).join("")}</div>${button(uiText("equipment.choose"), "equip-combo", `data-id="${esc(option.id)}"`, "small-btn")}</div>`).join("");
-  return `<div class="eq-grp first" data-equip-ac="${d.ac}">${esc(uiText("equipment.protection", { ac: d.ac }))}</div>${armorRow}${shieldRow}${equipmentMageArmorField(c, f)}<div class="eq-grp">${esc(uiText("equipment.inHand"))}</div>${mainRow}${offRow}${combos ? `<div class="eq-grp">${esc(uiText("equipment.combos"))}</div>${combos}` : ""}`;
+  // Autres combinaisons : les mêmes changements que dans les Attaques, avec « Choisir ». Celles qui prennent une lumière suivent la case « Éclairage ».
+  const all = weaponSwapOptions(next, d).filter((option) => option.line), shown = all.filter((option) => !option.light || lightingShown());
+  const combos = shown.map((option) => `<div class="attack-card${option.light ? " light" : ""}" data-equip-combo="${esc(option.id)}"><div class="attack-main"><div class="attack-title">${option.light ? icon("flame", 16) : ""}${esc(weaponSwapName(option))}${weaponSwapCost(option.cost, option.actions)}${option.line.proficient ? "" : (" <span class=\"pill red\">" + uiText("non maîtrisée") + "</span>")}</div><div class="attack-meta">${attackMeta(option.line)}</div>${[...weaponSwapEffects(option), ...(option.light ? [lightRangeText({ ref: option.light.ref, hooded: false })] : []), ...(option.blockedBy ? [uiText("light.extinguished", { name: lightName(option.blockedBy) })] : [])].map((text) => `<div class="attack-effect">${esc(text)}</div>`).join("")}</div>${button(uiText("equipment.choose"), "equip-combo", `data-id="${esc(option.id)}"`, "small-btn")}</div>`).join("");
+  const toggle = all.some((option) => option.light) ? lightingToggle() : "";
+  return `<div class="eq-grp first" data-equip-ac="${d.ac}">${esc(uiText("equipment.protection", { ac: d.ac }))}</div>${armorRow}${shieldRow}${equipmentMageArmorField(c, f)}<div class="eq-grp">${esc(uiText("equipment.inHand"))}</div>${mainRow}${offRow}${combos || toggle ? `<div class="eq-grp eq-grp-tools"><span>${esc(uiText("equipment.combos"))}</span>${toggle}</div>${combos}` : ""}`;
 }
 function renderEquipmentFields(c) {
   const f = ui.form;
@@ -56828,6 +57215,11 @@ function candidateEquipment() {
   c.equipment.weapons = c.equipment.weapons.map((w) => ({ id: w.id, instanceId: w.instanceId, ...(w.inventoryId ? { inventoryId: w.inventoryId } : {}), isMagical: !!w.isMagical, magic: Number(w.magic) || 0, twoHands: !!w.twoHands && !!weaponOf(w.id)?.versatile }));
   const ids = new Set(c.equipment.weapons.map((w) => w.instanceId));
   c.equipment.hands = Object.fromEntries(["main", "off"].map((hand) => [hand, ids.has(ui.form.hands?.[hand]) ? ui.form.hands[hand] : null]));
+  // Lumière choisie dans une main : une nouvelle lumière consomme une torche, une bougie ou une flasque d'huile ; la même reste telle quelle.
+  const before = activeCharacter().equipment.light, light = ui.form.light;
+  if (!light || c.equipment.hands[light.hand] || light.hand === "off" && ui.form.shield) c.equipment.light = null;
+  else if (before?.ref === light.ref) c.equipment.light = { ...before, hand: light.hand };
+  else c.equipment.light = lightFuel(c, light.ref) ? { ref: light.ref, hand: light.hand, inventoryId: consumeLightFuel(c, light.ref), hooded: false } : null;
   c.equipment.pactWeaponId = ids.has(ui.form.pactWeaponId) ? ui.form.pactWeaponId : null;
   c.equipment.hexWeaponId = ids.has(ui.form.hexWeaponId) ? ui.form.hexWeaponId : null;
   c.equipment.armorBonus = Number(c.equipment.armorBonus) || 0;
@@ -56857,24 +57249,86 @@ async function performInventory(action, el, c, data, d) {
     case "equip-pick":
       // Le choix d'un emplacement passe par les mêmes fonctions que les champs détaillés.
       if (data.slot === "armor") equipmentArmorSource(c, data.value);
-      else ui.form = setHeldWeapon(candidateEquipment(), data.slot, data.value || null).equipment;
+      // Une lumière prend la main choisie ; une arme choisie pour sa main, ou à deux mains, l'éteint.
+      else if (data.value?.startsWith("light:")) { const form = clone(ui.form); fitLightInHand(form, data.value.slice(6), data.slot); ui.form = form; }
+      else ui.form = releaseLightForHands(setHeldWeapon(candidateEquipment(), data.slot, data.value || null).equipment);
       ui.equipPick = null;
       render();
       break;
     case "equip-shield-toggle":
-      // Porter le bouclier libère la seconde main ; une arme à deux mains quitte alors les mains.
+      // Porter le bouclier libère la seconde main ; une arme à deux mains ou une lumière quitte alors cette main.
       if (ui.form.shield) ui.form.shield = false;
       else {
         const hands = ui.form.hands || {};
         ui.form.hands = { main: hands.main && hands.main === hands.off ? null : hands.main || null, off: null };
         ui.form.shield = true;
+        releaseLightForHands(ui.form);
       }
       render();
       break;
     case "equip-combo": {
       const option = weaponSwapOptions(candidateEquipment()).find((entry) => entry.id === data.id);
-      if (option) { ui.form.hands = { ...option.hands }; ui.form.shield = option.shield; }
+      if (option) {
+        ui.form.hands = { ...option.hands }; ui.form.shield = option.shield;
+        if (option.light) ui.form.light = { ref: option.light.ref, hand: option.light.hand, inventoryId: null, hooded: false };
+        else if (option.blockedBy) ui.form.light = null;
+      }
       render();
+      break;
+    }
+    case "toggle-lighting":
+      try { localStorage.setItem("compagnon-lighting", lightingShown() ? "off" : "on"); } catch {}
+      render();
+      break;
+    case "light-menu":
+      openModal("light");
+      break;
+    case "light-drop": {
+      const light = heldLight(c);
+      if (!light) break;
+      await saveCharacter(dropLight(c), uiText("light.dropped", { name: lightName(light.ref) }), "session", c);
+      if (ui.modal === "light") closeModal(); else render();
+      toast(uiText("light.dropped", { name: lightName(light.ref) }));
+      break;
+    }
+    case "light-extinguish": {
+      const light = heldLight(c);
+      if (!light) break;
+      await saveCharacter(extinguishLight(c), uiText("light.extinguished", { name: lightName(light.ref) }), "session", c);
+      closeModal();
+      toast(uiText("light.extinguished", { name: lightName(light.ref) }));
+      break;
+    }
+    case "light-hood": {
+      const light = heldLight(c);
+      if (!light) break;
+      const label = uiText(light.hooded ? "light.unhooded" : "light.hooded");
+      await saveCharacter(toggleLightHood(c), label, "session", c);
+      render(); toast(label);
+      break;
+    }
+    case "ground-pick": {
+      // Une arme ramassée redevient portée ; une lumière revient dans une main libre, sinon la fenêtre montre ce qui tombe.
+      if (data.kind === "weapon") {
+        const item = c.inventory.find((entry) => entry.id === data.id);
+        if (!item) break;
+        await saveCharacter(pickUpWeapon(c, item.id), uiText("ground.picked", { name: item.name }), "session", c);
+        render(); toast(uiText("ground.picked", { name: item.name }));
+        break;
+      }
+      const plan = lightPickUpPlan(c, data.id);
+      if (!plan) break;
+      if (plan.drops.length) { ui.groundPick = data.id; openModal("ground-pick"); break; }
+      await saveCharacter(plan.apply(), uiText("ground.picked", { name: lightName(plan.entry.ref) }), "session", c);
+      render(); toast(uiText("ground.picked", { name: lightName(plan.entry.ref) }));
+      break;
+    }
+    case "confirm-ground-pick": {
+      const plan = lightPickUpPlan(c, ui.groundPick);
+      closeModal();
+      if (!plan) break;
+      await saveCharacter(plan.apply(), uiText("ground.picked", { name: lightName(plan.entry.ref) }), "session", c);
+      render(); toast(uiText("ground.picked", { name: lightName(plan.entry.ref) }));
       break;
     }
     case "equip-cast-mage-armor":
@@ -57036,6 +57490,8 @@ async function performInventory(action, el, c, data, d) {
       if (i >= 0) next.inventory[i] = item;
       else next.inventory.push(item);
       item.instance.carried = !leftAtCamp;
+      // Un objet lâché au sol qu'on déclare de nouveau porté est ramassé.
+      if (item.instance.carried) delete item.instance.onGround;
       if (!item.instance.carried || item.instance.ownerId !== next.id) item.instance.equippedSlot = null;
       normalizeInventory(next); validateInventory(next); applyInventoryEquipment(next);
       openReview(
@@ -57419,6 +57875,25 @@ async function performShop(action, c, data) {
 
 /** Fenêtres de l'inventaire et de l'équipement, rendues pour renderModal. */
 function renderInventoryModals(c, d, cancel) {
+  // Toucher le témoin de la fiche : la lumière tenue, puis ses gestes (maquette validée le 23 novembre 2026).
+  if (ui.modal === "light") {
+    const light = heldLight(c);
+    if (!light) return modalShell(uiText("light.toggle"), "", cancel);
+    const source = LIGHT_SOURCES[light.ref], range = lightRange(light), row = (label, value) => `<div class="summary-row"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`;
+    const rows = (range.bright ? row(uiText("light.menu.bright"), uiMeters(range.bright)) + row(uiText("light.menu.dim"), uiText("light.menu.dimMore", { dim: uiMeters(range.dim) }))
+      : row(uiText("light.menu.dim"), uiMeters(range.dim))) + (source.burns === "self" ? row(uiText("light.menu.duration"), uiText("light.menu.oneHour")) : row(uiText("light.menu.oil"), uiText("light.menu.oilValue", { count: lightStock(c, light.ref) })));
+    const actions = [source.hood ? `<button type="button" class="btn ghost" data-action="light-hood">${esc(uiText(light.hooded ? "light.menu.hoodRaise" : "light.menu.hoodLower"))}<span class="pill cost-action">${esc(uiText("weaponSwap.action"))}</span></button>` : "",
+      button(uiText("light.menu.drop"), "light-drop", "", "ghost"), button(uiText("light.menu.extinguish"), "light-extinguish", "", "ghost")].join("");
+    return modalShell(uiText("light.lit", { name: lightName(light.ref) }), `${rows}<div class="light-actions">${actions}</div>`, button(uiText("Fermer"), "close-modal", "", "ghost"));
+  }
+  // Ramasser une lumière sans main libre : ce qui tombe pour la prendre.
+  if (ui.modal === "ground-pick") {
+    const plan = lightPickUpPlan(c, ui.groundPick);
+    if (!plan) return modalShell(uiText("ground.title"), `<p>${uiText("weaponSwap.gone")}</p>`, cancel);
+    const named = (id) => d.attacks.find((attack) => attack.instanceId === id && !attack.twoWeapon)?.name || weaponOf(weaponInstances(c).find((entry) => entry.instanceId === id)?.id)?.name || "";
+    const steps = [...plan.drops.map((id) => `<li>${esc(uiText("weaponSwap.step.drop", { name: named(id) }))}</li>`), `<li>${esc(uiText("ground.step.pick", { name: lightName(plan.entry.ref) }))}${weaponSwapCost("free")}</li>`].join("");
+    return modalShell(uiText("ground.modalTitle", { name: lightName(plan.entry.ref) }), `<ol class="weapon-swap-steps">${steps}</ol>`, cancel + button(uiText("Valider"), "confirm-ground-pick", "", "primary"));
+  }
   if (["use-inventory-item", "resolve-last-charge", "declare-item-result"].includes(ui.modal)) {
     const item = c.inventory.find((entry) => entry.id === ui.form.itemId), last = ui.modal === "resolve-last-charge", resultOnly = ui.modal === "declare-item-result";
     // Potion à dés : l'application lance les soins après la validation, le résultat n'est plus demandé.
@@ -59532,7 +60007,7 @@ function grappleEffect() {
 function renderShoveModal(cancel) {
   return modalShell(uiText("combat.shove.title"), `<div class="actions">${button(uiText("combat.shove.prone"), "shove-result", 'data-value="prone"', "primary")}${button(uiText("combat.shove.push", { distance: uiMeters(1.5) }), "shove-result", 'data-value="push"', "primary")}</div>`, cancel);
 }
-function renderCombatActions(c, d, damage, swaps = []) {
+function renderCombatActions(c, d, damage, swaps = [], lightToggle = false) {
   const skill = uiSkills.athletics[0];
   // Jets du personnage qui ne dépensent rien et ne sont pas des dégâts (décision L2) : le nom, la règle qui les déclenche, le bouton qui lance.
   // damage : les jets de dégâts sans dépense (extraAttackEntries, combat), placés en tête avec leur bouton « Dégâts ».
@@ -59545,7 +60020,7 @@ function renderCombatActions(c, d, damage, swaps = []) {
   // Le nombre de lignes se lit sur l'entrée repliée.
   const count = swaps.length + damage.length + free.length + Object.keys(COMBAT_ACTIONS).length;
   // « En changeant d'arme » en tête, puis les autres actions.
-  const switching = swaps.length ? `<div class="attack-group" data-weapon-swaps>${esc(uiText("weaponSwap.title"))}</div>${swaps.map(renderWeaponSwapCard).join("")}<div class="attack-group">${esc(uiText("weaponSwap.others"))}</div>` : "";
+  const switching = swaps.length || lightToggle ? `<div class="attack-group${lightToggle ? " attack-group-tools" : ""}" data-weapon-swaps>${lightToggle ? `<span>${esc(uiText("weaponSwap.title"))}</span>${lightingToggle()}` : esc(uiText("weaponSwap.title"))}</div>${swaps.map(renderWeaponSwapCard).join("")}<div class="attack-group">${esc(uiText("weaponSwap.others"))}</div>` : "";
   return `<details class="attack-others" data-detail="combat-actions"><summary>${esc(uiText("combat.others"))} <span class="attack-others-count" aria-label="${esc(uiText("combat.others.count", { count }))}">${count}</span></summary>${switching}${damage.map(renderExtraAttack).join("")}${free.join("")}${Object.entries(COMBAT_ACTIONS).map(([id, action]) => `<div class="combat-action" data-combat-action="${id}"><div class="attack-main"><div class="attack-title">${esc(uiText(action.name))}</div><div class="attack-meta">${esc(uiText(action.rule, { distance: uiMeters(1.5) }))}</div></div><button class="attack-roll" data-action="roll-combat-action" data-id="${id}" aria-label="${esc(uiText("combat.rollLabel", { action: uiText(action.name), skill }))}"><strong>${signed(d.skills.athletics)}</strong><small>${esc(skill)}</small></button></div>`).join("")}</details>`;
 }
 /** Munitions d'une ligne d'attaque : pastille à côté du nom, rouge à zéro ; rien sans suivi des munitions ou pour une arme qui n'en tire pas. */
@@ -59607,6 +60082,16 @@ function ammoBlocked(r) {
   const ammo = rollAmmo(r);
   return !!ammo && !r.ammoRolled && !ammo.groups.some((group) => group.total > 0);
 }
+/**
+ * « Au sol » (demande de Luca du 23 novembre 2026) : les lumières et les armes lâchées, avec « Ramasser » (l'interaction du tour),
+ * puis les munitions à récupérer après le combat. Sans objet lâché, seules les munitions restent, comme avant.
+ */
+function renderGround(c) {
+  const pick = (kind, id) => `<span class="ground-act">${weaponSwapCost("free")}${button(uiText("ground.pick"), "ground-pick", `data-kind="${kind}" data-id="${esc(id)}"`, "small-btn ghost")}</span>`;
+  const rows = [...groundLights(c).map((entry) => `<div class="ground-row" data-ground="${esc(entry.id)}"><span class="pill sand">${icon("flame", 12)}${esc(uiText("light.lit", { name: lightName(entry.ref) }))}</span>${pick("light", entry.id)}</div>`),
+    ...groundWeapons(c).map((item) => `<div class="ground-row" data-ground="${esc(item.id)}"><strong>${esc(item.name)}</strong>${pick("weapon", item.id)}</div>`)];
+  return rows.length ? `<div class="attack-group" data-ground-items>${esc(uiText("ground.title"))}</div>${rows.join("")}${renderAmmoRecovery(c)}` : renderAmmoRecovery(c);
+}
 /** Après le combat : la moitié des munitions tirées se récupère (une minute de recherche), une ligne par sorte. */
 function renderAmmoRecovery(c) {
   if (!ammunitionTracking()) return "";
@@ -59614,11 +60099,11 @@ function renderAmmoRecovery(c) {
 }
 /** Description d'une ligne d'attaque : dés, type, dégâts en plus, propriétés. */
 function attackMeta(a) {
-  return `${esc(a.damageDice)} ${signed(a.damageBonus)} ${esc(a.type)}${a.additionalDamageDice ? uiText(" + {p0} (fendoir)", { p0: a.additionalDamageDice }) : ""}${a.divineDamageDice ? uiText(" + {p0} radiants (châtiment amélioré)", { p0: a.divineDamageDice }) : ""}${a.properties.length ? ` · ${esc(a.properties.join(", "))}` : ""}${a.pactWeapon ? uiText(" · arme de pacte") : ""}${a.attacksPerAction > 1 ? uiText(" · {p0} attaques par action", { p0: a.attacksPerAction }) : ""}`;
+  return `${esc(a.damageDice)}${a.flatDamage ? "" : ` ${signed(a.damageBonus)}`} ${esc(a.type)}${a.additionalDamageDice ? uiText(" + {p0} (fendoir)", { p0: a.additionalDamageDice }) : ""}${a.divineDamageDice ? uiText(" + {p0} radiants (châtiment amélioré)", { p0: a.divineDamageDice }) : ""}${a.properties.length ? ` · ${esc(a.properties.join(", "))}` : ""}${a.pactWeapon ? uiText(" · arme de pacte") : ""}${a.attacksPerAction > 1 ? uiText(" · {p0} attaques par action", { p0: a.attacksPerAction }) : ""}`;
 }
-/** Coût d'un changement d'arme pour ce tour, affiché sans être compté : « 1× par tour » (interaction gratuite) ou « 1 action ». */
-function weaponSwapCost(cost) {
-  return cost === "action" ? ` <span class="pill cost-action" data-swap-cost="action">${uiText("weaponSwap.action")}</span>` : cost === "free" ? ` <span class="pill cost-free" data-swap-cost="free">${uiText("weaponSwap.free")}</span>` : "";
+/** Coût d'un changement d'arme pour ce tour, affiché sans être compté : « 1× par tour » (interaction gratuite), « 1 action » ou « 2 actions » (retirer le bouclier, allumer). */
+function weaponSwapCost(cost, actions = 1) {
+  return cost === "action" ? ` <span class="pill cost-action" data-swap-cost="action">${actions > 1 ? uiText("weaponSwap.actions", { count: actions }) : uiText("weaponSwap.action")}</span>` : cost === "free" ? ` <span class="pill cost-free" data-swap-cost="free">${uiText("weaponSwap.free")}</span>` : "";
 }
 const weaponSwapName = (option) => option.withShield ? uiText("weaponSwap.withShield", { name: option.name }) : option.name;
 /** Effets d'un changement d'arme : la CA, l'attaque à deux armes, un bouclier non maîtrisé. */
@@ -59630,9 +60115,15 @@ const weaponSwapEffects = (option) => [option.ac[0] !== option.ac[1] ? uiText("w
 function renderWeaponSwapCard(option) {
   const a = option.line;
   if (!a) return "";
-  const effects = weaponSwapEffects(option);
-  const name = weaponSwapName(option), data = `data-action="weapon-swap" data-id="${esc(option.id)}" data-index="${option.index}"`;
-  return `<div class="attack-card" data-weapon-swap="${esc(option.id)}"><div class="attack-main"><div class="attack-title">${esc(name)}${weaponSwapCost(option.cost)}${ammoPill(activeCharacter(), a)}${a.proficient ? "" : (" <span class=\"pill red\">" + uiText("non maîtrisée") + "</span>")}</div><div class="attack-meta">${attackMeta(a)}</div>${effects.length ? `<div class="attack-effect">${effects.map(esc).join(" · ")}</div>` : ""}</div><button class="attack-roll" ${data} data-step="attack" aria-label="${uiText("Jet d’attaque {p11}", { p11: esc(name) })}"><strong>${signed(a.attack)}</strong><small>${uiText("toucher")}</small></button><button class="attack-roll ghost" ${data} data-step="damage" aria-label="${uiText("Dégâts {p15}", { p15: esc(name) })}">${icon("dice", 18)}<small>${uiText("dégâts")}</small></button></div>`;
+  const name = weaponSwapName(option);
+  // La main de la lumière est nécessaire : carte grisée, « Lâcher la torche » à la place des dés (maquette du 23 novembre 2026).
+  if (option.blockedBy) {
+    const reason = uiText(`light.blocked.${option.pair ? "pair" : a.weapon?.two ? "two" : "hand"}`, { name: lightName(option.blockedBy) });
+    return `<div class="attack-card blocked" data-weapon-swap="${esc(option.id)}" data-blocked="${esc(option.blockedBy)}"><div class="attack-main"><div class="attack-title">${esc(name)}${ammoPill(activeCharacter(), a)}</div><div class="attack-meta">${attackMeta(a)}</div><div class="attack-effect">${esc(reason)}</div></div>${button(uiText(`light.drop.${option.blockedBy}`), "light-drop", "", "small-btn")}</div>`;
+  }
+  const effects = [...weaponSwapEffects(option), ...(option.light ? [lightRangeText({ ref: option.light.ref, hooded: false })] : [])];
+  const data = `data-action="weapon-swap" data-id="${esc(option.id)}" data-index="${option.index}"`;
+  return `<div class="attack-card${option.light ? " light" : ""}" data-weapon-swap="${esc(option.id)}"><div class="attack-main"><div class="attack-title">${option.light ? icon("flame", 16) : ""}${esc(name)}${weaponSwapCost(option.cost, option.actions)}${ammoPill(activeCharacter(), a)}${a.proficient ? "" : (" <span class=\"pill red\">" + uiText("non maîtrisée") + "</span>")}</div><div class="attack-meta">${attackMeta(a)}</div>${effects.length ? `<div class="attack-effect">${effects.map(esc).join(" · ")}</div>` : ""}</div><button class="attack-roll" ${data} data-step="attack" aria-label="${uiText("Jet d’attaque {p11}", { p11: esc(name) })}"><strong>${signed(a.attack)}</strong><small>${uiText("toucher")}</small></button><button class="attack-roll ghost" ${data} data-step="damage" aria-label="${uiText("Dégâts {p15}", { p15: esc(name) })}">${icon("dice", 18)}<small>${uiText("dégâts")}</small></button></div>`;
 }
 /** Fenêtre d'un changement d'arme : les gestes et leur coût, la CA qui change, puis « Valider et lancer ». */
 function renderWeaponSwapModal(c, d, cancel) {
@@ -59640,11 +60131,14 @@ function renderWeaponSwapModal(c, d, cancel) {
   if (!option) return modalShell(uiText("weaponSwap.title"), `<p>${uiText("weaponSwap.gone")}</p>`, cancel);
   const steps = option.steps.map((step) => `<li>${esc(uiText(`weaponSwap.step.${step.kind}`, { name: step.name || "" }))}${weaponSwapCost(step.cost)}</li>`).join("");
   const ac = option.ac[0] !== option.ac[1] ? `<div class="summary-row section-gap"><span>${uiText("CA")}</span><strong>${option.ac[0]} → ${option.ac[1]}</strong></div>` : "";
+  // Allumer : la torche ou la flasque d'huile consommée.
+  const stock = option.light ? (() => { const count = lightStock(c, option.light.ref); return `<div class="summary-row${ac ? "" : " section-gap"}"><span>${uiText(LIGHT_SOURCES[option.light.ref].burns === "self" ? "light.swap.stock" : "light.menu.oil")}</span><strong>${count} → ${count - 1}</strong></div>`; })() : "";
   const twoWeapon = weaponSwapEffects(option).slice(option.ac[0] !== option.ac[1] ? 1 : 0).map((text) => `<p class="small section-gap">${esc(text)}</p>`).join("");
-  return modalShell(uiText("weaponSwap.modalTitle", { name: weaponSwapName(option) }), `<ol class="weapon-swap-steps">${steps}</ol>${ac}${twoWeapon}`, cancel + button(uiText("weaponSwap.confirm"), "confirm-weapon-swap", "", "primary"));
+  return modalShell(uiText("weaponSwap.modalTitle", { name: weaponSwapName(option) }), `<ol class="weapon-swap-steps">${steps}</ol>${ac}${stock}${twoWeapon}`, cancel + button(uiText("weaponSwap.confirm"), "confirm-weapon-swap", "", "primary"));
 }
 function renderAttacks(c, d) {
-  const extra = extraAttackEntries(c, d), hands = swapHands(c), swaps = weaponSwapOptions(c, d);
+  // Les combinaisons qui prennent une lumière suivent la case « Éclairage » ; les cartes bloquées par la lumière tenue restent.
+  const extra = extraAttackEntries(c, d), hands = swapHands(c), allSwaps = weaponSwapOptions(c, d).filter((option) => option.line), swaps = allSwaps.filter((option) => !option.light || lightingShown());
   const extras = [
     d.extraAttacks > 1 ? uiText("{p0} attaques avec l’action Attaquer", { p0: d.extraAttacks }) : "",
 
@@ -59655,9 +60149,9 @@ function renderAttacks(c, d) {
   return `<div class="section-title section-gap"><h3>${uiText("Attaques")}</h3><button class="link-btn" data-action="equipment">${uiText("Équiper {p1}", { p1: icon("chevron", 13) })}</button></div>${attackGroups(d.attacks, (attack) => attackInHand(c, attack, hands))
     .map(
       ({ attack: a, index: i, count }) => twoWeaponRoutine(d, i) ? renderTwoWeaponCard(d, i) :
-        `<div class="attack-card"><div class="attack-main"><div class="attack-title">${esc(attackGroupName({ attack: a, count }))}${economyPill(a.bonusAction && "bonus")}${ammoPill(c, a)}${a.proficient ? "" : (" <span class=\"pill red\">" + uiText("non maîtrisée") + "</span>")}</div><div class="attack-meta">${attackMeta(a)}</div></div><button class="attack-roll" data-action="roll-attack" data-index="${i}" aria-label="${uiText("Jet d’attaque {p11}", { p11: esc(a.name) })}"><strong>${signed(a.attack)}</strong><small>${uiText("toucher")}</small></button><button class="attack-roll ghost" data-action="roll-damage" data-index="${i}" aria-label="${uiText("Dégâts {p15}", { p15: esc(a.name) })}">${icon("dice", 18)}<small>${uiText("dégâts")}</small></button></div>`,
+        `<div class="attack-card${a.light ? " light" : ""}"><div class="attack-main"><div class="attack-title">${a.light ? icon("flame", 16) : ""}${esc(attackGroupName({ attack: a, count }))}${economyPill(a.bonusAction && "bonus")}${ammoPill(c, a)}${a.proficient ? "" : (" <span class=\"pill red\">" + uiText("non maîtrisée") + "</span>")}</div><div class="attack-meta">${attackMeta(a)}</div></div><button class="attack-roll" data-action="roll-attack" data-index="${i}" aria-label="${uiText("Jet d’attaque {p11}", { p11: esc(a.name) })}"><strong>${signed(a.attack)}</strong><small>${uiText("toucher")}</small></button><button class="attack-roll ghost" data-action="roll-damage" data-index="${i}" aria-label="${uiText("Dégâts {p15}", { p15: esc(a.name) })}">${icon("dice", 18)}<small>${uiText("dégâts")}</small></button></div>`,
     )
-    .join("")}${renderAmmoRecovery(c)}${d.martialArts ? renderMartialArtsCard(c, d) : ""}${extra.filter((entry) => !entry.combat).map(renderExtraAttack).join("")}${spellRollCards(c, d).map(renderSpellRollCard).join("")}${extras.length ? `<p class="tiny muted attack-extras">${extras.map(esc).join(" · ")}</p>` : ""}${d.twoWeapon && !d.twoWeapon.allowed ? `<p class="tiny muted attack-extras" data-two-weapon-refused>${esc(uiText("attack.twoWeapon.notLight", { names: d.twoWeapon.notLight.map((id) => uiWeapons[id]?.name || id).join(", ") }))}</p>` : ""}${renderCombatActions(c, d, extra.filter((entry) => entry.combat), swaps)}`;
+    .join("")}${renderGround(c)}${d.martialArts ? renderMartialArtsCard(c, d) : ""}${extra.filter((entry) => !entry.combat).map(renderExtraAttack).join("")}${spellRollCards(c, d).map(renderSpellRollCard).join("")}${extras.length ? `<p class="tiny muted attack-extras">${extras.map(esc).join(" · ")}</p>` : ""}${d.twoWeapon && !d.twoWeapon.allowed ? `<p class="tiny muted attack-extras" data-two-weapon-refused>${esc(uiText("attack.twoWeapon.notLight", { names: d.twoWeapon.notLight.map((id) => uiWeapons[id]?.name || id).join(", ") }))}</p>` : ""}${renderCombatActions(c, d, extra.filter((entry) => entry.combat), swaps, allSwaps.some((option) => option.light))}`;
 }
 
 /**
@@ -60716,7 +61210,7 @@ function renderSheet(c) {
     subs = subclassSummary(c),
     settings = featureSettings(c);
   const classes = classLevels(c), sheetClass = classes.length === 1 ? uiText("{p0} · Niveau {p1}", { p0: uiClasses[classes[0].classId].name, p1: d.level }) : uiText("{p0} · Niveau {p1}", { p0: classSummary(c), p1: d.level });
-  return `<section class="hero sheet-hero"><div class="hero-identity">${characterPortrait(c, { editable: true })}<div class="hero-summary"><h1>${esc(c.name)}</h1><p class="hero-origin">${esc(d.race.name)}</p><p class="subtitle">${esc(sheetClass)}</p><section class="identity-hp hp-panel"><div class="hp-line"><div class="hp-reading"><strong class="hp-current">${d.currentHp}</strong><span class="hp-max">/ ${d.maxHp} <span class="hp-unit">${uiText("PV")}</span></span></div><button class="link-btn hp-temp${c.state.tempHp ? " has-value" : ""}" data-action="temporary-hp" aria-label="${c.state.tempHp ? uiText("{p0} points de vie temporaires. Modifier la réserve", { p0: c.state.tempHp }) : uiText("Ajouter des points de vie temporaires")}">${c.state.tempHp ? `<span><strong>+${c.state.tempHp}</strong>${uiText("PV temporaires")}</span>` : `<span>${uiText("{p0} PV temporaires", { p0: icon("plus", 13) })}</span>`}</button><button class="icon-btn hp-details" data-action="hp-details" aria-label="${uiText("Détails des points de vie et dés de vie")}">${icon("info", 18)}</button></div>${d.currentHp < d.maxHp / 2 ? `<span class="pill ${d.currentHp === 0 ? "red" : ""}">${d.currentHp === 0 ? uiText("À 0 PV") : uiText("Blessé")}</span>` : ""}${effectiveExhaustion >= 4 ? ("<p class=\"small hp-warning\">" + uiText("Maximum réduit par l’épuisement.") + "</p>") : ""}</section><p class="hero-context">${esc(d.background.name)}${subs ? ` · ${esc(subs)}` : ""}</p></div></div><div class="hp-actions sheet-health-actions">${button(uiText("{p0} Dégâts", { p0: icon("sun", 18) }), "damage", "", "primary")}${button(uiText("{p0} Soins", { p0: icon("plus", 18) }), "heal", "", "ghost")}</div>${d.currentHp === 0 ? `<div class="sheet-death-saves">${renderDeathSaves(c)}</div>` : ""}</section>${renderActiveForm(c, d)}${renderSheetCarryWarning(c, d)}<div class="split sheet-panels${sheetSpellIds(c).size ? " has-magic" : ""}"><div class="stack"><div class="stats-strip sheet-stats">${[
+  return `<section class="hero sheet-hero"><div class="hero-identity">${characterPortrait(c, { editable: true })}<div class="hero-summary"><h1>${esc(c.name)}${renderLightBadge(c)}</h1><p class="hero-origin">${esc(d.race.name)}</p><p class="subtitle">${esc(sheetClass)}</p><section class="identity-hp hp-panel"><div class="hp-line"><div class="hp-reading"><strong class="hp-current">${d.currentHp}</strong><span class="hp-max">/ ${d.maxHp} <span class="hp-unit">${uiText("PV")}</span></span></div><button class="link-btn hp-temp${c.state.tempHp ? " has-value" : ""}" data-action="temporary-hp" aria-label="${c.state.tempHp ? uiText("{p0} points de vie temporaires. Modifier la réserve", { p0: c.state.tempHp }) : uiText("Ajouter des points de vie temporaires")}">${c.state.tempHp ? `<span><strong>+${c.state.tempHp}</strong>${uiText("PV temporaires")}</span>` : `<span>${uiText("{p0} PV temporaires", { p0: icon("plus", 13) })}</span>`}</button><button class="icon-btn hp-details" data-action="hp-details" aria-label="${uiText("Détails des points de vie et dés de vie")}">${icon("info", 18)}</button></div>${d.currentHp < d.maxHp / 2 ? `<span class="pill ${d.currentHp === 0 ? "red" : ""}">${d.currentHp === 0 ? uiText("À 0 PV") : uiText("Blessé")}</span>` : ""}${effectiveExhaustion >= 4 ? ("<p class=\"small hp-warning\">" + uiText("Maximum réduit par l’épuisement.") + "</p>") : ""}</section><p class="hero-context">${esc(d.background.name)}${subs ? ` · ${esc(subs)}` : ""}</p></div></div><div class="hp-actions sheet-health-actions">${button(uiText("{p0} Dégâts", { p0: icon("sun", 18) }), "damage", "", "primary")}${button(uiText("{p0} Soins", { p0: icon("plus", 18) }), "heal", "", "ghost")}</div>${d.currentHp === 0 ? `<div class="sheet-death-saves">${renderDeathSaves(c)}</div>` : ""}</section>${renderActiveForm(c, d)}${renderSheetCarryWarning(c, d)}<div class="split sheet-panels${sheetSpellIds(c).size ? " has-magic" : ""}"><div class="stack"><div class="stats-strip sheet-stats">${[
     ["shield", d.ac, uiText("CA"), "ac-info"],
     ["zap", signed(d.initiative), "Initiative", "roll-initiative"],
     ["compass", uiMeters(d.speed || d.flySpeed || d.swimSpeed || d.burrowSpeed || 0), d.speed ? uiText("Vitesse") : d.flySpeed ? uiText("Vol") : d.swimSpeed ? uiText("Nage") : d.burrowSpeed ? uiText("Fouissement") : uiText("Vitesse"), ""],
@@ -60764,6 +61258,11 @@ function renderSheet(c) {
           .join("")}`,
     )
     .join("")}</section></div></div>${issues.errors.length || issues.warnings.length ? `<details class="section-gap no-print issues-box" data-detail="issues"><summary class="small muted">${uiText("{p0} {p1} point(s) à vérifier sur la fiche", { p0: icon("info", 15), p1: issues.errors.length + issues.warnings.length })}</summary><div class="section-gap">${issueList(issues.errors, "error")}${issueList(issues.warnings)}</div></details>` : ""}`;
+}
+/** Témoin à droite du nom (variante A, choisie par Luca le 23 novembre 2026) : la lumière tenue ; le toucher ouvre sa fenêtre. */
+function renderLightBadge(c) {
+  const light = heldLight(c);
+  return light ? ` <button type="button" class="pill sand light-badge" data-action="light-menu" aria-label="${esc(uiText("light.menu.aria", { name: lightName(light.ref) }))}">${icon("flame", 13)}${esc(lightName(light.ref))}</button>` : "";
 }
 function renderActiveForm(c, d = uiDerive(c)) {
   if (!d.wildShape) return "";
@@ -61724,7 +62223,7 @@ function renderModal() {
   if (["journal-editor", "journal-photo", "journal-discard"].includes(ui.modal)) return renderJournalModals(c, d, cancel);
   if (["rune-inscriptions", "rune-expense", "copy-spell", "magic", "sheet-slot-correction", "sheet-slot", "cast", "cast-target", "spell-stock-consume"].includes(ui.modal)) return renderSpellModals(c, d, cancel);
   if (["rest", "resource-uses", "resource-conversions", "dawn-item", "resource-event"].includes(ui.modal)) return renderResourceModals(c, d, cancel);
-  if (["use-inventory-item", "resolve-last-charge", "declare-item-result", "item-spell-stock", "item-spell-deposit", "item-spell-remove", "item-slot-recovery", "equipment", "equip-instance", "item", "catalog", "shop", "shop-terms", "shop-price", "attunements"].includes(ui.modal)) return renderInventoryModals(c, d, cancel);
+  if (["use-inventory-item", "resolve-last-charge", "declare-item-result", "item-spell-stock", "item-spell-deposit", "item-spell-remove", "item-slot-recovery", "equipment", "equip-instance", "item", "catalog", "shop", "shop-terms", "shop-price", "attunements", "light", "ground-pick"].includes(ui.modal)) return renderInventoryModals(c, d, cancel);
   if (ui.modal.startsWith("creation-")) return renderCreationModal(c, cancel);
   if (["replace-spell", "replace-choice", "calculation-details", "acquisition-history", "rule-options", "adjustments"].includes(ui.modal)) return renderLevelModals(c, d, cancel);
   if (["conditions"].includes(ui.modal)) return renderEffectModals(c, d, cancel);
@@ -62170,7 +62669,8 @@ async function perform(action, el) {
     case "dice-lucky": case "dice-keep": case "dice-keep-options": case "dice-after-option": case "dice-part": case "dice-portent": case "roll-mode": case "dice-pick": case "roll-external": case "roll-start":
     case "roll-accept": case "reroll": case "death-roll": case "death-mark": case "roll-initiative":
       await performDice(action, el, c, data, d); break;
-    case "equipment": case "review-equipment": case "equip-cast-mage-armor": case "equip-pick-open": case "equip-pick": case "equip-shield-toggle": case "equip-combo": case "add-library-item": case "instance-reference": case "attunements": case "toggle-repair-attunement":
+    case "equipment": case "review-equipment": case "equip-cast-mage-armor": case "equip-pick-open": case "equip-pick": case "equip-shield-toggle": case "equip-combo": case "toggle-lighting":
+    case "light-menu": case "light-drop": case "light-extinguish": case "light-hood": case "ground-pick": case "confirm-ground-pick": case "add-library-item": case "instance-reference": case "attunements": case "toggle-repair-attunement":
     case "review-attunements": case "equip-instance": case "review-equip-instance": case "unequip-instance": case "convert-ammunition": case "item-spell-stock":
     case "item-slot-recovery": case "item-spell-deposit": case "review-item-spell-deposit": case "item-spell-remove": case "review-item-spell-remove":
     case "review-item-slot-recovery": case "review-reset-item-recovery": case "declare-item-result": case "use-inventory-item": case "resolve-last-charge":
