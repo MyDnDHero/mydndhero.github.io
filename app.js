@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-candidate-8";
+const APP_VERSION = "2.0.0-candidate-9";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -398,7 +398,6 @@ const UI_FR = Object.freeze({
   "items.error.single": "Un exemplaire équipé, harmonisable ou doté de charges doit avoir une quantité de 1.",
   "items.error.origin": "Provenance d’objet temporaire invalide.",
   "items.error.equipment": "Cet exemplaire ne peut pas occuper cet emplacement.",
-  "items.error.weaponLimit": "Tu peux préparer au maximum six armes à la fois.",
   "items.unsupported": "Certains effets de cet objet ne sont pas encore calculés. Son texte et son état sont conservés.",
   "items.instance": "Exemplaire",
   "items.leftAtCamp": "Laissé au campement",
@@ -512,7 +511,6 @@ const UI_FR = Object.freeze({
   "Aptitudes & effets": "Aptitudes & effets",
   "Arme": "Arme",
   "Arme à feu arcanique : +1d8 à un seul jet de dégâts d’un sort d’artificier lancé à travers la baguette, le bâton ou le sceptre gravé après le repos long. Le bonus ne s’ajoute pas aux canons.": "Arme à feu arcanique : +1d8 à un seul jet de dégâts d’un sort d’artificier lancé à travers la baguette, le bâton ou le sceptre gravé après le repos long. Le bonus ne s’ajoute pas aux canons.",
-  "Armes à portée de main": "Armes à portée de main",
   "Armure": "Armure",
   "Armure arcanique": "Armure arcanique",
   "Armure légère ou aucune, sans bouclier. Le chant cesse si tu attaques à deux mains. Avantage aux tests d’Acrobaties et bonus d’INT aux sauvegardes de concentration.": "Armure légère ou aucune, sans bouclier. Le chant cesse si tu attaques à deux mains. Avantage aux tests d’Acrobaties et bonus d’INT aux sauvegardes de concentration.",
@@ -1268,7 +1266,6 @@ const UI_FR = Object.freeze({
   "Matériaux": "Matériaux",
   "Matériel": "Matériel",
   "Maîtrise": "Maîtrise",
-  "Maîtrisées uniquement": "Maîtrisées uniquement",
   "Me transformer": "Me transformer",
   "Me transformer (2 usages)": "Me transformer (2 usages)",
   "Mes personnages": "Mes personnages",
@@ -1690,7 +1687,6 @@ const UI_FR = Object.freeze({
   "Équipement fusionné, sans effet.": "Équipement fusionné, sans effet.",
   "Équipement pendant la transformation": "Équipement pendant la transformation",
   "Équipement porté avec l’accord du MJ.": "Équipement porté avec l’accord du MJ.",
-  "Équiper, puis comparer.": "Équiper, puis comparer.",
   "États & épuisement": "États & épuisement",
   "États, maladies et malédictions sont conservés. Confirme séparément les récupérations propres aux aptitudes.": "États, maladies et malédictions sont conservés. Confirme séparément les récupérations propres aux aptitudes.",
   "Étourdi": "Étourdi",
@@ -4361,7 +4357,6 @@ const UI_FR = Object.freeze({
   "attack.giantStrike.stone": "Frappe des pierres",
   "attack.giantStrike.storm": "Frappe des tempêtes",
   "creation.searchBackground": "Nom, compétence, aptitude…",
-  "equipment.weaponsHelp": "Seules les armes de ton inventaire peuvent être mises à portée de main. Pour une nouvelle arme, ajoute-la d’abord à l’inventaire.",
   "equipment.outsideInventory": "{name} (hors inventaire)",
   "equipment.armorHelp": "Seules les armures de ton inventaire sont proposées.",
   "equipment.noShield": "Aucun bouclier dans ton inventaire.",
@@ -5219,7 +5214,6 @@ const UI_FR = Object.freeze({
   "Une fiche déjà présente peut être remplacée. Les sauvegardes de la version précédente sont converties.": "Une fiche déjà présente peut être remplacée. Les sauvegardes de la version précédente sont converties.",
   "Colle ici le texte d’une sauvegarde Compagnon.": "Colle ici le texte d’une sauvegarde Compagnon.",
   "Importer ces personnages ?": "Importer ces personnages ?",
-  "shop.buy": "Acheter",
   "shop.catalogue": "Catalogue",
   "shop.cart": "Panier",
   "shop.cartCount": "Panier ({count})",
@@ -5239,13 +5233,9 @@ const UI_FR = Object.freeze({
   "shop.plus": "Un de plus",
   "shop.unitPrice": "Prix à l’unité",
   "shop.priceMissing": "Prix à saisir",
-  "shop.cataloguePrice": "Prix du catalogue : {price}",
-  "shop.variablePrice": "Prix variable : indique celui du MJ.",
-  "shop.total": "Total",
   "shop.missing": "Il manque {amount}",
-  "shop.review": "Vérifier l’achat",
-  "shop.label": "Acheter : {names}",
-  "shop.cost": "Coût total : {total}.",
+  "shop.review": "Vérifier",
+  "shop.label": "Marchand : {names}",
   "shop.unit": "{price} l’unité",
   "shop.names.pair": "{first} et {second}",
   "shop.names.one": "{names} et 1 autre",
@@ -5257,7 +5247,87 @@ const UI_FR = Object.freeze({
   "Non maîtrisé": "Non maîtrisé",
   "Masquer les non maîtrisés": "Masquer les non maîtrisés",
   "Aucun vol terminé à rétablir.": "Aucun vol terminé à rétablir.",
-  "Lancé par un allié": "Lancé par un allié"
+  "Lancé par un allié": "Lancé par un allié",
+  "weaponSwap.title": "En changeant d’arme",
+  "weaponSwap.others": "Autres actions",
+  "weaponSwap.free": "1× par tour",
+  "weaponSwap.action": "1 action",
+  "weaponSwap.ac": "CA {before} → {after}",
+  "weaponSwap.twoWeapon.lost": "Plus d’attaque à deux armes.",
+  "weaponSwap.twoWeapon.gained": "Attaque à deux armes possible.",
+  "weaponSwap.withShield": "{name} et bouclier",
+  "weaponSwap.modalTitle": "Prendre : {name}",
+  "weaponSwap.step.shieldOff": "Retirer le bouclier",
+  "weaponSwap.step.shieldOn": "Mettre le bouclier",
+  "weaponSwap.step.drop": "Lâcher au sol : {name}",
+  "weaponSwap.step.take": "Prendre : {name}",
+  "weaponSwap.confirm": "Valider et lancer",
+  "weaponSwap.saved": "Changement d’arme",
+  "weaponSwap.gone": "Ce changement n’est plus possible.",
+  "combat.success": "Réussi",
+  "combat.failure": "Raté",
+  "combat.grapple.holding": "Tu agrippes une créature",
+  "combat.grapple.duration": "Jusqu’à ce que tu la lâches",
+  "combat.grapple.effect": "La créature est agrippée : sa vitesse tombe à 0. Tu peux la traîner ou la porter, à la moitié de ta vitesse sauf si elle est plus petite que toi de deux tailles ou plus. Une de tes mains la tient. Elle peut s’échapper par une action : test de Force (Athlétisme) ou de Dextérité (Acrobaties) contre ton Athlétisme. Retire cet effet quand tu la lâches.",
+  "combat.grapple.saved": "Lutte réussie",
+  "combat.grapple.noted": "Noté dans États et effets : Tu agrippes une créature.",
+  "combat.grapple.unarmed": "Combat à mains nues : 1d4 contondants à la créature agrippée, au début de chacun de tes tours.",
+  "combat.shove.title": "Bousculade réussie",
+  "combat.shove.prone": "À terre",
+  "combat.shove.push": "Repoussée de {distance}",
+  "combat.shove.proneRule": "La créature est à terre : elle a le désavantage à ses jets d’attaque ; les attaques au corps à corps contre elle ont l’avantage, celles à distance le désavantage. Se relever lui coûte la moitié de sa vitesse.",
+  "combat.shove.pushRule": "La créature est repoussée de {distance}, loin de toi.",
+  "equipment.details": "Réglages détaillés",
+  "equipment.protection": "Protection · CA {ac}",
+  "equipment.inHand": "En main",
+  "equipment.combos": "Autres combinaisons",
+  "equipment.choose": "Choisir",
+  "equipment.bothHands": "Les deux mains",
+  "equipment.offShield": "Tient le bouclier",
+  "equipment.shieldNone": "Aucun",
+  "equipment.shieldWorn": "+2 CA",
+  "equipment.shieldInBag": "{count} dans le sac",
+  "equipment.shieldOn": "Porter",
+  "equipment.shieldOff": "Retirer",
+  "equipment.unarmored": "10 + DEX",
+  "equipment.armorType.light": "légère",
+  "equipment.armorType.medium": "intermédiaire",
+  "equipment.armorType.heavy": "lourde",
+  "equipment.shieldLabel": "Bouclier",
+  "equipment.weapons": "Armes",
+  "ammo.count": "{count} munitions",
+  "ammo.one": "1 munition",
+  "ammo.none": "Plus de munitions",
+  "ammo.recovery": "{count} munitions tirées pendant le combat",
+  "ammo.recover": "Récupérer {count}",
+  "ammo.recovered": "Munitions récupérées",
+  "Munitions tirées invalides.": "Munitions tirées invalides.",
+  "ammo.label": "Munition",
+  "ammo.option": "{name} · {count} restantes",
+  "ammo.option.one": "{name} · 1 restante",
+  "ammo.kind.arrows": "Flèches",
+  "ammo.kind.crossbow-bolts": "Carreaux d’arbalète",
+  "ammo.kind.sling-bullets": "Billes de fronde",
+  "ammo.kind.blowgun-needles": "Aiguilles de sarbacane",
+  "shop.merchant": "Marchand",
+  "shop.bag": "Mon sac",
+  "shop.bagSearch": "Chercher dans mon sac",
+  "shop.buys": "Achats",
+  "shop.sales": "Ventes",
+  "shop.lot": "{price} les {count}",
+  "shop.rate": "{rate} %",
+  "shop.terms": "Conditions de l’échoppe",
+  "shop.terms.sell": "Prix de vente",
+  "shop.terms.buy": "Prix d’achat",
+  "shop.terms.rule": "Règle 2014",
+  "shop.terms.enter": "Entrer",
+  "shop.terms.apply": "Appliquer",
+  "shop.price.sell": "Vendre : {name}",
+  "shop.price.buy": "Acheter : {name}",
+  "shop.price.add": "Ajouter au panier",
+  "{p0} Vendre": "{p0} Vendre",
+  "weaponSwap.pair": "{first} et {second}",
+  "weaponSwap.pairSame": "{name} ×2"
 });
 
 
@@ -5293,7 +5363,6 @@ const UI_EN = Object.freeze({
   "items.error.single": "An equipped, attunable or charged copy must have a quantity of 1.",
   "items.error.origin": "Invalid temporary item origin.",
   "items.error.equipment": "This copy cannot use this slot.",
-  "items.error.weaponLimit": "You can ready at most six weapons at a time.",
   "items.unsupported": "Some of this item's effects are not calculated yet. Its text and state are retained.",
   "items.instance": "Copy",
   "items.leftAtCamp": "Left at camp",
@@ -5407,7 +5476,6 @@ const UI_EN = Object.freeze({
   "Aptitudes & effets": "Features & effects",
   "Arme": "Weapon",
   "Arme à feu arcanique : +1d8 à un seul jet de dégâts d’un sort d’artificier lancé à travers la baguette, le bâton ou le sceptre gravé après le repos long. Le bonus ne s’ajoute pas aux canons.": "Arcane Firearm: +1d8 to one damage roll of an artificer spell cast through the wand, staff or rod inscribed after a long rest. This bonus does not apply to cannons.",
-  "Armes à portée de main": "Readied weapons",
   "Armure": "Armor",
   "Armure arcanique": "Arcane Armor",
   "Armure légère ou aucune, sans bouclier. Le chant cesse si tu attaques à deux mains. Avantage aux tests d’Acrobaties et bonus d’INT aux sauvegardes de concentration.": "Light armor or none, without a shield. The song ends if you attack with two hands. Advantage on Acrobatics checks and your INT bonus on concentration saving throws.",
@@ -6163,7 +6231,6 @@ const UI_EN = Object.freeze({
   "Matériaux": "Materials",
   "Matériel": "Equipment",
   "Maîtrise": "Proficiency",
-  "Maîtrisées uniquement": "Proficient only",
   "Me transformer": "Transform",
   "Me transformer (2 usages)": "Transform (2 uses)",
   "Mes personnages": "My characters",
@@ -6585,7 +6652,6 @@ const UI_EN = Object.freeze({
   "Équipement fusionné, sans effet.": "Merged equipment, no effect.",
   "Équipement pendant la transformation": "Equipment during transformation",
   "Équipement porté avec l’accord du MJ.": "Equipment worn with DM approval.",
-  "Équiper, puis comparer.": "Equip, then compare.",
   "États & épuisement": "Conditions & exhaustion",
   "États, maladies et malédictions sont conservés. Confirme séparément les récupérations propres aux aptitudes.": "Conditions, diseases and curses are retained. Confirm feature-specific recoveries separately.",
   "Étourdi": "Stunned",
@@ -9256,7 +9322,6 @@ const UI_EN = Object.freeze({
   "attack.giantStrike.stone": "Stone Strike",
   "attack.giantStrike.storm": "Storm Strike",
   "creation.searchBackground": "Name, skill, feature…",
-  "equipment.weaponsHelp": "Only weapons from your inventory can be kept at hand. For a new weapon, add it to your inventory first.",
   "equipment.outsideInventory": "{name} (not in inventory)",
   "equipment.armorHelp": "Only armor from your inventory is listed.",
   "equipment.noShield": "No shield in your inventory.",
@@ -10114,7 +10179,6 @@ const UI_EN = Object.freeze({
   "Une fiche déjà présente peut être remplacée. Les sauvegardes de la version précédente sont converties.": "A character already here can be replaced. Previous-version backups are converted.",
   "Colle ici le texte d’une sauvegarde Compagnon.": "Paste a Compagnon backup here.",
   "Importer ces personnages ?": "Import these characters?",
-  "shop.buy": "Buy",
   "shop.catalogue": "Catalogue",
   "shop.cart": "Cart",
   "shop.cartCount": "Cart ({count})",
@@ -10134,13 +10198,9 @@ const UI_EN = Object.freeze({
   "shop.plus": "One more",
   "shop.unitPrice": "Unit price",
   "shop.priceMissing": "Enter a price",
-  "shop.cataloguePrice": "Catalogue price: {price}",
-  "shop.variablePrice": "Variable price: enter the DM’s.",
-  "shop.total": "Total",
   "shop.missing": "{amount} short",
-  "shop.review": "Review purchase",
-  "shop.label": "Buy: {names}",
-  "shop.cost": "Total cost: {total}.",
+  "shop.review": "Review",
+  "shop.label": "Merchant: {names}",
   "shop.unit": "{price} each",
   "shop.names.pair": "{first} and {second}",
   "shop.names.one": "{names} and 1 more",
@@ -10152,7 +10212,87 @@ const UI_EN = Object.freeze({
   "Non maîtrisé": "Not proficient",
   "Masquer les non maîtrisés": "Hide non-proficient items",
   "Aucun vol terminé à rétablir.": "No ended flight to restore.",
-  "Lancé par un allié": "Cast by an ally"
+  "Lancé par un allié": "Cast by an ally",
+  "weaponSwap.title": "Switching weapons",
+  "weaponSwap.others": "Other actions",
+  "weaponSwap.free": "1× per turn",
+  "weaponSwap.action": "1 action",
+  "weaponSwap.ac": "AC {before} → {after}",
+  "weaponSwap.twoWeapon.lost": "No more two-weapon attack.",
+  "weaponSwap.twoWeapon.gained": "Two-weapon attack available.",
+  "weaponSwap.withShield": "{name} and shield",
+  "weaponSwap.modalTitle": "Take: {name}",
+  "weaponSwap.step.shieldOff": "Doff your shield",
+  "weaponSwap.step.shieldOn": "Don your shield",
+  "weaponSwap.step.drop": "Drop: {name}",
+  "weaponSwap.step.take": "Take: {name}",
+  "weaponSwap.confirm": "Confirm and roll",
+  "weaponSwap.saved": "Weapon switch",
+  "weaponSwap.gone": "This switch is no longer possible.",
+  "combat.success": "Success",
+  "combat.failure": "Failure",
+  "combat.grapple.holding": "You are grappling a creature",
+  "combat.grapple.duration": "Until you let go",
+  "combat.grapple.effect": "The creature is grappled: its speed becomes 0. You can drag or carry it, at half your speed unless it is two or more sizes smaller than you. One of your hands holds it. It can use its action to escape: a Strength (Athletics) or Dexterity (Acrobatics) check against your Athletics. Remove this effect when you let go.",
+  "combat.grapple.saved": "Grapple succeeded",
+  "combat.grapple.noted": "Noted in Conditions and effects: You are grappling a creature.",
+  "combat.grapple.unarmed": "Unarmed Fighting: 1d4 bludgeoning to the grappled creature at the start of each of your turns.",
+  "combat.shove.title": "Shove succeeded",
+  "combat.shove.prone": "Prone",
+  "combat.shove.push": "Pushed {distance}",
+  "combat.shove.proneRule": "The creature is prone: it has disadvantage on attack rolls; melee attacks against it have advantage, ranged ones disadvantage. Standing up costs half its speed.",
+  "combat.shove.pushRule": "The creature is pushed {distance} away from you.",
+  "equipment.details": "Detailed settings",
+  "equipment.protection": "Protection · AC {ac}",
+  "equipment.inHand": "In hand",
+  "equipment.combos": "Other combinations",
+  "equipment.choose": "Choose",
+  "equipment.bothHands": "Both hands",
+  "equipment.offShield": "Holds the shield",
+  "equipment.shieldNone": "None",
+  "equipment.shieldWorn": "+2 AC",
+  "equipment.shieldInBag": "{count} in the bag",
+  "equipment.shieldOn": "Wear",
+  "equipment.shieldOff": "Remove",
+  "equipment.unarmored": "10 + DEX",
+  "equipment.armorType.light": "light",
+  "equipment.armorType.medium": "medium",
+  "equipment.armorType.heavy": "heavy",
+  "equipment.shieldLabel": "Shield",
+  "equipment.weapons": "Weapons",
+  "ammo.count": "{count} ammunition",
+  "ammo.one": "1 ammunition",
+  "ammo.none": "Out of ammunition",
+  "ammo.recovery": "{count} ammunition fired during the fight",
+  "ammo.recover": "Recover {count}",
+  "ammo.recovered": "Ammunition recovered",
+  "Munitions tirées invalides.": "Invalid fired ammunition.",
+  "ammo.label": "Ammunition",
+  "ammo.option": "{name} · {count} left",
+  "ammo.option.one": "{name} · 1 left",
+  "ammo.kind.arrows": "Arrows",
+  "ammo.kind.crossbow-bolts": "Crossbow bolts",
+  "ammo.kind.sling-bullets": "Sling bullets",
+  "ammo.kind.blowgun-needles": "Blowgun needles",
+  "shop.merchant": "Merchant",
+  "shop.bag": "My bag",
+  "shop.bagSearch": "Search my bag",
+  "shop.buys": "Purchases",
+  "shop.sales": "Sales",
+  "shop.lot": "{price} for {count}",
+  "shop.rate": "{rate}%",
+  "shop.terms": "Shop terms",
+  "shop.terms.sell": "Selling price",
+  "shop.terms.buy": "Buying price",
+  "shop.terms.rule": "2014 rule",
+  "shop.terms.enter": "Enter",
+  "shop.terms.apply": "Apply",
+  "shop.price.sell": "Sell: {name}",
+  "shop.price.buy": "Buy: {name}",
+  "shop.price.add": "Add to cart",
+  "{p0} Vendre": "{p0} Sell",
+  "weaponSwap.pair": "{first} and {second}",
+  "weaponSwap.pairSame": "{name} ×2"
 });
 
 
@@ -36505,6 +36645,98 @@ function consumeInventoryAmmunition(character, id) {
   return next;
 }
 
+/**
+ * Munitions suivies à l'unité, dépensées d'office (décision de Luca du 22 novembre 2026). Règle 2014, propriété Munitions : chaque attaque en dépense une,
+ * la prendre fait partie de l'attaque ; une minute après le combat rend la moitié des munitions tirées. Les sortes sont celles que tirent les armes du catalogue.
+ */
+const AMMUNITION_KINDS = Object.freeze(["arrows", "crossbow-bolts", "sling-bullets", "blowgun-needles"]);
+/** Sorte d'une munition (« arrows ») d'après sa référence ou son nom anglais, suivie à l'unité ou non ; null pour tout autre objet. */
+function ammunitionKindOf(item) {
+  if (AMMUNITION_KINDS.includes(item?.ref)) return item.ref;
+  const raw = item?.instance ? itemVerifiedDefinition(item) : null;
+  if (!item?.instance?.ammunition && String(raw?.type || "").split("|")[0] !== "A") return null;
+  const name = String(raw?.baseName || raw?.name || "").toLowerCase().replace(/\s*\(\d+\)$/, "").trim().replaceAll(" ", "-");
+  const kind = name.endsWith("s") ? name : `${name}s`;
+  return AMMUNITION_KINDS.includes(kind) ? kind : null;
+}
+/** Sorte d'une pile de munitions suivie à l'unité (« Flèches », « +1 Arrow ») ; null pour tout autre objet. */
+function ammunitionKind(item) {
+  return item?.instance?.ammunition ? ammunitionKindOf(item) : null;
+}
+/** Munition spéciale : une variante (argentée, tueuse, adamantium) ou un bonus magique ; jamais tirée sans être choisie. */
+function specialAmmunition(item) {
+  return !!item.instance?.variantReference || Number(itemVerifiedDefinition(item)?.bonusWeapon) > 0;
+}
+/**
+ * Munitions emportées d'une sorte, regroupées pour le choix au tir (demande de Luca du 22 novembre 2026) : d'abord les ordinaires (id « plain »),
+ * toujours présentes même vides, puis chaque munition spéciale par référence. Chaque groupe dit son reste et la première pile non vide, celle que le tir dépense.
+ * plain : la pile ordinaire tirée d'office ; untracked quand une pile n'est pas comptée à l'unité : son reste est inconnu.
+ */
+function weaponAmmunition(character, kind) {
+  const carried = (character.inventory || []).filter((item) => inventoryItemCarried(character, item) && ammunitionKindOf(item) === kind);
+  const stacks = carried.filter((item) => item.instance?.ammunition);
+  const groups = [{ id: "plain", name: "", total: 0, stack: null, bonus: 0, silvered: false }];
+  for (const item of stacks) {
+    const special = specialAmmunition(item), id = special ? item.ref : "plain";
+    let group = groups.find((entry) => entry.id === id);
+    if (!group) groups.push(group = { id, name: item.name, total: 0, stack: null, bonus: Number(itemVerifiedDefinition(item)?.bonusWeapon) || 0, silvered: /silvered/i.test(String(item.instance.variantReference || "")) });
+    group.total += Math.max(0, item.qty);
+    if (!group.stack && item.qty >= 1) group.stack = item;
+  }
+  return { kind, total: stacks.reduce((sum, item) => sum + Math.max(0, item.qty), 0), plain: groups[0].stack, groups, untracked: carried.length > stacks.length };
+}
+/** Sorte de munition suivie pour une ligne d'attaque : l'arme vient de l'inventaire et tire une munition connue ; "" sinon (fiche d'avant l'inventaire, arme à feu). */
+function attackAmmunitionKind(character, attack) {
+  const kind = attack?.weapon?.ammunition;
+  return AMMUNITION_KINDS.includes(kind) && (character.inventory || []).some((item) => item.id === attack.instanceId) ? kind : "";
+}
+/**
+ * Munition tirée : une de moins dans sa pile. Une munition ordinaire compte dans les munitions tirées de sa sorte (state.ammoFired), pour la récupération ;
+ * une munition spéciale non : « Récupérer » rend des munitions ordinaires.
+ */
+function fireAmmunition(character, id) {
+  const next = consumeInventoryAmmunition(character, id), item = next.inventory.find((entry) => entry.id === id), kind = ammunitionKind(item);
+  if (kind && !specialAmmunition(item)) next.state.ammoFired = { ...(next.state.ammoFired || {}), [kind]: (next.state.ammoFired?.[kind] || 0) + 1 };
+  return next;
+}
+/** Après le combat : la moitié des munitions tirées, arrondie en dessous, revient dans la première pile ordinaire de la sorte ; le compte repart à zéro. */
+function recoverAmmunition(character, kind) {
+  const next = itemClone(character), fired = next.state.ammoFired?.[kind] || 0;
+  const stack = weaponAmmunition(next, kind).plain || next.inventory.find((item) => ammunitionKind(item) === kind && inventoryItemCarried(next, item) && !item.instance.variantReference);
+  if (stack) stack.qty += Math.floor(fired / 2);
+  const rest = { ...(next.state.ammoFired || {}) }; delete rest[kind];
+  next.state.ammoFired = rest;
+  validateInventory(next);
+  return next;
+}
+
+/**
+ * Prix du Manuel d'un objet du sac, à l'unité, en pièces de cuivre ; null sans prix connu (objet libre, objet magique sans prix).
+ * Une pile de munitions suivie à l'unité divise le prix du lot du catalogue (« Flèches (20) », 1 po) : 5 pc la flèche.
+ */
+function inventoryItemPrice(item) {
+  const snapshot = item?.instance?.snapshot, legacy = itemLegacy(item?.ref);
+  const lot = (name, fallback) => item.instance?.ammunition ? Number(String(name || "").match(/\((\d+)\)$/)?.[1] || fallback || 1) : 1;
+  if (Number.isInteger(snapshot?.value) && snapshot.value >= 0) return snapshot.value / lot(snapshot.name, legacy?.count);
+  const cost = legacy ? parseCoins(legacy.cost) : null;
+  return cost === null ? null : cost / lot("", legacy.count);
+}
+/** Bien de troc (toile, épices, bétail) : il garde sa pleine valeur, le marchand le reprend à son prix de vente (Manuel des joueurs, Revente). */
+function inventoryItemTrade(item) {
+  return String(item?.instance?.snapshot?.type || "").split("|")[0] === "TG";
+}
+/** Vente au marchand : chaque ligne { id, qty } retire autant d'exemplaires ; un objet vendu en entier quitte le sac, l'équipement suit. */
+function sellInventoryItems(character, lines) {
+  const next = itemClone(character), sold = new Set();
+  for (const { id, qty } of lines) {
+    const item = next.inventory.find((entry) => entry.id === id);
+    if (!item || !Number.isSafeInteger(qty) || qty < 1 || qty > item.qty) throw itemError("quantity");
+    item.qty -= qty; sold.add(id);
+  }
+  next.inventory = next.inventory.filter((item) => item.qty > 0 || !sold.has(item.id));
+  return applyInventoryEquipment(next);
+}
+
 /** Emporté par ce personnage : ni laissé au campement, ni détruit, ni confié à un autre. */
 function inventoryItemCarried(character, item) {
   return !item.instance || !!item.instance.carried && !item.instance.destroyed && item.instance.ownerId === character.id;
@@ -36591,8 +36823,11 @@ function applyInventoryEquipment(character) {
     else if (item.instance.equippedSlot !== "shield" || adapter.kind !== "shield") { equipment.shield = false; equipment.shieldInventoryId = null; }
     else { equipment.shield = true; armorBonus += adapter.magic; }
   }
-  for (const item of character.inventory) {
-    if (!usable(item) || !["ready", "main", "off"].includes(item.instance.equippedSlot)) continue;
+  // Plus de notion « à portée de main » (décision de Luca du 22 novembre 2026) : toute arme portée est prête, en main ou dans le sac.
+  // Celles déjà prêtes ou tenues passent d'abord, pour garder l'arme principale des fiches existantes ; les autres armes du sac suivent.
+  const weaponItems = [...character.inventory.filter((item) => usable(item) && ["ready", "main", "off"].includes(item.instance.equippedSlot)),
+    ...character.inventory.filter((item) => usable(item) && !item.instance.equippedSlot && !item.instance.infusionSlot)];
+  for (const item of weaponItems) {
     const adapter = itemRuntimeAdapter(item, character);
     if (adapter.kind !== "weapon") continue;
     equipment.weapons.push({ id: adapter.id, instanceId: item.id, inventoryId: item.id, magic: adapter.magic, attackBonus: adapter.attackBonus, bloodshed: adapter.bloodshed, isMagical: !!adapter.isMagical, twoHands: !!item.instance.twoHands });
@@ -36640,7 +36875,6 @@ function equipInventoryItem(character, id, slot = null) {
   if (slot === "off" || two && ["main", "off"].includes(slot)) { next.equipment.shield = false; next.equipment.shieldInventoryId = null; }
   if (slot === "shield") next.equipment.hands.off = null;
   applyInventoryEquipment(next);
-  if (next.equipment.weapons.length > 6) throw itemError("weaponLimit");
   validateInventory(next);
   return next;
 }
@@ -36652,13 +36886,15 @@ function syncInventoryEquipmentChoices(character) {
     const state = item.instance;
     if (!state) continue;
     const weapon = equipment.weapons.find((entry) => entry.inventoryId === item.id);
-    if (["ready", "main", "off"].includes(state.equippedSlot)) {
+    const held = weapon ? equipment.hands.main === weapon.instanceId ? "main" : equipment.hands.off === weapon.instanceId ? "off" : null : null;
+    // Une arme prise dans le sac (sans emplacement depuis le 22 novembre 2026) passe en main comme une arme prête.
+    if (["ready", "main", "off"].includes(state.equippedSlot) || held && !state.equippedSlot && !state.infusionSlot) {
       const adapter = itemRuntimeAdapter(item);
       if (!weapon || weapon.id !== adapter.id) {
         state.equippedSlot = null;
         if (weapon) delete weapon.inventoryId;
       } else {
-        state.equippedSlot = equipment.hands.main === weapon.instanceId ? "main" : equipment.hands.off === weapon.instanceId ? "off" : "ready";
+        state.equippedSlot = held || "ready";
         state.twoHands = !!weapon.twoHands;
       }
     }
@@ -42856,8 +43092,11 @@ function validateImport(input) {
   for (const list of [c.skills, c.background.skills, c.spells.known, c.spells.prepared])
     if (list.some((v) => typeof v !== "string") || new Set(list).size !== list.length) throw new Error(uiText("Liste contenant des doublons."));
   if (c.state.conditions.some((s) => !Object.hasOwn(CONDITIONS, s))) throw new Error(uiText("État inconnu."));
+  // Munitions tirées depuis la dernière récupération, par sorte (fireAmmunition).
+  const fired = c.state.ammoFired;
+  if (fired !== undefined && (!fired || typeof fired !== "object" || Array.isArray(fired) || Object.entries(fired).some(([kind, count]) => !AMMUNITION_KINDS.includes(kind) || !Number.isInteger(count) || count < 0 || count > 9999))) throw new Error(uiText("Munitions tirées invalides."));
   if (!(c.equipment.armor in ARMORS)) throw new Error(uiText("Armure inconnue."));
-  if (c.equipment.weapons.length > 6 || c.equipment.weapons.some((w) => !plain(w) || !weaponOf(w.id) || !Number.isFinite(Number(w.magic || 0))))
+  if (c.equipment.weapons.length > 200 || c.equipment.weapons.some((w) => !plain(w) || !weaponOf(w.id) || !Number.isFinite(Number(w.magic || 0))))
     throw new Error(uiText("Arme inconnue."));
   for (const entry of c.equipment.weapons) {
     if (entry.instanceId !== undefined && (typeof entry.instanceId !== "string" || !entry.instanceId || entry.instanceId.length > 120)) throw new Error(uiText("error.weaponIdentity"));
@@ -46380,7 +46619,8 @@ function attackLineProfile(c, d, a) {
   const arrow = (a.weapon?.ranged || a.weapon?.thrown) && a.damageDice !== "0" ? weaponSpell(c, d, "lightning-arrow") : null;
   const parts = [{ label: a.name, notation: a.damageDice, bonus: a.damageBonus, type: a.type, weapon: true, ...(arrow && a.weapon.ranged && { on: false }) }];
   if (arrow) parts.push({ label: arrow.name, notation: arrow.notation, bonus: 0, type: damageTypeLabel(arrow.types), ...(!a.weapon.ranged && { on: false }), ...(arrow.event && { cost: { strike: arrow.event.id } }) });
-  return { name: a.name, attack: { bonus: a.attack, critThreshold: Math.min(a.critThreshold || 20, d.critThreshold, itemCritThreshold(c, a)) }, roll: { kind: "attack", weapon: a }, parts, options: attackOptions(c, d, { weapon: a }), note: [rage && uiText(" Le bonus de rage déclaré est déjà inclus.").trim(), arrow && uiText("attack.spell.lightningArrow"), itemAttackNote(c, a)].filter(Boolean).join(" ") };
+  // ammo : la sorte de munition que l'arme tire (« arrows »), dépensée au premier jet de l'attaque (spendRollOptions).
+  return { name: a.name, ammo: attackAmmunitionKind(c, a), attack: { bonus: a.attack, critThreshold: Math.min(a.critThreshold || 20, d.critThreshold, itemCritThreshold(c, a)) }, roll: { kind: "attack", weapon: a }, parts, options: attackOptions(c, d, { weapon: a }), note: [rage && uiText(" Le bonus de rage déclaré est déjà inclus.").trim(), arrow && uiText("attack.spell.lightningArrow"), itemAttackNote(c, a)].filter(Boolean).join(" ") };
 }
 
 // Domaines dont la Frappe divine ajoute des dégâts ; null : type de l'arme.
@@ -47015,7 +47255,8 @@ function itemAttackOptions(c, weapon) {
   });
   for (const stack of stacks.filter((entry, index) => stacks.findIndex((other) => other.ref === entry.ref) === index)) {
     const bonus = Number(itemVerifiedDefinition(stack).bonusWeapon), left = stacks.filter((other) => other.ref === stack.ref).reduce((sum, other) => sum + other.qty, 0);
-    options.push({ id: `item:${stack.ref}:ammo`, label: stack.name, note: uiText("{p0} restant(s)", { p0: left }), attack: { bonus }, damage: { bonus, type: weapon.type || "" }, cost: { ammo: stack.id } });
+    // ammoGroup : la liste « Munition » de la fenêtre de dés coche cette case quand le joueur choisit cette munition.
+    options.push({ id: `item:${stack.ref}:ammo`, ammoGroup: stack.ref, label: stack.name, note: uiText("{p0} restant(s)", { p0: left }), attack: { bonus }, damage: { bonus, type: weapon.type || "" }, cost: { ammo: stack.id } });
   }
   return options;
 }
@@ -47043,6 +47284,148 @@ function itemRollModes(c, roll) {
     if (key === "item|dmg|demon armor" && attack && item.instance.equippedSlot === "armor") modes.push({ id: `item:${item.id}:demon`, mode: "disadvantage", name: item.name, text: uiText("attack.item.vs.demon") });
   }
   return modes;
+}
+
+
+// Module : weapon-swaps
+
+/**
+ * Changer d'arme en combat (prototype validé par Luca le 22 novembre 2026) : les attaques de la fiche suivent les armes en main ;
+ * les autres armes à portée de main se prennent avec le coût du tour, affiché sans être compté, car l'app ne suit pas le tour.
+ * Règles 2014 (Manuel des joueurs, chapitres 5 et 9) : lâcher une arme ne coûte rien ; dégainer ou ramasser une arme est l'interaction
+ * avec un objet, gratuite une fois par tour ; mettre ou retirer un bouclier prend une action. On lâche plutôt qu'on range : c'est le moins cher.
+ * Étapes rendues : { kind: "shieldOff" | "drop" | "take" | "shieldOn", name, cost: "action" | "free" | "none" }.
+ */
+const _twoHanded = (entry) => !!entry && (!!weaponOf(entry.id)?.two || !!entry.twoHands);
+const _readyWeapons = (c) => weaponInstances(c).filter((entry) => entry.id !== "unarmed" && weaponOf(entry.id));
+// Exemplaires interchangeables : la même arme, au même bonus. Un exemplaire identique à une arme tenue reste avec elle (« Hachette ×2 »).
+const _sameWeapon = (entry) => JSON.stringify([entry.id, Number(entry.magic) || 0, !!entry.isMagical, !!entry.twoHands]);
+
+/** Mains du personnage. Sans main réglée, la première arme à portée de main (l'« Arme principale » d'Équiper) est tenue, avec le bouclier s'il est porté. */
+function swapHands(c) {
+  const held = heldWeapons(c);
+  if (held.main || held.off) return { main: held.main, off: held.off, shield: !!c.equipment.shield, assumed: false };
+  const main = _readyWeapons(c).find((entry) => !c.equipment.shield || !_twoHanded(entry)) || null;
+  return { main, off: _twoHanded(main) ? main : null, shield: !!c.equipment.shield, assumed: true };
+}
+
+/**
+ * Ligne d'attaque montrée en haut des Attaques : une arme tenue, ou une attaque qui ne vient pas d'une arme (mains nues, arme naturelle).
+ * Un exemplaire identique resté dans le sac n'y figure pas : « Hachette ×2 » en haut veut dire deux hachettes en main ; la paire se prend
+ * sous « En changeant d'arme » (23 novembre 2026).
+ */
+function attackInHand(c, attack, hands = swapHands(c)) {
+  if (!attack.instanceId || attack.twoWeapon) return true;
+  const entry = _readyWeapons(c).find((weapon) => weapon.instanceId === attack.instanceId);
+  return !entry || [hands.main, hands.off].some((held) => held?.instanceId === entry.instanceId);
+}
+
+/** Fiche après le changement : mains et bouclier, inventaire synchronisé (bouclier rangé ou porté, armes tenues ou à portée). */
+function applyWeaponSwap(c, option) {
+  const next = clone(c);
+  next.equipment.hands = { main: option.hands.main, off: option.hands.off };
+  if (option.shield !== !!c.equipment.shield) {
+    next.equipment.shield = option.shield;
+    next.equipment.shieldInventoryId = option.shield ? option.shieldItemId : null;
+    const item = option.shield && next.inventory.find((entry) => entry.id === option.shieldItemId);
+    if (item?.instance) item.instance.equippedSlot = "shield";
+  }
+  return syncInventoryEquipmentChoices(next);
+}
+
+function _swapOption(c, d, hands, entry, withShield, shieldItemId) {
+  const two = _twoHanded(entry), keepsMain = hands.main?.instanceId === entry.instanceId, mainTwoHanded = !!hands.main && hands.off?.instanceId === hands.main.instanceId;
+  const steps = [], dropped = [];
+  let off = two ? entry : mainTwoHanded ? null : hands.off, shield = hands.shield;
+  if (two && hands.shield) { steps.push({ kind: "shieldOff", cost: "action" }); shield = false; }
+  if (withShield) { off = null; shield = true; }
+  if (!keepsMain && hands.main) dropped.push(hands.main);
+  if ((two || withShield) && hands.off && !mainTwoHanded && hands.off.instanceId !== hands.main?.instanceId) dropped.push(hands.off);
+  // Nom de la ligne d'attaque (« Hachette +1 »), celui du catalogue à défaut.
+  const named = (weapon) => d.attacks.find((attack) => attack.instanceId === weapon.instanceId && !attack.twoWeapon)?.name || weaponOf(weapon.id).name;
+  for (const weapon of dropped) steps.push({ kind: "drop", name: named(weapon), cost: "none" });
+  if (!keepsMain) steps.push({ kind: "take", name: named(entry), cost: "free" });
+  if (withShield) steps.push({ kind: "shieldOn", cost: "action" });
+  const option = { id: withShield ? `${entry.instanceId}|shield` : entry.instanceId, instanceId: entry.instanceId, withShield, name: named(entry), steps,
+    cost: steps.some((step) => step.cost === "action") ? "action" : "free", hands: { main: entry.instanceId, off: off?.instanceId || null }, shield, shieldItemId };
+  const after = applyWeaponSwap(c, option), dAfter = derive(after);
+  const before = twoWeaponStatus(c)?.allowed && !hands.assumed, gained = !!twoWeaponStatus(after)?.allowed;
+  // index : la ligne de l'arme dans les attaques de la fiche, comme le data-index des boutons d'une arme en main.
+  // unskilledShield : le bouclier pris n'est pas maîtrisé (désavantage aux jets de FOR et DEX, aucun sort).
+  return { ...option, unskilledShield: withShield && itemProficiency(c, { kind: "armor", id: "shield" }) === false, ac: [d.ac, dAfter.ac], twoWeapon: before && !gained ? "lost" : !before && gained ? "gained" : "", index: d.attacks.findIndex((attack) => attack.instanceId === entry.instanceId && !attack.twoWeapon),
+    line: dAfter.attacks.find((attack) => attack.instanceId === entry.instanceId && !attack.twoWeapon) || null };
+}
+
+/**
+ * Paire d'armes, une dans chaque main, pour l'attaque à deux armes (Manuel des joueurs, Combat à deux armes : une arme de corps à corps légère
+ * dans chaque main, ou à une main avec Ambidextre). Lâcher ce qu'on tient ne coûte rien ; prendre la première arme est l'interaction du tour ;
+ * la seconde demande une action, sauf avec Ambidextre, qui dégaine deux armes à une main d'un coup (demande de Luca du 23 novembre 2026).
+ */
+function _pairOption(c, d, hands, first, second, dualWielder) {
+  const named = (weapon) => d.attacks.find((attack) => attack.instanceId === weapon.instanceId && !attack.twoWeapon)?.name || weaponOf(weapon.id).name;
+  const held = [hands.main, hands.off].filter((weapon, i, all) => weapon && all.findIndex((other) => other?.instanceId === weapon.instanceId) === i);
+  const kept = new Set([first.instanceId, second.instanceId]), steps = [];
+  if (hands.shield) steps.push({ kind: "shieldOff", cost: "action" });
+  for (const weapon of held) if (!kept.has(weapon.instanceId)) steps.push({ kind: "drop", name: named(weapon), cost: "none" });
+  [first, second].filter((weapon) => !held.some((entry) => entry.instanceId === weapon.instanceId))
+    .forEach((weapon, i) => steps.push({ kind: "take", name: named(weapon), cost: i === 0 || dualWielder ? "free" : "action" }));
+  const option = { id: `${first.instanceId}+${second.instanceId}`, instanceId: first.instanceId, pair: true, withShield: false, name: _pairName(first, second, named), steps,
+    cost: steps.some((step) => step.cost === "action") ? "action" : "free", hands: { main: first.instanceId, off: second.instanceId }, shield: false, shieldItemId: null };
+  const after = applyWeaponSwap(c, option), dAfter = derive(after);
+  if (!twoWeaponStatus(after)?.allowed) return null;
+  return { ...option, unskilledShield: false, ac: [d.ac, dAfter.ac], twoWeapon: twoWeaponStatus(c)?.allowed && !hands.assumed ? "" : "gained",
+    index: d.attacks.findIndex((attack) => attack.instanceId === first.instanceId && !attack.twoWeapon),
+    line: dAfter.attacks.find((attack) => attack.instanceId === first.instanceId && !attack.twoWeapon) || null };
+}
+/** « Dague ×2 » pour deux exemplaires, comme la carte du haut une fois tenus ; sinon « Épée courte et dague » (nom du catalogue en minuscule après « et »). */
+function _pairName(first, second, named) {
+  if (_sameWeapon(first) === _sameWeapon(second)) return uiText("weaponSwap.pairSame", { name: named(first) });
+  const plain = named(second) === weaponOf(second.id).name && uiLanguage() === "fr";
+  return uiText("weaponSwap.pair", { first: named(first), second: plain ? named(second).charAt(0).toLocaleLowerCase("fr") + named(second).slice(1) : named(second) });
+}
+/** Paires proposées : deux exemplaires d'une même arme, puis les deux meilleures armes différentes ; jamais la paire déjà tenue. */
+function _pairOptions(c, d, hands) {
+  const dualWielder = collect(c).feats.includes("dualWielder"), kinds = new Map();
+  const heldFirst = [hands.main, hands.off, ..._readyWeapons(c)].filter((entry, i, all) => entry && all.findIndex((other) => other?.instanceId === entry.instanceId) === i);
+  for (const entry of heldFirst) {
+    const info = weaponOf(entry.id);
+    if (_twoHanded(entry) || info.ranged || !(info.light || dualWielder)) continue;
+    const key = _sameWeapon(entry);
+    kinds.set(key, [...(kinds.get(key) || []), entry]);
+  }
+  const average = (entry) => { const [count, sides] = String(weaponOf(entry.id).damage || "").split("d").map(Number); return (count || 0) * ((sides || 0) + 1) / 2 + (Number(entry.magic) || 0); };
+  const pairs = [...kinds.values()].filter((list) => list.length >= 2).map((list) => [list[0], list[1]]);
+  const best = [...kinds.values()].map((list) => list[0]).sort((a, b) => average(b) - average(a));
+  if (best.length >= 2) pairs.push([best[0], best[1]]);
+  const heldKey = [hands.main, hands.off].filter(Boolean).map(_sameWeapon).sort().join("|");
+  return pairs.filter((pair) => pair.map(_sameWeapon).sort().join("|") !== heldKey).map(([first, second]) => _pairOption(c, d, hands, first, second, dualWielder)).filter(Boolean);
+}
+
+/**
+ * Changements proposés sous « En changeant d'arme » : chaque arme à portée de main qui n'est pas tenue (un exemplaire par arme identique),
+ * puis, quand un bouclier attend dans le sac, la première arme de corps à corps à une main avec ce bouclier.
+ */
+// La fiche est remplacée à chaque modification : ses changements se calculent une fois par fiche et par langue, pas à chaque affichage.
+const _swapCache = new WeakMap();
+function weaponSwapOptions(c, d) {
+  const language = uiLanguage(), cached = _swapCache.get(c);
+  if (cached?.language === language) return cached.options;
+  const options = _weaponSwapOptions(c, d || derive(c));
+  _swapCache.set(c, { language, options });
+  return options;
+}
+function _weaponSwapOptions(c, d) {
+  const hands = swapHands(c), seen = new Set([hands.main, hands.off].filter(Boolean).map(_sameWeapon)), options = [];
+  for (const entry of _readyWeapons(c)) {
+    const key = _sameWeapon(entry);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    options.push(_swapOption(c, d, hands, entry, false, null));
+  }
+  const shieldItem = hands.shield ? null : inventoryEquipmentChoices(c, "shield")[0]?.item;
+  const melee = shieldItem && [hands.main, ..._readyWeapons(c)].find((entry) => entry && !_twoHanded(entry) && !weaponOf(entry.id).ranged);
+  if (melee) options.push(_swapOption(c, d, hands, melee, true, shieldItem.id));
+  return [...options, ..._pairOptions(c, d, hands)];
 }
 
 
@@ -49751,6 +50134,11 @@ const iconPaths={
  paw:'<ellipse cx="5.5" cy="10.5" rx="2" ry="2.6"/><ellipse cx="9.5" cy="5.5" rx="2" ry="2.6"/><ellipse cx="14.5" cy="5.5" rx="2" ry="2.6"/><ellipse cx="18.5" cy="10.5" rx="2" ry="2.6"/><path d="M12 12.5c-3 0-6.5 4-6.5 6.6 0 2.2 2.6 2.6 6.5 1.6 3.9 1 6.5.6 6.5-1.6 0-2.6-3.5-6.6-6.5-6.6Z"/>',
  leaf:'<path d="M20 3C8 1 1 9 5 16s16 4 15-13Z"/><path d="m3 22 13-13M7 18v-7m5 2 6 1"/>',
  wind:'<path d="M3 8h12a3 3 0 1 0-3-3M2 12h17a3 3 0 1 1-3 3M3 16h6a3 3 0 1 1-3 3"/>',
+ shop:'<path d="M4 9.5V20h16V9.5"/><path d="M3 9.5 5 4h14l2 5.5c0 1.4-1.1 2.5-2.5 2.5S16 10.9 16 9.5c0 1.4-1.1 2.5-2.5 2.5h-3C9.1 12 8 10.9 8 9.5 8 10.9 6.9 12 5.5 12S3 10.9 3 9.5Z"/><path d="M10 20v-5h4v5"/>',
+ ammo:'<path d="M4 20 18 6"/><path d="M13 5h6v6"/><path d="m4 20 1.2-4M4 20l4-1.2M7.5 16.5l-1.2 3.3M7.5 16.5l3.3-1.2"/>',
+ armor:'<path d="M8 3c1 1.6 2.4 2.4 4 2.4S15 4.6 16 3l3.5 2.5-1.8 4.2V19a2 2 0 0 1-2 2H8.3a2 2 0 0 1-2-2V9.7L4.5 5.5Z"/><path d="M9.5 11h5M12 8v13M9 15.5h6"/>',
+ sword:'<path d="M19.5 4.5 10 14"/><path d="M19.5 4.5h-3.8L8.2 12M19.5 4.5v3.8L12 15.8"/><path d="m6.5 11.5 6 6"/><path d="m8.2 15.8-4 4"/><path d="m3.6 19.2 1.2 1.2"/>',
+ hand:'<path d="M8.5 12.5V6a1.4 1.4 0 0 1 2.8 0v5"/><path d="M11.3 10.5V4.6a1.4 1.4 0 0 1 2.8 0v6"/><path d="M14.1 10.6V6a1.4 1.4 0 0 1 2.8 0v5.2"/><path d="M16.9 9.2a1.4 1.4 0 0 1 2.8 0V14c0 4-2.8 7-6.6 7h-.8c-2.6 0-4.4-1.2-5.8-3.2L4 13.5a1.5 1.5 0 0 1 2.4-1.8l2.1 2.3"/>',
  shield:'<path d="M12 2 3 6v6c0 5 9 10 9 10s9-5 9-10V6Z"/><path d="m8 12 3 3 5-6"/>',
  bow:'<path d="M5 2c15 6 15 14 0 20L16 12ZM3 12h19m-4-3 4 3-4 3"/>',
  dagger:'<path d="m15 3 6-1-1 6L9 19l-4-4Z"/><path d="m3 13 8 8M3 21l4-4"/>',
@@ -56188,7 +56576,7 @@ function proficiencyPill(proficient) {
 }
 function renderInventoryRow(c, item, acc = collect(c)) {
   const state = item.instance, slots = inventoryItemSlots(item), adapter = itemRuntimeAdapter(item);
-  return `<details class="inventory-item carnet-item-row" data-detail="inventory-item-${esc(item.id)}"><summary>${icon(["armor", "shield"].includes(state?.equippedSlot) ? "shield" : state?.equippedSlot === "ready" ? "swords" : "bag", 18)}<span><span class="inventory-name">${esc(item.name)} <span class="pill outline">×${item.qty}</span>${proficiencyPill(itemProficiency(c, { item }, acc))}</span><span class="inventory-meta">${item.weightUnknown ? uiText("Poids non renseigné") : uiText("units.perItem", { value: formatCarriedWeight(item.weight) })}${state?.charges ? ` · ${state.charges.current} / ${state.charges.max} ${esc(inventoryChargesLabel(item))}` : ""}${state?.equippedSlot ? ` · ${esc(inventorySlotLabel(state.equippedSlot))}` : ""}${state && !state.carried ? ` · ${esc(uiText("items.leftAtCamp"))}` : ""}${state?.container === "holding" && item.qty > 0 && inventoryItemCarried(c, item) ? ` · ${esc(uiText("items.unlimitedCarry"))}` : ""}</span></span>${icon("chevron", 16)}</summary><div class="carnet-item-detail">${item.description ? `<p class="small preserve">${esc(item.description)}</p>` : ""}${adapter.personal ? `<p class="small muted">${uiText("{p0} : {p1} · {p2} · Autres propriétés : voir la référence.", { p0: inventoryPersonalBonuses(c).some((bonus) => bonus.itemId === item.id) ? uiText("Actif") : uiText("Inactif"), p1: esc(inventoryBonusSummary(adapter.personal)), p2: esc(state.reference.source) })}</p>` : ""}${adapter.textual && !adapter.personal ? `<p class="small muted">${uiText("Propriétés textuelles : voir la référence.")}</p>` : ""}${adapter.kind === "unsupported" ? `<p class="small muted">${esc(adapter.reason)}</p>` : ""}<div class="actions section-gap">${renderInventorySpellActions(c, item)}${renderInventoryUseActions(c, item)}${equipmentPack(item) ? button(uiText("Convertir en objets"), "convert-equipment-pack", `data-id="${esc(item.id)}"`, "small-btn ghost") : ""}${state?.ammunition && ammunitionTracking() && item.qty >= 1 ? button(uiText("Consommer 1"), "consume-ammunition", `data-id="${esc(item.id)}"`, "small-btn ghost") : ""}${!state?.ammunition && uiGear[item.ref]?.kind === "ammo" ? button(uiText("Convertir en {p0} unités par lot", { p0: uiGear[item.ref].count }), "convert-ammunition", `data-id="${esc(item.id)}"`, "small-btn ghost") : ""}${slots.length && item.qty >= 1 ? button(uiText(state?.equippedSlot ? "items.unequip" : "items.equip"), state?.equippedSlot ? "unequip-instance" : "equip-instance", `data-id="${esc(item.id)}"`, "small-btn ghost") : ""}</div><div class="item-actions">${smallIcon("edit", "edit-item", uiText("Modifier cet objet"), `data-id="${esc(item.id)}"`)}${smallIcon("trash", "delete-item", uiText("Retirer cet objet"), `data-id="${esc(item.id)}"`)}</div>${inventorySource(item)}</div></details>`;
+  return `<details class="inventory-item carnet-item-row" data-detail="inventory-item-${esc(item.id)}"><summary>${icon(["armor", "shield"].includes(state?.equippedSlot) ? "shield" : state?.equippedSlot === "ready" ? "swords" : "bag", 18)}<span><span class="inventory-name">${esc(item.name)} <span class="pill outline">×${item.qty}</span>${proficiencyPill(itemProficiency(c, { item }, acc))}</span><span class="inventory-meta">${item.weightUnknown ? uiText("Poids non renseigné") : uiText("units.perItem", { value: formatCarriedWeight(item.weight) })}${state?.charges ? ` · ${state.charges.current} / ${state.charges.max} ${esc(inventoryChargesLabel(item))}` : ""}${state?.equippedSlot && state.equippedSlot !== "ready" ? ` · ${esc(inventorySlotLabel(state.equippedSlot))}` : ""}${state && !state.carried ? ` · ${esc(uiText("items.leftAtCamp"))}` : ""}${state?.container === "holding" && item.qty > 0 && inventoryItemCarried(c, item) ? ` · ${esc(uiText("items.unlimitedCarry"))}` : ""}</span></span>${icon("chevron", 16)}</summary><div class="carnet-item-detail">${item.description ? `<p class="small preserve">${esc(item.description)}</p>` : ""}${adapter.personal ? `<p class="small muted">${uiText("{p0} : {p1} · {p2} · Autres propriétés : voir la référence.", { p0: inventoryPersonalBonuses(c).some((bonus) => bonus.itemId === item.id) ? uiText("Actif") : uiText("Inactif"), p1: esc(inventoryBonusSummary(adapter.personal)), p2: esc(state.reference.source) })}</p>` : ""}${adapter.textual && !adapter.personal ? `<p class="small muted">${uiText("Propriétés textuelles : voir la référence.")}</p>` : ""}${adapter.kind === "unsupported" ? `<p class="small muted">${esc(adapter.reason)}</p>` : ""}<div class="actions section-gap">${renderInventorySpellActions(c, item)}${renderInventoryUseActions(c, item)}${equipmentPack(item) ? button(uiText("Convertir en objets"), "convert-equipment-pack", `data-id="${esc(item.id)}"`, "small-btn ghost") : ""}${state?.ammunition && ammunitionTracking() && item.qty >= 1 ? button(uiText("Consommer 1"), "consume-ammunition", `data-id="${esc(item.id)}"`, "small-btn ghost") : ""}${!state?.ammunition && uiGear[item.ref]?.kind === "ammo" ? button(uiText("Convertir en {p0} unités par lot", { p0: uiGear[item.ref].count }), "convert-ammunition", `data-id="${esc(item.id)}"`, "small-btn ghost") : ""}${slots.length && item.qty >= 1 ? button(uiText(state?.equippedSlot ? "items.unequip" : "items.equip"), state?.equippedSlot ? "unequip-instance" : "equip-instance", `data-id="${esc(item.id)}"`, "small-btn ghost") : ""}</div><div class="item-actions">${smallIcon("edit", "edit-item", uiText("Modifier cet objet"), `data-id="${esc(item.id)}"`)}${smallIcon("trash", "delete-item", uiText("Retirer cet objet"), `data-id="${esc(item.id)}"`)}</div>${inventorySource(item)}</div></details>`;
 }
 function renderInventorySpellActions(c, item) {
   const storage = itemSpellStorageDefinition(item), recovery = itemSlotRecoveryDefinition(item), state = item.instance;
@@ -56302,7 +56690,7 @@ function renderInventory(c) {
       ({ attack: a, count }) =>
         `<div class="equipment-summary"><div><div class="item-label">${uiText("Arme")}</div><div class="item-name">${esc(attackGroupName({ attack: a, count }))}</div></div><span class="pill">${signed(a.attack)} · ${esc(a.damageDice)} ${signed(a.damageBonus)}</span></div>`,
     )
-    .join("")}<p class="small section-gap">${esc(uiText("equipment.mainHand"))} : ${esc(hands.main ? weaponOf(hands.main.id)?.name : uiText("equipment.free"))} · ${esc(uiText("equipment.offHand"))} : ${esc(c.equipment.shield ? uiText("equipment.shield") : hands.off ? weaponOf(hands.off.id)?.name : uiText("equipment.free"))}</p><p class="tiny muted section-gap">${uiText("CA : {p16}.", { p16: esc(d.acExplanation) })}</p>${d.stealthDisadvantage ? notice(armorerStatus(c).active && armorerStatus(c).model === "infiltrator" ? uiText("Discrétion : l’avantage du Champ d’atténuation annule le désavantage de cette armure.") : uiText("Cette armure impose le désavantage aux tests de Discrétion."), "warning") : ""}${!d.armorProficient ? notice(uiText("Armure ou bouclier non maîtrisé : tu ne peux pas lancer de sorts avec cet équipement."), "warning") : ""}${d.strTooLow ? notice(uiText("Force insuffisante pour {p0} : vitesse réduite de 3 m.", { p0: esc(armor.name) }), "warning") : ""}<section class="panel"><h2 class="panel-title">${uiText("Harmonisations : {p25}/{p26}", { p25: inventoryAttunementStatus(c).count, p26: inventoryAttunementStatus(c).limit })}</h2>${button(uiText("Corriger les harmonisations"), "attunements", "", "small-btn ghost")}</section></details><div class="stack"><details class="carnet-coins" data-detail="inventory-coins" open><summary><strong>${uiText("Bourse")}</strong><span>${shopCoins(shopPurse(c))}</span></summary><div class="coins">${icon("gem", 28)}<div><strong>${shopCoins(shopPurse(c))}</strong></div></div><div class="purse-actions">${button(uiText("shop.buy"), "shop-open", "", "primary")}${button(uiText("Ajuster"), "gold", "", "ghost")}</div></details></div></div>${renderRunePanel(c)}</div><section class="section-gap carnet-inventory-list">${
+    .join("")}<p class="small section-gap">${esc(uiText("equipment.mainHand"))} : ${esc(hands.main ? weaponOf(hands.main.id)?.name : uiText("equipment.free"))} · ${esc(uiText("equipment.offHand"))} : ${esc(c.equipment.shield ? uiText("equipment.shield") : hands.off ? weaponOf(hands.off.id)?.name : uiText("equipment.free"))}</p><p class="tiny muted section-gap">${uiText("CA : {p16}.", { p16: esc(d.acExplanation) })}</p>${d.stealthDisadvantage ? notice(armorerStatus(c).active && armorerStatus(c).model === "infiltrator" ? uiText("Discrétion : l’avantage du Champ d’atténuation annule le désavantage de cette armure.") : uiText("Cette armure impose le désavantage aux tests de Discrétion."), "warning") : ""}${!d.armorProficient ? notice(uiText("Armure ou bouclier non maîtrisé : tu ne peux pas lancer de sorts avec cet équipement."), "warning") : ""}${d.strTooLow ? notice(uiText("Force insuffisante pour {p0} : vitesse réduite de 3 m.", { p0: esc(armor.name) }), "warning") : ""}<section class="panel"><h2 class="panel-title">${uiText("Harmonisations : {p25}/{p26}", { p25: inventoryAttunementStatus(c).count, p26: inventoryAttunementStatus(c).limit })}</h2>${button(uiText("Corriger les harmonisations"), "attunements", "", "small-btn ghost")}</section></details><div class="stack"><details class="carnet-coins" data-detail="inventory-coins" open><summary><strong>${uiText("Bourse")}</strong><span>${shopCoins(shopPurse(c))}</span></summary><div class="coins">${icon("gem", 28)}<div><strong>${shopCoins(shopPurse(c))}</strong></div></div><div class="purse-actions">${button(uiText("shop.merchant"), "shop-open", "", "primary")}${button(uiText("Ajuster"), "gold", "", "ghost")}</div></details></div></div>${renderRunePanel(c)}</div><section class="section-gap carnet-inventory-list">${
     c.inventory.length
       ? `<div class="search-wrap">${icon("search", 18)}<input id="inventory-search" class="search-input" data-bind="ui.inventoryQuery" value="${esc(ui.inventoryQuery)}" placeholder="${uiText("Rechercher dans le sac…")}" aria-label="${uiText("Rechercher dans le sac")}"></div><div class="inventory-list">${items
           .map(
@@ -56320,6 +56708,54 @@ function ammunitionTracking() {
 function renderAttunementChoices(c) {
   const status = inventoryAttunementStatus(c);
   return `<section class="review-section" data-attunement-choices><h3>${uiText("Harmonisations : {p0}/{p1}", { p0: status.count, p1: status.limit })}</h3><p class="small">${uiText("Choisis les objets à conserver harmonisés. Tous les exemplaires restent dans l’inventaire. Limite : {p2}.", { p2: status.level >= 10 ? uiText("Artificier niveau {p0}", { p0: status.level }) : uiText("3 objets") })}</p>${!status.items.length ? ("<p class=\"small\">" + uiText("Aucun objet avec harmonisation dans ton inventaire.") + "</p>") : ""}${status.items.map((item, index) => `<div class="summary-row"><span>${esc(item.name)} <small class="muted">${uiText("(exemplaire {p1})", { p1: index + 1 })}</small></span>${button(item.instance.attunement.active ? uiText("Terminer") : uiText("Harmoniser"), "toggle-repair-attunement", `data-id="${esc(item.id)}" aria-pressed="${item.instance.attunement.active}" ${!item.instance.attunement.active && status.count >= status.limit ? "disabled" : ""}`, "small-btn ghost")}</div>`).join("")}</section>`;
+}
+/** Armure de mage dans « Protection » : chemin unique, son lancement ; la case ne sert qu'à mettre fin à une armure posée par l'ancienne case. */
+function equipmentMageArmorField(c, f) {
+  // Armure de mage : chemin unique, son lancement (emplacement, utilisation d'un don ou à volonté), décision de Luca du 21 novembre 2026.
+  // La case ne sert plus qu'à mettre fin à une armure posée par l'ancienne case ; posée par un sort reçu, elle se termine dans États et effets.
+  const mageSpell = uiSpellById(c, "mage-armor"), mageCastable = !!mageSpell && Object.keys(spellCastOptions(c, mageSpell).modes || {}).length > 0;
+  const mageField = c.equipment.mageArmor ? checkField(uiText("Armure de mage active"), "form.mageArmor", f.mageArmor, uiText("Sans armure : CA de 13 + DEX. Les formules de défense ne s’additionnent pas."))
+    : activeReceivedEffects(c).some((entry) => entry.spellId === "mage-armor") ? `<p class="small" data-mage-armor="active">${uiText("Armure de mage active")}</p>`
+      : mageCastable ? `<div class="section-gap">${button(uiText("Lancer {p0}", { p0: mageSpell.name }), "equip-cast-mage-armor", "", "small-btn")}</div>` : "";
+  return mageField;
+}
+/** Icône d'une arme : arc pour le tir, hache, dague pour une arme légère de corps à corps, épée sinon. */
+function equipmentWeaponIcon(id) {
+  const weapon = weaponOf(id) || {};
+  return weapon.ranged ? "bow" : /axe|halberd|glaive/.test(id) ? "axe" : weapon.light ? "dagger" : "sword";
+}
+/**
+ * Haut de l'écran Équipement (version 1 allégée, validée par Luca le 22 novembre 2026) : « Protection · CA » (armure, bouclier, Armure de mage),
+ * « En main » (main principale, seconde main), les armes à portée de main, puis « Autres combinaisons » avec leur coût en combat et leur effet.
+ * Toucher une ligne ouvre le choix de cet emplacement. Les mains non réglées suivent la même règle que les Attaques (swapHands).
+ */
+function renderEquipmentSummary(c, next) {
+  const f = ui.form, d = derive(next), acc = collect(c), hands = swapHands(next), open = ui.equipPick;
+  const line = (entry) => entry && d.attacks.find((attack) => attack.instanceId === entry.instanceId && !attack.twoWeapon);
+  const name = (entry) => line(entry)?.name || weaponOf(entry?.id)?.name || entry?.id || "";
+  const meta = (entry) => { const a = line(entry); return a ? `${signed(a.attack)} · ${a.damageDice} ${signed(a.damageBonus)} ${a.type}` : ""; };
+  const unskilled = (entry) => entry ? proficiencyPill(weaponProficiency(next, { id: entry.id, instanceId: entry.instanceId }, acc).proficient) : "";
+  const row = (slot, label, title, detail, iconName, pill = "", tap = true) => `<${tap ? "button" : "div"} ${tap ? `type="button" data-action="equip-pick-open" data-slot="${slot}" aria-expanded="${open === slot}"` : ""} class="eq-slot${tap ? "" : " still"}" data-equip-slot="${slot}"><span class="eq-ico">${icon(iconName, 22)}</span><span class="eq-text"><small>${esc(label)}</small><strong>${esc(title)}</strong>${detail || pill ? `<span class="eq-meta">${esc(detail)}${pill}</span>` : ""}</span>${tap ? `<span class="eq-chev">${icon("chevron", 16)}</span>` : ""}</${tap ? "button" : "div"}>`;
+  const picks = (slot, options) => open !== slot ? "" : `<div class="eq-picks" data-picks="${slot}">${options.map((option) => `<button type="button" class="eq-pick${option.on ? " on" : ""}" data-action="equip-pick" data-slot="${slot}" data-value="${esc(option.value)}"><span><strong>${esc(option.title)}</strong>${option.detail ? `<small>${esc(option.detail)}</small>` : ""}</span>${option.pill || ""}</button>`).join("")}</div>`;
+  // Protection.
+  const formula = (armor) => armor.type === "none" ? uiText("equipment.unarmored") : uiText("{p0} · CA {p1}{p2}", { p0: uiText(`equipment.armorType.${armor.type}`), p1: armor.base, p2: armor.type === "light" ? " + DEX" : armor.type === "medium" ? " + DEX (max 2)" : "" });
+  const carriedArmors = inventoryEquipmentChoices(c, "armor"), carriedShields = inventoryEquipmentChoices(c, "shield");
+  const wornArmor = carriedArmors.find(({ item }) => item.id === f.armorInventoryId), armor = uiArmors[f.armor] || uiArmors.none;
+  const armorOptions = [{ value: "none", title: uiArmors.none.name, detail: uiText("equipment.unarmored"), on: f.armor === "none" },
+    ...carriedArmors.map(({ item, adapter }) => ({ value: item.id, title: item.name, detail: formula(uiArmors[adapter.id]), on: item.id === f.armorInventoryId, pill: proficiencyPill(itemProficiency(c, { item }, acc)) }))];
+  const armorRow = row("armor", uiText("Armure"), f.armor === "none" ? uiArmors.none.name : wornArmor?.item.name || armor.name, formula(armor), "armor", f.armor === "none" ? "" : proficiencyPill(itemProficiency(c, { kind: "armor", id: f.armor }, acc))) + picks("armor", armorOptions);
+  const shieldPill = proficiencyPill(itemProficiency(c, { kind: "armor", id: "shield" }, acc));
+  const shieldRow = carriedShields.length || f.shield ? `<button type="button" data-action="equip-shield-toggle" aria-pressed="${!!f.shield}" class="eq-slot" data-equip-slot="shield"><span class="eq-ico">${icon("shield", 22)}</span><span class="eq-text"><small>${esc(uiText("equipment.shieldLabel"))}</small><strong>${esc(f.shield ? carriedShields.find(({ item }) => item.id === f.shieldInventoryId)?.item.name || uiText("equipment.shieldLabel") : uiText("equipment.shieldNone"))}</strong><span class="eq-meta">${esc(f.shield ? uiText("equipment.shieldWorn") : uiText("equipment.shieldInBag", { count: carriedShields.length }))}${shieldPill}</span></span><span class="eq-toggle">${esc(uiText(f.shield ? "equipment.shieldOff" : "equipment.shieldOn"))}</span></button>` : "";
+  // En main.
+  const ready = f.weapons.filter((entry) => entry.id !== "unarmed"), twoHanded = !!hands.main && hands.off?.instanceId === hands.main.instanceId;
+  const free = { value: "", title: uiText("equipment.freeHand"), detail: "" };
+  const handOptions = (hand) => [...ready.filter((entry) => hand === "main" || !(weaponOf(entry.id)?.two || entry.twoHands)).map((entry) => ({ value: entry.instanceId, title: name(entry), detail: meta(entry), on: hands[hand]?.instanceId === entry.instanceId, pill: unskilled(entry) })), { ...free, on: !hands[hand] }];
+  const mainRow = row("main", uiText(twoHanded ? "equipment.bothHands" : "equipment.mainHand"), hands.main ? name(hands.main) : uiText("equipment.freeHand"), meta(hands.main), hands.main ? equipmentWeaponIcon(hands.main.id) : "hand", unskilled(hands.main)) + picks("main", handOptions("main"));
+  const offRow = twoHanded ? "" : f.shield ? row("off", uiText("equipment.offHand"), uiText("equipment.offShield"), "", "shield", "", false)
+    : row("off", uiText("equipment.offHand"), hands.off ? name(hands.off) : uiText("equipment.freeHand"), meta(hands.off), hands.off ? equipmentWeaponIcon(hands.off.id) : "hand", unskilled(hands.off)) + picks("off", handOptions("off"));
+  // Autres combinaisons : les mêmes changements que dans les Attaques, avec « Choisir ».
+  const combos = weaponSwapOptions(next, d).filter((option) => option.line).map((option) => `<div class="attack-card" data-equip-combo="${esc(option.id)}"><div class="attack-main"><div class="attack-title">${esc(weaponSwapName(option))}${weaponSwapCost(option.cost)}${option.line.proficient ? "" : (" <span class=\"pill red\">" + uiText("non maîtrisée") + "</span>")}</div><div class="attack-meta">${attackMeta(option.line)}</div>${weaponSwapEffects(option).map((text) => `<div class="attack-effect">${esc(text)}</div>`).join("")}</div>${button(uiText("equipment.choose"), "equip-combo", `data-id="${esc(option.id)}"`, "small-btn")}</div>`).join("");
+  return `<div class="eq-grp first" data-equip-ac="${d.ac}">${esc(uiText("equipment.protection", { ac: d.ac }))}</div>${armorRow}${shieldRow}${equipmentMageArmorField(c, f)}<div class="eq-grp">${esc(uiText("equipment.inHand"))}</div>${mainRow}${offRow}${combos ? `<div class="eq-grp">${esc(uiText("equipment.combos"))}</div>${combos}` : ""}`;
 }
 function renderEquipmentFields(c) {
   const f = ui.form;
@@ -56348,7 +56784,7 @@ function renderEquipmentFields(c) {
       const options = { unarmed: uiText("Frappe à mains nues") };
       for (const entry of carried) {
         // Le filtre ne retire jamais l’arme de la rangée ; un exemplaire ne sert qu’à une rangée.
-        if (entry.item.id !== w.inventoryId && (taken.has(entry.item.id) || ui.equipmentProficientOnly && !weaponProficiency(weaponCharacter, { id: entry.adapter.id, instanceId: entry.item.id }, weaponTraining).proficient)) continue;
+        if (entry.item.id !== w.inventoryId && taken.has(entry.item.id)) continue;
         options[entry.item.id] = unskilled(carriedLabel(entry), weaponProficiency(weaponCharacter, { id: entry.adapter.id, instanceId: entry.item.id }, weaponTraining).proficient);
       }
       // Une arme enregistrée avant l’inventaire, ou qui n’est plus portée, reste affichée telle quelle.
@@ -56357,17 +56793,14 @@ function renderEquipmentFields(c) {
       const free = !w.inventoryId;
       // Le texte d'une liste fermée peut être coupé : l'arme choisie non maîtrisée porte aussi la pastille sous la liste.
       const chosen = w.id === "unarmed" ? "" : proficiencyPill(weaponProficiency(weaponCharacter, { id: w.id, instanceId: w.instanceId }, weaponTraining).proficient).trim();
-      return `<div class="weapon-row"><div class="form-grid">${selectField(i === 0 ? uiText("Arme principale") : uiText("Arme {p0}", { p0: i + 1 }), `form.weapons.${i}.source`, current, options, chosen)}${free ? field(uiText("Bonus magique"), `form.weapons.${i}.magic`, w.magic || 0, "number", "", 'min="-5" max="10" step="1"') : ""}</div>${free ? checkField(uiText("Autre propriété magique"), `form.weapons.${i}.isMagical`, !!w.isMagical, uiText("Pour une arme magique sans bonus chiffré, notamment lors du lien de pacte.")) : ""}${info?.versatile ? checkField(uiText("Tenue à deux mains ({p0})", { p0: info.versatile }), `form.weapons.${i}.twoHands`, w.twoHands) : ""}${f.weapons.length > 1 ? button(uiText("{p0} Retirer", { p0: icon("trash", 14) }), "equip-remove-weapon", `data-index="${i}"`, "small-btn ghost") : ""}</div>`;
+      // Arme du sac : prête d'elle-même (plus de notion « à portée de main », 22 novembre 2026), la rangée la nomme sans liste à changer.
+      const label = i === 0 ? uiText("Arme principale") : uiText("Arme {p0}", { p0: i + 1 });
+      const head = free ? selectField(label, `form.weapons.${i}.source`, current, options, chosen) : `<div class="field" data-weapon-item="${esc(w.inventoryId)}"><span>${esc(label)}</span><strong class="weapon-row-name">${esc(carried.some((entry) => entry.item.id === w.inventoryId) ? carriedLabel(carried.find((entry) => entry.item.id === w.inventoryId)) : options[current])}</strong>${chosen ? `<small>${chosen}</small>` : ""}</div>`;
+      return `<div class="weapon-row"><div class="form-grid">${head}${free ? field(uiText("Bonus magique"), `form.weapons.${i}.magic`, w.magic || 0, "number", "", 'min="-5" max="10" step="1"') : ""}</div>${free ? checkField(uiText("Autre propriété magique"), `form.weapons.${i}.isMagical`, !!w.isMagical, uiText("Pour une arme magique sans bonus chiffré, notamment lors du lien de pacte.")) : ""}${info?.versatile ? checkField(uiText("Tenue à deux mains ({p0})", { p0: info.versatile }), `form.weapons.${i}.twoHands`, w.twoHands) : ""}${f.weapons.length > 1 && free ? button(uiText("{p0} Retirer", { p0: icon("trash", 14) }), "equip-remove-weapon", `data-index="${i}"`, "small-btn ghost") : ""}</div>`;
     })
     .join("");
-  // Armure de mage : chemin unique, son lancement (emplacement, utilisation d'un don ou à volonté), décision de Luca du 21 novembre 2026.
-  // La case ne sert plus qu'à mettre fin à une armure posée par l'ancienne case ; posée par un sort reçu, elle se termine dans États et effets.
-  const mageSpell = uiSpellById(c, "mage-armor"), mageCastable = !!mageSpell && Object.keys(spellCastOptions(c, mageSpell).modes || {}).length > 0;
-  const mageField = c.equipment.mageArmor ? checkField(uiText("Armure de mage active"), "form.mageArmor", f.mageArmor, uiText("Sans armure : CA de 13 + DEX. Les formules de défense ne s’additionnent pas."))
-    : activeReceivedEffects(c).some((entry) => entry.spellId === "mage-armor") ? `<p class="small" data-mage-armor="active">${uiText("Armure de mage active")}</p>`
-      : mageCastable ? `<div class="section-gap">${button(uiText("Lancer {p0}", { p0: mageSpell.name }), "equip-cast-mage-armor", "", "small-btn")}</div>` : "";
   const armorChosen = armorCurrent === "none" ? null : itemProficiency(c, armorCurrent === "kept" ? { kind: "armor", id: f.armor } : { item: carriedArmors.find(({ item }) => item.id === armorCurrent).item }, weaponTraining);
-  return `<div class="form-grid">${selectField(uiText("Armure"), "form.armorSource", armorCurrent, armorOptions, [proficiencyPill(armorChosen).trim(), esc(uiText("equipment.armorHelp"))].filter(Boolean).join("<br>"))}${field(uiText("Bonus magique de CA"), "form.armorBonus", f.armorBonus, "number", uiText("Armure, bouclier ou objets magiques."), 'min="-5" max="20" step="1"')}</div>${shieldField}${mageField}<h3 style="margin:14px 0 8px">${uiText("Armes à portée de main")}</h3><p class="small muted" data-weapons-help>${esc(uiText("equipment.weaponsHelp"))}</p>${checkField(uiText("Maîtrisées uniquement"), "ui.equipmentProficientOnly", ui.equipmentProficientOnly)}${rows}${f.weapons.length < 6 && carried.some(({ item }) => !taken.has(item.id)) ? button(uiText("{p0} Ajouter une arme", { p0: icon("plus", 15) }), "equip-add-weapon", "", "small-btn") : ""}<h3 class="section-gap">${esc(uiText("equipment.heldWeapons"))}</h3><p class="small muted">${esc(uiText("equipment.handsHelp"))}</p><div class="form-grid">${selectField(uiText("equipment.mainHand"), "form.hands.main", f.hands?.main || "", instanceOptions)}${selectField(uiText("equipment.offHand"), "form.hands.off", f.hands?.off || "", instanceOptions)}</div>${hasSubclass(c, "warlock", "hexblade") ? selectField(uiText("Guerrier maudit : arme choisie"), "form.hexWeaponId", f.hexWeaponId || "", { "": uiText("Aucune"), ...Object.fromEntries(f.weapons.filter((w) => w.id !== "unarmed" && !weaponOf(w.id)?.two && weaponProficiency(c, w, weaponTraining).proficient).map((w, index) => [w.instanceId, `${weaponOf(w.id).name} · ${uiText("equipment.instance").replace("{number}", index + 1)}`])) }, uiText("Une arme maîtrisée sans propriété à deux mains, choisie après le repos long. CHA est utilisé s’il est plus avantageux, y compris pour l’arme de pacte.")) : ""}${classLevel(c, "warlock") ? [ ["pactBook", uiText("Livre des ombres : nom et notes")], ["pactFamiliar", uiText("Familier : nom, forme et notes")], ["pactTalisman", uiText("Talisman : porteur et notes")], ["genieVessel", uiText("Réceptacle du génie : objet et notes")] ].filter(([key]) => f[key] || key === "pactBook" && allChoices(c, "pact").includes("tome") || key === "pactFamiliar" && allChoices(c, "pact").includes("chain") || key === "pactTalisman" && allChoices(c, "pact").includes("talisman") || key === "genieVessel" && hasSubclass(c, "warlock", "genie")).map(([key, label]) => field(label, `form.${key}`, f[key] || "")).join("") : ""}${pactAvailable ? selectField(uiText("Arme de pacte"), "form.pactWeaponId", f.pactWeaponId || "", { ...instanceOptions, "": uiText("Aucune arme liée") }, uiText("Après l’acquisition ou le rituel de lien prévu par le Pacte de la lame.")) : ""}`;
+  return `<div class="form-grid">${selectField(uiText("Armure"), "form.armorSource", armorCurrent, armorOptions, [proficiencyPill(armorChosen).trim(), esc(uiText("equipment.armorHelp"))].filter(Boolean).join("<br>"))}${field(uiText("Bonus magique de CA"), "form.armorBonus", f.armorBonus, "number", uiText("Armure, bouclier ou objets magiques."), 'min="-5" max="20" step="1"')}</div>${shieldField}<h3 style="margin:14px 0 8px">${uiText("equipment.weapons")}</h3>${rows}${conjured.length || carried.some(({ item }) => !taken.has(item.id)) ? button(uiText("{p0} Ajouter une arme", { p0: icon("plus", 15) }), "equip-add-weapon", "", "small-btn") : ""}<h3 class="section-gap">${esc(uiText("equipment.heldWeapons"))}</h3><p class="small muted">${esc(uiText("equipment.handsHelp"))}</p><div class="form-grid">${selectField(uiText("equipment.mainHand"), "form.hands.main", f.hands?.main || "", instanceOptions)}${selectField(uiText("equipment.offHand"), "form.hands.off", f.hands?.off || "", instanceOptions)}</div>${hasSubclass(c, "warlock", "hexblade") ? selectField(uiText("Guerrier maudit : arme choisie"), "form.hexWeaponId", f.hexWeaponId || "", { "": uiText("Aucune"), ...Object.fromEntries(f.weapons.filter((w) => w.id !== "unarmed" && !weaponOf(w.id)?.two && weaponProficiency(c, w, weaponTraining).proficient).map((w, index) => [w.instanceId, `${weaponOf(w.id).name} · ${uiText("equipment.instance").replace("{number}", index + 1)}`])) }, uiText("Une arme maîtrisée sans propriété à deux mains, choisie après le repos long. CHA est utilisé s’il est plus avantageux, y compris pour l’arme de pacte.")) : ""}${classLevel(c, "warlock") ? [ ["pactBook", uiText("Livre des ombres : nom et notes")], ["pactFamiliar", uiText("Familier : nom, forme et notes")], ["pactTalisman", uiText("Talisman : porteur et notes")], ["genieVessel", uiText("Réceptacle du génie : objet et notes")] ].filter(([key]) => f[key] || key === "pactBook" && allChoices(c, "pact").includes("tome") || key === "pactFamiliar" && allChoices(c, "pact").includes("chain") || key === "pactTalisman" && allChoices(c, "pact").includes("talisman") || key === "genieVessel" && hasSubclass(c, "warlock", "genie")).map(([key, label]) => field(label, `form.${key}`, f[key] || "")).join("") : ""}${pactAvailable ? selectField(uiText("Arme de pacte"), "form.pactWeaponId", f.pactWeaponId || "", { ...instanceOptions, "": uiText("Aucune arme liée") }, uiText("Après l’acquisition ou le rituel de lien prévu par le Pacte de la lame.")) : ""}`;
 }
 /** Rangée du formulaire pour un exemplaire de l’inventaire. */
 function equipmentInventoryWeapon({ item, adapter }) {
@@ -56417,10 +56850,38 @@ function candidateEquipment() {
 /** Actions de l'inventaire et de l'équipement, appelées par perform. */
 async function performInventory(action, el, c, data, d) {
   switch (action) {
+    case "equip-pick-open":
+      ui.equipPick = ui.equipPick === data.slot ? null : data.slot;
+      render();
+      break;
+    case "equip-pick":
+      // Le choix d'un emplacement passe par les mêmes fonctions que les champs détaillés.
+      if (data.slot === "armor") equipmentArmorSource(c, data.value);
+      else ui.form = setHeldWeapon(candidateEquipment(), data.slot, data.value || null).equipment;
+      ui.equipPick = null;
+      render();
+      break;
+    case "equip-shield-toggle":
+      // Porter le bouclier libère la seconde main ; une arme à deux mains quitte alors les mains.
+      if (ui.form.shield) ui.form.shield = false;
+      else {
+        const hands = ui.form.hands || {};
+        ui.form.hands = { main: hands.main && hands.main === hands.off ? null : hands.main || null, off: null };
+        ui.form.shield = true;
+      }
+      render();
+      break;
+    case "equip-combo": {
+      const option = weaponSwapOptions(candidateEquipment()).find((entry) => entry.id === data.id);
+      if (option) { ui.form.hands = { ...option.hands }; ui.form.shield = option.shield; }
+      render();
+      break;
+    }
     case "equip-cast-mage-armor":
       await perform("cast", { dataset: { id: "mage-armor" } });
       break;
     case "equipment":
+      ui.equipPick = null;
       ui.form = clone(c.equipment);
       ui.form.weapons = weaponInstances(c);
       ui.form.hands = { main: null, off: null, ...ui.form.hands };
@@ -56467,7 +56928,8 @@ async function performInventory(action, el, c, data, d) {
       openReview(ui.form.character, "Harmonisations", "Les objets restent dans l’inventaire. Les bonus suivent le port et l’harmonisation de chaque exemplaire."); break;
     case "equip-instance": {
       const item = c.inventory.find((entry) => entry.id === data.id);
-      ui.form = { itemId: item.id, slot: inventoryItemSlots(item)[0] };
+      // Une arme du sac est prête d'elle-même : on la prend en main principale ou seconde main.
+      ui.form = { itemId: item.id, slot: inventoryItemSlots(item).find((slot) => slot !== "ready") };
       openModal("equip-instance"); break;
     }
     case "review-equip-instance": {
@@ -56592,8 +57054,9 @@ async function performInventory(action, el, c, data, d) {
       break;
     }
     case "equip-add-weapon": {
+      // Une arme du sac pas encore listée d'abord ; sinon une rangée libre, à changer en arme de pacte invoquée.
       const spare = inventoryEquipmentChoices(c, "weapon").find(({ item }) => !ui.form.weapons.some((weapon) => weapon.inventoryId === item.id));
-      if (spare) ui.form.weapons.push(equipmentInventoryWeapon(spare));
+      ui.form.weapons.push(spare ? equipmentInventoryWeapon(spare) : { id: "unarmed", instanceId: uid(), magic: 0, isMagical: false, twoHands: false });
       render();
       break;
     }
@@ -56604,6 +57067,7 @@ async function performInventory(action, el, c, data, d) {
       render();
       break;
     case "shop-open": case "shop-tab": case "shop-view": case "shop-full": case "shop-add": case "shop-free": case "shop-remove": case "shop-minus": case "shop-plus": case "shop-detail": case "shop-review":
+    case "shop-terms-open": case "shop-terms-rule": case "shop-terms-ok": case "shop-terms-cancel": case "shop-back": case "shop-sell": case "shop-price-ok":
       await performShop(action, c, data); break;
     case "catalog-item":
       ui.catalogQuery = "";
@@ -56642,6 +57106,25 @@ let shopCatalogueCache = null;
 const shopCoins = (copper) => formatCoins(copper, uiLanguage());
 const shopCoinNames = () => uiLanguage() === "en" ? { po: "gp", pa: "sp", pc: "cp" } : { po: "po", pa: "pa", pc: "pc" };
 const shopId = (prefix, key) => `${prefix}-${String(key).replace(/[^a-z0-9]+/gi, "-")}`;
+// Marchand (décisions de Luca du 22 novembre 2026) : conditions de l'échoppe à l'entrée, prix calculés, achats et ventes dans un seul panier.
+// Taux du marchand en pour cent, de ×0,1 à ×10, 100 % au milieu du curseur.
+const MERCHANT_RATES = [10, 15, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90, 100, 110, 120, 125, 150, 175, 200, 250, 300, 400, 500, 750, 1000];
+// Règle 2014 (Manuel des joueurs, Revente) : le marchand vend au prix du Manuel et rachète l'équipement à moitié prix.
+const MERCHANT_RULE = Object.freeze({ sell: 100, buy: 50 });
+/** Conditions gardées sur l'appareil (demande de Luca), sinon la règle 2014. */
+function merchantTerms() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("compagnon-merchant") || "null");
+    if (MERCHANT_RATES.includes(saved?.sell) && MERCHANT_RATES.includes(saved?.buy)) return { sell: saved.sell, buy: saved.buy };
+  } catch {}
+  return { ...MERCHANT_RULE };
+}
+function saveMerchantTerms(terms) {
+  try { localStorage.setItem("compagnon-merchant", JSON.stringify({ sell: terms.sell, buy: terms.buy })); } catch {}
+}
+const merchantRate = (rate) => uiText("shop.rate", { rate: new Intl.NumberFormat(uiLanguage() === "en" ? "en" : "fr").format(rate) });
+/** Objets du sac que le personnage peut vendre : les siens, même laissés au campement, ni détruits ni épuisés. */
+const shopBagItems = (c) => c.inventory.filter((item) => item.qty > 0 && !item.instance?.destroyed && (!item.instance || item.instance.ownerId === c.id));
 /** Catalogue rapide par onglet et reste du Manuel des joueurs, avec prix en pièces de cuivre et référence de la Bibliothèque. */
 function shopCatalogue() {
   const language = uiLanguage();
@@ -56672,12 +57155,26 @@ function shopLineUnit(line) {
   return po * 100 + pa * 10 + pc;
 }
 const shopLineQty = (line) => Math.max(0, Math.floor(Number(line.qty) || 0));
-const shopTotal = () => ui.shop.cart.reduce((sum, line) => sum + (shopLineUnit(line) ?? 0) * shopLineQty(line), 0);
+const shopFreeLine = (line) => !line.row && !line.sale;
+/**
+ * Montant d'une ligne en pièces de cuivre : un objet hors catalogue ou un prix convenu (objet sans prix du Manuel) se lit tel quel ;
+ * sinon le prix du Manuel au taux du marchand, arrondi à son avantage (achat au pc supérieur, vente au pc inférieur). Un bien de troc se revend au prix de vente.
+ */
+function shopLineAmount(line) {
+  if (shopFreeLine(line)) return (shopLineUnit(line) ?? 0) * shopLineQty(line);
+  if (Number.isFinite(line.agreed)) return line.agreed * shopLineQty(line);
+  const terms = ui.shop.terms, rate = (line.sale && !line.trade ? terms.buy : terms.sell) / 100, raw = line.unit * shopLineQty(line) * rate;
+  return line.sale ? Math.floor(raw + 1e-9) : Math.ceil(raw - 1e-9);
+}
+const shopBuys = () => ui.shop.cart.filter((line) => !line.sale).reduce((sum, line) => sum + shopLineAmount(line), 0);
+const shopSales = () => ui.shop.cart.filter((line) => line.sale).reduce((sum, line) => sum + shopLineAmount(line), 0);
 const shopCount = () => ui.shop.cart.reduce((sum, line) => sum + shopLineQty(line), 0);
 const shopPurse = (c) => Math.round(c.gold * 100);
+const shopAfter = (c) => shopPurse(c) - shopBuys() + shopSales();
+const shopSaleMax = (c, line) => c.inventory.find((item) => item.id === line.itemId)?.qty || 0;
 function shopReady(c) {
   const cart = ui.shop.cart;
-  return cart.length > 0 && cart.every((line) => shopLineQty(line) >= 1 && shopLineQty(line) <= 999 && shopLineUnit(line) !== null && line.name.trim() && Number(line.weight || 0) >= 0) && shopTotal() <= shopPurse(c);
+  return cart.length > 0 && cart.every((line) => shopLineQty(line) >= 1 && shopLineQty(line) <= (line.sale ? shopSaleMax(c, line) : 999) && (!shopFreeLine(line) || shopLineUnit(line) !== null && line.name.trim() && Number(line.weight || 0) >= 0)) && shopAfter(c) >= 0;
 }
 function shopRowsHtml() {
   const shop = ui.shop, catalogue = shopCatalogue(), q = librarySearchText(shop.query.trim()), tabs = Object.fromEntries(SHOP_TABS);
@@ -56690,7 +57187,7 @@ function shopRowsHtml() {
   const proficient = (row) => c ? itemProficiency(c, kinds[row.kind] ? { kind: kinds[row.kind], id: row.id } : { reference: row.referenceId }, acc) : null;
   return list.filter((row) => row.search.includes(q) && !(shop.proficientOnly && proficient(row) === false)).sort(order).map((row) => {
     const inCart = shop.cart.filter((line) => line.row === row.key).reduce((sum, line) => sum + shopLineQty(line), 0), open = shop.opened.includes(row.key);
-    const meta = [row.copper === null ? row.cost : shopCoins(row.copper), row.weight ? formatCarriedWeight(row.weight) : "", row.facts, q && !shop.full ? uiText(tabs[row.kind]) : ""].filter(Boolean).map(esc).join(" · ");
+    const meta = [row.copper === null ? row.cost : shopCoins(Math.ceil(row.copper * shop.terms.sell / 100 - 1e-9)), row.weight ? formatCarriedWeight(row.weight) : "", row.facts, q && !shop.full ? uiText(tabs[row.kind]) : ""].filter(Boolean).map(esc).join(" · ");
     const title = `<span class="shop-title"><strong>${esc(row.name)}${inCart ? ` <span class="pill outline">×${inCart}</span>` : ""}${proficiencyPill(proficient(row))}</strong><small>${meta}</small></span>`;
     const head = shopHasDetail(row) ? `<button type="button" id="${shopId("shop-detail", row.key)}" class="shop-info" data-action="shop-detail" data-id="${esc(row.key)}" aria-expanded="${open}">${title}<span class="shop-chevron">${icon("chevron", 16)}</span></button>` : `<div class="shop-text">${title}</div>`;
     return `<div class="catalog-row shop-row${open ? " open" : ""}">${head}${button(uiText("{p0} Ajouter", { p0: icon("plus", 14) }), "shop-add", `id="${shopId("shop-add", row.key)}" data-id="${esc(row.key)}"`, "small-btn")}${open ? `<div class="shop-detail">${shopDetailHtml(row)}</div>` : ""}</div>`;
@@ -56724,55 +57221,89 @@ async function shopLoadDetail(row) {
   if (row.note && !/reference-section/.test(html)) html += `<p>${esc(row.note)}</p>`;
   return { html, extra: additionalEntries ? referenceEntriesHtml(additionalEntries, language, { ...options, context: raw, labels }) : "", source: raw?.source ? [raw.source, raw.page ? uiText("p. {p0}", { p0: raw.page }) : "", "D&D 2014"].filter(Boolean).join(" · ") : "" };
 }
-function shopLineNote(line) {
-  const row = line.row && shopRow(line.row), unit = shopLineUnit(line);
-  if (!row) return "";
-  return row.copper === null ? uiText("shop.variablePrice") : unit !== null && unit !== row.copper ? uiText("shop.cataloguePrice", { price: shopCoins(row.copper) }) : "";
+const shopLineTotal = (line) => shopFreeLine(line) && shopLineUnit(line) === null ? uiText("shop.priceMissing") : `${line.sale ? "+" : ""}${shopCoins(shopLineAmount(line))}`;
+function shopStepper(line, base, id, max) {
+  return `<div class="shop-stepper"><button type="button" id="${id}-minus" data-action="shop-minus" data-id="${line.key}" aria-label="${uiText("shop.minus")}">−</button><input id="${id}-qty" type="number" inputmode="numeric" min="1" max="${max}" step="1" data-bind="${base}.qty" value="${esc(line.qty)}" aria-label="${uiText("Quantité")}"><button type="button" id="${id}-plus" data-action="shop-plus" data-id="${line.key}" aria-label="${uiText("shop.plus")}" ${shopLineQty(line) >= max ? "disabled" : ""}>+</button></div>`;
 }
-const shopLineTotal = (line) => shopLineUnit(line) === null ? uiText("shop.priceMissing") : shopCoins(shopLineUnit(line) * shopLineQty(line));
-function shopCartHtml() {
-  const names = shopCoinNames();
-  if (!ui.shop.cart.length) return `<p class="small muted">${uiText("shop.cartEmpty")}</p>`;
-  return ui.shop.cart.map((line, index) => {
-    const base = `ui.shop.cart.${index}`, id = `shop-line-${line.key}`;
-    return `<div class="shop-line" data-line="${line.key}"><div class="shop-line-head">${line.row ? `<strong>${esc(line.name)}</strong>` : `<input id="${id}-name" class="shop-line-name" type="text" data-bind="${base}.name" value="${esc(line.name)}" placeholder="${uiText("Nom de l’objet")}" aria-label="${uiText("Nom de l’objet")}" maxlength="120">`}${smallIcon("x", "shop-remove", uiText("shop.remove"), `id="${id}-remove" data-id="${line.key}"`)}</div><div class="shop-line-body"><div class="shop-stepper"><button type="button" id="${id}-minus" data-action="shop-minus" data-id="${line.key}" aria-label="${uiText("shop.minus")}">−</button><input id="${id}-qty" type="number" inputmode="numeric" min="1" max="999" step="1" data-bind="${base}.qty" value="${esc(line.qty)}" aria-label="${uiText("Quantité")}"><button type="button" id="${id}-plus" data-action="shop-plus" data-id="${line.key}" aria-label="${uiText("shop.plus")}">+</button></div><div class="shop-price" role="group" aria-label="${uiText("shop.unitPrice")}">${["po", "pa", "pc"].map((coin) => `<label><input id="${id}-${coin}" type="number" inputmode="numeric" min="0" step="1" data-bind="${base}.${coin}" value="${esc(line[coin])}" aria-label="${names[coin]}"><span>${names[coin]}</span></label>`).join("")}</div><strong class="shop-line-total">${esc(shopLineTotal(line))}</strong></div>${line.row ? `<small class="muted shop-line-note">${esc(shopLineNote(line))}</small>` : `<label class="shop-weight">${uiText("Poids unitaire (kg)")} <input id="${id}-weight" type="number" inputmode="decimal" min="0" max="10000" step="0.1" data-bind="${base}.weight" value="${esc(line.weight)}"></label>`}</div>`;
-  }).join("");
+function shopCartLineHtml(c, line, index) {
+  const names = shopCoinNames(), base = `ui.shop.cart.${index}`, id = `shop-line-${line.key}`, remove = smallIcon("x", "shop-remove", uiText("shop.remove"), `id="${id}-remove" data-id="${line.key}"`);
+  if (!shopFreeLine(line)) return `<div class="shop-line" data-line="${line.key}"><div class="shop-line-head"><strong>${esc(line.name)}</strong><strong class="shop-line-total${line.sale ? " gain" : ""}">${esc(shopLineTotal(line))}</strong></div><div class="shop-line-body shop-line-computed">${shopStepper(line, base, id, line.sale ? shopSaleMax(c, line) : 999)}${remove}</div></div>`;
+  return `<div class="shop-line" data-line="${line.key}"><div class="shop-line-head"><input id="${id}-name" class="shop-line-name" type="text" data-bind="${base}.name" value="${esc(line.name)}" placeholder="${uiText("Nom de l’objet")}" aria-label="${uiText("Nom de l’objet")}" maxlength="120">${remove}</div><div class="shop-line-body">${shopStepper(line, base, id, 999)}<div class="shop-price" role="group" aria-label="${uiText("shop.unitPrice")}">${["po", "pa", "pc"].map((coin) => `<label><input id="${id}-${coin}" type="number" inputmode="numeric" min="0" step="1" data-bind="${base}.${coin}" value="${esc(line[coin])}" aria-label="${names[coin]}"><span>${names[coin]}</span></label>`).join("")}</div><strong class="shop-line-total">${esc(shopLineTotal(line))}</strong></div><label class="shop-weight">${uiText("Poids unitaire (kg)")} <input id="${id}-weight" type="number" inputmode="decimal" min="0" max="10000" step="0.1" data-bind="${base}.weight" value="${esc(line.weight)}"></label></div>`;
+}
+function shopCartHtml(c) {
+  const cart = ui.shop.cart;
+  if (!cart.length) return `<p class="small muted">${uiText("shop.cartEmpty")}</p>`;
+  const group = (sale) => cart.map((line, index) => [line, index]).filter(([line]) => !!line.sale === sale);
+  const html = (title, rows) => rows.length ? `<div class="shop-group">${esc(uiText(title))}</div>${rows.map(([line, index]) => shopCartLineHtml(c, line, index)).join("")}` : "";
+  return html("shop.buys", group(false)) + html("shop.sales", group(true));
+}
+/** Mon sac : chaque objet vendable, son prix de rachat (le lot pour une pile) et « Vendre ». */
+function shopBagHtml(c) {
+  const shop = ui.shop, q = librarySearchText(shop.bagQuery.trim());
+  return shopBagItems(c).filter((item) => librarySearchText(item.name).includes(q)).map((item) => {
+    const unit = inventoryItemPrice(item), sold = shop.cart.filter((line) => line.sale && line.itemId === item.id).reduce((sum, line) => sum + shopLineQty(line), 0);
+    const rate = (inventoryItemTrade(item) ? shop.terms.sell : shop.terms.buy) / 100, total = unit === null ? null : Math.floor(unit * item.qty * rate + 1e-9);
+    const meta = [item.qty > 1 ? `×${item.qty}` : "", total === null ? "" : item.qty > 1 ? uiText("shop.lot", { price: shopCoins(total), count: item.qty }) : shopCoins(total)].filter(Boolean).map(esc).join(" · ");
+    return `<div class="catalog-row shop-row"><div class="shop-text"><span class="shop-title"><strong>${esc(item.name)}${sold ? ` <span class="pill outline">×${sold}</span>` : ""}</strong>${meta ? `<small>${meta}</small>` : ""}</span></div>${button(uiText("{p0} Vendre", { p0: icon("plus", 14) }), "shop-sell", `id="${shopId("shop-sell", item.id)}" data-id="${esc(item.id)}" ${sold >= item.qty ? "disabled" : ""}`, "small-btn")}</div>`;
+  }).join("") || `<p class="small muted section-gap">${uiText("Aucun objet.")}</p>`;
 }
 function shopSummaryHtml(c) {
-  const purse = shopPurse(c), total = shopTotal();
+  const purse = shopPurse(c), after = shopAfter(c);
   if (!ui.shop.cart.length) return `<div class="shop-summary"><span>${uiText("Bourse")} : <strong>${shopCoins(purse)}</strong></span></div>`;
-  return `<div class="shop-summary"><span>${uiText("shop.total")} <strong>${shopCoins(total)}</strong></span>${total > purse ? `<span class="shop-missing">${uiText("shop.missing", { amount: shopCoins(total - purse) })}</span>` : `<span>${uiText("Bourse")} : ${shopCoins(purse)} ${icon("arrow", 15)} <strong>${shopCoins(purse - total)}</strong></span>`}</div>`;
+  return `<div class="shop-summary">${after < 0 ? `<span class="shop-missing">${uiText("shop.missing", { amount: shopCoins(-after) })}</span>` : `<span>${uiText("Bourse")} : ${shopCoins(purse)} ${icon("arrow", 15)} <strong>${shopCoins(after)}</strong></span>`}</div>`;
 }
 const shopCartLabel = () => shopCount() ? uiText("shop.cartCount", { count: shopCount() }) : uiText("shop.cart");
 function renderShop(c, cancel) {
   const shop = ui.shop, count = shopCount();
   const head = shop.full ? `<div class="shop-full-head"><strong>${uiText("shop.full.title")}</strong><small class="muted">${uiText("shop.full.help")}</small></div>` : `<div class="segmented four">${SHOP_TABS.map(([id, label]) => `<button type="button" data-action="shop-tab" data-value="${id}" class="${shop.tab === id ? "active" : ""}">${uiText(label)}</button>`).join("")}</div>`;
   const catalog = `<div class="shop-catalog">${head}<div class="spell-toolbar shop-toolbar"><div class="search-wrap">${icon("search", 18)}<input id="shop-search" class="search-input" type="search" data-bind="ui.shop.query" value="${esc(shop.query)}" placeholder="${uiText("Chercher…")}" aria-label="${uiText("Chercher un objet")}"></div><select id="shop-sort" class="select-plain" data-bind="ui.shop.sort" aria-label="${uiText("shop.sort")}">${SHOP_SORTS.map((id) => `<option value="${id}" ${shop.sort === id ? "selected" : ""}>${uiText(`shop.sort.${id}`)}</option>`).join("")}</select></div>${checkField(uiText("Masquer les non maîtrisés"), "ui.shop.proficientOnly", shop.proficientOnly)}<div class="shop-rows">${shopRowsHtml()}</div>${window.COMPANION_STANDALONE ? "" : button(uiText(shop.full ? "shop.full.close" : "shop.full.open"), "shop-full", "", "ghost shop-switch")}</div>`;
-  const cart = `<div class="shop-cart"><h3 class="shop-cart-title">${uiText("shop.cart")}${count ? ` <span class="pill">${count}</span>` : ""}</h3>${shopCartHtml()}${button(`${icon("plus", 14)} ${uiText("shop.free")}`, "shop-free", "", "ghost shop-free")}</div>`;
-  const views = `<div class="shop-views segmented">${[["catalog", uiText("shop.catalogue")], ["cart", shopCartLabel()]].map(([id, label]) => `<button type="button" data-action="shop-view" data-value="${id}" class="${shop.view === id ? "active" : ""}" aria-pressed="${shop.view === id}">${esc(label)}</button>`).join("")}</div>`;
-  return modalShell(uiText("shop.buy"), `${views}<div class="shop-body" data-view="${shop.view}">${catalog}${cart}</div>`, `${shopSummaryHtml(c)}<div class="shop-buttons">${cancel}${button(uiText("shop.review"), "shop-review", shopReady(c) ? "" : "disabled", "primary")}</div>`, true, "", "shop-modal");
+  const cart = `<div class="shop-cart"><h3 class="shop-cart-title">${uiText("shop.cart")}${count ? ` <span class="pill">${count}</span>` : ""}</h3>${shopCartHtml(c)}${button(`${icon("plus", 14)} ${uiText("shop.free")}`, "shop-free", "", "ghost shop-free")}</div>`;
+  const bag = `<div class="shop-bag"><div class="spell-toolbar shop-toolbar"><div class="search-wrap">${icon("search", 18)}<input id="shop-bag-search" class="search-input" type="search" data-bind="ui.shop.bagQuery" value="${esc(shop.bagQuery)}" placeholder="${uiText("Chercher…")}" aria-label="${uiText("shop.bagSearch")}"></div></div><div class="shop-bag-rows">${shopBagHtml(c)}</div></div>`;
+  const views = `<div class="shop-views segmented">${[["catalog", uiText("shop.catalogue")], ["bag", uiText("shop.bag")], ["cart", shopCartLabel()]].map(([id, label]) => `<button type="button" data-action="shop-view" data-value="${id}" class="${shop.view === id ? "active" : ""}" aria-pressed="${shop.view === id}">${esc(label)}</button>`).join("")}</div>`;
+  const terms = `<button type="button" class="shop-terms" data-action="shop-terms-open" aria-label="${uiText("shop.terms")}" title="${uiText("shop.terms")}">${icon("shop", 18)}<span>${esc(merchantRate(shop.terms.sell))} / ${esc(merchantRate(shop.terms.buy))}</span></button>`;
+  return modalShell(uiText("shop.merchant"), `${views}<div class="shop-body" data-view="${shop.view}">${catalog}${bag}${cart}</div>`, `${shopSummaryHtml(c)}<div class="shop-buttons">${cancel}${button(uiText("shop.review"), "shop-review", shopReady(c) ? "" : "disabled", "primary")}</div>`, true, "", "shop-modal", terms);
+}
+/** Conditions de l'échoppe : prix de vente et prix d'achat du marchand, en curseur ; « Règle 2014 » revient à 100 % / 50 %. */
+function renderShopTerms() {
+  const draft = ui.shop.draft;
+  const rate = (key) => `<div class="shop-rate"><div class="shop-rate-head"><label for="shop-rate-${key}">${uiText(`shop.terms.${key}`)}</label><b data-shop-rate-value="${key}">${esc(merchantRate(draft[key]))}</b></div><input id="shop-rate-${key}" type="range" min="0" max="${MERCHANT_RATES.length - 1}" step="1" value="${MERCHANT_RATES.indexOf(draft[key])}" data-bind="ui.shop.draft.${key}"><div class="shop-rate-ticks"><span>${esc(merchantRate(10))}</span><span>${esc(merchantRate(100))}</span><span>${esc(merchantRate(1000))}</span></div></div>`;
+  return modalShell(uiText("shop.terms"), `${rate("sell")}${rate("buy")}${button(uiText("shop.terms.rule"), "shop-terms-rule", "", "ghost")}`, button(uiText("Annuler"), "shop-terms-cancel", "", "ghost") + button(uiText(draft.entry ? "shop.terms.enter" : "shop.terms.apply"), "shop-terms-ok", "", "primary"), false, "", "shop-terms-modal");
+}
+/** Objet sans prix connu (objet magique, objet libre, prix variable) : le prix convenu à la table, à l'unité, en pièces d'or. */
+const shopAgreedPrice = () => { const value = String(ui.shop.price?.value ?? "").trim().replace(",", "."); return value === "" || !(Number(value) >= 0) ? null : Math.round(Number(value) * 100); };
+function renderShopPrice() {
+  const price = ui.shop.price, coin = shopCoinNames().po;
+  return modalShell(uiText(price.sale ? "shop.price.sell" : "shop.price.buy", { name: price.name }), `<label class="field" for="shop-price-value"><span>${uiText("shop.unitPrice")}</span><span class="shop-agreed"><input id="shop-price-value" type="number" inputmode="decimal" min="0" step="0.01" data-bind="ui.shop.price.value" value="${esc(price.value)}"><span>${coin}</span></span></label>`, button(uiText("Annuler"), "shop-back", "", "ghost") + button(uiText("shop.price.add"), "shop-price-ok", shopAgreedPrice() === null ? "disabled" : "", "primary"), false, "", "shop-price-modal");
 }
 /** Saisie dans la fenêtre d'achat : la liste ou les totaux changent, le champ en cours garde le focus. */
 function shopInput(path, el) {
   // En quittant un champ, « change » répète une valeur déjà lue : redessiner la liste ferait perdre l'appui sur « Ajouter ».
+  // Curseur des conditions : sa position choisit un taux de la liste ; le chiffre suit sans redessiner la fenêtre.
+  if (path.startsWith("ui.shop.draft.")) {
+    const key = path.split(".").pop(), rate = MERCHANT_RATES[Number(el.value)];
+    if (rate) { ui.shop.draft[key] = rate; const label = modalRoot.querySelector(`[data-shop-rate-value="${key}"]`); if (label) label.textContent = merchantRate(rate); }
+    return;
+  }
   const value = el.type === "checkbox" ? el.checked : el.value;
   if (boundValue(path) === value) return;
   setBinding(path, value);
+  if (path === "ui.shop.price.value") { const add = modalRoot.querySelector('[data-action="shop-price-ok"]'); if (add) add.disabled = shopAgreedPrice() === null; return; }
+  if (path === "ui.shop.bagQuery") { const rows = modalRoot.querySelector(".shop-bag-rows"); if (rows) rows.innerHTML = shopBagHtml(activeCharacter()); return; }
   if (["ui.shop.query", "ui.shop.sort", "ui.shop.proficientOnly"].includes(path)) { const rows = modalRoot.querySelector(".shop-rows"); if (rows) rows.innerHTML = shopRowsHtml(); return; }
   const c = activeCharacter();
   for (const line of ui.shop.cart) {
     const node = modalRoot.querySelector(`.shop-line[data-line="${line.key}"]`);
     if (!node) continue;
     node.querySelector(".shop-line-total").textContent = shopLineTotal(line);
-    const note = node.querySelector(".shop-line-note"); if (note) note.textContent = shopLineNote(line);
+    const plus = node.querySelector('[data-action="shop-plus"]'); if (plus) plus.disabled = shopLineQty(line) >= (line.sale ? shopSaleMax(c, line) : 999);
   }
   const summary = modalRoot.querySelector(".shop-summary"); if (summary) summary.outerHTML = shopSummaryHtml(c);
   const review = modalRoot.querySelector('[data-action="shop-review"]'); if (review) review.disabled = !shopReady(c);
   const view = modalRoot.querySelector('[data-action="shop-view"][data-value="cart"]'); if (view) view.textContent = shopCartLabel();
 }
 function shopCartLine(row) {
-  const coins = row?.copper == null ? { po: "", pa: "", pc: "" } : { po: String(Math.floor(row.copper / 100)), pa: String(Math.floor(row.copper % 100 / 10)), pc: String(row.copper % 10) };
-  return { key: String(ui.shop.nextKey++), row: row?.key || null, name: row?.name || "", qty: "1", ...coins, weight: "0" };
+  if (!row) return { key: String(ui.shop.nextKey++), row: null, name: "", qty: "1", po: "", pa: "", pc: "", weight: "0" };
+  return { key: String(ui.shop.nextKey++), row: row.key, name: row.name, qty: "1", unit: row.copper };
 }
 /** Ajoute au sac un objet du catalogue rapide comme le fait « Objet du catalogue » : une pile par objet, un exemplaire par arme ou armure. */
 function addRuntimeItem(character, id) {
@@ -56781,10 +57312,11 @@ function addRuntimeItem(character, id) {
   if (existing) existing.qty += info.kind === "ammo" && existing.instance?.ammunition ? info.count : 1;
   else character.inventory.push(createRuntimeItem(id, character.id, { id: uid() }));
 }
-/** Fiche après l'achat du panier, avec les lignes de la revue : bourse puis quantité de chaque objet. */
-function shopPurchase(c) {
-  const next = clone(c), unitOf = new Map();
-  for (const line of ui.shop.cart) {
+/** Fiche après le passage chez le marchand, avec les lignes de la revue : bourse, objets achetés, objets vendus. */
+function shopTrade(c) {
+  let next = clone(c);
+  const noteOf = new Map(), buys = ui.shop.cart.filter((line) => !line.sale), sales = ui.shop.cart.filter((line) => line.sale);
+  for (const line of buys) {
     const row = line.row && shopRow(line.row), qty = shopLineQty(line), before = new Map(next.inventory.map((item) => [item.id, item.qty]));
     if (!row) {
       const item = { id: uid(), name: line.name.trim(), qty, weight: Math.round((Number(line.weight) || 0) * 100) / 100, description: "" };
@@ -56794,19 +57326,21 @@ function shopPurchase(c) {
       const existing = next.inventory.find((x) => x.ref === row.id && !x.instance?.container && !x.instance?.equippedSlot && !x.instance?.charges);
       if (existing) existing.qty += item.qty * qty; else { item.qty *= qty; next.inventory.push(item); }
     } else for (let count = 0; count < qty; count++) addRuntimeItem(next, row.id);
-    const unit = uiText("shop.unit", { price: shopCoins(shopLineUnit(line)) });
-    for (const item of next.inventory) if (before.get(item.id) !== item.qty) unitOf.set(item.id, unit);
+    const note = shopCoins(shopLineAmount(line));
+    for (const item of next.inventory) if (before.get(item.id) !== item.qty) noteOf.set(item.id, note);
   }
-  next.gold = (shopPurse(c) - shopTotal()) / 100;
-  // Une ligne par pile ; les armes et armures, ajoutées à l'unité, sont regroupées par nom.
+  // Une ligne par pile achetée ; les armes et armures, ajoutées à l'unité, sont regroupées par nom.
   const groups = new Map();
   for (const item of next.inventory) {
     const before = c.inventory.find((old) => old.id === item.id)?.qty || 0;
     if (before === item.qty) continue;
-    const group = groups.get(before ? item.id : `${item.name}|${unitOf.get(item.id)}`) || { label: item.name, before: 0, after: 0, source: unitOf.get(item.id) };
-    group.before += before; group.after += item.qty; groups.set(before ? item.id : `${item.name}|${unitOf.get(item.id)}`, group);
+    const key = before ? item.id : `${item.name}|${noteOf.get(item.id)}`, group = groups.get(key) || { label: item.name, before: 0, after: 0, source: noteOf.get(item.id) };
+    group.before += before; group.after += item.qty; groups.set(key, group);
   }
-  return { next, impactRows: [{ label: uiText("Bourse"), before: shopCoins(shopPurse(c)), after: shopCoins(shopPurse(c) - shopTotal()) }, ...groups.values()] };
+  if (sales.length) next = sellInventoryItems(next, sales.map((line) => ({ id: line.itemId, qty: shopLineQty(line) })));
+  next.gold = shopAfter(c) / 100;
+  const sold = sales.map((line) => { const before = c.inventory.find((item) => item.id === line.itemId)?.qty || 0; return { label: line.name, before, after: before - shopLineQty(line), source: shopCoins(shopLineAmount(line)) }; });
+  return { next, impactRows: [{ label: uiText("Bourse"), before: shopCoins(shopPurse(c)), after: shopCoins(shopAfter(c)) }, ...groups.values(), ...sold] };
 }
 function shopLabel() {
   const names = ui.shop.cart.map((line) => line.name.trim());
@@ -56817,9 +57351,32 @@ async function performShop(action, c, data) {
   // Après le rendu, le focus revient à la commande actionnée, ou à celle indiquée.
   const redraw = (focusId = null) => { render(); if (focusId) document.getElementById(focusId)?.focus({ preventScroll: true }); };
   switch (action) {
-    case "shop-open":
-      ui.shop = { view: "catalog", tab: "gear", full: false, query: "", sort: "az", proficientOnly: false, opened: [], details: {}, cart: [], nextKey: 1 };
-      openModal("shop"); break;
+    case "shop-open": {
+      // En entrant chez le marchand, ses conditions d'abord (demande de Luca) ; elles reprennent les derniers réglages de l'appareil.
+      const terms = merchantTerms();
+      ui.shop = { view: "catalog", tab: "gear", full: false, query: "", bagQuery: "", sort: "az", proficientOnly: false, opened: [], details: {}, cart: [], nextKey: 1, terms, draft: { ...terms, entry: true }, price: null };
+      openModal("shop-terms"); break;
+    }
+    case "shop-terms-open": shop.draft = { ...shop.terms, entry: false }; openModal("shop-terms"); break;
+    case "shop-terms-rule": shop.draft = { ...shop.draft, ...MERCHANT_RULE }; render(); break;
+    case "shop-terms-ok": shop.terms = { sell: shop.draft.sell, buy: shop.draft.buy }; saveMerchantTerms(shop.terms); shop.draft = null; openModal("shop"); break;
+    case "shop-terms-cancel": case "shop-back": closeModal(); break;
+    case "shop-sell": {
+      const item = shopBagItems(c).find((entry) => entry.id === data.id), existing = item && shop.cart.find((entry) => entry.sale && entry.itemId === item.id);
+      if (!item) break;
+      if (existing) { if (shopLineQty(existing) < item.qty) existing.qty = String(shopLineQty(existing) + 1); redraw(shopId("shop-sell", item.id)); break; }
+      const unit = inventoryItemPrice(item);
+      if (unit === null) { shop.price = { sale: true, itemId: item.id, name: item.name, value: "" }; openModal("shop-price"); break; }
+      shop.cart.push({ key: String(shop.nextKey++), sale: true, itemId: item.id, name: item.name, qty: "1", unit, trade: inventoryItemTrade(item) });
+      redraw(shopId("shop-sell", item.id)); break;
+    }
+    case "shop-price-ok": {
+      const agreed = shopAgreedPrice(), price = shop.price;
+      if (agreed === null || !price) break;
+      const item = price.sale ? c.inventory.find((entry) => entry.id === price.itemId) : null, row = price.row ? shopRow(price.row) : null;
+      shop.cart.push(price.sale ? { key: String(shop.nextKey++), sale: true, itemId: item.id, name: item.name, qty: "1", unit: null, agreed, trade: false } : { ...shopCartLine(row), agreed });
+      shop.price = null; openModal("shop"); break;
+    }
     case "shop-tab": shop.tab = data.value; shop.query = ""; redraw(); break;
     case "shop-view": shop.view = data.value; redraw(); break;
     case "shop-full": {
@@ -56834,13 +57391,15 @@ async function performShop(action, c, data) {
     }
     case "shop-add": {
       const row = shopRow(data.id), existing = shop.cart.find((entry) => entry.row === row.key);
+      // Prix variable au catalogue : le prix convenu à la table, une fois.
+      if (!existing && row.copper === null) { shop.price = { sale: false, row: row.key, name: row.name, value: "" }; openModal("shop-price"); break; }
       if (existing) existing.qty = String(Math.min(999, shopLineQty(existing) + 1)); else shop.cart.push(shopCartLine(row));
       redraw(shopId("shop-add", row.key)); break;
     }
     case "shop-free": { const added = shopCartLine(null); shop.cart.push(added); shop.view = "cart"; redraw(`shop-line-${added.key}-name`); break; }
     case "shop-remove": shop.cart = shop.cart.filter((entry) => entry !== line); redraw(); break;
     case "shop-minus": if (line && shopLineQty(line) > 1) { line.qty = String(shopLineQty(line) - 1); redraw(`shop-line-${line.key}-minus`); } break;
-    case "shop-plus": if (line && shopLineQty(line) < 999) { line.qty = String(shopLineQty(line) + 1); redraw(`shop-line-${line.key}-plus`); } break;
+    case "shop-plus": if (line && shopLineQty(line) < (line.sale ? shopSaleMax(c, line) : 999)) { line.qty = String(shopLineQty(line) + 1); redraw(`shop-line-${line.key}-plus`); } break;
     case "shop-detail": {
       const row = shopRow(data.id), focusId = shopId("shop-detail", row.key);
       if (shop.opened.includes(row.key)) shop.opened = shop.opened.filter((key) => key !== row.key);
@@ -56852,8 +57411,8 @@ async function performShop(action, c, data) {
     }
     case "shop-review": {
       if (!shopReady(c)) break;
-      const { next, impactRows } = shopPurchase(c);
-      openReview(next, shopLabel(), uiText("shop.cost", { total: shopCoins(shopTotal()) }), "session", { impactRows, shop: true }); break;
+      const { next, impactRows } = shopTrade(c);
+      openReview(next, shopLabel(), "", "session", { impactRows, shop: true }); break;
     }
   }
 }
@@ -56874,16 +57433,17 @@ function renderInventoryModals(c, d, cancel) {
   if (ui.modal === "equipment") {
     const next = candidateEquipment(),
       bad = ui.form.shield && next.equipment.weapons.some((w) => w.twoHands || weaponOf(w.id)?.two) && next.equipment.weapons.length === 1;
+    // Haut de l'écran : Protection, En main, combinaisons ; les champs détaillés restent dans un volet replié (bonus magique, arme de pacte…).
     return modalShell(
-      uiText("Équiper, puis comparer."),
-      `${renderEquipmentFields(c)}${bad ? notice(uiText("Un bouclier et une arme à deux mains ne s’utilisent pas en même temps. Retire le bouclier ou change d’arme."), "warning") : ""}<div class="section-gap">${impactHtml(c, next)}</div>`,
+      uiText("Équipement"),
+      `${renderEquipmentSummary(c, next)}<details class="equipment-details section-gap" data-detail="equipment-details"><summary>${esc(uiText("equipment.details"))}</summary>${renderEquipmentFields(c)}</details>${bad ? notice(uiText("Un bouclier et une arme à deux mains ne s’utilisent pas en même temps. Retire le bouclier ou change d’arme."), "warning") : ""}<div class="section-gap">${impactHtml(c, next)}</div>`,
       cancel + button(uiText("Vérifier les changements"), "review-equipment", "", "primary"),
       true,
     );
   }
   if (ui.modal === "equip-instance") {
     const item = c.inventory.find((entry) => entry.id === ui.form.itemId);
-    return modalShell(item.name, `${selectField(uiText("items.slot"), "form.slot", ui.form.slot, Object.fromEntries(inventoryItemSlots(item).map((slot) => [slot, inventorySlotLabel(slot)])))}${notice(uiText("items.equipmentReview"))}`, cancel + button(uiText("items.equip"), "review-equip-instance", "", "primary"));
+    return modalShell(item.name, `${selectField(uiText("items.slot"), "form.slot", ui.form.slot, Object.fromEntries(inventoryItemSlots(item).filter((slot) => slot !== "ready").map((slot) => [slot, inventorySlotLabel(slot)])))}${notice(uiText("items.equipmentReview"))}`, cancel + button(uiText("items.equip"), "review-equip-instance", "", "primary"));
   }
   if (ui.modal === "item")
     return modalShell(
@@ -56892,6 +57452,8 @@ function renderInventoryModals(c, d, cancel) {
       cancel + button(uiText(ui.form.editing ? "Vérifier" : "Vérifier l’ajout"), "review-item", "", "primary"),
     );
   if (ui.modal === "shop") return renderShop(c, cancel);
+  if (ui.modal === "shop-terms") return renderShopTerms();
+  if (ui.modal === "shop-price") return renderShopPrice();
   if (ui.modal === "catalog") {
     const q = librarySearchText(ui.catalogQuery || ""),
       tab = ui.catalogTab || "gear";
@@ -58874,9 +59436,10 @@ function renderExtraAttack(entry) {
  * Regroupe les exemplaires qui s’utilisent à l’identique : une seule ligne « Hachette ×2 ».
  * index désigne la première attaque du groupe dans d.attacks, pour les jets ; l’attaque à deux armes reste seule.
  */
-function attackGroups(attacks) {
+function attackGroups(attacks, keep = () => true) {
   const groups = new Map();
   attacks.forEach((attack, index) => {
+    if (!keep(attack)) return;
     const key = attack.twoWeapon ? `two-weapon|${index}` : JSON.stringify([attack.id, attack.name, attack.attack, attack.damageDice, attack.damageBonus, attack.type, attack.properties, attack.proficient, !!attack.pactWeapon, attack.attacksPerAction, attack.additionalDamageDice || "", attack.divineDamageDice || "", attack.critThreshold || 0, attack.context || ""]);
     if (groups.has(key)) groups.get(key).count++;
     else groups.set(key, { attack, index, count: 1 });
@@ -58961,7 +59524,15 @@ const COMBAT_ACTIONS = {
  * « Autres actions de combat » : entrée repliée sous les armes ; chaque action rappelle sa règle et lance le test d'Athlétisme de la fiche.
  * Ce ne sont pas des lignes d'attaque : elles ont leur propre classe, la forme reste celle d'une carte d'attaque.
  */
-function renderCombatActions(c, d, damage) {
+/** Effet noté après une lutte réussie : la règle de l'agrippé, sans effet chiffré. */
+function grappleEffect() {
+  return { id: "", name: uiText("combat.grapple.holding"), source: uiText("combat.grapple"), caster: "", duration: uiText("combat.grapple.duration"), description: uiText("combat.grapple.effect"), referenceId: "action|phb|grapple", spellId: "", level: 0, target: "", value: 0 };
+}
+/** Bousculade réussie : l'effet choisi, à terre ou repoussée. */
+function renderShoveModal(cancel) {
+  return modalShell(uiText("combat.shove.title"), `<div class="actions">${button(uiText("combat.shove.prone"), "shove-result", 'data-value="prone"', "primary")}${button(uiText("combat.shove.push", { distance: uiMeters(1.5) }), "shove-result", 'data-value="push"', "primary")}</div>`, cancel);
+}
+function renderCombatActions(c, d, damage, swaps = []) {
   const skill = uiSkills.athletics[0];
   // Jets du personnage qui ne dépensent rien et ne sont pas des dégâts (décision L2) : le nom, la règle qui les déclenche, le bouton qui lance.
   // damage : les jets de dégâts sans dépense (extraAttackEntries, combat), placés en tête avec leur bouton « Dégâts ».
@@ -58972,11 +59543,108 @@ function renderCombatActions(c, d, damage) {
     return `<div class="combat-action" data-free-roll="${esc(entry.id)}"><div class="attack-main"><div class="attack-title">${esc(entry.name)}${economyPill(actionEconomy(entry.key))}</div><div class="attack-meta">${esc(uiText(`roll.rule.${entry.id}`, { distance: uiMeters(entry.meters || 0) }))}</div></div><button class="attack-roll" data-action="roll-free" data-id="${esc(entry.id)}" aria-label="${esc(label)}">${face}</button></div>`;
   });
   // Le nombre de lignes se lit sur l'entrée repliée.
-  const count = damage.length + free.length + Object.keys(COMBAT_ACTIONS).length;
-  return `<details class="attack-others" data-detail="combat-actions"><summary>${esc(uiText("combat.others"))} <span class="attack-others-count" aria-label="${esc(uiText("combat.others.count", { count }))}">${count}</span></summary>${damage.map(renderExtraAttack).join("")}${free.join("")}${Object.entries(COMBAT_ACTIONS).map(([id, action]) => `<div class="combat-action" data-combat-action="${id}"><div class="attack-main"><div class="attack-title">${esc(uiText(action.name))}</div><div class="attack-meta">${esc(uiText(action.rule, { distance: uiMeters(1.5) }))}</div></div><button class="attack-roll" data-action="roll-combat-action" data-id="${id}" aria-label="${esc(uiText("combat.rollLabel", { action: uiText(action.name), skill }))}"><strong>${signed(d.skills.athletics)}</strong><small>${esc(skill)}</small></button></div>`).join("")}</details>`;
+  const count = swaps.length + damage.length + free.length + Object.keys(COMBAT_ACTIONS).length;
+  // « En changeant d'arme » en tête, puis les autres actions.
+  const switching = swaps.length ? `<div class="attack-group" data-weapon-swaps>${esc(uiText("weaponSwap.title"))}</div>${swaps.map(renderWeaponSwapCard).join("")}<div class="attack-group">${esc(uiText("weaponSwap.others"))}</div>` : "";
+  return `<details class="attack-others" data-detail="combat-actions"><summary>${esc(uiText("combat.others"))} <span class="attack-others-count" aria-label="${esc(uiText("combat.others.count", { count }))}">${count}</span></summary>${switching}${damage.map(renderExtraAttack).join("")}${free.join("")}${Object.entries(COMBAT_ACTIONS).map(([id, action]) => `<div class="combat-action" data-combat-action="${id}"><div class="attack-main"><div class="attack-title">${esc(uiText(action.name))}</div><div class="attack-meta">${esc(uiText(action.rule, { distance: uiMeters(1.5) }))}</div></div><button class="attack-roll" data-action="roll-combat-action" data-id="${id}" aria-label="${esc(uiText("combat.rollLabel", { action: uiText(action.name), skill }))}"><strong>${signed(d.skills.athletics)}</strong><small>${esc(skill)}</small></button></div>`).join("")}</details>`;
+}
+/** Munitions d'une ligne d'attaque : pastille à côté du nom, rouge à zéro ; rien sans suivi des munitions ou pour une arme qui n'en tire pas. */
+function ammoPill(c, a) {
+  const kind = attackAmmunitionKind(c, a);
+  if (!kind || !ammunitionTracking()) return "";
+  const { total, untracked } = weaponAmmunition(c, kind);
+  // Pile non comptée à l'unité, sans autre munition suivie : le reste est inconnu, on ne dit rien plutôt que « Plus de munitions ».
+  if (untracked && !total) return "";
+  return ` <span class="pill ammo${total ? "" : " ammo-out"}" data-ammo="${total}">${icon("ammo", 12)}${esc(total ? uiText(total === 1 ? "ammo.one" : "ammo.count", { count: total }) : uiText("ammo.none"))}</span>`;
+}
+/**
+ * Munitions du jet d'une arme qui en tire, suivies à l'unité : sortes portées (ordinaires d'abord), sorte du tir, reste total.
+ * La sorte du tir : la munition magique cochée (Garder, ou la liste), sinon le choix de la liste, sinon la première que le personnage a encore.
+ */
+function rollAmmo(r) {
+  const kind = r?.sequence?.profile.ammo;
+  if (!kind || !ammunitionTracking()) return null;
+  const { groups, total, untracked } = weaponAmmunition(activeCharacter(), kind);
+  if (untracked && !total) return null;
+  const on = r.optionList.find((option) => option.ammoGroup && (r.optionState.on[option.id] || r.optionState.spent[option.id]));
+  const choice = on?.ammoGroup || r.ammoChoice;
+  return { kind, groups, total, group: groups.find((group) => group.id === choice) || groups.find((group) => group.total > 0) || groups[0] };
+}
+/** À l'ouverture du jet, la munition d'office est fixée ; une munition magique coche alors sa case de bonus. */
+function settleRollAmmo(r) {
+  const ammo = rollAmmo(r);
+  if (!ammo || r.ammoChoice) return;
+  r.ammoChoice = ammo.group.id;
+  for (const option of r.optionList) if (option.ammoGroup) r.optionState.on[option.id] = option.ammoGroup === ammo.group.id;
+}
+/** Liste « Munition » : le joueur choisit la munition de ce tir ; une munition magique coche sa case de bonus, les autres la décochent. */
+function chooseRollAmmo(r, value) {
+  const ammo = rollAmmo(r);
+  if (!ammo || r.phase !== "ready" || !ammo.groups.some((group) => group.id === value && group.total > 0)) return;
+  r.ammoChoice = value;
+  for (const option of r.optionList) if (option.ammoGroup) r.optionState.on[option.id] = option.ammoGroup === value;
+  refreshSequence(r, uiText("Options modifiées"));
+}
+/** « Flèches · 20 restantes » : une sorte de munition et son reste. */
+function ammoGroupLabel(ammo, group) {
+  const name = group.id === "plain" ? uiText(`ammo.kind.${ammo.kind}`) : group.name;
+  return uiText(group.total === 1 ? "ammo.option.one" : "ammo.option", { name, count: group.total });
+}
+/**
+ * Dans la fenêtre de dés, sous le mode, avant le premier dé de l'attaque, seulement la liste « Munition » (demandes de Luca du 22 novembre 2026) :
+ * les munitions qui restent, ou « Plus de munitions » en rouge ; une fois le dé lancé, plus de liste. Aucune ligne autour.
+ */
+function renderAmmoLine(r) {
+  const ammo = rollAmmo(r);
+  if (!ammo || r.ammoRolled) return "";
+  const owned = ammo.groups.filter((group) => group.total > 0);
+  const options = owned.length ? owned.map((group) => `<option value="${esc(group.id)}" ${group === ammo.group ? "selected" : ""}>${esc(ammoGroupLabel(ammo, group))}</option>`).join("") : `<option value="" selected>${esc(uiText("ammo.none"))}</option>`;
+  // Sans titre visible (Luca) : les entrées disent la munition ; le nom reste pour les lecteurs d'écran.
+  return `<div class="dice-ammo-pick" data-ammo-line><select id="dice-ammo" data-dice-ammo class="select-plain${owned.length ? "" : " ammo-out"}" aria-label="${esc(uiText("ammo.label"))}" ${r.phase !== "ready" ? "disabled" : ""}>${options}</select></div>`;
+}
+/** Sans munition, le dé ne se lance pas (Manuel des joueurs, propriété Munitions : une arme à munitions n'attaque que si l'on en a). */
+function ammoBlocked(r) {
+  const ammo = rollAmmo(r);
+  return !!ammo && !r.ammoRolled && !ammo.groups.some((group) => group.total > 0);
+}
+/** Après le combat : la moitié des munitions tirées se récupère (une minute de recherche), une ligne par sorte. */
+function renderAmmoRecovery(c) {
+  if (!ammunitionTracking()) return "";
+  return Object.entries(c.state.ammoFired || {}).filter(([, fired]) => Math.floor(fired / 2) >= 1).map(([kind, fired]) => `<div class="ammo-recover" data-ammo-recover="${esc(kind)}"><span>${esc(uiText("ammo.recovery", { count: fired }))}</span>${button(uiText("ammo.recover", { count: Math.floor(fired / 2) }), "ammo-recover", `data-kind="${esc(kind)}"`, "small-btn ghost")}</div>`).join("");
+}
+/** Description d'une ligne d'attaque : dés, type, dégâts en plus, propriétés. */
+function attackMeta(a) {
+  return `${esc(a.damageDice)} ${signed(a.damageBonus)} ${esc(a.type)}${a.additionalDamageDice ? uiText(" + {p0} (fendoir)", { p0: a.additionalDamageDice }) : ""}${a.divineDamageDice ? uiText(" + {p0} radiants (châtiment amélioré)", { p0: a.divineDamageDice }) : ""}${a.properties.length ? ` · ${esc(a.properties.join(", "))}` : ""}${a.pactWeapon ? uiText(" · arme de pacte") : ""}${a.attacksPerAction > 1 ? uiText(" · {p0} attaques par action", { p0: a.attacksPerAction }) : ""}`;
+}
+/** Coût d'un changement d'arme pour ce tour, affiché sans être compté : « 1× par tour » (interaction gratuite) ou « 1 action ». */
+function weaponSwapCost(cost) {
+  return cost === "action" ? ` <span class="pill cost-action" data-swap-cost="action">${uiText("weaponSwap.action")}</span>` : cost === "free" ? ` <span class="pill cost-free" data-swap-cost="free">${uiText("weaponSwap.free")}</span>` : "";
+}
+const weaponSwapName = (option) => option.withShield ? uiText("weaponSwap.withShield", { name: option.name }) : option.name;
+/** Effets d'un changement d'arme : la CA, l'attaque à deux armes, un bouclier non maîtrisé. */
+const weaponSwapEffects = (option) => [option.ac[0] !== option.ac[1] ? uiText("weaponSwap.ac", { before: option.ac[0], after: option.ac[1] }) : "", option.twoWeapon ? uiText(`weaponSwap.twoWeapon.${option.twoWeapon}`) : "", option.unskilledShield ? uiText("Armure ou bouclier non maîtrisé : désavantage aux tests, attaques et sauvegardes de FOR et DEX, et aucun sort possible.") : ""].filter(Boolean);
+/**
+ * Carte « En changeant d'arme » (prototype validé par Luca le 22 novembre 2026) : la forme d'une carte d'attaque, avec le coût du tour et l'effet.
+ * Toucher et Dégâts ouvrent la fenêtre qui valide le changement, puis le jet.
+ */
+function renderWeaponSwapCard(option) {
+  const a = option.line;
+  if (!a) return "";
+  const effects = weaponSwapEffects(option);
+  const name = weaponSwapName(option), data = `data-action="weapon-swap" data-id="${esc(option.id)}" data-index="${option.index}"`;
+  return `<div class="attack-card" data-weapon-swap="${esc(option.id)}"><div class="attack-main"><div class="attack-title">${esc(name)}${weaponSwapCost(option.cost)}${ammoPill(activeCharacter(), a)}${a.proficient ? "" : (" <span class=\"pill red\">" + uiText("non maîtrisée") + "</span>")}</div><div class="attack-meta">${attackMeta(a)}</div>${effects.length ? `<div class="attack-effect">${effects.map(esc).join(" · ")}</div>` : ""}</div><button class="attack-roll" ${data} data-step="attack" aria-label="${uiText("Jet d’attaque {p11}", { p11: esc(name) })}"><strong>${signed(a.attack)}</strong><small>${uiText("toucher")}</small></button><button class="attack-roll ghost" ${data} data-step="damage" aria-label="${uiText("Dégâts {p15}", { p15: esc(name) })}">${icon("dice", 18)}<small>${uiText("dégâts")}</small></button></div>`;
+}
+/** Fenêtre d'un changement d'arme : les gestes et leur coût, la CA qui change, puis « Valider et lancer ». */
+function renderWeaponSwapModal(c, d, cancel) {
+  const option = weaponSwapOptions(c, d).find((entry) => entry.id === ui.swap?.id);
+  if (!option) return modalShell(uiText("weaponSwap.title"), `<p>${uiText("weaponSwap.gone")}</p>`, cancel);
+  const steps = option.steps.map((step) => `<li>${esc(uiText(`weaponSwap.step.${step.kind}`, { name: step.name || "" }))}${weaponSwapCost(step.cost)}</li>`).join("");
+  const ac = option.ac[0] !== option.ac[1] ? `<div class="summary-row section-gap"><span>${uiText("CA")}</span><strong>${option.ac[0]} → ${option.ac[1]}</strong></div>` : "";
+  const twoWeapon = weaponSwapEffects(option).slice(option.ac[0] !== option.ac[1] ? 1 : 0).map((text) => `<p class="small section-gap">${esc(text)}</p>`).join("");
+  return modalShell(uiText("weaponSwap.modalTitle", { name: weaponSwapName(option) }), `<ol class="weapon-swap-steps">${steps}</ol>${ac}${twoWeapon}`, cancel + button(uiText("weaponSwap.confirm"), "confirm-weapon-swap", "", "primary"));
 }
 function renderAttacks(c, d) {
-  const extra = extraAttackEntries(c, d);
+  const extra = extraAttackEntries(c, d), hands = swapHands(c), swaps = weaponSwapOptions(c, d);
   const extras = [
     d.extraAttacks > 1 ? uiText("{p0} attaques avec l’action Attaquer", { p0: d.extraAttacks }) : "",
 
@@ -58984,12 +59652,12 @@ function renderAttacks(c, d) {
     d.critThreshold < 20 ? uiText("Critique sur {p0}-20", { p0: d.critThreshold }) : "",
     d.sneakAttack ? uiText("Attaque sournoise +{p0}d6", { p0: d.sneakAttack }) : "",
   ].filter(Boolean);
-  return `<div class="section-title section-gap"><h3>${uiText("Attaques")}</h3><button class="link-btn" data-action="equipment">${uiText("Équiper {p1}", { p1: icon("chevron", 13) })}</button></div>${attackGroups(d.attacks)
+  return `<div class="section-title section-gap"><h3>${uiText("Attaques")}</h3><button class="link-btn" data-action="equipment">${uiText("Équiper {p1}", { p1: icon("chevron", 13) })}</button></div>${attackGroups(d.attacks, (attack) => attackInHand(c, attack, hands))
     .map(
       ({ attack: a, index: i, count }) => twoWeaponRoutine(d, i) ? renderTwoWeaponCard(d, i) :
-        `<div class="attack-card"><div class="attack-main"><div class="attack-title">${esc(attackGroupName({ attack: a, count }))}${economyPill(a.bonusAction && "bonus")}${a.proficient ? "" : (" <span class=\"pill red\">" + uiText("non maîtrisée") + "</span>")}</div><div class="attack-meta">${esc(a.damageDice)} ${signed(a.damageBonus)} ${esc(a.type)}${a.additionalDamageDice ? uiText(" + {p0} (fendoir)", { p0: a.additionalDamageDice }) : ""}${a.divineDamageDice ? uiText(" + {p0} radiants (châtiment amélioré)", { p0: a.divineDamageDice }) : ""}${a.properties.length ? ` · ${esc(a.properties.join(", "))}` : ""}${a.pactWeapon ? uiText(" · arme de pacte") : ""}${a.attacksPerAction > 1 ? uiText(" · {p0} attaques par action", { p0: a.attacksPerAction }) : ""}</div></div><button class="attack-roll" data-action="roll-attack" data-index="${i}" aria-label="${uiText("Jet d’attaque {p11}", { p11: esc(a.name) })}"><strong>${signed(a.attack)}</strong><small>${uiText("toucher")}</small></button><button class="attack-roll ghost" data-action="roll-damage" data-index="${i}" aria-label="${uiText("Dégâts {p15}", { p15: esc(a.name) })}">${icon("dice", 18)}<small>${uiText("dégâts")}</small></button></div>`,
+        `<div class="attack-card"><div class="attack-main"><div class="attack-title">${esc(attackGroupName({ attack: a, count }))}${economyPill(a.bonusAction && "bonus")}${ammoPill(c, a)}${a.proficient ? "" : (" <span class=\"pill red\">" + uiText("non maîtrisée") + "</span>")}</div><div class="attack-meta">${attackMeta(a)}</div></div><button class="attack-roll" data-action="roll-attack" data-index="${i}" aria-label="${uiText("Jet d’attaque {p11}", { p11: esc(a.name) })}"><strong>${signed(a.attack)}</strong><small>${uiText("toucher")}</small></button><button class="attack-roll ghost" data-action="roll-damage" data-index="${i}" aria-label="${uiText("Dégâts {p15}", { p15: esc(a.name) })}">${icon("dice", 18)}<small>${uiText("dégâts")}</small></button></div>`,
     )
-    .join("")}${d.martialArts ? renderMartialArtsCard(c, d) : ""}${extra.filter((entry) => !entry.combat).map(renderExtraAttack).join("")}${spellRollCards(c, d).map(renderSpellRollCard).join("")}${extras.length ? `<p class="tiny muted attack-extras">${extras.map(esc).join(" · ")}</p>` : ""}${d.twoWeapon && !d.twoWeapon.allowed ? `<p class="tiny muted attack-extras" data-two-weapon-refused>${esc(uiText("attack.twoWeapon.notLight", { names: d.twoWeapon.notLight.map((id) => uiWeapons[id]?.name || id).join(", ") }))}</p>` : ""}${renderCombatActions(c, d, extra.filter((entry) => entry.combat))}`;
+    .join("")}${renderAmmoRecovery(c)}${d.martialArts ? renderMartialArtsCard(c, d) : ""}${extra.filter((entry) => !entry.combat).map(renderExtraAttack).join("")}${spellRollCards(c, d).map(renderSpellRollCard).join("")}${extras.length ? `<p class="tiny muted attack-extras">${extras.map(esc).join(" · ")}</p>` : ""}${d.twoWeapon && !d.twoWeapon.allowed ? `<p class="tiny muted attack-extras" data-two-weapon-refused>${esc(uiText("attack.twoWeapon.notLight", { names: d.twoWeapon.notLight.map((id) => uiWeapons[id]?.name || id).join(", ") }))}</p>` : ""}${renderCombatActions(c, d, extra.filter((entry) => entry.combat), swaps)}`;
 }
 
 /**
@@ -59004,8 +59672,8 @@ function openConcentrationSave(c, { spell, dc }) {
   });
 }
 /** Test d'une compétence par le chemin de la fiche ; title nomme l'action de combat qui le demande (lutte, bousculade). */
-function rollSkillCheck(c, d, key, title = uiSkills[key][0]) {
-  rollCheck(title, d.skills[key], "check", { ...skillCheckOptions(c, key), modeRoll: { kind: "check", ability: SKILLS[key][1], skill: key } });
+function rollSkillCheck(c, d, key, title = uiSkills[key][0], extra = {}) {
+  rollCheck(title, d.skills[key], "check", { ...skillCheckOptions(c, key), modeRoll: { kind: "check", ability: SKILLS[key][1], skill: key }, ...extra });
 }
 /** options.modeRoll : le jet décrit au moteur (rollModeSources), pour ses sources d'avantage et de désavantage. options.dc : seuil connu, { value, label, success, failure } ; options.failRoll : jet déclaré qu'ouvre un échec à ce seuil. */
 function rollCheck(name, bonus, kind = "check", options = {}) {
@@ -59021,6 +59689,8 @@ function rollCheck(name, bonus, kind = "check", options = {}) {
     // Sauvegarde de caractéristique : ce que la fiche possède et qui dépend de l'effet subi, rappelé sous les dés sans rien cocher.
     reminders: options.modeRoll?.kind === "save" ? saveReminders(c, options.modeRoll.ability, { concentration: !!options.modeRoll.concentration }, uiDerive(c)) : [],
     ...(options.dc && { dc: options.dc }), ...(options.launchLabel && { launchLabel: options.launchLabel }), ...(options.failRoll && { failRoll: options.failRoll }),
+    // Verdict décidé à la table (test opposé) : deux boutons après le résultat, apply pour le premier.
+    ...(options.apply && { apply: options.apply, acceptLabel: options.acceptLabel, cancelLabel: options.cancelLabel, afterApply: options.afterApply }),
   });
 }
 /** Sort dont la concentration est perdue : sauvegarde de concentration lancée et ratée au seuil ; null sinon (gardée, ou fermée sans lancer). */
@@ -59100,6 +59770,7 @@ function prepareDiceDialog(name, request, options = {}, inPlace = false) {
   // Cases reprises du cadenas : celles que le jet n'aurait pas cochées d'office, nommées par l'indicateur (rollKeptOptions).
   const photo = activeCharacter()?.state.keptRollOptions || null, keptIds = keptRollOptions(listed.optionList, photo).on.filter((id) => !listed.optionList.find((option) => option.id === id).on);
   ui.roll = { name, request, phase: "ready", result: null, rolledRequest: null, lucky: null, history: [], panel: null, extras: { support: "", bonus: 0 }, ...listed, optionState: rollOptionState(listed.optionList, options.chainOn, photo), keptIds, ...options, baseNote: options.note || "" };
+  if (ui.roll.sequence) settleRollAmmo(ui.roll);
   if (ui.roll.sequence) ui.roll.request = sequenceRequest(ui.roll);
   ui.roll.portent = portentRollState(ui.roll);
   ui.rollMode = sheetRollMode(ui.roll).mode;
@@ -59261,6 +59932,8 @@ async function saveRollSpend(r, next, label, paid = []) {
 }
 // Dépense des options cochées à cette étape, une seule fois par jet.
 async function spendRollOptions(r) {
+  // Le premier dé de l'attaque lancé, la ligne des munitions se retire : le reste a été lu juste avant, et la carte le redit.
+  if (r.sequence) r.ammoRolled = true;
   // Coût du jet lui-même : celui du profil d'attaque, ou celui d'une aptitude qui paie son dé au lancer (réaction du Présage cosmique).
   const step = rollStep(r), cost = r.sequence ? r.sequence.profile.cost : r.cost, own = cost ? [{ id: "__profile", label: r.sequence?.profile.name || r.name, cost }] : [];
   // Le jet d'attaque lancé met fin à l'aide en attente, que le joueur ait gardé l'avantage ou non.
@@ -59270,6 +59943,10 @@ async function spendRollOptions(r) {
   // Effet reçu qui finit avec ce jet d'attaque (Invisibilité, Gelure) : retiré de la fiche une fois le dé lancé, le mode du jet déjà fixé.
   const ends = step === "attack" && r.sequence && !r.sequence.profile.creature ? receivedEndings(activeCharacter(), r.sequence.profile.roll).map((entry) => ({ id: `ends:${entry.id}`, label: entry.name, cost: { received: entry.id } })) : [];
   const costs = [...own, ...parts, ...aid, ...ends, ...optionCosts(r.optionList, r.optionState, step, { critical: r.sequence?.verdict === "critical" })].filter((entry) => !r.optionState.spent[entry.id]);
+  // Munition ordinaire tirée au premier jet de l'attaque (décision de Luca du 22 novembre 2026) ; une munition magique cochée la remplace. Sans munition, rien ne bloque.
+  const ammo = rollAmmo(r), magic = r.optionList.some((option) => option.cost?.ammo && (r.optionState.on[option.id] || r.optionState.spent[option.id]));
+  const stack = ammo && !magic && !r.optionState.spent.__ammo ? ammo.group.stack : null;
+  if (stack) costs.push({ id: "__ammo", label: stack.name, cost: { ammo: stack.id } });
   if (!costs.length) return;
   let next = activeCharacter();
   for (const { cost } of costs) {
@@ -59280,8 +59957,8 @@ async function spendRollOptions(r) {
     if (cost.strike) next = markSpellStrike(next, cost.strike, { ends: !!cost.ends });
     // Charges d'un objet dépensées sur le coup (bâton percussif, tatouage de fureur sanglante).
     if (cost.item) next = useInventoryItem(next, cost.item.id, { amount: cost.item.amount });
-    // Munition magique tirée : une de moins dans sa pile.
-    if (cost.ammo) next = consumeInventoryAmmunition(next, cost.ammo);
+    // Munition tirée, ordinaire ou magique : une de moins dans sa pile, comptée pour la récupération d'après le combat.
+    if (cost.ammo) next = fireAmmunition(next, cost.ammo);
     if (cost.received) next = setReceivedEffect(next, null, cost.received);
     if (cost.aid) next = endCreationHelp(next);
   }
@@ -59347,7 +60024,8 @@ function optionFormula(option, r, step) {
 }
 // Options à cocher du panneau ; celles que la règle place après le dé ont leur bouton sous le résultat (renderDiceAfterRoll).
 function visibleRollOptions(r) {
-  return r.optionList.filter((option) => !option.after && optionVisible(option, r.optionState, rollStep(r), { critical: r.sequence?.verdict === "critical" }));
+  const ammo = !!rollAmmo(r);
+  return r.optionList.filter((option) => !option.after && !(ammo && option.ammoGroup) && optionVisible(option, r.optionState, rollStep(r), { critical: r.sequence?.verdict === "critical" }));
 }
 // Un jet de d20 lancé dans l'application peut être retouché après coup : pas un total saisi, ni un jet contre la mort, enregistré dès le lancer.
 function rollAmendable(r) {
@@ -59471,9 +60149,9 @@ function diceDisplayItems(r) {
 }
 
 function renderDiceDialog() {
-  const r = ui.roll, seq = r.sequence, ready = r.phase === "ready", rolling = r.phase === "rolling", result = r.phase === "result" ? r.result : null,
+  const r = ui.roll, seq = r.sequence, blocked = ammoBlocked(r), ready = r.phase === "ready" && !blocked, rolling = r.phase === "rolling", result = r.phase === "result" ? r.result : null,
     modes = rollHasModes(r), locked = rollSettingsLocked(r), critical = result && r.critical,
-    hint = rolling ? uiText("Les dés roulent…") : ready ? (diceDisplayItems(r).length ? uiText("Toucher les dés pour lancer") : uiText("Dégâts fixes, sans dé à lancer")) : uiText("Résultat du lancer"),
+    hint = rolling ? uiText("Les dés roulent…") : blocked ? "" : ready ? (diceDisplayItems(r).length ? uiText("Toucher les dés pour lancer") : uiText("Dégâts fixes, sans dé à lancer")) : uiText("Résultat du lancer"),
     title = r.request.kind === "hit-dice" ? uiText("Dés de vie") : r.name || uiText("Jet de dés");
   // Sous le choix du mode : les dons de la fiche qui annulent une règle générale du tir, sans case.
   const modeNotes = modes ? (r.modeNotes || []).map((entry) => `<p class="dice-mode-note" data-mode-note="${esc(entry.id)}">${esc(uiText("reminder.line", entry))}</p>`).join("") : "";
@@ -59511,9 +60189,9 @@ function renderDiceDialog() {
   const applies = !!r.apply && (!r.applyWhen || !!result && r.applyWhen(result));
   // Rappels d'une sauvegarde : une ligne chacun sous la note du mode, avant comme après le lancer.
   const reminders = (r.reminders || []).map((entry) => `<p class="dice-roll-reminder" data-roll-reminder="${esc(entry.id)}">${esc(uiText("reminder.line", entry))}</p>`).join("");
-  const body = `<div class="dice-roll-content"><div class="dice-panel-body" id="dice-panel-body">${panelBody}</div><div class="dice-sequence">${renderDiceSequence(r)}${renderPortentChoice(r)}</div>${portentApplies(r) ? "" : modeHtml}${quantity}<button id="dice-tray" class="dice-tray" data-action="roll-start" aria-label="${uiText("Lancer les dés")}" ${!ready ? "disabled" : ""}><canvas class="dice-canvas" aria-hidden="true"></canvas><span class="dice-tray-hint">${hint}<span class="dice-roll-formula">${esc(diceRequestFormula(currentDiceRequest(r)))}</span></span></button><div class="dice-outcome" role="status" aria-live="polite" aria-atomic="true">${scoreHtml}${result && r.note ? `<p class="dice-roll-note">${esc(r.note)}</p>` : ""}${outcomeHtml}${dc}</div><div class="dice-after-roll">${renderDiceAfterRoll(r)}</div><div class="dice-verdict-zone">${verdict}</div><div class="dice-roll-extra">${history}${keptHtml}${help ? `<p class="dice-roll-help">${esc(help)}</p>` : ""}${reminders}</div></div>`;
-  const footer = ready || rolling
-    ? button(uiText("Annuler"), "close-modal", "", "ghost") + button(rolling ? uiText("Lancer en cours…") : r.launchLabel || uiText("Lancer les dés"), "roll-start", `id="dice-launch" ${rolling ? "disabled" : ""}`, "primary")
+  const body = `<div class="dice-roll-content"><div class="dice-panel-body" id="dice-panel-body">${panelBody}</div><div class="dice-sequence">${renderDiceSequence(r)}${renderPortentChoice(r)}</div>${portentApplies(r) ? "" : modeHtml}${renderAmmoLine(r)}${quantity}<button id="dice-tray" class="dice-tray" data-action="roll-start" aria-label="${uiText("Lancer les dés")}" ${!ready ? "disabled" : ""}><canvas class="dice-canvas" aria-hidden="true"></canvas><span class="dice-tray-hint">${hint}<span class="dice-roll-formula">${esc(diceRequestFormula(currentDiceRequest(r)))}</span></span></button><div class="dice-outcome" role="status" aria-live="polite" aria-atomic="true">${scoreHtml}${result && r.note ? `<p class="dice-roll-note">${esc(r.note)}</p>` : ""}${outcomeHtml}${dc}</div><div class="dice-after-roll">${renderDiceAfterRoll(r)}</div><div class="dice-verdict-zone">${verdict}</div><div class="dice-roll-extra">${history}${keptHtml}${help ? `<p class="dice-roll-help">${esc(help)}</p>` : ""}${reminders}</div></div>`;
+  const footer = ready || rolling || blocked
+    ? button(uiText("Annuler"), "close-modal", "", "ghost") + button(rolling ? uiText("Lancer en cours…") : r.launchLabel || uiText("Lancer les dés"), "roll-start", `id="dice-launch" ${rolling || blocked ? "disabled" : ""}`, "primary")
     : applies ? button(r.cancelLabel || uiText("Annuler"), "close-modal", "", "ghost") + button(r.acceptLabel || uiText("Utiliser ce résultat"), "roll-accept", 'id="dice-accept"', "primary")
       // Après le toucher, le verdict mène à la suite ; un 1 naturel termine l'attaque.
       : seq?.step === "attack" && choices.length ? button(uiText("{p0} Relancer", { p0: icon("dice", 16) }), "reroll", 'id="dice-reroll"', "ghost")
@@ -59551,6 +60229,10 @@ function updateDiceDialog() {
     const target = dialog.querySelector(part), source = fresh.querySelector(part);
     if (target && source && target.innerHTML !== source.innerHTML) target.innerHTML = source.innerHTML;
   }
+  // Munitions : le reste change une fois le tir payé ; la ligne garde sa place, son texte et sa couleur suivent.
+  const ammo = dialog.querySelector("[data-ammo-line]"), freshAmmo = fresh.querySelector("[data-ammo-line]");
+  if (ammo && !freshAmmo) ammo.remove();
+  else if (ammo && freshAmmo && ammo.outerHTML !== freshAmmo.outerHTML) { ammo.className = freshAmmo.className; ammo.innerHTML = freshAmmo.innerHTML; }
   document.getElementById(focusId)?.focus({ preventScroll: true });
   // Un bouton désactivé garde le focus et peut retenir les touches, dont Échap.
   if (document.activeElement?.disabled) dialog.focus({ preventScroll: true });
@@ -59588,7 +60270,7 @@ function playCriticalFx(r, plan) {
 }
 async function startDiceDialog() {
   const r = ui.roll;
-  if (ui.modal !== "roll" || !r || r.phase !== "ready") return;
+  if (ui.modal !== "roll" || !r || r.phase !== "ready" || ammoBlocked(r)) return;
   r.phase = "spending";
   try { await spendRollOptions(r); await spendHeldPortent(r); } finally { r.phase = "ready"; }
   if (ui.roll !== r || ui.modal !== "roll") return;
@@ -59661,8 +60343,24 @@ async function performDice(action, el, c, data, d) {
     case "roll-skill":
       rollSkillCheck(c, d, data.key);
       break;
-    case "roll-combat-action":
-      if (COMBAT_ACTIONS[data.id]) rollSkillCheck(c, d, "athletics", uiText("combat.roll", { action: uiText(COMBAT_ACTIONS[data.id].name), skill: uiSkills.athletics[0] }));
+    case "roll-combat-action": {
+      // Réussi ou raté se décide à la table, contre le jet de la créature (décision de Luca du 22 novembre 2026). Une lutte réussie se note sur la fiche :
+      // l'effet « Tu agrippes une créature » rappelle la règle, et le retirer, c'est lâcher. Une bousculade réussie demande « À terre » ou « Repoussée ».
+      if (!COMBAT_ACTIONS[data.id]) break;
+      const verdict = { acceptLabel: uiText("combat.success"), cancelLabel: uiText("combat.failure") };
+      const grapple = { ...verdict, apply: async () => { const now = activeCharacter(); await saveCharacter(setReceivedEffect(now, grappleEffect(), ""), uiText("combat.grapple.saved"), "session", now); },
+        afterApply: () => toast([uiText("combat.grapple.noted"), equippedStyles(activeCharacter()).includes("unarmedFighting") ? uiText("combat.grapple.unarmed") : ""].filter(Boolean).join(" ")) };
+      const shove = { ...verdict, apply: async () => {}, afterApply: () => openModal("combat-shove") };
+      rollSkillCheck(c, d, "athletics", uiText("combat.roll", { action: uiText(COMBAT_ACTIONS[data.id].name), skill: uiSkills.athletics[0] }), data.id === "grapple" ? grapple : shove);
+      break;
+    }
+    case "ammo-recover":
+      await saveCharacter(recoverAmmunition(c, data.kind), uiText("ammo.recovered"), "session", c);
+      render(); toast(uiText("ammo.recovered"));
+      break;
+    case "shove-result":
+      closeModal();
+      toast(data.value === "prone" ? uiText("combat.shove.proneRule") : uiText("combat.shove.pushRule", { distance: uiMeters(1.5) }));
       break;
     case "roll-free": {
       const entry = freeRolls(c, d).find((row) => row.id === data.id), check = entry?.effect.check;
@@ -59689,6 +60387,20 @@ async function performDice(action, el, c, data, d) {
       const entry = extraAttackEntries(c, d).find((row) => row.key === key);
       if (entry?.open) { await perform(entry.open[0], { dataset: entry.open[1] }); break; }
       startAttackSequence((c, d) => extraAttackEntries(c, d).find((row) => row.key === key)?.profile, data.step === "attack" ? "attack" : "damage");
+      break;
+    }
+    case "weapon-swap":
+      ui.swap = { id: data.id, step: data.step === "damage" ? "damage" : "attack" };
+      openModal("weapon-swap");
+      break;
+    case "confirm-weapon-swap": {
+      // Les mains changent, puis le jet de l'arme prise se lance, comme depuis sa carte.
+      const option = weaponSwapOptions(c, d).find((entry) => entry.id === ui.swap?.id), step = ui.swap?.step;
+      if (!option) { closeModal(); break; }
+      await saveCharacter(applyWeaponSwap(c, option), uiText("weaponSwap.saved"), "session", c);
+      closeModal();
+      const index = uiDerive(activeCharacter()).attacks.findIndex((attack) => attack.instanceId === option.instanceId && !attack.twoWeapon);
+      if (index >= 0) await perform(step === "damage" ? "roll-damage" : "roll-attack", { dataset: { index: String(index) } });
       break;
     }
     case "roll-attack":
@@ -60607,7 +61319,6 @@ const ui = {
   catalogTab: "gear",
   editorClass: null,
   attackIndex: 0,
-  equipmentProficientOnly: false,
   exportText: "",
   importText: "",
   beastTab: "available",
@@ -61013,11 +61724,13 @@ function renderModal() {
   if (["journal-editor", "journal-photo", "journal-discard"].includes(ui.modal)) return renderJournalModals(c, d, cancel);
   if (["rune-inscriptions", "rune-expense", "copy-spell", "magic", "sheet-slot-correction", "sheet-slot", "cast", "cast-target", "spell-stock-consume"].includes(ui.modal)) return renderSpellModals(c, d, cancel);
   if (["rest", "resource-uses", "resource-conversions", "dawn-item", "resource-event"].includes(ui.modal)) return renderResourceModals(c, d, cancel);
-  if (["use-inventory-item", "resolve-last-charge", "declare-item-result", "item-spell-stock", "item-spell-deposit", "item-spell-remove", "item-slot-recovery", "equipment", "equip-instance", "item", "catalog", "shop", "attunements"].includes(ui.modal)) return renderInventoryModals(c, d, cancel);
+  if (["use-inventory-item", "resolve-last-charge", "declare-item-result", "item-spell-stock", "item-spell-deposit", "item-spell-remove", "item-slot-recovery", "equipment", "equip-instance", "item", "catalog", "shop", "shop-terms", "shop-price", "attunements"].includes(ui.modal)) return renderInventoryModals(c, d, cancel);
   if (ui.modal.startsWith("creation-")) return renderCreationModal(c, cancel);
   if (["replace-spell", "replace-choice", "calculation-details", "acquisition-history", "rule-options", "adjustments"].includes(ui.modal)) return renderLevelModals(c, d, cancel);
   if (["conditions"].includes(ui.modal)) return renderEffectModals(c, d, cancel);
   if (ui.modal === "roll") return renderDiceDialog();
+  if (ui.modal === "weapon-swap") return renderWeaponSwapModal(c, d, cancel);
+  if (ui.modal === "combat-shove") return renderShoveModal(cancel);
   if (["trait", "custom-spell", "aidedd", "import", "install", "export-text", "import-text"].includes(ui.modal)) return renderMoreModals(c, d, cancel);
   if (ui.modal === "undo-conflict") {
     const conflict = ui.undoConflict;
@@ -61029,7 +61742,7 @@ function renderModal() {
       repair = previewCharacterRepair(beginCharacterRepair(p.original, { revision: p.baseRevision }), p.character);
     return modalShell(
       uiText("Récapitulatif"),
-      `${renderRepairConflict()}<p class="modal-copy"><strong>${esc(uiStoredText(p.label))}</strong><br>${esc(uiStoredText(p.description) || uiText("La fiche n’a pas encore été modifiée. Sa version précédente restera dans les réglages."))}</p>${p.ask ? `<label class="field" for="review-ask"><span>${esc(p.ask.label)}</span><select id="review-ask" data-review-ask>${Array.from({ length: p.ask.max - p.ask.min + 1 }, (_, index) => `<option value="${p.ask.min + index}" ${p.ask.value === p.ask.min + index ? "selected" : ""}>${p.ask.min + index}</option>`).join("")}</select></label>` : ""}${p.campaignDetails || ""}${renderRuneChanges(p.original, p.character)}${impactHtml(p.original, p.character, p.impactRows)}${renderRepairConsequences(repair)}${p.magicSummary ? `<div class="section-gap">${esc(p.magicSummary)}</div>` : ""}<div class="section-gap">${issueList(issues.errors, "error")}${issueList(issues.warnings)}</div>`,
+      `${renderRepairConflict()}<p class="modal-copy"><strong>${esc(uiStoredText(p.label))}</strong>${p.shop && !p.description ? "" : `<br>${esc(uiStoredText(p.description) || uiText("La fiche n’a pas encore été modifiée. Sa version précédente restera dans les réglages."))}`}</p>${p.ask ? `<label class="field" for="review-ask"><span>${esc(p.ask.label)}</span><select id="review-ask" data-review-ask>${Array.from({ length: p.ask.max - p.ask.min + 1 }, (_, index) => `<option value="${p.ask.min + index}" ${p.ask.value === p.ask.min + index ? "selected" : ""}>${p.ask.min + index}</option>`).join("")}</select></label>` : ""}${p.campaignDetails || ""}${renderRuneChanges(p.original, p.character)}${impactHtml(p.original, p.character, p.impactRows)}${renderRepairConsequences(repair)}${p.magicSummary ? `<div class="section-gap">${esc(p.magicSummary)}</div>` : ""}<div class="section-gap">${issueList(issues.errors, "error")}${issueList(issues.warnings)}</div>`,
       // choices : la revue se valide par l'un de ses choix (Présage : « Sur une autre créature » ou « Sur moi »), chacun avec sa fiche.
       p.choices ? p.choices.map((choice, index) => button(esc(choice.label), "commit-review", `data-choice="${index}" ${issues.errors.length ? "disabled" : ""}`, index === p.choices.length - 1 ? "primary" : "ghost")).join("")
         : cancel + (issues.errors.length ? button(uiText("repair.editAll"), "repair-pending", "", "small-btn") : "") + button(uiText("Valider les modifications"), "commit-review", issues.errors.length ? "disabled" : "", "primary"),
@@ -61203,6 +61916,9 @@ function closeModal() {
   }
   // Revue d'un achat refermée sans valider : retour au panier.
   if (ui.modal === "review" && ui.pending?.shop && ui.shop) { ui.pending = null; ui.modal = "shop"; render(); return; }
+  // Prix convenu ou conditions rouvertes depuis la boutique, refermés : retour à la boutique. À l'entrée, refermer les conditions quitte le marchand.
+  if (ui.modal === "shop-price" && ui.shop) { ui.shop.price = null; ui.modal = "shop"; render(); return; }
+  if (ui.modal === "shop-terms" && ui.shop && !ui.shop.draft?.entry) { ui.shop.draft = null; ui.modal = "shop"; render(); return; }
   if (ui.modal === "review" && ui.pending?.libraryBack) {
     const origin = ui.pending.libraryBack;
     ui.pending = null; restoreLibraryOrigin(origin); return;
@@ -61450,11 +62166,11 @@ async function perform(action, el) {
     case "review-conditions":
       await performEffects(action, el, c, data, d); break;
     case "roll-ability": case "roll-save": case "roll-skill": case "roll-combat-action": case "roll-free": case "roll-martial-arts": case "roll-extra-attack":
-    case "roll-attack": case "roll-damage": case "roll-two-weapon": case "dice-chain-next": case "dice-panel": case "dice-verdict": case "dice-option":
+    case "roll-attack": case "roll-damage": case "shove-result": case "ammo-recover": case "weapon-swap": case "confirm-weapon-swap": case "roll-two-weapon": case "dice-chain-next": case "dice-panel": case "dice-verdict": case "dice-option":
     case "dice-lucky": case "dice-keep": case "dice-keep-options": case "dice-after-option": case "dice-part": case "dice-portent": case "roll-mode": case "dice-pick": case "roll-external": case "roll-start":
     case "roll-accept": case "reroll": case "death-roll": case "death-mark": case "roll-initiative":
       await performDice(action, el, c, data, d); break;
-    case "equipment": case "review-equipment": case "equip-cast-mage-armor": case "add-library-item": case "instance-reference": case "attunements": case "toggle-repair-attunement":
+    case "equipment": case "review-equipment": case "equip-cast-mage-armor": case "equip-pick-open": case "equip-pick": case "equip-shield-toggle": case "equip-combo": case "add-library-item": case "instance-reference": case "attunements": case "toggle-repair-attunement":
     case "review-attunements": case "equip-instance": case "review-equip-instance": case "unequip-instance": case "convert-ammunition": case "item-spell-stock":
     case "item-slot-recovery": case "item-spell-deposit": case "review-item-spell-deposit": case "item-spell-remove": case "review-item-spell-remove":
     case "review-item-slot-recovery": case "review-reset-item-recovery": case "declare-item-result": case "use-inventory-item": case "resolve-last-charge":
@@ -61462,6 +62178,7 @@ async function perform(action, el) {
     case "review-equipment-pack": case "edit-item": case "review-item": case "delete-item": case "equip-add-weapon": case "equip-remove-weapon": case "catalog-item":
     case "catalog-tab": case "add-catalog-item": case "toggle-item-effect": case "shop-open": case "shop-tab": case "shop-view": case "shop-full": case "shop-add":
     case "shop-free": case "shop-remove": case "shop-minus": case "shop-plus": case "shop-detail": case "shop-review":
+    case "shop-terms-open": case "shop-terms-rule": case "shop-terms-ok": case "shop-terms-cancel": case "shop-back": case "shop-sell": case "shop-price-ok":
       await performInventory(action, el, c, data, d); break;
     case "campaign-new": case "campaign-personal-new": case "campaign-language": case "campaign-edit": case "campaign-proposal": case "campaign-track-new":
     case "campaign-track-edit": case "campaign-track-review": case "campaign-acquisition-review": case "campaign-personal-review": case "campaign-toggle":
@@ -61674,6 +62391,7 @@ document.addEventListener("change", (event) => {
     document.getElementById("review-ask")?.focus({ preventScroll: true });
     return;
   }
+  if (event.target.matches("[data-dice-ammo]") && ui.roll) { chooseRollAmmo(ui.roll, event.target.value); return; }
   if (event.target.matches("[data-dice-count]") && ui.roll?.phase === "ready") {
     const count = Number(event.target.value);
     if (Number.isInteger(count) && count >= 1 && count <= ui.roll.maxCount) { ui.roll.request.count = count; showPreparedDice(); }

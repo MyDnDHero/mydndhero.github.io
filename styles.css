@@ -59,6 +59,55 @@ button span{pointer-events:none}
 .pill.purple{background:var(--magic-bg);color:var(--magic)}
 .pill.sand{background:var(--surface);color:var(--warning)}
 .pill.red{background:var(--error-bg);color:var(--error)}
+/* Changer d'arme : coût du tour (1× par tour, 1 action) et effet. */
+.pill.cost-free,.pill.cost-action{padding:1px 7px;font-size:11px;letter-spacing:0;vertical-align:1px}
+.pill.cost-free{background:var(--success-bg);color:var(--success)}
+.pill.cost-action{background:var(--selection-bg);color:var(--accent)}
+.attack-effect{font-size:12px;margin-top:4px}
+.attack-group{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:14px 0 0}
+.weapon-swap-steps{margin:0;padding-left:20px;line-height:1.8}
+/* Écran Équipement : emplacements, choix, armes à portée de main (22 novembre 2026). */
+.eq-grp{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:18px 0 4px}
+.eq-grp.first{margin-top:0}
+.eq-slot{display:flex;align-items:center;gap:12px;width:100%;padding:10px 0;border:0;border-bottom:1px solid var(--line);background:transparent;color:inherit;text-align:left;font:inherit;cursor:pointer}
+.eq-slot.still{cursor:default}
+.eq-ico{width:44px;height:44px;border-radius:10px;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;color:var(--accent);flex:none}
+.eq-slot.still .eq-ico{color:var(--muted)}
+.eq-text{flex:1;min-width:0;display:flex;flex-direction:column}
+.eq-text small{font-size:12px;color:var(--muted)}
+.eq-text strong{font-weight:600;font-size:15px}
+.eq-meta{font-size:12px;color:var(--muted)}
+.eq-chev,.eq-toggle{color:var(--muted);font-size:13px}
+.eq-picks{display:grid;gap:6px;padding:8px 0 10px 56px;border-bottom:1px solid var(--line)}
+.eq-pick{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:inherit;text-align:left;font:inherit;cursor:pointer}
+.eq-pick.on{border-color:var(--accent)}
+.eq-pick small{display:block;font-size:12px;color:var(--muted)}
+.eq-chips{display:flex;flex-wrap:wrap;gap:8px}
+.eq-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-strong);border-radius:999px;padding:6px 12px;font-size:13px}
+.eq-chip svg{color:var(--muted)}
+/* Munitions : pastille sur la carte d'attaque, ligne dans la fenêtre de dés, récupération après le combat (22 novembre 2026). */
+/* Marchand (22 novembre 2026) : conditions de l'échoppe, groupes du panier, gain d'une vente. */
+.shop-terms{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 10px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);border-radius:8px;font:inherit;font-size:13px;font-weight:650;white-space:nowrap;cursor:pointer}
+.shop-terms svg{color:var(--accent)}
+.shop-rate{margin:4px 0 22px}
+.shop-rate-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.shop-rate-head label{font-size:15px;font-weight:650}
+.shop-rate-head b{font:700 26px var(--serif);color:var(--accent)}
+.shop-rate input[type=range]{width:100%;accent-color:var(--accent)}
+.shop-rate-ticks{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:2px}
+.shop-group{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:14px 2px 6px}
+.shop-line-total.gain{color:var(--success)}
+.shop-line-computed{display:flex;align-items:center;justify-content:space-between}
+.shop-agreed{display:flex;align-items:center;gap:8px}
+.shop-agreed input{flex:1}
+/* Arme du sac dans les réglages détaillés : son titre au-dessus du nom, comme une liste (capture de Luca du 22 novembre 2026). */
+.weapon-row .field[data-weapon-item]{display:flex;flex-direction:column;gap:7px;margin-bottom:0;font-size:12px;font-weight:600;min-width:0}
+.weapon-row-name{font-size:15px;font-weight:600;padding:4px 0}
+.pill.ammo{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;font-size:11px;letter-spacing:0;vertical-align:1px;background:var(--surface);color:var(--muted);border:1px solid var(--line)}
+.pill.ammo.ammo-out{background:var(--error-bg);color:var(--error);border-color:transparent}
+.dice-ammo-pick{margin:8px 0 4px}
+.dice-ammo-pick select.ammo-out{color:var(--error)}
+.ammo-recover{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);margin:8px 2px 0}
 .pill[data-proficiency]{margin-left:4px;vertical-align:middle;font:650 12px/1.25 var(--sans)}
 .pill.dark{background:var(--shadow-color);color:var(--accent-contrast)}
 .pill.outline{border:1px solid var(--line);background:transparent;color:var(--muted)}
@@ -662,7 +711,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .choice-card .choice-icon{color:var(--accent)}
 .wizard-main{border-radius:var(--radius)}
 .field small,.option-row p,.check-field small,.choice-spec .help,.wizard-intro,.preview-tip{font-size:14px;line-height:1.6}
-label.field,.option-row strong,.check-field{font-size:14px}
+label.field,.weapon-row .field[data-weapon-item],.option-row strong,.check-field{font-size:14px}
 .field input,.field textarea,.field select,.search-input,select.select-plain{border-color:var(--line-strong);background:var(--panel);border-radius:4px}
 input[type=checkbox],input[type=radio]{accent-color:var(--accent)}
 .score-editor input,.score-editor select,.stepper input{color:var(--ink)}
@@ -2768,8 +2817,11 @@ button.state-active::after{content:"";position:absolute;inset:-11px 0}
 .purse-actions{display:flex;gap:8px;margin:10px 0}
 .purse-actions .btn{flex:1;min-height:42px;font-size:13px}
 .shop-modal .modal-footer{flex-direction:column;align-items:stretch;gap:10px}
-.shop-views{display:none;margin-bottom:12px}
+/* Grand écran : le panier reste à droite ; à gauche, le catalogue ou Mon sac (22 novembre 2026). */
+.shop-views{display:flex;margin-bottom:12px}
+.shop-views [data-value="cart"]{display:none}
 .shop-body{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:24px;align-items:start}
+.shop-body[data-view="bag"] .shop-catalog,.shop-body:not([data-view="bag"]) .shop-bag{display:none}
 .shop-catalog .segmented{margin-bottom:12px}
 .spell-toolbar.shop-toolbar{margin:0 0 6px;gap:8px;flex-wrap:nowrap;align-items:stretch}
 .spell-toolbar.shop-toolbar .search-wrap{flex-basis:auto}
@@ -2823,9 +2875,9 @@ button.state-active::after{content:"";position:absolute;inset:-11px 0}
 .shop-buttons{display:flex;gap:10px;justify-content:flex-end}
 .shop-buttons .btn:disabled{opacity:.45;cursor:not-allowed}
 @media (max-width:900px){
-  .shop-views{display:flex}
+  .shop-views [data-value="cart"]{display:block}
   .shop-body{display:block}
-  .shop-body[data-view="catalog"] .shop-cart,.shop-body[data-view="cart"] .shop-catalog{display:none}
+  .shop-body[data-view="catalog"] .shop-cart,.shop-body[data-view="bag"] .shop-cart,.shop-body[data-view="cart"] .shop-catalog,.shop-body[data-view="cart"] .shop-bag{display:none}
   .shop-cart{position:static;background:none;border:0;padding:0}
   .shop-cart-title{display:none}
   .shop-buttons .btn{flex:1}
