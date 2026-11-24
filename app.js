@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-candidate-11";
+const APP_VERSION = "2.0.0-candidate-13";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -5380,7 +5380,9 @@ const UI_FR = Object.freeze({
   "weapon.twoHanded": "{name} à deux mains",
   "weapon.oneHanded": "{name} à une main",
   "weaponSwap.step.grip2": "Prendre à deux mains : {name}",
-  "weaponSwap.step.grip1": "Tenir à une main : {name}"
+  "weaponSwap.step.grip1": "Tenir à une main : {name}",
+  "update.percent": "{percent} %",
+  "back.exit": "Appuie encore sur Retour pour quitter."
 });
 
 
@@ -10398,7 +10400,9 @@ const UI_EN = Object.freeze({
   "weapon.twoHanded": "{name}, two-handed",
   "weapon.oneHanded": "{name}, one-handed",
   "weaponSwap.step.grip2": "Grip with both hands: {name}",
-  "weaponSwap.step.grip1": "Hold in one hand: {name}"
+  "weaponSwap.step.grip1": "Hold in one hand: {name}",
+  "update.percent": "{percent}%",
+  "back.exit": "Press Back again to exit."
 });
 
 
@@ -53444,7 +53448,7 @@ function creationNextRestore(saved) {
   const creationUrl = new URL(location.href);
   creationUrl.searchParams.set("creation", "next");
   creationUrl.searchParams.delete("welcome");
-  history.replaceState(null, "", creationUrl);
+  setAppUrl(creationUrl);
 }
 /** Nom affiché d’un brouillon de création : le sien, sinon ce qui est déjà choisi. */
 function creationNextDraftName(saved) {
@@ -55257,7 +55261,7 @@ function requestImport() {
 async function importSharedSave() {
   if ("launchQueue" in window) window.launchQueue.setConsumer(async (launch) => { const handle = launch.files?.[0]; if (handle) await importSaveFile(await handle.getFile()); });
   const url = new URL(location.href), shared = url.searchParams.has("partage");
-  if (shared) { url.searchParams.delete("partage"); history.replaceState(null, "", url); }
+  if (shared) { url.searchParams.delete("partage"); setAppUrl(url); }
   if (!("caches" in window)) return;
   try {
     const cache = await caches.open("compagnon-partage"), key = new URL("./_partage/sauvegarde", location.href).href, stored = await cache.match(key);
@@ -56182,7 +56186,7 @@ function resumeWizardDraft() {
   const creationUrl = new URL(location.href);
   creationUrl.searchParams.set("creation", "next");
   creationUrl.searchParams.delete("welcome");
-  history.replaceState(null, "", creationUrl);
+  setAppUrl(creationUrl);
   queueDraft();
 }
 function startWizard(character = null, classId = null) {
@@ -56201,7 +56205,7 @@ function startWizard(character = null, classId = null) {
     const creationUrl = new URL(location.href);
     creationUrl.searchParams.set("creation", "next");
     creationUrl.searchParams.delete("welcome");
-    history.replaceState(null, "", creationUrl);
+    setAppUrl(creationUrl);
     // Rien n’est choisi avant un clic : ni compétence de classe ni sous-classe.
     ui.wizard.draft.skills = [];
     ui.wizard.draft.subclasses = {};
@@ -56251,7 +56255,7 @@ async function performWizard(action, el, c, data, d) {
       });
       break;
     case "leave-wizard":
-      if (creationNextIsNew()) { queueDraft(); location.href = `${location.pathname}?creation=next&welcome=1`; break; }
+      if (creationNextIsNew()) { queueDraft(); location.replace(`${location.pathname}?creation=next&welcome=1`); break; }
       if (ui.wizard?.aidedd) { ui.aidedd.character = clone(ui.wizard.draft); ui.aidedd.reviewed = false; ui.wizard = null; ui.route = "home"; openModal("aidedd"); break; }
       clearTimeout(draftTimeout);
       if (ui.wizard) {
@@ -62142,7 +62146,7 @@ function renderNow() {
   const saveLabel = ui.saving ? uiText("save.saving") : localStore.readOnly ? uiText("save.readonly") : localStore.mode === "memory" ? uiText("save.memory") : ui.online ? uiText("save.local") : uiText("save.offline");
   const mobileStatus = ui.saving ? uiText("save.saving") : localStore.readOnly ? uiText("save.readonly") : localStore.mode === "memory" ? uiText("save.unsaved") : ui.online ? uiText("save.saved") : uiText("save.offlineShort");
   clearDashboardMount();
-  root.innerHTML = `<a class="skip" href="#main-content">${uiText("shell.skip")}</a><div class="app-shell ${emptyHome ? "empty-home" : ""}" style="--livery:${liveryOf(c)}"><aside class="sidebar"><button class="brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 30)}</span><span><span class="brand-name">Compagnon</span></span></button><div class="sidebar-label">${uiText("shell.table")}</div>${navFor(c).map(([route, ico, label]) => `<button class="nav-btn ${ui.route === route && !wizardActive ? "active" : ""}" data-action="navigate" data-route="${route}" ${ui.route === route && !wizardActive ? 'aria-current="page"' : ""} ${!c ? "disabled" : ""}>${icon(ico, 20)}${uiText(`nav.${route}`)}</button>`).join("")}<div class="sidebar-bottom"><button class="nav-btn ${ui.route === "library" ? "active" : ""}" data-action="navigate" data-route="library">${uiText("{p6}Bibliothèque", { p6: icon("book", 20) })}</button><button class="nav-btn ${ui.route === "offline" ? "active" : ""}" data-action="navigate" data-route="offline">${uiText("{p8}Contenu hors ligne", { p8: icon("download", 20) })}</button><button class="nav-btn ${ui.route === "home" && !wizardActive ? "active" : ""}" data-action="navigate" data-route="home">${uiText("{p10}Mes personnages", { p10: icon("users", 20) })}</button><button class="nav-btn ${ui.route === "settings" ? "active" : ""}" data-action="navigate" data-route="settings">${uiText("{p12}Réglages & sauvegardes", { p12: icon("settings", 20) })}</button><div class="local-note">${icon("lock", 19)}<div>${uiText("shell.local")}</div></div><div class="side-footer"><span>${uiText("shell.rules")}</span><span>v${APP_VERSION}</span></div></div></aside><div class="main-shell"><header class="topbar"><div class="top-title"><strong>${wizardActive ? uiText("shell.creation") : uiText(`nav.${ui.route}`)}</strong></div><button class="brand mobile-brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 26)}</span><span><span class="brand-name">Compagnon</span><span class="brand-sub">${uiText("shell.rules")}</span></span></button><div class="top-actions"><span class="save-status" title="${esc(saveLabel)}" role="status"><span class="status-dot" style="${localStore.mode === "memory" || localStore.readOnly ? "background:var(--warning)" : ""}" aria-hidden="true"></span><span class="status-text">${esc(saveLabel)}</span><span class="status-mobile">${esc(mobileStatus)}</span></span>${c && !wizardActive ? renderCharacterMenu(c) : !isInstalledApp() ? `<span class="top-utility">${smallIcon("phone", "install", uiText("shell.install"))}</span>` : ""}</div></header>${ui.languageWarning ? notice(uiText("language.failure"), "warning") : ""}${ui.update ? `<div class="update-banner">${uiText("Une nouvelle version est prête. Tes fiches seront conservées.{p0}", { p0: button(uiText("Mettre à jour"), "update-app", "", "small-btn") })}</div>` : ui.updateDownloading ? `<div class="update-banner" role="status">${uiText("update.downloading")}</div>` : ""}${contentBannerHtml()}${localStore.mode === "memory" ? notice(("Le navigateur bloque le stockage. <strong>" + uiText("Les changements ne survivront pas à la fermeture.") + "</strong> Exporte tes fiches et ouvre l’application hors navigation privée."), "error") : ""}${localStore.readOnly ? notice(uiText("Le stockage de ce navigateur est en lecture seule. Exporte tes fiches pour les conserver dans un navigateur compatible."), "warning") : ""}${localStore.pendingState ? notice(uiText("Une modification n’a pas été enregistrée. {p0}", { p0: button(uiText("Exporter les modifications en attente"), "export-pending", "", "small-btn") }), "warning") : ""}${appData.recovery?.length ? notice(uiText("{p0} fiche(s) nécessitent une récupération. Les autres restent accessibles. {p1}", { p0: appData.recovery.length, p1: button(uiText("Exporter les données à récupérer"), "export-recovery", "", "small-btn") }), "warning") : ""}<main class="main ${wizardActive ? "wizard-active" : ""}" id="main-content" tabindex="-1">${ui.wizard ? renderWizard() : ui.levelFlow ? renderLevelFlow() : renderPage(c)}${c ? printSheet(c) : ""}</main></div></div><nav class="mobile-nav" aria-label="${esc(uiText("shell.navigation"))}">${[
+  root.innerHTML = `<a class="skip" href="#main-content">${uiText("shell.skip")}</a><div class="app-shell ${emptyHome ? "empty-home" : ""}" style="--livery:${liveryOf(c)}"><aside class="sidebar"><button class="brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 30)}</span><span><span class="brand-name">Compagnon</span></span></button><div class="sidebar-label">${uiText("shell.table")}</div>${navFor(c).map(([route, ico, label]) => `<button class="nav-btn ${ui.route === route && !wizardActive ? "active" : ""}" data-action="navigate" data-route="${route}" ${ui.route === route && !wizardActive ? 'aria-current="page"' : ""} ${!c ? "disabled" : ""}>${icon(ico, 20)}${uiText(`nav.${route}`)}</button>`).join("")}<div class="sidebar-bottom"><button class="nav-btn ${ui.route === "library" ? "active" : ""}" data-action="navigate" data-route="library">${uiText("{p6}Bibliothèque", { p6: icon("book", 20) })}</button><button class="nav-btn ${ui.route === "offline" ? "active" : ""}" data-action="navigate" data-route="offline">${uiText("{p8}Contenu hors ligne", { p8: icon("download", 20) })}</button><button class="nav-btn ${ui.route === "home" && !wizardActive ? "active" : ""}" data-action="navigate" data-route="home">${uiText("{p10}Mes personnages", { p10: icon("users", 20) })}</button><button class="nav-btn ${ui.route === "settings" ? "active" : ""}" data-action="navigate" data-route="settings">${uiText("{p12}Réglages & sauvegardes", { p12: icon("settings", 20) })}</button><div class="local-note">${icon("lock", 19)}<div>${uiText("shell.local")}</div></div><div class="side-footer"><span>${uiText("shell.rules")}</span><span>v${APP_VERSION}</span></div></div></aside><div class="main-shell"><header class="topbar"><div class="top-title"><strong>${wizardActive ? uiText("shell.creation") : uiText(`nav.${ui.route}`)}</strong></div><button class="brand mobile-brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 26)}</span><span><span class="brand-name">Compagnon</span><span class="brand-sub">${uiText("shell.rules")}</span></span></button><div class="top-actions"><span class="save-status" title="${esc(saveLabel)}" role="status"><span class="status-dot" style="${localStore.mode === "memory" || localStore.readOnly ? "background:var(--warning)" : ""}" aria-hidden="true"></span><span class="status-text">${esc(saveLabel)}</span><span class="status-mobile">${esc(mobileStatus)}</span></span>${c && !wizardActive ? renderCharacterMenu(c) : !isInstalledApp() ? `<span class="top-utility">${smallIcon("phone", "install", uiText("shell.install"))}</span>` : ""}</div></header>${ui.languageWarning ? notice(uiText("language.failure"), "warning") : ""}${ui.update ? `<div class="update-banner">${uiText("Une nouvelle version est prête. Tes fiches seront conservées.{p0}", { p0: button(uiText("Mettre à jour"), "update-app", "", "small-btn") })}</div>` : ui.updateDownloading ? `<div class="update-banner" role="status"><span>${uiText("update.downloading")}</span>${updateProgressHtml()}</div>` : ""}${contentBannerHtml()}${localStore.mode === "memory" ? notice(("Le navigateur bloque le stockage. <strong>" + uiText("Les changements ne survivront pas à la fermeture.") + "</strong> Exporte tes fiches et ouvre l’application hors navigation privée."), "error") : ""}${localStore.readOnly ? notice(uiText("Le stockage de ce navigateur est en lecture seule. Exporte tes fiches pour les conserver dans un navigateur compatible."), "warning") : ""}${localStore.pendingState ? notice(uiText("Une modification n’a pas été enregistrée. {p0}", { p0: button(uiText("Exporter les modifications en attente"), "export-pending", "", "small-btn") }), "warning") : ""}${appData.recovery?.length ? notice(uiText("{p0} fiche(s) nécessitent une récupération. Les autres restent accessibles. {p1}", { p0: appData.recovery.length, p1: button(uiText("Exporter les données à récupérer"), "export-recovery", "", "small-btn") }), "warning") : ""}<main class="main ${wizardActive ? "wizard-active" : ""}" id="main-content" tabindex="-1">${ui.wizard ? renderWizard() : ui.levelFlow ? renderLevelFlow() : renderPage(c)}${c ? printSheet(c) : ""}</main></div></div><nav class="mobile-nav" aria-label="${esc(uiText("shell.navigation"))}">${[
     ["sheet", "clipboard", uiText("Fiche")],
     ["spells", "book", uiText("Sorts")],
     ["features", "swords", uiText("Aptitudes")],
@@ -62614,7 +62618,7 @@ async function clearDraft() {
     // Parcours terminé : l’adresse ne le rouvre plus quand la fiche est rechargée.
     const creationUrl = new URL(location.href);
     creationUrl.searchParams.delete("creation");
-    history.replaceState(null, "", creationUrl);
+    setAppUrl(creationUrl);
     return;
   }
   clearTimeout(draftTimeout);
@@ -63080,6 +63084,51 @@ document.addEventListener("click", async (event) => {
     actionBusy = false;
   }
 });
+// Bouton Retour d'Android et du navigateur (demande de Luca du 24 novembre 2026). Chaque toucher pose une entrée « tampon » dans
+// l'historique : Retour la consomme et ferme ce qui est ouvert, recule d'une étape, revient à la fiche, puis prévient avant de quitter.
+// Chrome saute une entrée posée sans geste de l'utilisateur et n'en accepte plus après un Retour tant qu'on n'a pas touché l'écran
+// (note Chromium « History manipulation intervention ») : un deuxième Retour sans toucher l'écran quitte toujours.
+// L'adresse de l'appli suit son état, pas l'historique : Retour la garde. Après un rechargement, l'entrée tampon reste celle de la page
+// (mesuré sous Chromium : reculer depuis elle ne recharge pas) ; l'appli la reprend au lieu d'en poser une seconde.
+const BACK_GUARD = "compagnonRetour";
+let backGuard = history.state?.[BACK_GUARD] ?? null, backArmed = !!backGuard, appHref = location.href;
+try { history.scrollRestoration = "manual"; } catch { /* navigateur sans réglage du défilement */ }
+function setAppUrl(url) {
+  history.replaceState(history.state, "", url);
+  appHref = location.href;
+}
+function armBack(event) {
+  if (backArmed || !event.isTrusted || navigator.userActivation?.isActive === false) return;
+  const id = `${Date.now()}-${Math.random()}`;
+  try { history.pushState({ ...history.state, [BACK_GUARD]: id }, ""); } catch { return; }
+  backGuard = id; backArmed = true;
+}
+function pressBack(selector) {
+  const target = [...document.querySelectorAll(selector)].find((node) => !node.disabled && node.getClientRects().length);
+  target?.click();
+  return !!target;
+}
+function goBack() {
+  const menu = document.querySelector(SHEET_MENUS) || (innerWidth <= 700 ? document.querySelector(".workflow-menu[open]") : null);
+  if (menu) { menu.open = false; return; }
+  if (ui.modal) {
+    if (ui.modal === "journal-editor" && ui.journalPhotoSourceOpen) setJournalPhotoSource(false, { restoreFocus: true });
+    else if (!pressBack('#modal-root [data-action="library-back"],#modal-root [data-action="aidedd-back"]')) closeModal();
+    return;
+  }
+  if (["#workflow-previous", "#workflow-close", "#main-content .audit-back", '#main-content [data-action="library-home"]'].some(pressBack)) return;
+  const home = activeCharacter() ? "sheet" : "home";
+  if (!ui.wizard && !ui.levelFlow && ui.route !== home) { go(home); return; }
+  toast(uiText("back.exit"));
+}
+for (const name of ["click", "keydown"]) document.addEventListener(name, armBack, true);
+window.addEventListener("popstate", (event) => {
+  if (location.href !== appHref) history.replaceState(history.state, "", appHref);
+  // Avancer ramène sur l'entrée tampon : rien à faire.
+  if (backGuard && event.state?.[BACK_GUARD] === backGuard) { backArmed = true; return; }
+  backArmed = false;
+  goBack();
+});
 document.addEventListener("keydown", (event) => {
   const menu = document.querySelector(SHEET_MENUS);
   if (event.key === "Escape" && menu && !ui.modal) {
@@ -63136,6 +63185,23 @@ window.addEventListener("appinstalled", () => {
   render();
   toast("Compagnon est installé.");
 });
+// Barre du bandeau « Nouvelle version en cours de téléchargement… » (demande de Luca du 24 novembre 2026) : le service worker
+// envoie l'avancement en octets du socle (SHELL_PROGRESS) ; la barre se met à jour sans redessiner la page.
+function updateProgressHtml() {
+  const progress = ui.updateProgress;
+  if (!progress?.total) return "";
+  return `<progress data-update-progress max="${progress.total}" value="${progress.done}"></progress><span data-update-percent aria-hidden="true">${esc(uiText("update.percent", { percent: Math.floor(100 * progress.done / progress.total) }))}</span>`;
+}
+function receiveUpdateProgress(event) {
+  const data = event.data;
+  if (data?.type !== "SHELL_PROGRESS" || !navigator.serviceWorker.controller || ui.update || data.build === document.querySelector('meta[name="compagnon-build"]')?.content) return;
+  ui.updateProgress = { done: data.done, total: data.total };
+  const bar = document.querySelector("[data-update-progress]");
+  if (!ui.updateDownloading || !bar) { ui.updateDownloading = true; render(); return; }
+  bar.max = data.total; bar.value = data.done;
+  const percent = document.querySelector("[data-update-percent]");
+  if (percent) percent.textContent = uiText("update.percent", { percent: Math.floor(100 * data.done / data.total) });
+}
 // L’appli installée reste ouverte des jours : à l’ouverture, puis au retour sur l’onglet après une minute d’absence,
 // un petit fichier dit quel build est publié. S’il a changé, le téléchargement part aussitôt et le bandeau le signale.
 const UPDATE_CHECK_PAUSE = 60 * 1000;
@@ -63160,6 +63226,7 @@ document.addEventListener("visibilitychange", () => {
 async function setupServiceWorker() {
   if (window.COMPANION_STANDALONE || !("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
   try {
+    navigator.serviceWorker.addEventListener("message", receiveUpdateProgress);
     swRegistration = await navigator.serviceWorker.register("./sw.js");
     if (swRegistration.waiting) {
       ui.update = true;
@@ -63171,11 +63238,13 @@ async function setupServiceWorker() {
         if (worker.state === "installed" && navigator.serviceWorker.controller) {
           ui.update = true;
           ui.updateDownloading = false;
+          ui.updateProgress = null;
           render();
         }
         // Téléchargement abandonné : le bandeau disparaît, la prochaine vérification relancera.
         if (worker.state === "redundant" && ui.updateDownloading && !ui.update) {
           ui.updateDownloading = false;
+          ui.updateProgress = null;
           render();
         }
       });

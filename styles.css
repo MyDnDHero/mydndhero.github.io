@@ -1404,6 +1404,8 @@ button.state-active::after{content:"";position:absolute;inset:-11px 0}
 .eq-grp-tools,.attack-group-tools{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .light-actions{display:grid;gap:8px;margin-top:14px}
 .light-actions .btn{display:flex;justify-content:space-between;align-items:center;width:100%}
+.update-banner progress[data-update-progress]{width:min(220px,40vw);height:6px;accent-color:var(--warning)}
+.update-banner [data-update-percent]{font-variant-numeric:tabular-nums;min-width:3.5ch}
 
 /* Parcours de création de personnage. */
 .creation-next .next-navigation { display: grid; gap: 8px; align-content: start; }
