@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-candidate-13";
+const APP_VERSION = "2.0.0-candidate-14";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -5382,7 +5382,11 @@ const UI_FR = Object.freeze({
   "weaponSwap.step.grip2": "Prendre à deux mains : {name}",
   "weaponSwap.step.grip1": "Tenir à une main : {name}",
   "update.percent": "{percent} %",
-  "back.exit": "Appuie encore sur Retour pour quitter."
+  "back.exit": "Appuie encore sur Retour pour quitter.",
+  "tool.thieves.description": "Test de Dextérité pour crocheter une serrure ou désamorcer un piège.",
+  "tool.thieves.roll": "Crocheter {bonus}",
+  "tool.source": "Outil maîtrisé",
+  "tool.source.expertise": "Outil maîtrisé · expertise"
 });
 
 
@@ -10402,7 +10406,11 @@ const UI_EN = Object.freeze({
   "weaponSwap.step.grip2": "Grip with both hands: {name}",
   "weaponSwap.step.grip1": "Hold in one hand: {name}",
   "update.percent": "{percent}%",
-  "back.exit": "Press Back again to exit."
+  "back.exit": "Press Back again to exit.",
+  "tool.thieves.description": "Dexterity check to pick a lock or disarm a trap.",
+  "tool.thieves.roll": "Pick lock {bonus}",
+  "tool.source": "Tool proficiency",
+  "tool.source.expertise": "Tool proficiency · expertise"
 });
 
 
@@ -52667,7 +52675,19 @@ function uiDerive(c) {
     }) };
 }
 
+/**
+ * Aptitudes de la fiche, dans la langue de l'interface. Les outils de voleur maîtrisés y ont leur carte (demande de Luca du 24 novembre 2026) :
+ * elle porte le jet pour crocheter une serrure ou désamorcer un piège, juste après les aptitudes de classe.
+ */
 function uiCharacterFeatures(c) {
+  const list = uiCharacterFeatureList(c), thieves = uiDerive(c).tools.find((tool) => tool.id === "thieves-tools");
+  if (!thieves) return list;
+  const at = list.findIndex((entry) => entry.category === "origin");
+  list.splice(at < 0 ? list.length : at, 0, { id: "tool|thieves-tools", name: thieves.name, description: uiText("tool.thieves.description"), referenceId: "item|phb|thieves' tools",
+    source: uiText(thieves.expertise ? "tool.source.expertise" : "tool.source"), category: "tool", group: uiText("Outils") });
+  return list;
+}
+function uiCharacterFeatureList(c) {
   return characterFeatures(c).map((entry) => {
     if (entry.id?.startsWith("race|") && c.raceId !== "custom") {
       const index = Number(entry.id.split("|")[1]), trait = uiRaceOf(c).traits[index];
@@ -59251,6 +59271,8 @@ const clericResourceImpact = (c, ids) => resources(c).filter((entry) => ids.incl
  */
 function featureSettings(c) {
   const out = [], add = (fragment, key, setting) => out.push({ fragment, key, ...setting });
+  // Carte des outils de voleur (uiCharacterFeatures) : son bouton lance le test de Dextérité, sans passer par la fenêtre « Test d’outil ».
+  if (uiDerive(c).tools.some((tool) => tool.id === "thieves-tools")) add(null, "thieves-tools", { feature: "tool|thieves-tools", button: [uiText("tool.thieves.roll", { bonus: signed(toolCheckOptions(c, "thieves-tools", "dex").bonus) }), "tool-roll", 'data-tool="thieves-tools"'] });
   if (hasSubclass(c, "fighter", "runeKnight")) add("|rune carver|", "fighter-runes", { current: uiText("setting.runes", { runes: fighterCarriedRunes(c).map((id) => FIGHTER_RUNES[id][0]).join(", ") || uiText("setting.runes.none") }), button: [uiText("setting.change"), "fighter-runes"] });
   if (hasSubclass(c, "rogue", "phantom")) {
     const chosen = picksOf(c, "rogue|whispers", "proficiency")[0];
@@ -59289,10 +59311,10 @@ function featureSettings(c) {
   }
   return out;
 }
-/** Réglage déclaré pour une aptitude, ou null. */
+/** Réglage déclaré pour une aptitude, ou null : par l’identifiant de la carte (feature), sinon par un fragment de la référence d’une aptitude de classe. */
 function featureSettingOf(settings, feature) {
   const reference = feature.id.startsWith("class|") && feature.referenceId || "";
-  return settings.find(({ fragment }) => typeof fragment === "string" ? reference.includes(fragment) : fragment.test(reference)) || null;
+  return settings.find(({ fragment, feature: id }) => id ? id === feature.id : typeof fragment === "string" ? reference.includes(fragment) : fragment.test(reference)) || null;
 }
 /** Valeur en cours d’un réglage, à placer sous le nom de l’aptitude. */
 function featureSettingCurrent(setting) {
@@ -59318,7 +59340,7 @@ function artificerTiers() {
 }
 function renderFeaturesPage(c) {
   const all = uiCharacterFeatures(c),
-    labels = Object.fromEntries(Object.entries({ class: uiText("Classe & sous-classe"), origin: uiText("Origine & historique"), feat: uiText("Dons"), custom: uiText("Maison") }).filter(([id]) => all.some((feature) => feature.category === id)));
+    labels = Object.fromEntries(Object.entries({ class: uiText("Classe & sous-classe"), tool: uiText("Outils"), origin: uiText("Origine & historique"), feat: uiText("Dons"), custom: uiText("Maison") }).filter(([id]) => all.some((feature) => feature.category === id)));
   if (ui.featureFilter !== "all" && !Object.hasOwn(labels, ui.featureFilter)) ui.featureFilter = "all";
   const normalize = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replaceAll("œ", "oe").toLowerCase(),
     query = normalize(ui.featureQuery.trim()),
@@ -59601,7 +59623,10 @@ async function performClasses(action, el, c, data, d) {
     }
     case "review-bard-spirit": openReview(setBardSpiritSession(c, ui.form), bardReference("Spirit Session", "Spirits", 6).name, ui.form.action === "conduct" ? "Rituel d’une heure terminé : une utilisation dépensée et un sort appris jusqu’au début du repos long." : "Correction du sort temporaire ; les dépenses restent conservées.", "session"); break;
     case "tool-check": ui.form = { toolId: d.tools[0]?.id || "", ability: "dex" }; openModal("tool-check"); break;
-    case "prepare-tool-check": { const roll = toolCheckOptions(c, ui.form.toolId, ui.form.ability); rollCheck(roll.name, roll.bonus, "check", { ...roll, modeRoll: { kind: "check", ability: ui.form.ability } }); break; }
+    case "tool-roll": case "prepare-tool-check": {
+      const [toolId, ability] = action === "tool-roll" ? [data.tool, "dex"] : [ui.form.toolId, ui.form.ability], roll = toolCheckOptions(c, toolId, ability);
+      rollCheck(roll.name, roll.bonus, "check", { ...roll, modeRoll: { kind: "check", ability } }); break;
+    }
     case "rogue-state": openRogueState(c, data.kind); break;
     case "review-rogue-state": { const next = setRogueState(c, { ...ui.form, amount: Number(ui.form.amount) }); openReview(next, "Suivi du Phantôme", "Confirme les valeurs et la dépense affichées.", "session", { impactRows: rogueImpactRows(c, next) }); break; }
     case "review-bard-payment": {
@@ -62661,7 +62686,7 @@ async function perform(action, el) {
     case "ranger-action": case "review-ranger-action": case "ranger-replacement": case "apply-ranger-replacement": case "paladin-effect": case "review-paladin-effect":
     case "paladin-hands": case "review-paladin-hands": case "paladin-replacement": case "apply-paladin-replacement": case "cleric-forge": case "review-cleric-forge":
     case "cleric-flight": case "review-cleric-flight": case "cleric-harness": case "review-cleric-harness": case "review-bard-spirit": case "tool-check":
-    case "prepare-tool-check": case "rogue-state": case "review-rogue-state": case "review-bard-payment": case "sorcerer-session": case "review-sorcerer":
+    case "tool-roll": case "prepare-tool-check": case "rogue-state": case "review-rogue-state": case "review-bard-payment": case "sorcerer-session": case "review-sorcerer":
     case "sorcerer-replacement": case "apply-sorcerer-replacement": case "sorcerer-wild": case "roll-sorcerer-wild": case "bard-expertise": case "apply-bard-expertise":
     case "barbarian-session": case "review-barbarian-session": case "barbarian-surge": case "kept-roll": case "kept-roll-end": case "wizard-bladesong":
     case "beast-reset-filters": case "beast-info": case "beast-tab": case "beast-discover": case "beast-clear-search": case "beast-sort": case "beast-toggle":

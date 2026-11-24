@@ -6,4 +6,4 @@ Ce dépôt contient uniquement la distribution générée du site. Les sources e
 
 Les mises à jour sont publiées depuis le projet source avec `npm run deploy`. Ne modifie pas ces fichiers à la main.
 
-Build vérifié : `5706e622a7a23ea790ae4c6d8b0805daebfc45325f38fb4131efb92ef41a658d`. Empreinte de distribution : `d4845323a843a9780c8d77d4dde1faa97990afebc2ca0b37a9a8e5b9e73e431b`. Recette : 2026-11-24T20:25:51.423Z.
+Build vérifié : `8ef334aef922e4273ffeb39eadd400a31a1f4912fd932f05e7e5640accf81c46`. Empreinte de distribution : `3704df47cf7a5ed270710bd6466b0a04029dd3a55559c75c885c1e1c1cb5e653`. Recette : 2026-11-24T23:41:05.812Z.
