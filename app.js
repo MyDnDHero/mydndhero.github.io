@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-candidate-10";
+const APP_VERSION = "2.0.0-candidate-11";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -5376,7 +5376,11 @@ const UI_FR = Object.freeze({
   "ground.step.pick": "Ramasser : {name}",
   "error.heldLight": "Lumière tenue invalide.",
   "error.groundLights": "Lumières au sol invalides.",
-  "light.swap.stock": "Dans le sac"
+  "light.swap.stock": "Dans le sac",
+  "weapon.twoHanded": "{name} à deux mains",
+  "weapon.oneHanded": "{name} à une main",
+  "weaponSwap.step.grip2": "Prendre à deux mains : {name}",
+  "weaponSwap.step.grip1": "Tenir à une main : {name}"
 });
 
 
@@ -10390,7 +10394,11 @@ const UI_EN = Object.freeze({
   "ground.step.pick": "Pick up: {name}",
   "error.heldLight": "Invalid held light.",
   "error.groundLights": "Invalid lights on the ground.",
-  "light.swap.stock": "In the pack"
+  "light.swap.stock": "In the pack",
+  "weapon.twoHanded": "{name}, two-handed",
+  "weapon.oneHanded": "{name}, one-handed",
+  "weaponSwap.step.grip2": "Grip with both hands: {name}",
+  "weaponSwap.step.grip1": "Hold in one hand: {name}"
 });
 
 
@@ -37272,15 +37280,19 @@ function dropWeaponsToGround(c, instanceIds) {
   _weaponsToGround(next, instanceIds);
   return syncInventoryEquipmentChoices(next);
 }
+/** Pose au sol une lumière (fiche modifiée en place) : elle reste allumée ; sa lampe ou sa lanterne n'est plus portée. */
+function _lightToGround(c, light) {
+  c.state.groundLights = [...groundLights(c), { id: uid(), ref: light.ref, inventoryId: light.inventoryId, hooded: !!light.hooded }];
+  const item = light.inventoryId && c.inventory.find((entry) => entry.id === light.inventoryId);
+  if (item?.instance) { item.instance.carried = false; item.instance.onGround = true; item.instance.equippedSlot = null; }
+  if (c.equipment.light?.ref === light.ref) c.equipment.light = null;
+}
 /** Lâcher la lumière tenue : elle reste allumée au sol. */
 function dropLight(c) {
   const light = heldLight(c);
   if (!light) return c;
   const next = clone(c);
-  next.state.groundLights = [...groundLights(next), { id: uid(), ref: light.ref, inventoryId: light.inventoryId, hooded: !!light.hooded }];
-  const item = light.inventoryId && next.inventory.find((entry) => entry.id === light.inventoryId);
-  if (item?.instance) { item.instance.carried = false; item.instance.onGround = true; }
-  next.equipment.light = null;
+  _lightToGround(next, light);
   return next;
 }
 /** Éteindre : la torche ou la bougie est consumée ; la lampe ou la lanterne reste dans le sac, sa flasque est perdue. */
@@ -45721,7 +45733,8 @@ function _attack(c, entry, ctx, profile = null, bonusAttack = false) {
     w.light && "légère",
     w.heavy && "lourde",
     w.two && "à deux mains",
-    w.versatile && `polyvalente (${w.versatile})`,
+    // Tenue à deux mains, le dé de la ligne est déjà celui de la polyvalence : pas de « (1d8) » en double.
+    w.versatile && (entry.twoHands ? "polyvalente, à deux mains" : `polyvalente (${w.versatile})`),
     w.reach && "allonge",
     w.thrown && "lancer",
     w.loading && "chargement",
@@ -47652,11 +47665,13 @@ function applyWeaponSwap(c, option) {
     next.equipment.light = { ref: option.light.ref, hand: option.light.hand, inventoryId, hooded: false };
     for (const weapon of next.equipment.weapons) if (weapon.instanceId === option.hands.main) weapon.twoHands = false;
   }
+  if (option.twoHands !== undefined) for (const weapon of next.equipment.weapons) if (weapon.instanceId === option.instanceId) weapon.twoHands = option.twoHands;
   _weaponsToGround(next, option.drops || []);
   return syncInventoryEquipmentChoices(next);
 }
 // Coût affiché d'un changement : « 1× par tour » sans action, sinon le nombre d'actions (allumer en prend une).
-const _cost = (steps) => { const actions = steps.filter((step) => step.cost === "action").length; return { cost: actions ? "action" : "free", actions }; };
+// Sans action ni interaction (changer de prise, lâcher), aucun coût n'est affiché.
+const _cost = (steps) => { const actions = steps.filter((step) => step.cost === "action").length; return { cost: actions ? "action" : steps.some((step) => step.cost === "free") ? "free" : "none", actions }; };
 
 function _swapOption(c, d, hands, entry, withShield, shieldItemId) {
   const light = hands.light;
@@ -47782,6 +47797,28 @@ function _lightOptions(c, d, hands) {
   }
   return options;
 }
+/**
+ * Changer de prise de l'arme polyvalente tenue (demande de Luca du 23 novembre 2026) : gratuit, sans pastille, le Manuel 2014 ne lui donnant aucun coût.
+ * À deux mains, la seconde main se libère (son arme tombe au sol, le bouclier se retire en une action) ; une lumière tenue bloque.
+ */
+function _gripOptions(c, d, hands) {
+  const main = hands.main;
+  if (!main || !weaponOf(main.id)?.versatile) return [];
+  if (hands.light && hands.off?.instanceId !== main.instanceId) {
+    const bare = _withoutLight(c);
+    return _gripOptions(bare, d, swapHands(bare)).map((option) => ({ ...option, blockedBy: hands.light.ref }));
+  }
+  const named = d.attacks.find((attack) => attack.instanceId === main.instanceId && !attack.twoWeapon)?.name || weaponOf(main.id).name;
+  const both = hands.off?.instanceId === main.instanceId, offWeapon = !both && hands.off ? hands.off : null, steps = [];
+  if (!both && hands.shield) steps.push({ kind: "shieldOff", cost: "action" });
+  if (offWeapon) steps.push({ kind: "drop", name: offWeapon && (d.attacks.find((attack) => attack.instanceId === offWeapon.instanceId && !attack.twoWeapon)?.name || weaponOf(offWeapon.id).name), cost: "none" });
+  steps.push({ kind: both ? "grip1" : "grip2", name: named, cost: "none" });
+  const option = { id: `${main.instanceId}|${both ? "grip1" : "grip2"}`, instanceId: main.instanceId, withShield: false, name: uiText(both ? "weapon.oneHanded" : "weapon.twoHanded", { name: named }), steps, ..._cost(steps),
+    hands: { main: main.instanceId, off: both ? null : main.instanceId }, shield: both && hands.shield, shieldItemId: c.equipment.shieldInventoryId || null, drops: offWeapon ? [offWeapon.instanceId] : [], twoHands: !both };
+  const after = applyWeaponSwap(c, option), dAfter = derive(after);
+  return [{ ...option, unskilledShield: false, ac: [d.ac, dAfter.ac], twoWeapon: offWeapon && twoWeaponStatus(c)?.allowed && !hands.assumed ? "lost" : "",
+    index: d.attacks.findIndex((attack) => attack.instanceId === main.instanceId && !attack.twoWeapon), line: dAfter.attacks.find((attack) => attack.instanceId === main.instanceId && !attack.twoWeapon) || null }];
+}
 function _weaponSwapOptions(c, d) {
   const hands = swapHands(c), seen = new Set([hands.main, hands.off].filter(Boolean).map(_sameWeapon)), options = [];
   for (const entry of _readyWeapons(c)) {
@@ -47793,7 +47830,7 @@ function _weaponSwapOptions(c, d) {
   const shieldItem = hands.shield ? null : inventoryEquipmentChoices(c, "shield")[0]?.item;
   const melee = shieldItem && [hands.main, ..._readyWeapons(c)].find((entry) => entry && !_twoHanded(entry) && !weaponOf(entry.id).ranged);
   if (melee) options.push(_swapOption(c, d, hands, melee, true, shieldItem.id));
-  return [...options, ..._pairOptions(c, d, hands), ..._lightOptions(c, d, hands)];
+  return [..._gripOptions(c, d, hands), ...options, ..._pairOptions(c, d, hands), ..._lightOptions(c, d, hands)];
 }
 
 
@@ -57131,7 +57168,19 @@ function renderEquipmentSummary(c, next) {
   // Lumières du sac en ambre, sous les armes (maquette validée par Luca le 23 novembre 2026). La lumière tenue reste proposée dans sa main.
   const light = next.equipment.light, lightRefs = [...new Set([...(light ? [light.ref] : []), ...availableLights(next)])];
   const lightOptions = (hand) => lightRefs.filter((ref) => hand !== "off" || !f.shield).map((ref) => ({ value: `light:${ref}`, title: lightName(ref), detail: `${lightStockText(next, ref)} · ${lightRangeText({ ref, hooded: false })}`, on: light?.ref === ref && light.hand === hand, light: true }));
-  const handOptions = (hand) => [...ready.filter((entry) => hand === "main" || !(weaponOf(entry.id)?.two || entry.twoHands)).map((entry) => ({ value: entry.instanceId, title: name(entry), detail: meta(entry), on: hands[hand]?.instanceId === entry.instanceId, pill: unskilled(entry) })), ...lightOptions(hand), { ...free, on: !hands[hand] && light?.hand !== hand }];
+  // Arme polyvalente : en main principale, la prise à une main puis à deux mains (demande de Luca du 23 novembre 2026), chacune avec sa ligne.
+  // La prise se lit aussi sur l'exemplaire de l'inventaire (instance.twoHands) : l'aperçu la change aux deux endroits.
+  const grip = (entry, two) => derive({ ...next, inventory: next.inventory.map((item) => item.id === entry.inventoryId && item.instance ? { ...item, instance: { ...item.instance, twoHands: two } } : item),
+    equipment: { ...next.equipment, light: null, shield: two ? false : next.equipment.shield, hands: { main: entry.instanceId, off: two ? entry.instanceId : null },
+      weapons: next.equipment.weapons.map((weapon) => weapon.instanceId === entry.instanceId ? { ...weapon, twoHands: two } : weapon) } }).attacks.find((attack) => attack.instanceId === entry.instanceId && !attack.twoWeapon);
+  const gripMeta = (a) => a ? `${signed(a.attack)} · ${a.damageDice} ${signed(a.damageBonus)} ${a.type}` : "";
+  const weaponOptions = (hand) => ready.filter((entry) => hand === "main" || !(weaponOf(entry.id)?.two || entry.twoHands)).flatMap((entry) => {
+    const held = hands[hand]?.instanceId === entry.instanceId, versatile = hand === "main" && !!weaponOf(entry.id)?.versatile;
+    if (!versatile) return [{ value: entry.instanceId, title: name(entry), detail: meta(entry), on: held, pill: unskilled(entry) }];
+    return [{ value: entry.instanceId, title: name(entry), detail: gripMeta(grip(entry, false)), on: held && !twoHanded, pill: unskilled(entry) },
+      { value: `${entry.instanceId}|two`, title: uiText("weapon.twoHanded", { name: name(entry) }), detail: gripMeta(grip(entry, true)), on: held && twoHanded, pill: unskilled(entry) }];
+  });
+  const handOptions = (hand) => [...weaponOptions(hand), ...lightOptions(hand), { ...free, on: !hands[hand] && light?.hand !== hand }];
   const lightRow = (slot, label) => `<button type="button" data-action="equip-pick-open" data-slot="${slot}" aria-expanded="${open === slot}" class="eq-slot light" data-equip-slot="${slot}" data-light="${esc(light.ref)}"><span class="eq-ico">${icon("flame", 22)}</span><span class="eq-text"><small>${esc(label)}</small><strong>${esc(uiText("light.lit", { name: lightName(light.ref) }))}</strong><span class="eq-meta">${esc(`${lightRangeText(light)} · ${lightStockText(next, light.ref)}`)}</span></span><span class="eq-chev">${icon("chevron", 16)}</span></button>` + picks(slot, handOptions(slot));
   const mainRow = light?.hand === "main" ? lightRow("main", uiText("equipment.mainHand"))
     : row("main", uiText(twoHanded ? "equipment.bothHands" : "equipment.mainHand"), hands.main ? name(hands.main) : uiText("equipment.freeHand"), meta(hands.main), hands.main ? equipmentWeaponIcon(hands.main.id) : "hand", unskilled(hands.main)) + picks("main", handOptions("main"));
@@ -57140,7 +57189,7 @@ function renderEquipmentSummary(c, next) {
     : row("off", uiText("equipment.offHand"), hands.off ? name(hands.off) : uiText("equipment.freeHand"), meta(hands.off), hands.off ? equipmentWeaponIcon(hands.off.id) : "hand", unskilled(hands.off)) + picks("off", handOptions("off"));
   // Autres combinaisons : les mêmes changements que dans les Attaques, avec « Choisir ». Celles qui prennent une lumière suivent la case « Éclairage ».
   const all = weaponSwapOptions(next, d).filter((option) => option.line), shown = all.filter((option) => !option.light || lightingShown());
-  const combos = shown.map((option) => `<div class="attack-card${option.light ? " light" : ""}" data-equip-combo="${esc(option.id)}"><div class="attack-main"><div class="attack-title">${option.light ? icon("flame", 16) : ""}${esc(weaponSwapName(option))}${weaponSwapCost(option.cost, option.actions)}${option.line.proficient ? "" : (" <span class=\"pill red\">" + uiText("non maîtrisée") + "</span>")}</div><div class="attack-meta">${attackMeta(option.line)}</div>${[...weaponSwapEffects(option), ...(option.light ? [lightRangeText({ ref: option.light.ref, hooded: false })] : []), ...(option.blockedBy ? [uiText("light.extinguished", { name: lightName(option.blockedBy) })] : [])].map((text) => `<div class="attack-effect">${esc(text)}</div>`).join("")}</div>${button(uiText("equipment.choose"), "equip-combo", `data-id="${esc(option.id)}"`, "small-btn")}</div>`).join("");
+  const combos = shown.map((option) => `<div class="attack-card${option.light ? " light" : ""}" data-equip-combo="${esc(option.id)}"><div class="attack-main"><div class="attack-title">${option.light ? icon("flame", 16) : ""}${esc(weaponSwapName(option))}${weaponSwapCost(option.cost, option.actions)}${option.line.proficient ? "" : (" <span class=\"pill red\">" + uiText("non maîtrisée") + "</span>")}</div><div class="attack-meta">${attackMeta(option.line)}</div>${[...weaponSwapEffects(option), ...(option.light ? [lightRangeText({ ref: option.light.ref, hooded: false })] : []), ...(option.blockedBy ? [uiText("light.dropped", { name: lightName(option.blockedBy) })] : [])].map((text) => `<div class="attack-effect">${esc(text)}</div>`).join("")}</div>${button(uiText("equipment.choose"), "equip-combo", `data-id="${esc(option.id)}"`, "small-btn")}</div>`).join("");
   const toggle = all.some((option) => option.light) ? lightingToggle() : "";
   return `<div class="eq-grp first" data-equip-ac="${d.ac}">${esc(uiText("equipment.protection", { ac: d.ac }))}</div>${armorRow}${shieldRow}${equipmentMageArmorField(c, f)}<div class="eq-grp">${esc(uiText("equipment.inHand"))}</div>${mainRow}${offRow}${combos || toggle ? `<div class="eq-grp eq-grp-tools"><span>${esc(uiText("equipment.combos"))}</span>${toggle}</div>${combos}` : ""}`;
 }
@@ -57212,12 +57261,18 @@ function equipmentArmorSource(c, value) {
 function candidateEquipment() {
   let c = clone(activeCharacter());
   c.equipment = clone(ui.form);
+  // Combinaison choisie (action rapide, demande de Luca du 23 novembre 2026) : ce qu'elle lâche tombe au sol ; « En main » range, hors combat.
+  const drops = ui.form.drops || [], lightDropped = !!ui.form.dropLight;
+  delete c.equipment.drops; delete c.equipment.dropLight;
   c.equipment.weapons = c.equipment.weapons.map((w) => ({ id: w.id, instanceId: w.instanceId, ...(w.inventoryId ? { inventoryId: w.inventoryId } : {}), isMagical: !!w.isMagical, magic: Number(w.magic) || 0, twoHands: !!w.twoHands && !!weaponOf(w.id)?.versatile }));
   const ids = new Set(c.equipment.weapons.map((w) => w.instanceId));
   c.equipment.hands = Object.fromEntries(["main", "off"].map((hand) => [hand, ids.has(ui.form.hands?.[hand]) ? ui.form.hands[hand] : null]));
   // Lumière choisie dans une main : une nouvelle lumière consomme une torche, une bougie ou une flasque d'huile ; la même reste telle quelle.
   const before = activeCharacter().equipment.light, light = ui.form.light;
-  if (!light || c.equipment.hands[light.hand] || light.hand === "off" && ui.form.shield) c.equipment.light = null;
+  if (!light || c.equipment.hands[light.hand] || light.hand === "off" && ui.form.shield) {
+    c.equipment.light = null;
+    if (before && lightDropped) _lightToGround(c, before);
+  }
   else if (before?.ref === light.ref) c.equipment.light = { ...before, hand: light.hand };
   else c.equipment.light = lightFuel(c, light.ref) ? { ref: light.ref, hand: light.hand, inventoryId: consumeLightFuel(c, light.ref), hooded: false } : null;
   c.equipment.pactWeaponId = ids.has(ui.form.pactWeaponId) ? ui.form.pactWeaponId : null;
@@ -57236,6 +57291,7 @@ function candidateEquipment() {
     const item = c.inventory.find((entry) => entry.id === id);
     if (item?.instance && (slot !== "ready" || !["ready", "main", "off"].includes(item.instance.equippedSlot))) item.instance.equippedSlot = slot;
   }
+  _weaponsToGround(c, drops.filter((id) => id !== c.equipment.hands.main && id !== c.equipment.hands.off));
   return syncInventoryEquipmentChoices(c);
 }
 
@@ -57251,7 +57307,16 @@ async function performInventory(action, el, c, data, d) {
       if (data.slot === "armor") equipmentArmorSource(c, data.value);
       // Une lumière prend la main choisie ; une arme choisie pour sa main, ou à deux mains, l'éteint.
       else if (data.value?.startsWith("light:")) { const form = clone(ui.form); fitLightInHand(form, data.value.slice(6), data.slot); ui.form = form; }
-      else ui.form = releaseLightForHands(setHeldWeapon(candidateEquipment(), data.slot, data.value || null).equipment);
+      else {
+        // « Bâton à deux mains » : la même arme, tenue à deux mains ; l'option simple la tient à une main.
+        const two = !!data.value?.endsWith("|two"), id = two ? data.value.slice(0, -4) : data.value || null;
+        if (id) ui.form.drops = (ui.form.drops || []).filter((drop) => drop !== id);
+        if (data.slot === "main" && id) ui.form.weapons = ui.form.weapons.map((weapon) => weapon.instanceId === id && weaponOf(weapon.id)?.versatile ? { ...weapon, twoHands: two } : weapon);
+        const lightHand = ui.form.light?.hand;
+        ui.form = releaseLightForHands(setHeldWeapon(candidateEquipment(), data.slot, id).equipment);
+        // « Main libre » sur la main de la lumière la range : elle s'éteint (aucune arme ne vient la remplacer).
+        if (!id && lightHand === data.slot) ui.form.light = null;
+      }
       ui.equipPick = null;
       render();
       break;
@@ -57270,8 +57335,10 @@ async function performInventory(action, el, c, data, d) {
       const option = weaponSwapOptions(candidateEquipment()).find((entry) => entry.id === data.id);
       if (option) {
         ui.form.hands = { ...option.hands }; ui.form.shield = option.shield;
+        ui.form.drops = [...new Set([...(ui.form.drops || []), ...(option.drops || [])])].filter((id) => id !== option.hands.main && id !== option.hands.off);
+        if (option.twoHands !== undefined) ui.form.weapons = ui.form.weapons.map((weapon) => weapon.instanceId === option.instanceId ? { ...weapon, twoHands: option.twoHands } : weapon);
         if (option.light) ui.form.light = { ref: option.light.ref, hand: option.light.hand, inventoryId: null, hooded: false };
-        else if (option.blockedBy) ui.form.light = null;
+        else if (option.blockedBy) { ui.form.light = null; ui.form.dropLight = true; }
       }
       render();
       break;
@@ -57286,7 +57353,7 @@ async function performInventory(action, el, c, data, d) {
     case "light-drop": {
       const light = heldLight(c);
       if (!light) break;
-      await saveCharacter(dropLight(c), uiText("light.dropped", { name: lightName(light.ref) }), "session", c);
+      await saveCharacter(dropLight(c), uiText("light.dropped", { name: lightName(light.ref) }), "session", c, { noHistory: true });
       if (ui.modal === "light") closeModal(); else render();
       toast(uiText("light.dropped", { name: lightName(light.ref) }));
       break;
@@ -57294,7 +57361,7 @@ async function performInventory(action, el, c, data, d) {
     case "light-extinguish": {
       const light = heldLight(c);
       if (!light) break;
-      await saveCharacter(extinguishLight(c), uiText("light.extinguished", { name: lightName(light.ref) }), "session", c);
+      await saveCharacter(extinguishLight(c), uiText("light.extinguished", { name: lightName(light.ref) }), "session", c, { noHistory: true });
       closeModal();
       toast(uiText("light.extinguished", { name: lightName(light.ref) }));
       break;
@@ -57303,7 +57370,7 @@ async function performInventory(action, el, c, data, d) {
       const light = heldLight(c);
       if (!light) break;
       const label = uiText(light.hooded ? "light.unhooded" : "light.hooded");
-      await saveCharacter(toggleLightHood(c), label, "session", c);
+      await saveCharacter(toggleLightHood(c), label, "session", c, { noHistory: true });
       render(); toast(label);
       break;
     }
@@ -57312,14 +57379,14 @@ async function performInventory(action, el, c, data, d) {
       if (data.kind === "weapon") {
         const item = c.inventory.find((entry) => entry.id === data.id);
         if (!item) break;
-        await saveCharacter(pickUpWeapon(c, item.id), uiText("ground.picked", { name: item.name }), "session", c);
+        await saveCharacter(pickUpWeapon(c, item.id), uiText("ground.picked", { name: item.name }), "session", c, { noHistory: true });
         render(); toast(uiText("ground.picked", { name: item.name }));
         break;
       }
       const plan = lightPickUpPlan(c, data.id);
       if (!plan) break;
       if (plan.drops.length) { ui.groundPick = data.id; openModal("ground-pick"); break; }
-      await saveCharacter(plan.apply(), uiText("ground.picked", { name: lightName(plan.entry.ref) }), "session", c);
+      await saveCharacter(plan.apply(), uiText("ground.picked", { name: lightName(plan.entry.ref) }), "session", c, { noHistory: true });
       render(); toast(uiText("ground.picked", { name: lightName(plan.entry.ref) }));
       break;
     }
@@ -57327,7 +57394,7 @@ async function performInventory(action, el, c, data, d) {
       const plan = lightPickUpPlan(c, ui.groundPick);
       closeModal();
       if (!plan) break;
-      await saveCharacter(plan.apply(), uiText("ground.picked", { name: lightName(plan.entry.ref) }), "session", c);
+      await saveCharacter(plan.apply(), uiText("ground.picked", { name: lightName(plan.entry.ref) }), "session", c, { noHistory: true });
       render(); toast(uiText("ground.picked", { name: lightName(plan.entry.ref) }));
       break;
     }
@@ -57347,6 +57414,8 @@ async function performInventory(action, el, c, data, d) {
         candidateEquipment(),
         "Équipement actif",
         "Les changements de CA, d’attaque, de dégâts et de déplacement seront appliqués. Les objets du sac ne s’équipent pas automatiquement.",
+        "settings",
+        { noHistory: true },
       );
       break;
     case "add-library-item": {
@@ -57388,11 +57457,11 @@ async function performInventory(action, el, c, data, d) {
     }
     case "review-equip-instance": {
       const next = equipInventoryItem(c, ui.form.itemId, ui.form.slot);
-      openReview(next, uiText("items.equip"), uiText("items.equipmentReview")); break;
+      openReview(next, uiText("items.equip"), uiText("items.equipmentReview"), "settings", { noHistory: true }); break;
     }
     case "unequip-instance": {
       const next = equipInventoryItem(c, data.id, null);
-      openReview(next, uiText("items.unequip"), uiText("items.equipmentReview")); break;
+      openReview(next, uiText("items.unequip"), uiText("items.equipmentReview"), "settings", { noHistory: true }); break;
     }
     case "convert-ammunition": {
       const next = clone(c), item = next.inventory.find((entry) => entry.id === data.id), info = uiGear[item?.ref];
@@ -60891,7 +60960,7 @@ async function performDice(action, el, c, data, d) {
       // Les mains changent, puis le jet de l'arme prise se lance, comme depuis sa carte.
       const option = weaponSwapOptions(c, d).find((entry) => entry.id === ui.swap?.id), step = ui.swap?.step;
       if (!option) { closeModal(); break; }
-      await saveCharacter(applyWeaponSwap(c, option), uiText("weaponSwap.saved"), "session", c);
+      await saveCharacter(applyWeaponSwap(c, option), uiText("weaponSwap.saved"), "session", c, { noHistory: true });
       closeModal();
       const index = uiDerive(activeCharacter()).attacks.findIndex((attack) => attack.instanceId === option.instanceId && !attack.twoWeapon);
       if (index >= 0) await perform(step === "damage" ? "roll-damage" : "roll-attack", { dataset: { index: String(index) } });
@@ -62342,7 +62411,10 @@ async function saveCharacter(character, label = "Modification", mode = "settings
         if (!undone?.operation || undone.operation.undone) throw new Error(uiText("Cette opération a déjà été annulée ou n’est plus disponible."));
         undone.operation.undone = true;
       }
-      if (previous) {
+      // Les changements d'équipement, de mains et de lumière ne gardent pas de version (option 2 choisie par Luca le 24 novembre 2026) :
+      // ils prenaient les 30 places de « Retour en arrière » et chassaient les versions utiles.
+      if (previous && options.noHistory && mode === "session") result.dashboard = normalizeDashboard(previous.dashboard, previous.id);
+      if (previous && !options.noHistory) {
         if (mode === "session") result.dashboard = normalizeDashboard(previous.dashboard, previous.id);
         const patches = mode === "session" && !options.undoSnapshotId ? sessionUndoPatches(previous, result) : [];
         next.snapshots.push({
@@ -62696,7 +62768,7 @@ async function perform(action, el) {
         break;
       }
       const announcement = resourceChangeAnnouncement(p.original, p.character);
-      await saveCharacter(p.character, p.label, p.mode || "settings", p.original, { description: p.description, impactRows: p.impactRows, undoSnapshotId: p.undoSnapshotId });
+      await saveCharacter(p.character, p.label, p.mode || "settings", p.original, { description: p.description, impactRows: p.impactRows, undoSnapshotId: p.undoSnapshotId, noHistory: p.noHistory });
       if (p.shop) ui.shop = null;
       closeModal();
       // Le jet déclaré par la ressource suit la validation : sa fenêtre tient lieu de confirmation, sans message par-dessus.
@@ -62705,7 +62777,8 @@ async function perform(action, el) {
       else if (p.attackProfile) startAttackSequence(() => p.attackProfile, "attack");
       else if (p.creationAttack) startAttackSequence((sheet) => creationAttacks(sheet).find((entry) => entry.id === p.creationAttack)?.profile, "attack");
       else if (p.creationHeal) openCreationHealRoll(p.creationHeal);
-      else toast(announcement || uiText("Changements enregistrés. Une version précédente reste dans les réglages."));
+      // Plus de message « Changements enregistrés… » : l'en-tête dit déjà « Enregistré » (demande de Luca du 24 novembre 2026).
+      else if (announcement) toast(announcement);
       break;
     }
     case "correct-session-undo": {
