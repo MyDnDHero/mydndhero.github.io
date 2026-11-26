@@ -1524,6 +1524,7 @@ button.state-active::after{content:"";position:absolute;inset:-11px 0}
 /* Sur une ligne de choix, la pastille garde la hauteur de la ligne ; sa zone touchable reste de 44 px. */
 .choice-option > .source-link { position: relative; margin-left: auto; min-height: 32px; }
 .choice-option > .source-link::after { content: ""; position: absolute; inset: -6px 0; }
+.choice-option-rule { flex-basis: 100%; margin-left: 27px; }
 .choice-option-details { flex-basis: 100%; margin-left: 27px; font-size: 13px; }
 .choice-option-details summary { color: var(--muted); cursor: pointer; }
 .choice-option-details p { margin: 6px 0 0; color: var(--muted); line-height: 1.6; }
@@ -1735,6 +1736,8 @@ button.state-active::after{content:"";position:absolute;inset:-11px 0}
 /* La feuille reste entière ; seul le lecteur agrandi défile. */
 .journal-photo{display:block;width:100%;padding:0;border:1px solid var(--line);border-radius:3px;background:var(--surface);color:var(--accent);text-align:center;cursor:zoom-in;overflow:hidden}
 .journal-photo img{display:block;width:100%;height:auto;max-width:100%;object-fit:contain;background:#fff}
+/* Photo rangée à part, en cours de lecture : sa place est tenue, son texte de remplacement ne clignote pas. Introuvable, il s'affiche. */
+img[data-photo-id]:not([src]):not([data-photo-missing]){color:transparent}
 .journal-photo span{display:block;padding:10px;font:500 14px/1.4 var(--sans)}
 .journal-photo+.journal-body{margin-top:22px}
 .journal-writing-field{margin-bottom:0}
@@ -2967,6 +2970,7 @@ button.state-active::after{content:"";position:absolute;inset:-11px 0}
 .audit-menu-row:hover{background:var(--surface)}
 .audit-menu-label{margin:23px 0 10px;font:400 12px/1.4 var(--sans);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
 .audit-more .page-head+.audit-menu-label{margin-top:0}
+.audit-more-identity{margin:0 0 10px;color:var(--muted)}
 .audit-settings-more{margin-top:16px}
 .audit-settings-version{margin:12px 0 0;color:var(--muted);font-size:12px}
 .audit-settings-more>.btn{padding:6px 0;border:0;background:transparent;color:var(--muted);font-family:inherit}
@@ -2981,6 +2985,8 @@ button.state-active::after{content:"";position:absolute;inset:-11px 0}
 .import-choice{display:grid;gap:8px;padding:8px 0 12px;border-bottom:1px solid var(--line)}
 .import-choice .segmented{margin:0}
 .import-choice p{margin:0}
+/* « Mettre fin » à droite du sort : une ligne de moins sur la fiche. */
+.sheet-concentration{align-items:center}.sheet-concentration>div{flex:1;min-width:0}.sheet-concentration>.link-btn{flex:none}
 
 /* Fiche B, couche finale après les styles de pages. */
 .character-menu{position:relative;color:var(--ink)}

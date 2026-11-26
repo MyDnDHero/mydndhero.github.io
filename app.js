@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-candidate-14";
+const APP_VERSION = "2.0.0-candidate-15";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -2653,6 +2653,10 @@ const UI_FR = Object.freeze({
   "Rechercher dans le journal…": "Rechercher dans le journal…",
   "Pages du journal": "Pages du journal",
   "Agrandir la photo de cette page": "Agrandir la photo de cette page",
+  "Photo introuvable sur cet appareil.": "Photo introuvable sur cet appareil.",
+  "Photo non incluse. Pour l’imprimer, utilise le bouton Imprimer de l’appli.": "Photo non incluse. Pour l’imprimer, utilise le bouton Imprimer de l’appli.",
+  "La photo de la page « {p0} » est introuvable sur cet appareil. Retire-la de cette page, puis relance l’export.": "La photo de la page « {p0} » est introuvable sur cet appareil. Retire-la de cette page, puis relance l’export.",
+  "Ce fichier cite des photos restées sur un autre appareil. Refais l’export depuis cet appareil.": "Ce fichier cite des photos restées sur un autre appareil. Refais l’export depuis cet appareil.",
   "Feuille photographiée : {p4}": "Feuille photographiée : {p4}",
   "Source de la photo": "Source de la photo",
   "Agrandir la photo choisie": "Agrandir la photo choisie",
@@ -7677,6 +7681,10 @@ const UI_EN = Object.freeze({
   "Rechercher dans le journal…": "Search the journal…",
   "Pages du journal": "Journal pages",
   "Agrandir la photo de cette page": "Enlarge this page's photo",
+  "Photo introuvable sur cet appareil.": "Photo not found on this device.",
+  "Photo non incluse. Pour l’imprimer, utilise le bouton Imprimer de l’appli.": "Photo not included. To print it, use the app’s Print button.",
+  "La photo de la page « {p0} » est introuvable sur cet appareil. Retire-la de cette page, puis relance l’export.": "The photo on page “{p0}” can’t be found on this device. Remove it from that page, then export again.",
+  "Ce fichier cite des photos restées sur un autre appareil. Refais l’export depuis cet appareil.": "This file refers to photos kept on another device. Export again from that device.",
   "Feuille photographiée : {p4}": "Photographed page: {p4}",
   "Source de la photo": "Photo source",
   "Agrandir la photo choisie": "Enlarge chosen photo",
@@ -10559,6 +10567,35 @@ function sortListChoices(items, name, core = () => false) {
   const collator = new Intl.Collator(uiLanguage() === "en" ? "en" : "fr", { sensitivity: "base", numeric: true });
   const first = selectedListOrder === "core";
   return [...items].sort((a, b) => (first ? Number(core(b)) - Number(core(a)) : 0) || collator.compare(name(a), name(b)));
+}
+
+
+// Module : render-memo
+/** Mémoire d'un rendu. Pendant qu'une page se construit, une fiche enregistrée ne change pas : un calcul demandé plusieurs fois
+ * pour elle n'est fait qu'une fois. Hors d'un rendu, rien n'est gardé.
+ * Seules les fiches déclarées stables à l'ouverture du rendu sont gardées, par leur objet même. Une copie de travail (aperçu d'un ajout,
+ * d'un soin, d'un achat) est construite puis retouchée pendant le rendu : un calcul fait avant sa dernière retouche serait faux après,
+ * elle est donc toujours recalculée. Le résultat gardé est partagé entre ses lecteurs : il se lit, il ne se modifie pas. */
+let _renderMemoTables = null, _renderMemoStable = null;
+
+function withRenderMemo(stable, run) {
+  if (_renderMemoTables) return run();
+  _renderMemoTables = new Map();
+  _renderMemoStable = new Set(stable);
+  try { return run(); } finally { _renderMemoTables = _renderMemoStable = null; }
+}
+
+// Contrôle de recette (COMPANION_MEMO_AUDIT) : chaque relecture refait le calcul et le compare. Un écart signale une fiche modifiée
+// pendant le rendu ou un résultat partagé modifié par un de ses lecteurs.
+const _renderMemoPrint = (value) => JSON.stringify(value, (key, item) => item instanceof Set ? { set: [...item] } : item instanceof Map ? { map: [...item] } : item);
+
+function renderMemo(name, key, compute) {
+  if (!_renderMemoStable?.has(key)) return compute();
+  let table = _renderMemoTables.get(name);
+  if (!table) _renderMemoTables.set(name, table = new Map());
+  if (!table.has(key)) table.set(key, compute());
+  else if (globalThis.COMPANION_MEMO_AUDIT && _renderMemoPrint(compute()) !== _renderMemoPrint(table.get(key))) throw new Error(`Mémoire de rendu périmée : ${name}`);
+  return table.get(key);
 }
 
 
@@ -37798,9 +37835,38 @@ function journalPhotoInfo(dataUrl) {
   return { mime: "image/jpeg", bytes: bytes.length, ..._journalJpegSize(bytes) };
 }
 
+/** Photo rangée à part de la fiche, dans le stockage de l'appareil : la fiche n'en garde que l'identifiant, le poids et les dimensions.
+ * Une photo arrive et repart toujours entière (dataUrl), dans un fichier exporté comme dans un brouillon ; seul l'enregistrement local la range à part. */
+const _journalPhotoIdPattern = /^[a-zA-Z0-9][a-zA-Z0-9-]{7,63}$/;
+const journalPhotoStored = (image) => typeof image?.photoId === "string";
+function journalPhotoReference(image, photoId) {
+  return { photoId, bytes: _journalEncodedPhotoBytes(image.dataUrl), width: image.width, height: image.height };
+}
+/** Remplace chaque photo d'une fiche par ce que `swap` renvoie ; la fiche et ses pages ne sont copiées que si une photo change. */
+function mapJournalPhotos(character, swap) {
+  const entries = character?.journalEntries;
+  if (!Array.isArray(entries)) return character;
+  let changed = false;
+  const next = entries.map((entry) => {
+    if (!entry?.image) return entry;
+    const image = swap(entry.image, entry);
+    if (image === entry.image) return entry;
+    changed = true;
+    return { ...entry, image };
+  });
+  return changed ? { ...character, journalEntries: next } : character;
+}
+
 function validateJournalPhoto(value) {
   if (value == null) return null;
-  if (!_journalPlain(value) || ![Object.prototype, null].includes(Object.getPrototypeOf(value)) || Object.keys(value).some((key) => !["dataUrl", "width", "height"].includes(key))) _journalPhotoFailure();
+  if (!_journalPlain(value) || ![Object.prototype, null].includes(Object.getPrototypeOf(value))) _journalPhotoFailure();
+  if (journalPhotoStored(value)) {
+    const { photoId, bytes, width, height } = value;
+    if (Object.keys(value).some((key) => !["photoId", "bytes", "width", "height"].includes(key)) || !_journalPhotoIdPattern.test(photoId) ||
+      !Number.isInteger(bytes) || bytes < 1 || bytes > JOURNAL_PHOTO_MAX_BYTES || ![width, height].every((side) => Number.isInteger(side) && side >= 1 && side <= JOURNAL_PHOTO_MAX_SIDE)) _journalPhotoFailure();
+    return { photoId, bytes, width, height };
+  }
+  if (Object.keys(value).some((key) => !["dataUrl", "width", "height"].includes(key))) _journalPhotoFailure();
   const { dataUrl, width, height } = value, cached = _journalPhotoValidationCache.get(value);
   if (cached && cached.dataUrl === dataUrl && cached.width === width && cached.height === height) return { ...cached };
   const info = journalPhotoInfo(dataUrl);
@@ -37859,7 +37925,7 @@ function validateJournalEntries(character) {
     if (typeof entry.body !== "string" || entry.body.length > bodyLimit) throw new Error(`Le texte du journal est limité à ${bodyLimit} caractères.`);
     const photo = validateJournalPhoto(entry.image);
     if (photo) {
-      photoBytes += _journalEncodedPhotoBytes(photo.dataUrl);
+      photoBytes += journalPhotoStored(photo) ? photo.bytes : _journalEncodedPhotoBytes(photo.dataUrl);
       if (photoBytes > JOURNAL_PHOTOS_MAX_BYTES) throw new Error("Les photos de ce personnage dépassent 12 Mio. Retire ou remplace une photo par une version plus légère ; rien n’a été enregistré.");
     }
     if (!legacy && !entry.body.trim() && !photo) throw new Error("Écris un texte ou ajoute une photo pour cette page du journal.");
@@ -37873,6 +37939,7 @@ function validateJournalEntries(character) {
 /** Garde un suffixe de 30 versions au plus et de 12 Mio de photos cumulées.
  * Les photos de ces versions ont déjà été validées : aucun décodage ni reclonage ici.
  * Chaque copie compte, même identique. Une dernière version héritée hors budget reste seule.
+ * Une photo rangée à part n'est enregistrée qu'une fois : elle ne pèse pas dans les versions qui la citent.
  */
 function retainJournalSnapshots(snapshots) {
   if (!Array.isArray(snapshots)) throw new Error("Historique du journal invalide.");
@@ -45510,7 +45577,11 @@ function _backgroundToolDuplicates(c) {
   return { granted, outside: outside.tools, duplicates: granted.filter((id) => outside.tools.has(id)), occupied: new Set([...outside.tools, ...granted]) };
 }
 /** Agrège tous les effets accordés (race, historique, classes, sous-classes, dons, manifestations). */
-function collect(c, upTo = levelOf(c)) {
+/** Pendant un rendu, les octrois d'une fiche à son niveau actuel ne sont réunis qu'une fois. */
+function collect(c, upTo) {
+  return upTo === undefined ? renderMemo("collect", c, () => _collectAt(c, levelOf(c))) : _collectAt(c, upTo);
+}
+function _collectAt(c, upTo) {
   const acc = _emptyAcc(), sources = grantSources(c, upTo).filter((source) => !source.contractDiagnostics?.length);
   for (const src of sources.filter((src) => src.kind !== "feat")) _applyGrants(acc, c, src);
   // Effets reçus guidés : présents sur la seule fiche projetée (receivedProjection), jamais enregistrés.
@@ -46111,18 +46182,28 @@ function _deriveBody(c, overrides = {}) {
   };
 }
 
-/** La fiche de base reste intacte ; seule cette vue applique les statistiques de la bête. */
+/** Copie de travail d'un calcul. Le portrait et le journal, lourds (photos) et jamais lus ici, restent ceux de la fiche au lieu d'être recopiés. */
+function _deriveCopy(c) {
+  const { portrait, journalEntries, ...rest } = c, copy = clone(rest);
+  if ("portrait" in c) copy.portrait = portrait;
+  if ("journalEntries" in c) copy.journalEntries = journalEntries;
+  return copy;
+}
+/** La fiche de base reste intacte ; seule cette vue applique les statistiques de la bête. Pendant un rendu, une fiche n'est calculée qu'une fois. */
 function derive(c) {
+  return renderMemo("derive", c, () => _deriveView(c));
+}
+function _deriveView(c) {
   c = receivedProjection(c);
   if (c.equipment.armorInventoryId || c.equipment.shieldInventoryId || c.equipment.weapons.some((entry) => entry.inventoryId) || c.inventory.some((entry) => entry.instance?.equippedSlot)) {
-    c = clone(c);
+    c = _deriveCopy(c);
     applyInventoryEquipment(c);
   }
   const body = _deriveBody(c), active = c.state.wildShape;
   if (!active) return { ...body, currentHp: c.state.hp, wildShape: null, body: null };
   const profile = WILDSHAPE_PROFILES[active.beastId], beast = _wildShapeCreature(active.beastId);
   if (!profile || !beast) throw new Error(uiText("Profil de forme sauvage inconnu."));
-  const raw = profile.raw, shadow = clone(c), scores = { ..._abilityProgression(c, collect(c)).totals, str: raw.str, dex: raw.dex, con: raw.con };
+  const raw = profile.raw, shadow = _deriveCopy(c), scores = { ..._abilityProgression(c, collect(c)).totals, str: raw.str, dex: raw.dex, con: raw.con };
   shadow.state = _wildShapeState(shadow, raw);
   if (active.equipment !== "worn") shadow.equipment = { armor: "none", shield: false, armorBonus: 0, mageArmor: c.equipment.mageArmor, weapons: [] };
   const sizes = { T: "TP", S: "P", M: "M", L: "G", H: "TG", G: "Gig" }, meters = (value) => (typeof value === "number" ? value : value?.number || 0) * .3;
@@ -49213,6 +49294,47 @@ function previewSessionUndo(character, patches, { correction = false, laterState
 // Module : storage
 const STORAGE_KEY = "compagnon-srd51-v1";
 const STORAGE_LOCK = `${STORAGE_KEY}-write`;
+// Photos du journal : une entrée par photo dans le magasin IndexedDB de l'état, à côté de la clé « state ».
+const STORAGE_PHOTO_PREFIX = "photo:";
+// Un état dont des photos sont rangées à part porte sa propre version. Une appli antérieure à ce rangement lirait une référence comme une photo
+// abîmée et mettrait la fiche de côté : avec cette version, elle refuse d'ouvrir la sauvegarde (« nécessite une version plus récente ») sans y toucher.
+const STORAGE_PHOTOS_VERSION = Math.max(SCHEMA_VERSION, 3);
+const _storagePhotoId = () => globalThis.crypto?.randomUUID?.() || `p${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+
+/** Applique `swap` aux photos du journal de toutes les fiches et de toutes les versions de l'historique ; rien n'est copié sans changement. */
+function mapStatePhotos(state, swap) {
+  const characters = (state.characters || []).map((character) => mapJournalPhotos(character, swap));
+  const snapshots = (state.snapshots || []).map((snapshot) => {
+    const character = mapJournalPhotos(snapshot.character, swap);
+    return character === snapshot.character ? snapshot : { ...snapshot, character };
+  });
+  return { ...state, characters, snapshots };
+}
+/** Sépare les photos de l'état à écrire : chaque photo distincte reçoit un identifiant ; fiches et historique n'en gardent que la référence. */
+function _storageDetachPhotos(state) {
+  const photos = new Map(), ids = new Map();
+  let cited = false;
+  const light = mapStatePhotos(state, (image) => {
+    if (journalPhotoStored(image)) { cited = true; return image; }
+    if (typeof image.dataUrl !== "string") return image;
+    let id = ids.get(image.dataUrl);
+    if (!id) { ids.set(image.dataUrl, id = _storagePhotoId()); photos.set(id, image.dataUrl); }
+    cited = true;
+    return journalPhotoReference(image, id);
+  });
+  return { light, photos, cited };
+}
+function _storagePhotoRecord(dataUrl) {
+  const comma = dataUrl.indexOf(","), binary = atob(dataUrl.slice(comma + 1)), bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < bytes.length; i++) bytes[i] = binary.charCodeAt(i);
+  return { type: dataUrl.slice(5, dataUrl.indexOf(";")), bytes: bytes.buffer };
+}
+function _storagePhotoDataUrl(record) {
+  const bytes = new Uint8Array(record.bytes);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return `data:${record.type};base64,${btoa(binary)}`;
+}
 
 function readLocalStorageData() {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -49221,7 +49343,7 @@ function readLocalStorageData() {
   catch { throw new Error(uiText("La sauvegarde locale est illisible. Ne vide pas le navigateur ; essaie un export ou une sauvegarde antérieure.")); }
 }
 function prepareStoredState(data) {
-  if (data && ![1, SCHEMA_VERSION].includes(data.schemaVersion))
+  if (data && ![1, SCHEMA_VERSION, STORAGE_PHOTOS_VERSION].includes(data.schemaVersion))
     throw new Error(uiText("Cette sauvegarde nécessite une version plus récente de Compagnon. Aucune donnée n’a été modifiée."));
   return clone(migrateState(data) || emptyState());
 }
@@ -49303,10 +49425,15 @@ class LocalStore {
       throw error;
     }
   }
+  /** Vrai quand les photos du journal se rangent à part de l'état (IndexedDB). Sinon elles restent dans la fiche, comme avant. */
+  get storesPhotos() { return this.mode === "indexeddb"; }
   async writeChecked(state, expectedRevision) {
-    const payload = clone(state);
-    payload.revision = expectedRevision + 1;
-    payload.schemaVersion = SCHEMA_VERSION;
+    // Les photos sortent de l'état : elles sont écrites une fois chacune, dans la même transaction que l'état qui les cite.
+    const { light, photos, cited } = this.storesPhotos ? _storageDetachPhotos(state) : { light: state, photos: new Map(), cited: false };
+    const records = [...photos].map(([id, dataUrl]) => [STORAGE_PHOTO_PREFIX + id, _storagePhotoRecord(dataUrl)]);
+    // L'état n'est pas recopié : IndexedDB et localStorage en écrivent leur propre copie. Seul son premier niveau est refait, pour poser
+    // révision et version sans toucher à l'objet reçu. L'état rendu partage donc ses fiches avec lui : l'appli ne les modifie pas en place.
+    const payload = { ...light, revision: expectedRevision + 1, schemaVersion: cited ? STORAGE_PHOTOS_VERSION : SCHEMA_VERSION };
     if (this.mode === "indexeddb")
       await new Promise((resolve, reject) => {
         const tx = this.db.transaction("app", "readwrite"),
@@ -49319,6 +49446,7 @@ class LocalStore {
             tx.abort();
             return;
           }
+          for (const [key, record] of records) objectStore.put(record, key);
           objectStore.put(payload, "state");
         };
         tx.oncomplete = resolve;
@@ -49343,8 +49471,40 @@ class LocalStore {
         this.readOnly = true;
         throw new Error(uiText("Stockage en lecture seule : ce navigateur ne peut pas protéger les écritures entre plusieurs fenêtres. Ta modification n’est pas enregistrée ; garde cet onglet ouvert pour la récupérer."));
       }
-    } else this.memory = payload;
+    } else this.memory = clone(payload);
     return payload;
+  }
+  /** Photo rangée à part, ou null si elle n'existe pas : `{ type, bytes }`, les octets du fichier image. */
+  async photo(id) {
+    if (!this.storesPhotos) return null;
+    return new Promise((resolve, reject) => {
+      const request = this.db.transaction("app", "readonly").objectStore("app").get(STORAGE_PHOTO_PREFIX + id);
+      request.onsuccess = () => resolve(request.result || null);
+      request.onerror = () => reject(request.error);
+    });
+  }
+  /** La même photo sous la forme d'un fichier exporté (data: URL), ou null. */
+  async photoDataUrl(id) {
+    const record = await this.photo(id);
+    return record ? _storagePhotoDataUrl(record) : null;
+  }
+  /** Efface les photos que l'état enregistré ne cite plus (page ou fiche supprimée, version sortie de l'historique).
+   * L'état est relu et les photos effacées dans une seule transaction : l'écriture d'une autre fenêtre passe avant ou après, jamais au milieu. */
+  async sweepPhotos() {
+    if (!this.storesPhotos) return 0;
+    return new Promise((resolve, reject) => {
+      const tx = this.db.transaction("app", "readwrite"), objectStore = tx.objectStore("app"), state = objectStore.get("state");
+      let removed = 0;
+      state.onsuccess = () => {
+        const cited = new Set((JSON.stringify(state.result ?? null).match(/"photoId":"[^"]+"/g) || []).map((match) => match.slice(11, -1)));
+        const keys = objectStore.getAllKeys(IDBKeyRange.bound(STORAGE_PHOTO_PREFIX, STORAGE_PHOTO_PREFIX + "\uffff"));
+        keys.onsuccess = () => {
+          for (const key of keys.result) if (!cited.has(key.slice(STORAGE_PHOTO_PREFIX.length))) { objectStore.delete(key); removed++; }
+        };
+      };
+      tx.oncomplete = () => resolve(removed);
+      tx.onerror = tx.onabort = () => reject(tx.error || new Error(uiText("Échec de la sauvegarde.")));
+    });
   }
 }
 
@@ -51063,7 +51223,8 @@ const dice3DInternals = (() => {
     gl.uniform1i(locations.atlas, 0); gl.enable(gl.DEPTH_TEST); gl.enable(gl.BLEND);
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     // Les chanfreins ont leur propre normale ; la profondeur gère aussi les faces arrière.
-    const resources = new Map();
+    // Formes et textures par sorte de dé ; used retient celles servies depuis le dernier trim().
+    const resources = new Map(), used = new Set();
     function buffer(data) { const result = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, result); gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW); return result; }
     const ground = buffer(new Float32Array([-1, 0, -1, 0, 1, 0, 0, 0, 1, 0, -1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, -1, 0, -1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, -1, 0, 1, 0, 1, 0, 0, 1]));
     function bind(data) {
@@ -51074,6 +51235,7 @@ const dice3DInternals = (() => {
     }
     function resource(item) {
       const key = [item.die.sides, item.die.color, item.die.percentile].join(":");
+      used.add(key);
       if (resources.has(key)) return resources.get(key);
       const atlas = makeAtlas(item.mesh, item.die), vertices = meshVertices(item.mesh, atlas), texture = gl.createTexture();
       gl.bindTexture(gl.TEXTURE_2D, texture); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
@@ -51101,12 +51263,30 @@ const dice3DInternals = (() => {
           gl.uniformMatrix4fv(locations.model, false, modelMatrix(item.rotation, item.position, item.scale)); gl.drawArrays(gl.TRIANGLES, 0, data.count);
         }
       },
+      lost: () => gl.isContextLost(),
+      /** Ne garde que les dés servis depuis l'appel précédent : la mémoire gardée reste celle d'une ouverture. */
+      trim() {
+        for (const [key, data] of resources) if (!used.has(key)) { gl.deleteBuffer(data.buffer); gl.deleteTexture(data.texture); resources.delete(key); }
+        used.clear();
+      },
       dispose() {
         for (const data of resources.values()) { gl.deleteBuffer(data.buffer); gl.deleteTexture(data.texture); }
         resources.clear(); gl.deleteBuffer(ground); gl.deleteProgram(program);
         gl.getExtension("WEBGL_lose_context")?.loseContext();
       },
     };
+  }
+
+  // Plateau gardé : un seul canevas WebGL sert à toutes les ouvertures de la fenêtre des dés. Contexte, programme et textures
+  // passent d'une ouverture à l'autre. Un contexte perdu (appli passée en arrière-plan) ou un rendu de secours repart d'un canevas neuf.
+  let kept = null, keptGpu = null;
+  function board(placeholder) {
+    if (!kept || !keptGpu || keptGpu.lost()) { kept = document.createElement("canvas"); keptGpu = null; }
+    // Les effets laissent classes et styles sur le canevas : il reprend ceux de la fenêtre neuve. Sa taille reste, measure() la corrige.
+    for (const name of kept.getAttributeNames()) if (name !== "width" && name !== "height") kept.removeAttribute(name);
+    for (const name of placeholder.getAttributeNames()) kept.setAttribute(name, placeholder.getAttribute(name));
+    placeholder.replaceWith(kept);
+    return kept;
   }
 
   function fallbackDraw(ctx, items, camera, width, height) {
@@ -51150,6 +51330,7 @@ const dice3DInternals = (() => {
 
   function create(canvas, options = {}) {
     if (!canvas || typeof canvas.getContext !== "function") throw new TypeError("Un canvas est attendu pour les dés.");
+    if (options.keep) canvas = board(canvas);
     let gpu = null, context = null, fallbackCanvas = null, disposed = false, frame = 0, finish = null, start = 0, rolling = false, items = [], camera;
     let mode = "webgl", width = 0, height = 0, phase = "ready", motionProgress = 1, revealProgress = 0, centerProgress = 0, survivor = null;
     const previousVisibility = canvas.style.visibility, parent = canvas.parentNode, previousParentPosition = parent?.style?.position;
@@ -51170,7 +51351,8 @@ const dice3DInternals = (() => {
       }
       setState(); options.onUnavailable?.();
     }
-    try { gpu = options.forceFallback ? null : webGL(canvas); } catch {}
+    try { gpu = options.forceFallback ? null : canvas === kept && keptGpu || webGL(canvas); } catch {}
+    if (canvas === kept && gpu) keptGpu = gpu;
     if (!gpu) fallback();
     setState();
     function settle(nextPhase = "result") {
@@ -51269,7 +51451,11 @@ const dice3DInternals = (() => {
       redraw() { draw(); },
       dispose() {
         if (disposed) return; disposed = true; settle(); observer?.disconnect(); globalThis.removeEventListener?.("resize", resize);
-        canvas.removeEventListener("webglcontextlost", contextLost); gpu?.dispose(); gpu = null;
+        canvas.removeEventListener("webglcontextlost", contextLost);
+        // Le plateau gardé quitte la fenêtre sans retenir son ancien contenu, et rend son image (1 × 1) jusqu'à l'ouverture suivante.
+        // Les autres canevas rendent leur contexte.
+        if (gpu && gpu === keptGpu) { gpu.trim(); canvas.width = canvas.height = 1; canvas.remove(); } else gpu?.dispose();
+        gpu = null;
         fallbackCanvas?.remove(); if (fallbackCanvas) canvas.style.visibility = previousVisibility;
         if (changedParentPosition && parent?.style) parent.style.position = previousParentPosition;
         items = []; context = null;
@@ -51285,7 +51471,10 @@ function dice3DGeometry(sides) { return dice3DInternals.geometry(sides); }
 /** Décompose le percentile : 00 + 0 représente 100 ; les autres paires valent 1 à 99. */
 function dice3DVisibleDice(dice) { return dice3DInternals.visibleDice(dice); }
 
-/** show(dés, {reveal:false}) prépare ; roll() roule, stabilise puis révèle ; dispose() libère tout. */
+/**
+ * show(dés, {reveal:false}) prépare ; roll() roule, stabilise puis révèle ; dispose() libère tout.
+ * Avec { keep: true }, canvas est une place réservée : le plateau gardé la remplace, et dispose() le garde pour l'ouverture suivante.
+ */
 function createDice3D(canvas, options = {}) { return dice3DInternals.create(canvas, options); }
 
 
@@ -52662,6 +52851,9 @@ function uiSpellCatalogue(c) {
   return catalogue(c).map((spell) => uiIsPersonalSpell(c, spell) ? spell : uiCatalogueEntry(spell));
 }
 function uiDerive(c) {
+  return renderMemo("uiDerive", c, () => uiDeriveNow(c));
+}
+function uiDeriveNow(c) {
   const values = derive(c);
   return { ...values, cls: uiCatalogueEntry(values.cls), wildShape: uiActiveWildShape(values.wildShape), race: uiRaceOf(c), background: uiBackgroundOf(c),
     languages: values.languages.map((entry) => LANGUAGES[entry.id] ? uiCatalogueEntry(entry) : entry),
@@ -52827,7 +53019,9 @@ function creationChoiceLine(c, level, choice) {
   return {
     group: expertise ? "skills" : "class", rank: expertise ? CREATION_LINE_RANKS.expertise : CREATION_LINE_RANKS.class, origin: "class", source: uiClasses[entry.classId].name, label: choice.title, plain: true, help: choice.help || "",
     path: `levels.${level - 1}.choices.${choice.key}`, bind: text ? "text" : choice.type === "one" ? "value" : "array", count: choice.count || 1,
-    raw: text ? [] : Array.isArray(value) ? value : [value], text: text ? String(value || "") : "", options: Object.entries(choice.options || {}).map(creationLineOption),
+    raw: text ? [] : Array.isArray(value) ? value : [value], text: text ? String(value || "") : "",
+    // La règle d’une option de classe, quand elle a sa fiche : discipline, manœuvre, invocation, style… (arbitrage P-15).
+    options: Object.entries(choice.options || {}).map(([id, entry]) => ({ ...creationLineOption([id, entry]), reference: Array.isArray(entry) && entry[2] || CHOICE_REFERENCES[choice.key]?.[id]?.referenceId || null })),
   };
 }
 /** Spec de `uiPickSpecs` : maîtrises, options d’aptitude, sorts d’un don ou d’une origine. */
@@ -53588,6 +53782,12 @@ function creationNextFiche(kind, fiche) {
   return `<section id="creation-${kind}-detail" class="creation-choice-detail creation-fiche" aria-label="${label}" tabindex="-1"><header class="creation-fiche-head">${fiche.image}<div class="creation-fiche-title"><h2>${esc(fiche.title)}</h2>${fiche.subtitle ? `<p class="creation-fiche-subtitle">${esc(fiche.subtitle)}</p>` : ""}${sourceLink(fiche.title, fiche.reference, [fiche.source])}</div></header>${fiche.lead ? `<p class="creation-choice-lead">${esc(fiche.lead)}</p>` : ""}${creationChoiceFacts([...facts.filter((fact) => !creationFactWide(fact)), ...facts.filter(creationFactWide)], "creation-fiche-facts")}${fiche.sections.map(([name, text]) => `<section class="creation-choice-feature"><h3>${esc(name)}</h3><p class="preserve">${esc(text || "")}</p></section>`).join("")}${fiche.fields || ""}${fiche.todo.length ? `<aside class="creation-fiche-todo"><h3>${uiText("creation.todo")}</h3><ul>${fiche.todo.map(([what, where]) => `<li><span>${esc(what)}</span><em>${esc(where)}</em></li>`).join("")}</ul></aside>` : ""}</section>`;
 }
 
+/** La recherche nomme le livre d’une race, par son code ou par le libellé que sa variante affiche (arbitrage P-15). Le Multivers porte deux codes.
+ * Comparé par le début : « el » ne doit pas trouver tout le Manuel. */
+function creationNextRaceInBook({ id, race }, query) {
+  const code = id === "custom" ? "homebrew" : race.source || "";
+  return [code, sourceLabel(code), ...(["motm", "mpmm"].includes(code) ? ["MPMM", "MOTM"] : [])].some((name) => creationChoiceNormalize(name).startsWith(query));
+}
 function renderCreationNextRace(w, c) {
   const groups = {};
   for (const [id, race] of Object.entries(uiRaces)) (groups[RACES[id].group || RACES[id].name] ||= []).push([id, race]);
@@ -53596,12 +53796,12 @@ function renderCreationNextRace(w, c) {
   for (const family of Object.keys(groups)) groups[family] = creationNextSortRaces(groups[family]);
   const query = creationChoiceNormalize(ui.raceQuery);
   const entries = order.flatMap((family) => family === "Maison" ? [{ id: "custom", family, race: { name: uiText("creation.homebrewOrigin") } }] : groups[family].map(([id, race]) => ({ id, race, family })));
-  if (ui.raceFamily === "all") return `<div class="origin-tools origin-family-search"><div class="search-wrap">${icon("search", 18)}<input id="origin-search" class="search-input" data-bind="ui.raceQuery" value="${esc(ui.raceQuery || "")}" placeholder="${uiText("creation.searchRace")}" aria-label="${uiText("creation.searchRace")}"></div></div><div class="origin-family-grid">${order.map((family) => {
-    const members = entries.filter((entry) => entry.family === family && (!query || creationChoiceNormalize(`${entry.race.name} ${entry.race.originalName || ""} ${family}`).includes(query)));
+  if (ui.raceFamily === "all") return `<div class="origin-tools origin-family-search"><div class="search-wrap">${icon("search", 18)}<input id="origin-search" class="search-input" data-bind="ui.raceQuery" value="${esc(ui.raceQuery || "")}" placeholder="${uiText("creation.searchRace")}" aria-label="${uiText("creation.searchRace")}"></div></div>${searchResults(`<div class="origin-family-grid">${order.map((family) => {
+    const members = entries.filter((entry) => entry.family === family && (!query || creationChoiceNormalize(`${entry.race.name} ${entry.race.originalName || ""} ${family}`).includes(query) || creationNextRaceInBook(entry, query)));
     if (!members.length) return "";
     const sample = members[0];
     return `<button type="button" class="origin-family-card" data-action="choose-race-family" data-value="${esc(family)}">${sample.id !== "custom" ? `<img src="${esc(creationNextPortrait(sample.id))}" alt="" loading="lazy">` : ""}<span><strong>${esc(uiSystemText(uiCatalogueName(family)))}</strong><span>${esc(CREATION_FAMILY_LABELS[family] || "")}</span><small class="next-family-count">${members.length > 1 ? uiText("creation.familyCount", { count: members.length, s: "s" }) : uiText("creation.familySingle")}</small></span>${icon("arrow", 16)}</button>`;
-  }).join("")}</div>`;
+  }).join("")}</div>`)}`;
   const members = entries.filter((entry) => entry.family === ui.raceFamily), chosen = w.nextRaceChosen && members.some((entry) => entry.id === c.raceId);
   const genericTraits = /^(âge|taille|langues?|augmentation de caractéristiques|type de créature)$/i;
   const variantTraits = (option) => (option.traits || []).map(([name]) => name).filter((name) => !genericTraits.test(name) && !members.some((entry) => entry.race !== option && (entry.race.traits || []).some(([other]) => other === name))).slice(0, 2).join(" · ");
@@ -53744,11 +53944,11 @@ function renderCreationNextLine(c, line, open, prefix = "wiz") {
     const tags = spell ? [spell.level ? uiText("Niv. {p0}", { p0: spell.level }) : "", spell.school, spell.casting?.split(",")[0], spell.concentration ? uiText("Concentration") : "", spell.ritual ? uiText("Rituel") : ""].filter(Boolean) : [];
     const more = spell ? renderCreationNextSpellDetails(c, spell, line.path)
       : entry.desc && !brief || entry.more?.length ? `<details class="choice-option-details" data-detail="${id}"><summary>${uiText("Détails")}</summary>${entry.desc && !brief ? `<p>${esc(entry.desc)}</p>` : ""}${(entry.more || []).map(([name, text]) => `<p><strong>${esc(name)}</strong><br>${esc(text)}</p>`).join("")}</details>` : "";
-    return `<div class="choice-option ${off ? "off" : ""} ${entry.on ? "selected" : ""}"><label class="choice-option-pick" for="${id}"><input type="${type}" id="${id}" name="choice-${slug}" ${binding} value="${esc(entry.id)}" ${entry.on ? "checked" : ""} ${off || full && !entry.on ? "disabled" : ""}><span class="choice-option-name">${esc(entry.name)}${feat && entry.on && entry.off ? `<em class="prereq bad">${esc(entry.why)}</em>` : ""}${brief ? `<small>${esc(entry.desc)}</small>` : ""}</span></label>${off ? `<span class="choice-option-why">${esc(entry.why)}</span>` : ""}${tags.length ? `<span class="choice-option-tags">${tags.map((tag) => `<span class="pill outline">${esc(tag)}</span>`).join("")}</span>` : ""}${spell ? sourceLink(spell.name, spell.referenceId, [spell.source]) : feat ? sourceLink(entry.name, reference, [entry.source]) : ""}${more}</div>`;
+    return `<div class="choice-option ${off ? "off" : ""} ${entry.on ? "selected" : ""}"><label class="choice-option-pick" for="${id}"><input type="${type}" id="${id}" name="choice-${slug}" ${binding} value="${esc(entry.id)}" ${entry.on ? "checked" : ""} ${off || full && !entry.on ? "disabled" : ""}><span class="choice-option-name">${esc(entry.name)}${feat && entry.on && entry.off ? `<em class="prereq bad">${esc(entry.why)}</em>` : ""}${brief ? `<small>${esc(entry.desc)}</small>` : ""}</span></label>${off ? `<span class="choice-option-why">${esc(entry.why)}</span>` : ""}${tags.length ? `<span class="choice-option-tags">${tags.map((tag) => `<span class="pill outline">${esc(tag)}</span>`).join("")}</span>` : ""}${spell ? sourceLink(spell.name, spell.referenceId, [spell.source]) : feat ? sourceLink(entry.name, reference, [entry.source]) : ""}${more}${entry.on && entry.reference ? `<div class="choice-option-rule">${sourceLink(entry.name, entry.reference)}</div>` : ""}</div>`;
   }).join("");
   const fields = line.typing ? renderCreationNextCustom(c, line, prefix) : "";
   const columns = line.pool && visible.length > 8 ? "columns" : "";
-  return `${tag}${head}<div class="choice-line-body" id="choice-body-${slug}">${warning}${help}${search}${campaign}<div class="choice-line-options ${columns}" role="group" aria-label="${esc(line.name)}">${stale}${rows || (stale ? "" : `<p class="creation-choice-empty">${uiText("creation.noOption")}</p>`)}</div>${fields}</div></div>`;
+  return `${tag}${head}<div class="choice-line-body" id="choice-body-${slug}">${warning}${help}${search}${searchResults(`${campaign}<div class="choice-line-options ${columns}" role="group" aria-label="${esc(line.name)}">${stale}${rows || (stale ? "" : `<p class="creation-choice-empty">${uiText("creation.noOption")}</p>`)}</div>`)}${fields}</div></div>`;
 }
 /** Ce qui manque, chaque manque ouvrant sa ligne ; regroupé par niveau quand l’écran en couvre plusieurs (une ligne sans niveau est du niveau 1). */
 function renderCreationNextRemaining(lines, byLevel = false) {
@@ -53848,7 +54048,7 @@ function renderJournalResults(entries, matches) {
   ui.journalSelectedId = selected?.id || null;
   if (!entries.length) return `<div class="journal-sheet journal-empty"><h2 class="journal-title">${uiText("Aucune page")}</h2><p>${uiText("Ajoute du texte ou une photo de tes notes.")}</p></div>`;
   if (!matches.length) return `<div class="journal-no-results"><h2>${uiText("Aucune page trouvée")}</h2><p>${uiText("Essaie un autre terme.")}</p>${button(uiText("Voir toutes les pages"), "journal-search-clear", "", "ghost")}</div>`;
-  return `<div class="journal-layout"><nav class="journal-index" aria-label="${uiText("Pages du journal")}"><h2 class="journal-index-heading"><span>${uiText("Sessions{p0}", { p0: ui.journalQuery.trim() ? "" : ` (${entries.length})` })}</span><small>${uiText("Récentes d’abord")}</small></h2><ol class="journal-entry-list">${matches.map(({ entry, excerpt }) => `<li><button type="button" class="journal-entry-link" data-action="journal-open" data-id="${esc(entry.id)}" ${entry.id === selected.id ? 'aria-current="page"' : ""}><span class="journal-date">${esc(journalDateLabel(entry.date))}</span><span class="journal-entry-title">${esc(entry.title || uiText("Notes de session"))}</span>${ui.journalQuery.trim() && excerpt ? `<span class="journal-entry-preview">${esc(excerpt)}</span>` : ""}</button></li>`).join("")}</ol></nav><article class="journal-sheet" aria-labelledby="journal-page-title"><header class="journal-sheet-head"><span class="journal-date">${esc(journalDateLabel(selected.date, true))}</span><h2 id="journal-page-title" class="journal-title" tabindex="-1">${esc(selected.title || uiText("Notes de session"))}</h2></header>${selected.image ? `<button type="button" class="journal-photo" data-action="journal-photo-view" data-id="${esc(selected.id)}" aria-label="${uiText("Agrandir la photo de cette page")}"><img src="${esc(selected.image.dataUrl)}" width="${selected.image.width}" height="${selected.image.height}" alt="${uiText("Feuille photographiée : {p4}", { p4: esc(selected.title || uiText("Notes de session")) })}"><span>${uiText("Agrandir la photo")}</span></button>` : ""}${selected.body ? `<div class="journal-body">${esc(selected.body)}</div>` : ""}<footer class="journal-page-actions">${button(uiText("{p0} Modifier", { p0: icon("edit", 16) }), "journal-edit", `data-id="${esc(selected.id)}"`)}${button(uiText("{p0} Supprimer", { p0: icon("trash", 16) }), "journal-delete", `data-id="${esc(selected.id)}"`, "character-delete-button")}</footer></article></div>`;
+  return `<div class="journal-layout"><nav class="journal-index" aria-label="${uiText("Pages du journal")}"><h2 class="journal-index-heading"><span>${uiText("Sessions{p0}", { p0: ui.journalQuery.trim() ? "" : ` (${entries.length})` })}</span><small>${uiText("Récentes d’abord")}</small></h2><ol class="journal-entry-list">${matches.map(({ entry, excerpt }) => `<li><button type="button" class="journal-entry-link" data-action="journal-open" data-id="${esc(entry.id)}" ${entry.id === selected.id ? 'aria-current="page"' : ""}><span class="journal-date">${esc(journalDateLabel(entry.date))}</span><span class="journal-entry-title">${esc(entry.title || uiText("Notes de session"))}</span>${ui.journalQuery.trim() && excerpt ? `<span class="journal-entry-preview">${esc(excerpt)}</span>` : ""}</button></li>`).join("")}</ol></nav><article class="journal-sheet" aria-labelledby="journal-page-title"><header class="journal-sheet-head"><span class="journal-date">${esc(journalDateLabel(selected.date, true))}</span><h2 id="journal-page-title" class="journal-title" tabindex="-1">${esc(selected.title || uiText("Notes de session"))}</h2></header>${selected.image ? `<button type="button" class="journal-photo" data-action="journal-photo-view" data-id="${esc(selected.id)}" aria-label="${uiText("Agrandir la photo de cette page")}">${journalPhotoImage(selected.image, uiText("Feuille photographiée : {p4}", { p4: esc(selected.title || uiText("Notes de session")) }))}<span>${uiText("Agrandir la photo")}</span></button>` : ""}${selected.body ? `<div class="journal-body">${esc(selected.body)}</div>` : ""}<footer class="journal-page-actions">${button(uiText("{p0} Modifier", { p0: icon("edit", 16) }), "journal-edit", `data-id="${esc(selected.id)}"`)}${button(uiText("{p0} Supprimer", { p0: icon("trash", 16) }), "journal-delete", `data-id="${esc(selected.id)}"`, "character-delete-button")}</footer></article></div>`;
 }
 function updateJournalSearch() {
   const target = document.getElementById("journal-results"), c = activeCharacter();
@@ -53861,13 +54061,80 @@ function updateJournalSearch() {
   document.getElementById("journal-search-clear").hidden = !ui.journalQuery;
 }
 
+// Photos du journal. Une photo enregistrée est rangée à part de la fiche (journalPhotoStored) : elle est lue quand une page, l'éditeur,
+// la visionneuse, l'impression ou l'export en a besoin, puis relâchée en quittant le journal. Une photo tout juste choisie reste entière dans le brouillon.
+const journalPhotoUrls = new Map(); // identifiant → URL d'objet, null si la photo est introuvable, ou promesse du chargement en cours
+const journalPhotoKey = (image) => image ? image.photoId || image.dataUrl : null;
+function showJournalPhoto(img, url) {
+  if (url) img.src = url;
+  else { img.alt = uiText("Photo introuvable sur cet appareil."); img.dataset.photoMissing = ""; }
+}
+/** URL d'affichage d'une photo rangée à part ; les images déjà dans la page la reçoivent dès qu'elle est lue. */
+function readJournalPhotoUrl(id) {
+  const known = journalPhotoUrls.get(id);
+  if (known !== undefined) return Promise.resolve(known);
+  const loading = localStore.photo(id).catch(() => null).then((record) => {
+    const url = record ? URL.createObjectURL(new Blob([record.bytes], { type: record.type })) : null;
+    // Relâchée pendant la lecture (journal quitté) : l'URL ne sert plus.
+    if (journalPhotoUrls.get(id) !== loading) { if (url) URL.revokeObjectURL(url); return null; }
+    journalPhotoUrls.set(id, url);
+    for (const img of document.querySelectorAll("img[data-photo-id]")) if (img.dataset.photoId === id) showJournalPhoto(img, url);
+    return url;
+  });
+  journalPhotoUrls.set(id, loading);
+  return loading;
+}
+/** Image d'une photo à l'écran : entière si elle vient d'être choisie, lue à la demande si elle est rangée à part. Sa place est tenue pendant la lecture. */
+function journalPhotoImage(image, alt) {
+  const size = `width="${image.width}" height="${image.height}"`;
+  if (!journalPhotoStored(image)) return `<img src="${esc(image.dataUrl)}" ${size} alt="${alt}">`;
+  const url = journalPhotoUrls.get(image.photoId);
+  if (url === undefined) void readJournalPhotoUrl(image.photoId);
+  return `<img data-photo-id="${esc(image.photoId)}" ${typeof url === "string" ? `src="${url}"` : url === null ? "data-photo-missing" : ""} ${size} alt="${url === null ? uiText("Photo introuvable sur cet appareil.") : alt}">`;
+}
+/** Photo d'une page dans la fiche à imprimer. Une image posée dans la page au moment d'imprimer doit être lisible sur-le-champ : une data: URL
+ * l'est, une URL d'objet non. Les photos rangées à part passent donc en data: URL pour le papier, lues par le bouton Imprimer (et Ctrl+P) avant
+ * de partir. L'impression lancée par le menu du navigateur part sans attendre : une photo pas lue y laisse une ligne qui dit comment l'obtenir. */
+const journalPhotoPrints = new Map(); // identifiant → data: URL de la photo, ou null si elle est introuvable
+function printJournalPhoto(entry) {
+  const image = entry.image, data = journalPhotoStored(image) ? journalPhotoPrints.get(image.photoId) : image.dataUrl;
+  if (typeof data === "string") return `<img class="print-journal-photo" src="${esc(data)}" width="${image.width}" height="${image.height}" alt="${uiText("Feuille photographiée : {p3}", { p3: esc(entry.title || "Notes de session") })}">`;
+  return `<p class="print-photo-pending">${uiText(data === null ? "Photo introuvable sur cet appareil." : "Photo non incluse. Pour l’imprimer, utilise le bouton Imprimer de l’appli.")}</p>`;
+}
+/** Lit les photos rangées à part d'une fiche pour le papier. */
+async function preloadJournalPhotos(character) {
+  for (const entry of journalEntriesOf(character)) {
+    const id = journalPhotoStored(entry.image) ? entry.image.photoId : null;
+    if (id && !journalPhotoPrints.has(id)) journalPhotoPrints.set(id, await localStore.photoDataUrl(id).catch(() => null));
+  }
+}
+function releaseJournalPhotos() {
+  for (const url of journalPhotoUrls.values()) if (typeof url === "string") URL.revokeObjectURL(url);
+  journalPhotoUrls.clear();
+  journalPhotoPrints.clear();
+}
+/** Les photos ne restent en mémoire que là où on les regarde : page Notes, ses fenêtres, impression. */
+function syncJournalPhotos() {
+  if ((journalPhotoUrls.size || journalPhotoPrints.size) && ui.route !== "notes" && !printMedia.matches && !printPreparing && !document.querySelector("#main-content > .print-only")) releaseJournalPhotos();
+}
+/** Copie d'une fiche avec ses photos entières, comme dans un fichier exporté. Une photo introuvable arrête l'export : la page concernée est nommée. */
+async function withJournalPhotos(character) {
+  const stored = (Array.isArray(character?.journalEntries) ? character.journalEntries : []).filter((entry) => journalPhotoStored(entry?.image)), photos = new Map();
+  for (const entry of stored) {
+    const dataUrl = photos.get(entry.image.photoId) || await localStore.photoDataUrl(entry.image.photoId);
+    if (!dataUrl) throw new Error(uiText("La photo de la page « {p0} » est introuvable sur cet appareil. Retire-la de cette page, puis relance l’export.", { p0: entry.title || uiText("Notes de session") }));
+    photos.set(entry.image.photoId, dataUrl);
+  }
+  return mapJournalPhotos(character, (image) => journalPhotoStored(image) ? { dataUrl: photos.get(image.photoId), width: image.width, height: image.height } : image);
+}
+
 function journalDateLabel(date, full = false) {
   if (!date) return "Sans date";
   return new Date(`${date}T12:00:00Z`).toLocaleDateString(uiLocale(), { timeZone: "UTC", day: "numeric", month: full ? "long" : "short", year: "numeric", ...(full ? { weekday: "long" } : {}) });
 }
 function journalDraftDirty() {
   const draft = ui.journalDraft;
-  return !!draft && (ui.journalPhotoLoading || ["date", "title", "body"].some((key) => draft[key] !== draft.initial[key]) || draft.image?.dataUrl !== draft.initial.image?.dataUrl);
+  return !!draft && (ui.journalPhotoLoading || ["date", "title", "body"].some((key) => draft[key] !== draft.initial[key]) || journalPhotoKey(draft.image) !== journalPhotoKey(draft.initial.image));
 }
 function openJournalEditor(id = null) {
   const character = activeCharacter(), entry = id ? journalEntriesOf(character).find((item) => item.id === id) : null;
@@ -53898,7 +54165,7 @@ function renderJournalEditor() {
   const expanded = ui.journalPhotoSourceOpen && !busy;
   const sourceAttributes = `aria-controls="journal-photo-sources" aria-expanded="${expanded}" ${disabled}`;
   const source = `<div class="journal-photo-source">${smallIcon("camera", "journal-photo-source", draft.image ? uiText("Choisir une autre photo") : uiText("Ajouter une photo"), sourceAttributes)}<div id="journal-photo-sources" class="journal-photo-sources" role="group" aria-label="${uiText("Source de la photo")}" ${expanded ? "" : "hidden"}>${button(uiText("{p0} Prendre une photo", { p0: icon("camera", 20) }), "journal-photo-camera", disabled, "ghost")}${button(uiText("{p0} Choisir une photo", { p0: icon("image", 20) }), "journal-photo-upload", disabled, "ghost")}</div></div>`;
-  const photo = draft.image ? `<div class="journal-photo-preview"><button type="button" class="journal-photo" data-action="journal-photo-view" aria-label="${uiText("Agrandir la photo choisie")}" ${disabled}><img src="${esc(draft.image.dataUrl)}" width="${draft.image.width}" height="${draft.image.height}" alt="${uiText("Aperçu de la feuille photographiée")}"><span>${uiText("Agrandir la photo")}</span></button><div class="journal-photo-actions">${smallIcon("replace", "journal-photo-replace", uiText("Remplacer la photo"), sourceAttributes)}${smallIcon("trash", "journal-photo-remove", uiText("Retirer la photo"), disabled)}</div></div>` : "";
+  const photo = draft.image ? `<div class="journal-photo-preview"><button type="button" class="journal-photo" data-action="journal-photo-view" aria-label="${uiText("Agrandir la photo choisie")}" ${disabled}>${journalPhotoImage(draft.image, uiText("Aperçu de la feuille photographiée"))}<span>${uiText("Agrandir la photo")}</span></button><div class="journal-photo-actions">${smallIcon("replace", "journal-photo-replace", uiText("Remplacer la photo"), sourceAttributes)}${smallIcon("trash", "journal-photo-remove", uiText("Retirer la photo"), disabled)}</div></div>` : "";
   const body = `${field(uiText("Date de la session"), "ui.journalDraft.date", draft.date, "date", legacy ? uiText("Tu peux laisser la date vide pour tes anciennes notes.") : "", `min="0001-01-01" max="9999-12-31" ${legacy ? "" : "required"}`)}${field(uiText("Titre de la session (facultatif)"), "ui.journalDraft.title", draft.title, "text", "", `maxlength="${JOURNAL_TITLE_LIMIT}" placeholder="${uiText("Ex. Les portes de Valombre")}"`)}<div class="field journal-writing-field"><div class="journal-writing-heading"><label for="${formId("ui.journalDraft.body")}">${uiText("Récit et commentaires")}</label>${source}</div>${ui.journalError ? `<p role="alert" class="notice error">${esc(uiSystemText(ui.journalError))}</p>` : ""}<p class="tiny muted journal-photo-status" role="status" ${ui.journalPhotoLoading ? "" : "hidden"}>${uiText("Préparation de la photo…")}</p><textarea id="${formId("ui.journalDraft.body")}" data-bind="ui.journalDraft.body" class="journal-composer-text" rows="7" maxlength="${legacy ? JOURNAL_LEGACY_BODY_LIMIT : JOURNAL_BODY_LIMIT}" placeholder="${uiText("Rencontres, décisions, indices…")}">${esc(draft.body)}</textarea><small>${uiText("Facultatif avec une photo.")}</small></div>${photo}<input id="journal-photo-file" type="file" accept="image/jpeg,image/png,image/webp" aria-label="${uiText("Choisir une image pour le journal")}" hidden ${disabled}><input id="journal-camera-file" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" aria-label="${uiText("Photographier une feuille")}" hidden ${disabled}>`;
   const editorBody = busy ? body.replaceAll("<input ", "<input disabled ").replaceAll("<textarea ", "<textarea disabled ") : body;
   return modalShell(draft.isNew ? uiText("Nouvelle page") : uiText("Modifier la page"), editorBody, button(uiText("Annuler"), "close-modal", ui.journalSaving ? "disabled" : "", "ghost") + button(ui.journalSaving ? uiText("Enregistrement…") : uiText("Enregistrer la page"), "journal-save", busy ? 'disabled aria-busy="true"' : "", "primary")).replace('class="modal ', 'class="modal journal-editor ');
@@ -53925,7 +54192,7 @@ function renderJournalPhotoViewer() {
   const view = ui.journalPhotoViewer;
   if (!view) return "";
   const { image, zoom } = view;
-  return modalShell("Photo", `<div class="journal-photo-zoom" role="group" aria-label="${uiText("Agrandissement de la photo")}">${button("−", "journal-photo-zoom", `data-zoom="out" aria-label="${uiText("Réduire la photo")}" ${zoom <= 1 ? "disabled" : ""}`)}${button("+", "journal-photo-zoom", `data-zoom="in" aria-label="${uiText("Agrandir la photo")}" ${zoom >= 6 ? "disabled" : ""}`)}${button(uiText("Ajuster"), "journal-photo-zoom", 'data-zoom="fit"')}<output id="journal-photo-scale" aria-live="polite">${zoom * 100} %</output></div><p class="small muted">${uiText("Agrandis la photo, puis fais-la glisser pour lire les détails.")}</p><div class="journal-photo-viewport" tabindex="0" role="region" aria-label="${uiText("Photo agrandie, défilement horizontal et vertical")}"><div class="journal-photo-stage" style="width:${zoom * 100}%"><img src="${esc(image.dataUrl)}" width="${image.width}" height="${image.height}" alt="${esc(view.title || uiText("Feuille manuscrite du journal"))}"></div></div>`, button(view.returnTo ? uiText("Revenir à la page") : uiText("Fermer"), "close-modal", "", "primary"), true).replace('class="modal ', 'class="modal journal-photo-viewer ');
+  return modalShell("Photo", `<div class="journal-photo-zoom" role="group" aria-label="${uiText("Agrandissement de la photo")}">${button("−", "journal-photo-zoom", `data-zoom="out" aria-label="${uiText("Réduire la photo")}" ${zoom <= 1 ? "disabled" : ""}`)}${button("+", "journal-photo-zoom", `data-zoom="in" aria-label="${uiText("Agrandir la photo")}" ${zoom >= 6 ? "disabled" : ""}`)}${button(uiText("Ajuster"), "journal-photo-zoom", 'data-zoom="fit"')}<output id="journal-photo-scale" aria-live="polite">${zoom * 100} %</output></div><p class="small muted">${uiText("Agrandis la photo, puis fais-la glisser pour lire les détails.")}</p><div class="journal-photo-viewport" tabindex="0" role="region" aria-label="${uiText("Photo agrandie, défilement horizontal et vertical")}"><div class="journal-photo-stage" style="width:${zoom * 100}%">${journalPhotoImage(image, esc(view.title || uiText("Feuille manuscrite du journal")))}</div></div>`, button(view.returnTo ? uiText("Revenir à la page") : uiText("Fermer"), "close-modal", "", "primary"), true).replace('class="modal ', 'class="modal journal-photo-viewer ');
 }
 function zoomJournalPhoto(direction) {
   const view = ui.journalPhotoViewer, viewport = modalRoot.querySelector(".journal-photo-viewport"), stage = modalRoot.querySelector(".journal-photo-stage");
@@ -53942,7 +54209,7 @@ function zoomJournalPhoto(direction) {
 }
 function printableJournal(c) {
   const entries = journalEntriesOf(c);
-  return entries.length ? entries.map((entry) => `<article class="print-journal-entry"><header><h3>${esc(entry.title || "Notes de session")}</h3><p>${esc(journalDateLabel(entry.date, true))}</p></header>${entry.image ? `<img class="print-journal-photo" src="${esc(entry.image.dataUrl)}" width="${entry.image.width}" height="${entry.image.height}" alt="${uiText("Feuille photographiée : {p3}", { p3: esc(entry.title || "Notes de session") })}">` : ""}${entry.body ? `<p class="print-note">${esc(entry.body)}</p>` : ""}</article>`).join("") : ("<p>" + uiText("Aucune page pour le moment.") + "</p>");
+  return entries.length ? entries.map((entry) => `<article class="print-journal-entry"><header><h3>${esc(entry.title || "Notes de session")}</h3><p>${esc(journalDateLabel(entry.date, true))}</p></header>${entry.image ? printJournalPhoto(entry) : ""}${entry.body ? `<p class="print-note">${esc(entry.body)}</p>` : ""}</article>`).join("") : ("<p>" + uiText("Aucune page pour le moment.") + "</p>");
 }
 
 function renderCampaignRule(definition, language = ui.campaignLanguage || uiLanguage()) {
@@ -54137,7 +54404,7 @@ function renderLibrary(embedded = false) {
   // Pastille de maîtrise des armes, armures, boucliers et outils pour le personnage ouvert ; sans personnage, aucune.
   const character = activeCharacter(), acc = character && collect(character), proficient = (id) => character ? itemProficiency(character, { reference: id }, acc) : null;
   const empty = ui.libraryFavoritesOnly && !favorites.length ? uiText("Aucun favori.") : result.queryTotal && restricted ? uiText("Aucune référence avec ces filtres. {p0}", { p0: button(uiText("Effacer les filtres"), "library-clear-filters", "", "small-btn") }) : uiText("Aucune référence ne correspond à ce nom dans le catalogue disponible.");
-  return head + `${embedded ? "" : button(`${icon("back", 16)} ${uiText("Toutes les catégories")}`, "library-home", "", "small-btn ghost")}<div class="spell-toolbar">${librarySearchField()}<select id="library-filter" class="select-plain" data-bind="ui.libraryType" aria-label="${uiText("Type de contenu")}"><option value="all">${uiText("Toutes les catégories")}</option>${types.map((type) => `<option value="${esc(type)}" ${ui.libraryType === type ? "selected" : ""}>${esc(uiLibraryTypes[type] || type)}</option>`).join("")}</select></div><div class="library-filters">${facets}${activeCharacter() ? button(uiText("library.table.history"), "rule-table-history", "", "small-btn") : ""}${button(uiText("Favoris"), "library-favorites", `aria-pressed="${ui.libraryFavoritesOnly}"`, "small-btn" + (ui.libraryFavoritesOnly ? " active" : ""))}</div><p class="small muted" role="status">${uiText("{p6} résultats · page {p7} / {p8}", { p6: result.total.toLocaleString(uiLocale()), p7: result.page + 1, p8: result.pages })}</p><div class="library-list">${result.entries.map((row) => `<div class="library-result">${row.removed ? `<div class="library-row"><span><strong>${esc(libraryRowName(row))}</strong><small>${uiText("{p1} · Référence retirée du catalogue", { p1: esc(row.source) })}</small></span></div>` : `<button class="library-row" data-action="library-entry" data-id="${esc(row.id)}"><span><strong>${esc(libraryRowName(row))}${proficiencyPill(proficient(row.id))}</strong><small>${esc(uiLibraryTypes[row.type] || row.type)} · ${esc(row.source)}${libraryScopeLabel(row) ? ` · ${esc(uiSystemText(libraryScopeLabel(row)))}` : ""}${row.translated ? " · FR" : " · EN"}${row.inherited ? uiText(" · variante") : ""}</small></span>${icon("chevron", 18)}</button>`}${button(favoriteIds.has(row.id) ? "★" : "☆", "library-favorite", `data-id="${esc(row.id)}" aria-label="${favoriteIds.has(row.id) ? uiText("Retirer des favoris") : uiText("Ajouter aux favoris")} : ${esc(libraryRowName(row))}" aria-pressed="${favoriteIds.has(row.id)}"`, "library-favorite ghost")}</div>`).join("") || notice(empty)}</div><div class="actions section-gap">${button(uiText("Précédent"), "library-page", `data-value="${result.page - 1}" ${result.page === 0 ? "disabled" : ""}`)}${button(uiText("Suivant"), "library-page", `data-value="${result.page + 1}" ${result.page + 1 === result.pages ? "disabled" : ""}`)}</div>`;
+  return head + `${embedded ? "" : button(`${icon("back", 16)} ${uiText("Toutes les catégories")}`, "library-home", "", "small-btn ghost")}<div class="spell-toolbar">${librarySearchField()}<select id="library-filter" class="select-plain" data-bind="ui.libraryType" aria-label="${uiText("Type de contenu")}"><option value="all">${uiText("Toutes les catégories")}</option>${types.map((type) => `<option value="${esc(type)}" ${ui.libraryType === type ? "selected" : ""}>${esc(uiLibraryTypes[type] || type)}</option>`).join("")}</select></div><div class="library-filters">${facets}${activeCharacter() ? button(uiText("library.table.history"), "rule-table-history", "", "small-btn") : ""}${button(uiText("Favoris"), "library-favorites", `aria-pressed="${ui.libraryFavoritesOnly}"`, "small-btn" + (ui.libraryFavoritesOnly ? " active" : ""))}</div>${searchResults(`<p class="small muted" role="status">${uiText("{p6} résultats · page {p7} / {p8}", { p6: result.total.toLocaleString(uiLocale()), p7: result.page + 1, p8: result.pages })}</p><div class="library-list">${result.entries.map((row) => `<div class="library-result">${row.removed ? `<div class="library-row"><span><strong>${esc(libraryRowName(row))}</strong><small>${uiText("{p1} · Référence retirée du catalogue", { p1: esc(row.source) })}</small></span></div>` : `<button class="library-row" data-action="library-entry" data-id="${esc(row.id)}"><span><strong>${esc(libraryRowName(row))}${proficiencyPill(proficient(row.id))}</strong><small>${esc(uiLibraryTypes[row.type] || row.type)} · ${esc(row.source)}${libraryScopeLabel(row) ? ` · ${esc(uiSystemText(libraryScopeLabel(row)))}` : ""}${row.translated ? " · FR" : " · EN"}${row.inherited ? uiText(" · variante") : ""}</small></span>${icon("chevron", 18)}</button>`}${button(favoriteIds.has(row.id) ? "★" : "☆", "library-favorite", `data-id="${esc(row.id)}" aria-label="${favoriteIds.has(row.id) ? uiText("Retirer des favoris") : uiText("Ajouter aux favoris")} : ${esc(libraryRowName(row))}" aria-pressed="${favoriteIds.has(row.id)}"`, "library-favorite ghost")}</div>`).join("") || notice(empty)}</div><div class="actions section-gap">${button(uiText("Précédent"), "library-page", `data-value="${result.page - 1}" ${result.page === 0 ? "disabled" : ""}`)}${button(uiText("Suivant"), "library-page", `data-value="${result.page + 1}" ${result.page + 1 === result.pages ? "disabled" : ""}`)}</div>`)}`;
 }
 function libraryRowName(row) {
   return uiLanguage() === "en" ? row.en || uiCatalogueName(row.name, row.id) : row.name || row.en;
@@ -54553,7 +54820,7 @@ function renderReceivedEffects(c, compact = false) {
 function receivedEffectModal(c) {
   const f = ui.form, guide = RECEIVED_GUIDES[f.spellId], selected = ui.receivedSelected, query = librarySearchText(ui.receivedQuery || "").trim();
   const matches = uiSpellCatalogue(c).filter((spell) => query ? librarySearchText(`${spell.name} ${spell.englishName || ""} ${spell.id}`).includes(query) : ui.receivedAll || Object.hasOwn(RECEIVED_GUIDES, spell.id));
-  const search = selected ? "" : `<div class="search-wrap">${icon("search", 18)}<input id="received-search" class="search-input" type="search" data-bind="ui.receivedQuery" value="${esc(ui.receivedQuery || "")}" placeholder="${uiText("audit.effects.search")}" aria-label="${uiText("Rechercher un effet")}"></div>${query || ui.receivedAll ? `<p class="small muted" role="status">${uiText("{p1} résultat(s).{p2}", { p1: matches.length, p2: matches.length > 25 ? uiText(" Les 25 premiers sont affichés, précise le nom pour retrouver les autres.") : "" })}</p>` : ""}<div class="library-list received-options">${matches.slice(0, 25).map((spell) => `<button class="library-row" data-action="received-select" data-id="${esc(spell.id)}">${icon(spell.id === "shield-of-faith" ? "sheet" : spell.id === "aid" ? "plus" : "sparkles", 19)}<span><strong>${esc(spell.name)}</strong><small>${esc(RECEIVED_GUIDES[spell.id] ? uiSystemText(RECEIVED_GUIDES[spell.id].summary) : spell.level ? uiText("Niveau {p0}", { p0: spell.level }) : uiText("Sort mineur"))}</small></span></button>`).join("")}</div><div class="library-group-list received-other">${button(uiText("Effet personnalisé"), "received-custom", "", "ghost")}${!ui.receivedAll && !query ? button(uiText("audit.effects.all"), "received-all", "", "ghost") : ""}</div>`;
+  const search = selected ? "" : `<div class="search-wrap">${icon("search", 18)}<input id="received-search" class="search-input" type="search" data-bind="ui.receivedQuery" value="${esc(ui.receivedQuery || "")}" placeholder="${uiText("audit.effects.search")}" aria-label="${uiText("Rechercher un effet")}"></div>${searchResults(`${query || ui.receivedAll ? `<p class="small muted" role="status">${uiText("{p1} résultat(s).{p2}", { p1: matches.length, p2: matches.length > 25 ? uiText(" Les 25 premiers sont affichés, précise le nom pour retrouver les autres.") : "" })}</p>` : ""}<div class="library-list received-options">${matches.slice(0, 25).map((spell) => `<button class="library-row" data-action="received-select" data-id="${esc(spell.id)}">${icon(spell.id === "shield-of-faith" ? "sheet" : spell.id === "aid" ? "plus" : "sparkles", 19)}<span><strong>${esc(spell.name)}</strong><small>${esc(RECEIVED_GUIDES[spell.id] ? uiSystemText(RECEIVED_GUIDES[spell.id].summary) : spell.level ? uiText("Niveau {p0}", { p0: spell.level }) : uiText("Sort mineur"))}</small></span></button>`).join("")}</div><div class="library-group-list received-other">${button(uiText("Effet personnalisé"), "received-custom", "", "ghost")}${!ui.receivedAll && !query ? button(uiText("audit.effects.all"), "received-all", "", "ghost") : ""}</div>`)}`;
   let preview = "";
   if (selected) {
     try {
@@ -55032,7 +55299,7 @@ function renderMore(c) {
     ["companions", "paw", uiText("audit.more.companions")],
     ["homebrew", "plus", uiText("audit.more.homebrew")],
   ];
-  return `<div class="audit-more"><div class="page-head"><h1>${uiText("Plus")}</h1></div><h2 class="audit-menu-label">${uiText("Personnage")}</h2><div class="audit-menu-list">${characterRows.map(([route, ico, title]) => auditMenuRow(route, ico, title, { action: route === "companions" ? "audit-more-companions" : "navigate", disabled: !c })).join("")}</div><h2 class="audit-menu-label">${uiText("audit.more.application")}</h2><div class="audit-menu-list">${[
+  return `<div class="audit-more"><div class="page-head"><h1>${uiText("Plus")}</h1></div><h2 class="audit-menu-label">${uiText("Personnage")}</h2>${c ? `<p class="audit-more-identity">${esc([uiDerive(c).race.name, uiDerive(c).background.name].filter(Boolean).join(" · "))}</p>` : ""}<div class="audit-menu-list">${characterRows.map(([route, ico, title]) => auditMenuRow(route, ico, title, { action: route === "companions" ? "audit-more-companions" : "navigate", disabled: !c })).join("")}</div><h2 class="audit-menu-label">${uiText("audit.more.application")}</h2><div class="audit-menu-list">${[
     ["home", "users", uiText("Mes personnages")],
     ["library", "book", uiText("Bibliothèque")],
     ["offline", "download", uiText("Contenu hors ligne")],
@@ -55126,7 +55393,9 @@ async function exportCharacters(all) {
   if (!selected.length || !selected[0]) return;
   toast(uiText("Préparation de la sauvegarde et de ses références…"));
   try { await ensureContent(); } catch {}
-  const chars = clone(selected);
+  let chars;
+  try { chars = clone(await Promise.all(selected.map(withJournalPhotos))); }
+  catch (error) { toast(error.message); return; }
   for (const character of chars) character.referenceArchive = await createCharacterReferenceArchive(character, contentLibrary);
   if (IS_ARTIFACT) {
     ui.exportText = JSON.stringify({ format: "compagnon-srd51", schemaVersion: SCHEMA_VERSION, exportedAt: new Date().toISOString(), characters: clone(chars) });
@@ -55154,6 +55423,8 @@ async function checkImportedCharacters(list) {
   const result = [];
   for (const character of list) {
     if (character.referenceArchive) await verifyCharacterReferenceArchive(character.referenceArchive);
+    // Un fichier porte ses photos entières : une référence viendrait d'un autre appareil, où la photo est restée.
+    if (Array.isArray(character?.journalEntries) && character.journalEntries.some((entry) => journalPhotoStored(entry?.image))) throw new Error(uiText("Ce fichier cite des photos restées sur un autre appareil. Refais l’export depuis cet appareil."));
     result.push(validateImport(character));
   }
   return result;
@@ -55325,13 +55596,14 @@ async function makeDemo() {
 /** Actions du menu Plus : réglages, création maison, contenus, sauvegardes et import, appelées par perform. */
 async function performMore(action, el, c, data, d) {
   switch (action) {
+    // Tout fichier qui sort de l'appareil emporte les photos entières, pas leur référence.
     case "export-pending":
-      if (localStore.pendingState) downloadJson({ format: "compagnon-srd51", schemaVersion: SCHEMA_VERSION, exportedAt: new Date().toISOString(), characters: localStore.pendingState.characters }, "compagnon-modifications-en-attente.json");
+      if (localStore.pendingState) downloadJson({ format: "compagnon-srd51", schemaVersion: SCHEMA_VERSION, exportedAt: new Date().toISOString(), characters: await Promise.all(localStore.pendingState.characters.map(withJournalPhotos)) }, "compagnon-modifications-en-attente.json");
       break;
     case "export-repair-draft":
-      if (repairContext()?.conflict) downloadJson({ format: "compagnon-srd51", schemaVersion: SCHEMA_VERSION, exportedAt: new Date().toISOString(), characters: [repairContext().conflict.character] }, "compagnon-brouillon-correction.json");
+      if (repairContext()?.conflict) downloadJson({ format: "compagnon-srd51", schemaVersion: SCHEMA_VERSION, exportedAt: new Date().toISOString(), characters: [await withJournalPhotos(repairContext().conflict.character)] }, "compagnon-brouillon-correction.json");
       break;
-    case "export-recovery": downloadJson({ format: "compagnon-recovery", entries: appData.recovery }, "compagnon-recuperation.json"); break;
+    case "export-recovery": downloadJson({ format: "compagnon-recovery", entries: await Promise.all(appData.recovery.map(async (entry) => ({ ...entry, character: await withJournalPhotos(entry.character) }))) }, "compagnon-recuperation.json"); break;
 
     case "download-content": {
       const scope = el.dataset.scope || "all";
@@ -55820,7 +56092,7 @@ function creationChoiceDirectory(kind, items, current, inspected) {
     named = items.filter(([, item]) => creationChoiceNormalize(`${item.name} ${item.role || ""} ${(item.skills || []).map((skill) => uiSkills[skill]?.[0] || skill).join(" ")} ${(item.aliases || []).join(" ")}`).includes(needle)),
     visible = classList || !needle ? named : [...named, ...items.filter((entry) => !named.includes(entry) && creationChoiceNormalize(creationNextBackgroundSearchText(...entry)).includes(needle))],
     title = classList ? "Classes" : uiText("Historiques");
-  return `<aside class="creation-choice-directory" aria-label="${uiText("Liste des {p0}", { p0: title.toLocaleLowerCase("fr-FR") })}"><div class="creation-choice-search"><div class="search-wrap">${icon("search", 17)}<input id="creation-${kind}-search" type="search" class="search-input" data-bind="ui.${queryKey}" value="${esc(query)}" placeholder="${classList ? uiText("Nom, rôle…") : uiText("creation.searchBackground")}" aria-label="${uiText("Rechercher {p7}", { p7: classList ? uiText("une classe") : uiText("un historique") })}">${query ? `<button type="button" class="creation-choice-clear" data-action="creation-choice-clear" data-kind="${kind}" aria-label="${uiText("Effacer la recherche")}">${icon("x", 15)}</button>` : ""}</div><span class="creation-choice-count" role="status">${visible.length} ${classList ? `classe${visible.length > 1 ? "s" : ""}` : `historique${visible.length > 1 ? "s" : ""}`}</span></div><div class="creation-choice-list" data-scroll-key="${esc(`${kind}:${query}`)}">${visible.map(([id, item]) => `<button type="button" id="creation-${kind}-${id}" class="creation-choice-row ${id === inspected ? "inspected" : ""}" data-action="creation-choice-inspect" data-kind="${kind}" data-id="${id}" aria-pressed="${id === inspected}" aria-controls="creation-${kind}-detail">${classList ? classIllustration(id, "creation-choice-image") || `<span class="creation-choice-icon" aria-hidden="true">${icon(item.icon, 21)}</span>` : backgroundIllustration(id, "creation-choice-image")}<span class="creation-choice-name"><strong>${esc(item.name)}</strong>${classList ? "" : `<span class="creation-choice-description">${esc(creationNextBackgroundDescription(id, item))}</span>${id === "custom" ? `<span class="creation-background-warning">${uiText("Avec l’accord du MJ")}</span>` : ""}`}<small class="${classList ? "" : "creation-background-benefits"}">${esc(classList ? item.role : creationNextBackgroundBenefits(item))}</small>${classList ? `<small class="creation-class-facts">Dé de vie d${item.die} · ${esc(uiAbilities[item.primary?.[0]]?.name || "")}</small>` : ""}</span>${id === current ? `<span class="creation-choice-adopted" aria-label="${uiText("Choix adopté")}">${icon("check", 16)}</span>` : ""}</button>`).join("") || ("<p class=\"creation-choice-empty\" role=\"status\">" + uiText("Aucun résultat.") + "</p>")}</div></aside>`;
+  return `<aside class="creation-choice-directory" aria-label="${uiText("Liste des {p0}", { p0: title.toLocaleLowerCase("fr-FR") })}"><div class="creation-choice-search"><div class="search-wrap">${icon("search", 17)}<input id="creation-${kind}-search" type="search" class="search-input" data-bind="ui.${queryKey}" value="${esc(query)}" placeholder="${classList ? uiText("Nom, rôle…") : uiText("creation.searchBackground")}" aria-label="${uiText("Rechercher {p7}", { p7: classList ? uiText("une classe") : uiText("un historique") })}">${searchResults(query ? `<button type="button" class="creation-choice-clear" data-action="creation-choice-clear" data-kind="${kind}" aria-label="${uiText("Effacer la recherche")}">${icon("x", 15)}</button>` : "")}</div>${searchResults(`<span class="creation-choice-count" role="status">${visible.length} ${classList ? `classe${visible.length > 1 ? "s" : ""}` : `historique${visible.length > 1 ? "s" : ""}`}</span>`)}</div>${searchResults(`<div class="creation-choice-list" data-scroll-key="${esc(`${kind}:${query}`)}">${visible.map(([id, item]) => `<button type="button" id="creation-${kind}-${id}" class="creation-choice-row ${id === inspected ? "inspected" : ""}" data-action="creation-choice-inspect" data-kind="${kind}" data-id="${id}" aria-pressed="${id === inspected}" aria-controls="creation-${kind}-detail">${classList ? classIllustration(id, "creation-choice-image") || `<span class="creation-choice-icon" aria-hidden="true">${icon(item.icon, 21)}</span>` : backgroundIllustration(id, "creation-choice-image")}<span class="creation-choice-name"><strong>${esc(item.name)}</strong>${classList ? "" : `<span class="creation-choice-description">${esc(creationNextBackgroundDescription(id, item))}</span>${id === "custom" ? `<span class="creation-background-warning">${uiText("Avec l’accord du MJ")}</span>` : ""}`}<small class="${classList ? "" : "creation-background-benefits"}">${esc(classList ? item.role : creationNextBackgroundBenefits(item))}</small>${classList ? `<small class="creation-class-facts">Dé de vie d${item.die} · ${esc(uiAbilities[item.primary?.[0]]?.name || "")}</small>` : ""}</span>${id === current ? `<span class="creation-choice-adopted" aria-label="${uiText("Choix adopté")}">${icon("check", 16)}</span>` : ""}</button>`).join("") || ("<p class=\"creation-choice-empty\" role=\"status\">" + uiText("Aucun résultat.") + "</p>")}</div>`)}</aside>`;
 }
 /** Un fait trop long pour une demi-colonne, ou marqué « wide », occupe toute la largeur de la fiche. */
 function creationFactWide([, value, span]) {
@@ -57121,12 +57393,12 @@ function renderInventory(c) {
     )
     .join("")}<p class="small section-gap">${esc(uiText("equipment.mainHand"))} : ${esc(hands.main ? weaponOf(hands.main.id)?.name : uiText("equipment.free"))} · ${esc(uiText("equipment.offHand"))} : ${esc(c.equipment.shield ? uiText("equipment.shield") : hands.off ? weaponOf(hands.off.id)?.name : uiText("equipment.free"))}</p><p class="tiny muted section-gap">${uiText("CA : {p16}.", { p16: esc(d.acExplanation) })}</p>${d.stealthDisadvantage ? notice(armorerStatus(c).active && armorerStatus(c).model === "infiltrator" ? uiText("Discrétion : l’avantage du Champ d’atténuation annule le désavantage de cette armure.") : uiText("Cette armure impose le désavantage aux tests de Discrétion."), "warning") : ""}${!d.armorProficient ? notice(uiText("Armure ou bouclier non maîtrisé : tu ne peux pas lancer de sorts avec cet équipement."), "warning") : ""}${d.strTooLow ? notice(uiText("Force insuffisante pour {p0} : vitesse réduite de 3 m.", { p0: esc(armor.name) }), "warning") : ""}<section class="panel"><h2 class="panel-title">${uiText("Harmonisations : {p25}/{p26}", { p25: inventoryAttunementStatus(c).count, p26: inventoryAttunementStatus(c).limit })}</h2>${button(uiText("Corriger les harmonisations"), "attunements", "", "small-btn ghost")}</section></details><div class="stack"><details class="carnet-coins" data-detail="inventory-coins" open><summary><strong>${uiText("Bourse")}</strong><span>${shopCoins(shopPurse(c))}</span></summary><div class="coins">${icon("gem", 28)}<div><strong>${shopCoins(shopPurse(c))}</strong></div></div><div class="purse-actions">${button(uiText("shop.merchant"), "shop-open", "", "primary")}${button(uiText("Ajuster"), "gold", "", "ghost")}</div></details></div></div>${renderRunePanel(c)}</div><section class="section-gap carnet-inventory-list">${
     c.inventory.length
-      ? `<div class="search-wrap">${icon("search", 18)}<input id="inventory-search" class="search-input" data-bind="ui.inventoryQuery" value="${esc(ui.inventoryQuery)}" placeholder="${uiText("Rechercher dans le sac…")}" aria-label="${uiText("Rechercher dans le sac")}"></div><div class="inventory-list">${items
+      ? `<div class="search-wrap">${icon("search", 18)}<input id="inventory-search" class="search-input" data-bind="ui.inventoryQuery" value="${esc(ui.inventoryQuery)}" placeholder="${uiText("Rechercher dans le sac…")}" aria-label="${uiText("Rechercher dans le sac")}"></div>${searchResults(`<div class="inventory-list">${items
           .map(
             (item) =>
               renderInventoryRow(c, item, acc),
           )
-          .join("")}</div>`
+          .join("")}</div>`)}`
       : `<div class="panel empty"><span class="empty-icon">${icon("bag", 28)}</span><h3>${uiText("Le sac est vide")}</h3>${button(uiText("Ajouter un objet"), "catalog-item", "", "small-btn")}</div>`
   }</section></div>${c.background.kitArchive?.length ? `<details class="section-gap"><summary>${uiText("Équipement d’historique remplacé ({p0})", { p0: c.background.kitArchive.length })}</summary><p class="small muted">${uiText("Ces exemplaires ne sont plus portés. Leurs descriptions et leurs notes restent conservées.")}</p>${c.background.kitArchive.map((item) => `<article class="panel section-gap"><h3>${esc(item.name)} ×${item.qty}</h3><p class="small preserve">${esc(item.description || uiText("Aucune note."))}</p></article>`).join("")}</details>` : ""}<div class="section-gap"><div class="actions">${button(uiText("Ajustements du MJ"), "adjustments", "", "small-btn")}${button(uiText("Contenus maison"), "navigate", 'data-route="homebrew"', "small-btn ghost")}</div>${renderCompactHelp(uiText("Ajustement du MJ : bonus chiffré. Aptitude maison : effet décrit et suivi."))}</div>`;
 }
@@ -58045,7 +58317,7 @@ function renderInventoryModals(c, d, cancel) {
         ["tools", uiText("Outils")],
       ]
         .map(([id, label]) => `<button type="button" data-action="catalog-tab" data-value="${id}" class="${tab === id ? "active" : ""}">${label}</button>`)
-        .join("")}</div><div class="search-wrap">${icon("search", 18)}<input id="catalog-search" class="search-input" data-bind="ui.catalogQuery" value="${esc(ui.catalogQuery || "")}" placeholder="${uiText("Chercher…")}" aria-label="${uiText("Chercher un objet")}"></div><div class="catalog-list">${rows || ("<p class=\"small muted\">" + uiText("Aucun objet.") + "</p>")}</div>`,
+        .join("")}</div><div class="search-wrap">${icon("search", 18)}<input id="catalog-search" class="search-input" data-bind="ui.catalogQuery" value="${esc(ui.catalogQuery || "")}" placeholder="${uiText("Chercher…")}" aria-label="${uiText("Chercher un objet")}"></div>${searchResults(`<div class="catalog-list">${rows || ("<p class=\"small muted\">" + uiText("Aucun objet.") + "</p>")}</div>`)}`,
       button(uiText("items.catalogue"), "inventory-library", "", "small-btn") + button(uiText("Terminé"), "close-modal", "", "green"),
       true,
     );
@@ -58104,10 +58376,12 @@ function renderSpellDescription(spell, c = ui.wizard?.draft || ui.levelFlow?.dra
   return `<p class="preserve" lang="${sourceLanguage}">${esc(referenceEntries(text, sourceLanguage))}</p>${fallback && options.fallbackNotice !== false ? `<p class="tiny muted">${uiText("language.fallback")}</p>` : language === "fr" && reference && libraryNeedsReview(reference) ? `<p class="tiny muted">${LIBRARY_TRANSLATION_REVIEW}</p>` : ""}`;
 }
 async function loadSpellCastReference(cast, spell) {
+  // Une référence déjà lue est déjà dans la fenêtre : la redessiner à l'identique ferait perdre un toucher en cours.
+  const shown = !!cachedSpellReference(spell.referenceId);
   try {
     await ensureContent();
     const entry = await contentLibrary.entry(spell.referenceId);
-    if (ui.cast === cast && ui.modal === "cast") { cast.entry = entry; render(); }
+    if (ui.cast === cast && ui.modal === "cast") { cast.entry = entry; if (!shown) render(); }
   } catch { /* Le pilote reste consultable hors catalogue. */ }
 }
 /** `held` : sorts déjà tenus par la fiche (creationHeldSpells), pour barrer dans l’éditeur de la montée de niveau un sort qu’une autre source donne déjà. */
@@ -58256,11 +58530,11 @@ function renderSpells(c) {
     slotGroupCount
       ? `<details class="panel slot-summary-panel" data-detail="spell-slots-${c.id}"><summary><strong>${uiText("Emplacements")}</strong><span>${Array.from({ length: 9 }, (_, i) => { const max = (d.slots[i] || 0) + (c.state.temporarySlots?.[i + 1] || 0); return max ? `${i + 1} · ${Math.max(0, max - (c.state.slotsUsed?.[i + 1] || 0))}/${max}` : ""; }).filter(Boolean).join(" · ")}${d.pact ? ` · ${uiText("Pacte")} ${Math.max(0, d.pact.count - (c.state.pactUsed || 0))}/${d.pact.count}` : ""}</span></summary>${renderSlots(c, { compact: true })}</details>`
       : notice(casters.length ? uiText("Tes premiers emplacements arrivent avec le prochain niveau de ta classe.") : uiText("Ta classe ne lance pas de sorts. La magie d’origine, de don ou maison reste utilisable."))
-  }${overview ? "</div>" : ""}${renderRunePanel(c)}${c.state.concentration ? `<div class="notice purple section-gap">${icon("sparkles", 19)}<div><strong>${uiText("Concentration : {p1}", { p1: esc(c.state.concentration) })}</strong><button class="link-btn" data-action="end-concentration">${uiText("Mettre fin à la concentration")}</button>${renderCompactHelp(uiText("Un seul sort de concentration à la fois."))}</div></div>` : ""}<div class="spell-toolbar"><div class="search-wrap">${icon("search", 18)}<input id="spell-search" class="search-input" data-bind="ui.spellQuery" value="${esc(ui.spellQuery)}" placeholder="${uiText("Rechercher un sort…")}" aria-label="${uiText("Rechercher un sort")}"></div></div><div class="carnet-spell-levels" role="group" aria-label="${uiText("Niveau de sort")}">${levels.map((level) => button(level === "all" ? uiText("Tous") : level === "0" ? uiText("Mineurs") : uiText("Niv. {p0}", { p0: level }), "spell-level", `data-value="${level}" aria-pressed="${ui.spellLevel === level}"`, `ghost ${ui.spellLevel === level ? "active" : ""}`)).join("")}</div>${
+  }${overview ? "</div>" : ""}${renderRunePanel(c)}${c.state.concentration ? `<div class="notice purple section-gap">${icon("sparkles", 19)}<div><strong>${uiText("Concentration : {p1}", { p1: esc(c.state.concentration) })}</strong><button class="link-btn" data-action="end-concentration">${uiText("Mettre fin à la concentration")}</button>${renderCompactHelp(uiText("Un seul sort de concentration à la fois."))}</div></div>` : ""}<div class="spell-toolbar"><div class="search-wrap">${icon("search", 18)}<input id="spell-search" class="search-input" data-bind="ui.spellQuery" value="${esc(ui.spellQuery)}" placeholder="${uiText("Rechercher un sort…")}" aria-label="${uiText("Rechercher un sort")}"></div></div><div class="carnet-spell-levels" role="group" aria-label="${uiText("Niveau de sort")}">${levels.map((level) => button(level === "all" ? uiText("Tous") : level === "0" ? uiText("Mineurs") : uiText("Niv. {p0}", { p0: level }), "spell-level", `data-value="${level}" aria-pressed="${ui.spellLevel === level}"`, `ghost ${ui.spellLevel === level ? "active" : ""}`)).join("")}</div>${searchResults(
     list.length
       ? `<div class="spell-grid">${grouped}</div>`
       : `<div class="panel empty"><span class="empty-icon">${icon("book", 29)}</span><h2>${ui.spellQuery ? uiText("Aucun sort trouvé") : uiText("Aucun sort sélectionné")}</h2>${ui.spellQuery ? ("<p>" + uiText("Essaie un autre nom ou ajoute un sort maison.") + "</p>") : ""}${casters.length ? button(uiText("Choisir mes sorts"), "edit-magic", "", "primary") : ""}</div>`
-  }<div class="catalogue-note">${esc(uiText("spells.catalogueNote").replace("{count}", SPELLS.length))}</div>`;
+  )}<div class="catalogue-note">${esc(uiText("spells.catalogueNote").replace("{count}", SPELLS.length))}</div>`;
 }
 function magicDraft(target) {
   return target === "level" ? ui.levelFlow.draft : ui.magic.draft;
@@ -58291,7 +58565,7 @@ function renderMagicEditor(c, target) {
   const workflow = target === "level";
   const selectedList = (label, ids) => ids.length ? `<div class="magic-selection-group"><strong>${label}</strong><div>${[...new Set(ids)].map((id) => { const spell = uiSpellById(c, id); return spell ? button(`${esc(spell.name)}<small>${spell.level ? `N${spell.level}` : uiText("Mineur")}</small>`, "editor-reveal", `data-id="${esc(id)}" data-target="${target}"`, "small-btn ghost") : ""; }).join("")}</div></div>` : "";
   const chosen = `<details class="magic-selected" data-detail="magic-selected-${target}-${classId}"><summary>${uiText("Sorts sélectionnés ")}<span>${model.selected.size}</span></summary>${selectedList(uiText("Mineurs"), model.entries.filter((entry) => entry.known && !entry.always && uiSpellById(c, entry.spellId)?.level === 0).map((entry) => entry.spellId))}${selectedList(limits.mode === "book" ? uiText("Grimoire") : uiText("Connus"), model.entries.filter((entry) => entry.known && !entry.always && !entry.prepared && uiSpellById(c, entry.spellId)?.level > 0).map((entry) => entry.spellId))}${selectedList(uiText("Préparés"), model.entries.filter((entry) => entry.prepared && !entry.always).map((entry) => entry.spellId))}${selectedList(uiText("Toujours préparés"), [...model.always])}${classId === "warlock" ? selectedList("Arcanums", Object.values(c.spells.arcana)) : ""}</details>`;
-  return `<div class="workflow-magic-editor magic-list-editor"><div class="workflow-magic-tools">${tabs}<div class="magic-level-tabs" role="group" aria-label="${uiText("Niveau des sorts")}">${model.levels.map((n) => `<button type="button" id="editor-level-${n}" data-action="editor-level" data-value="${n}" class="${level === n ? "active" : ""}" aria-pressed="${level === n}" aria-label="${n === 0 ? uiText("Mineurs") : limits.arcana.includes(n) ? uiText("Arcanum {p0}", { p0: n }) : uiText("Niveau {p0}", { p0: n })}">${n === 0 ? uiText("Mineurs") : n}${model.unlocked.includes(n) ? ("<small>" + uiText("Nouveau") + "</small>") : ""}</button>`).join("")}</div><div class="magic-counts" role="status">${counters}</div><div class="magic-search-line">${libraryBrowseButton("spell", target)}<div class="search-wrap">${icon("search", 18)}<input id="editor-search" class="search-input" data-bind="ui.editorQuery" value="${esc(ui.editorQuery)}" placeholder="${uiText("Rechercher un sort…")}" aria-label="${uiText("Rechercher un sort")}">${ui.editorQuery ? button(icon("x", 16), "clear-editor-search", 'aria-label="Effacer la recherche"', "ghost magic-search-clear") : ""}</div><span role="status">${uiText("{p7} sort{p8}", { p7: ui.editorQuery ? `${list.length} / ${available.length}` : available.length, p8: available.length > 1 ? "s" : "" })}</span></div><div class="magic-list-columns" aria-hidden="true"><span>${uiText("Sort")}</span><span>${uiText("Incantation")}</span><span>${uiText("Portée")}</span><span>${uiText("Durée")}</span><span></span></div></div><div class="${workflow ? "workflow-spell-scroll" : "magic-modal-list"}" ${workflow ? `id="workflow-spell-scroll" role="region" tabindex="0" aria-label="${uiText("Choix de sorts")}" data-scroll-key="${esc(`${target}|${classId}|${ui.editorQuery}|${ui.editorLevel}`)}"` : ""}>${list.length ? `<div class="magic-spell-list">${list.map((spell) => spellCard(c, spell, { editor: true, target, scope: "editor-" + target, classId, editorModel: model, held })).join("")}</div>` : `<p class="magic-empty">${uiText("Aucun sort trouvé.{p0}", { p0: ui.editorQuery ? ` ${button(uiText("Effacer la recherche"), "clear-editor-search", "", "small-btn ghost")}` : "" })}</p>`}${chosen}<details class="magic-options" data-detail="magic-options-${target}"><summary>Options</summary>${limits.mode === "known" || model.secrets || (classId === "cleric" && clericCantripVersatilityAvailable(c) || classId === "druid" && druidCantripVersatilityAvailable(c) || classId === "wizard" && wizardCantripFormulasAvailable(c)) ? button(["cleric", "druid", "wizard"].includes(classId) ? uiText("Remplacer un sort mineur") : uiText("Remplacer un sort ou corriger un Secret"), "replace-spell", `data-target="${target}"`, "small-btn") : ""}${checkField(uiText("Autoriser les exceptions du MJ"), `${prefix}.spells.allowExceptions`, c.spells.allowExceptions, "")}</details></div></div>`;
+  return `<div class="workflow-magic-editor magic-list-editor"><div class="workflow-magic-tools">${tabs}<div class="magic-level-tabs" role="group" aria-label="${uiText("Niveau des sorts")}">${model.levels.map((n) => `<button type="button" id="editor-level-${n}" data-action="editor-level" data-value="${n}" class="${level === n ? "active" : ""}" aria-pressed="${level === n}" aria-label="${n === 0 ? uiText("Mineurs") : limits.arcana.includes(n) ? uiText("Arcanum {p0}", { p0: n }) : uiText("Niveau {p0}", { p0: n })}">${n === 0 ? uiText("Mineurs") : n}${model.unlocked.includes(n) ? ("<small>" + uiText("Nouveau") + "</small>") : ""}</button>`).join("")}</div><div class="magic-counts" role="status">${counters}</div><div class="magic-search-line">${libraryBrowseButton("spell", target)}<div class="search-wrap">${icon("search", 18)}<input id="editor-search" class="search-input" data-bind="ui.editorQuery" value="${esc(ui.editorQuery)}" placeholder="${uiText("Rechercher un sort…")}" aria-label="${uiText("Rechercher un sort")}">${searchResults(ui.editorQuery ? button(icon("x", 16), "clear-editor-search", 'aria-label="Effacer la recherche"', "ghost magic-search-clear") : "")}</div>${searchResults(`<span role="status">${uiText("{p7} sort{p8}", { p7: ui.editorQuery ? `${list.length} / ${available.length}` : available.length, p8: available.length > 1 ? "s" : "" })}</span>`)}</div><div class="magic-list-columns" aria-hidden="true"><span>${uiText("Sort")}</span><span>${uiText("Incantation")}</span><span>${uiText("Portée")}</span><span>${uiText("Durée")}</span><span></span></div></div>${searchResults(`<div class="${workflow ? "workflow-spell-scroll" : "magic-modal-list"}" ${workflow ? `id="workflow-spell-scroll" role="region" tabindex="0" aria-label="${uiText("Choix de sorts")}" data-scroll-key="${esc(`${target}|${classId}|${ui.editorQuery}|${ui.editorLevel}`)}"` : ""}>${list.length ? `<div class="magic-spell-list">${list.map((spell) => spellCard(c, spell, { editor: true, target, scope: "editor-" + target, classId, editorModel: model, held })).join("")}</div>` : `<p class="magic-empty">${uiText("Aucun sort trouvé.{p0}", { p0: ui.editorQuery ? ` ${button(uiText("Effacer la recherche"), "clear-editor-search", "", "small-btn ghost")}` : "" })}</p>`}${chosen}<details class="magic-options" data-detail="magic-options-${target}"><summary>Options</summary>${limits.mode === "known" || model.secrets || (classId === "cleric" && clericCantripVersatilityAvailable(c) || classId === "druid" && druidCantripVersatilityAvailable(c) || classId === "wizard" && wizardCantripFormulasAvailable(c)) ? button(["cleric", "druid", "wizard"].includes(classId) ? uiText("Remplacer un sort mineur") : uiText("Remplacer un sort ou corriger un Secret"), "replace-spell", `data-target="${target}"`, "small-btn") : ""}${checkField(uiText("Autoriser les exceptions du MJ"), `${prefix}.spells.allowExceptions`, c.spells.allowExceptions, "")}</details></div>`)}</div>`;
 }
 
 function componentTracking() {
@@ -58576,7 +58850,7 @@ function renderSpellModals(c, d, cancel) {
     const books = spellCopyBooks(c), f = ui.form;
     const options = uiSpellCatalogue(c).filter((spell) => spellCopyPreview(c, spell.id, f.bookKey, books).eligible && (spell.id === f.spellId || magicEditorMatches(spell, ui.copyQuery || ""))).sort((a, b) => a.level - b.level || compareUnitLabels(a.name, b.name, uiLanguage()));
     const preview = spellCopyPreview(c, f.spellId, f.bookKey, books);
-    return modalShell(uiText("Copier un sort"), `${selectField(uiText("Livre"), "form.bookKey", f.bookKey, Object.fromEntries(books.map((book) => [book.key, book.name])))}${field(uiText("Rechercher un sort"), "ui.copyQuery", ui.copyQuery || "", "search", uiText("Nom français ou anglais…"))}${selectField(uiText("Sort à copier"), "form.spellId", f.spellId, { "": uiText("Choisir un sort"), ...Object.fromEntries(options.map((spell) => [spell.id, `${spell.level} · ${spell.name}`])) })}${preview.eligible ? `<p class="small" data-copy-preview>${uiText("Coût : {p0} PO en matériaux. Durée : {p1} min.{p2}", { p0: preview.cost, p1: preview.minutes, p2: preview.reduction ? `<br>${esc(preview.reduction)}.` : "" })}<br>${uiText("Source : {p3}.", { p3: esc(preview.source) })}</p>` : notice(esc(f.spellId ? preview.reasons.join(" ") : uiText("Choisis un sort admissible pour ce livre.")))}${field(uiText("Provenance du sort"), "form.provenance", f.provenance, "text", uiText("Parchemin, grimoire trouvé…"), 'maxlength="500"')}${selectField(uiText("Dépense réelle"), "form.payment", f.payment, { gold: uiText("Payer en PO"), item: uiText("Dépenser des matériaux du sac"), table: uiText("Ajustement de table") })}${f.payment === "gold" ? `<p class="small">${uiText("Bourse : {p0} → {p1} PO.", { p0: c.gold, p1: c.gold - preview.cost })}</p>` : f.payment === "item" ? `${selectField(uiText("Matériaux"), "form.itemId", f.itemId, { "": uiText("Choisir un stock"), ...Object.fromEntries(spellCopyMaterials(c).map((item) => [item.id, `${item.name} (${item.qty})`])) })}${field(uiText("Quantité dépensée"), "form.quantity", f.quantity, "number", "", 'min="1" step="1"')}${field(uiText("Valeur totale des matériaux (PO)"), "form.materialValue", f.materialValue, "number", "", 'min="0" step="0.01"')}` : field(uiText("Décision de table"), "form.note", f.note, "textarea", uiText("Coût adapté, matériaux fournis…"), 'maxlength="1000"')}<p class="tiny muted">${uiText("Confirme la copie après avoir résolu les éventuels jets de parchemin à la table. La durée reste à suivre à la table.")}</p>`, cancel + button(uiText("Vérifier la copie"), "review-spell-copy", preview.eligible ? "" : "disabled", "primary"), true);
+    return modalShell(uiText("Copier un sort"), `${selectField(uiText("Livre"), "form.bookKey", f.bookKey, Object.fromEntries(books.map((book) => [book.key, book.name])))}${field(uiText("Rechercher un sort"), "ui.copyQuery", ui.copyQuery || "", "search", uiText("Nom français ou anglais…"))}${searchResults(selectField(uiText("Sort à copier"), "form.spellId", f.spellId, { "": uiText("Choisir un sort"), ...Object.fromEntries(options.map((spell) => [spell.id, `${spell.level} · ${spell.name}`])) }))}${preview.eligible ? `<p class="small" data-copy-preview>${uiText("Coût : {p0} PO en matériaux. Durée : {p1} min.{p2}", { p0: preview.cost, p1: preview.minutes, p2: preview.reduction ? `<br>${esc(preview.reduction)}.` : "" })}<br>${uiText("Source : {p3}.", { p3: esc(preview.source) })}</p>` : notice(esc(f.spellId ? preview.reasons.join(" ") : uiText("Choisis un sort admissible pour ce livre.")))}${field(uiText("Provenance du sort"), "form.provenance", f.provenance, "text", uiText("Parchemin, grimoire trouvé…"), 'maxlength="500"')}${selectField(uiText("Dépense réelle"), "form.payment", f.payment, { gold: uiText("Payer en PO"), item: uiText("Dépenser des matériaux du sac"), table: uiText("Ajustement de table") })}${f.payment === "gold" ? `<p class="small">${uiText("Bourse : {p0} → {p1} PO.", { p0: c.gold, p1: c.gold - preview.cost })}</p>` : f.payment === "item" ? `${selectField(uiText("Matériaux"), "form.itemId", f.itemId, { "": uiText("Choisir un stock"), ...Object.fromEntries(spellCopyMaterials(c).map((item) => [item.id, `${item.name} (${item.qty})`])) })}${field(uiText("Quantité dépensée"), "form.quantity", f.quantity, "number", "", 'min="1" step="1"')}${field(uiText("Valeur totale des matériaux (PO)"), "form.materialValue", f.materialValue, "number", "", 'min="0" step="0.01"')}` : field(uiText("Décision de table"), "form.note", f.note, "textarea", uiText("Coût adapté, matériaux fournis…"), 'maxlength="1000"')}<p class="tiny muted">${uiText("Confirme la copie après avoir résolu les éventuels jets de parchemin à la table. La durée reste à suivre à la table.")}</p>`, cancel + button(uiText("Vérifier la copie"), "review-spell-copy", preview.eligible ? "" : "disabled", "primary"), true);
   }
   if (ui.modal === "magic")
     return modalShell(uiText("Choisir mes sorts"), `${renderMagicEditor(ui.magic.draft, "modal")}`, cancel + button(uiText("Vérifier les choix"), "review-magic", "", "primary"), true, uiText("Grimoire · changements non enregistrés"));
@@ -58590,7 +58864,7 @@ function renderSpellModals(c, d, cancel) {
       const modes = sheetSlotModes(c, d, spell, target);
       return `<div class="catalog-row"><div><strong>${esc(spell.name)}</strong><small>${uiText("Niveau {p0}", { p0: spell.level })}</small></div>${button(uiText("Lancer"), "cast", `data-id="${esc(spell.id)}" data-mode="${esc(modes[0][0])}"`, "small-btn")}</div>`;
     }).join("");
-    return modalShell(uiText("sheet.slotSpells", { level: target.level }), `<div class="search-wrap">${icon("search", 18)}<input id="sheet-slot-search" class="search-input" data-bind="ui.sheetSlotQuery" value="${esc(ui.sheetSlotQuery || "")}" placeholder="${uiText("Rechercher un sort…")}" aria-label="${uiText("Rechercher un sort")}"></div>${rows || `<p class="small muted">${uiText("Aucun sort trouvé")}</p>`}`, button(uiText("sheet.correctSlots"), "sheet-slot-correction", "", "ghost") + button(uiText("Fermer"), "close-modal"));
+    return modalShell(uiText("sheet.slotSpells", { level: target.level }), `<div class="search-wrap">${icon("search", 18)}<input id="sheet-slot-search" class="search-input" data-bind="ui.sheetSlotQuery" value="${esc(ui.sheetSlotQuery || "")}" placeholder="${uiText("Rechercher un sort…")}" aria-label="${uiText("Rechercher un sort")}"></div>${searchResults(rows || `<p class="small muted">${uiText("Aucun sort trouvé")}</p>`)}`, button(uiText("sheet.correctSlots"), "sheet-slot-correction", "", "ghost") + button(uiText("Fermer"), "close-modal"));
   }
   if (ui.modal === "cast") {
     const cast = ui.cast,
@@ -59351,11 +59625,11 @@ function renderFeaturesPage(c) {
   return `<div class="page-head carnet-feature-head"><h1>${uiText("Aptitudes")}</h1><details class="carnet-edit-menu"><summary aria-label="${uiText("Niveaux & choix")}">${icon("edit", 17)}</summary><div class="carnet-edit-popover">${button(uiText("Niveaux & choix"), "navigate", 'data-route="progression"', "ghost")}<label for="feature-filter">${uiText("Origine des aptitudes")}</label><select id="feature-filter" class="select-plain" data-bind="ui.featureFilter"><option value="all">${uiText("Toutes les aptitudes")}</option>${Object.entries(labels).map(([id, label]) => `<option value="${id}" ${ui.featureFilter === id ? "selected" : ""}>${label}</option>`).join("")}</select></div></details></div>
     ${renderArcaneWard(c)}<section class="aptitude-resource-panel"><div class="aptitude-resources">${res.length ? renderResourceGroups(c, res) : ""}</div>${wildShapeRules(c) ? button(uiText("Choisir une forme"), "navigate", 'data-route="wildshape"', "primary carnet-shape-action") : ""}${renderRestActions(c, "moon", 16)}${renderCreations(c)}</section>
     <div class="spell-toolbar carnet-feature-search"><div class="search-wrap">${icon("search", 18)}<input id="feature-search" class="search-input" data-bind="ui.featureQuery" value="${esc(ui.featureQuery)}" placeholder="${uiText("Rechercher une aptitude…")}" aria-label="${uiText("Rechercher une aptitude")}"></div></div>
-    ${query || ui.featureFilter !== "all" ? `<p class="small muted" role="status">${uiText("{p9} aptitude{p10} affichée{p11} sur {p12}.", { p9: list.length, p10: list.length > 1 ? "s" : "", p11: list.length > 1 ? "s" : "", p12: all.length })}</p>` : ""}
-    ${list.length ? `<div class="aptitude-grid">${list.map((f) => {
+    ${searchResults(query || ui.featureFilter !== "all" ? `<p class="small muted" role="status">${uiText("{p9} aptitude{p10} affichée{p11} sur {p12}.", { p9: list.length, p10: list.length > 1 ? "s" : "", p11: list.length > 1 ? "s" : "", p12: all.length })}</p>` : "")}
+    ${searchResults(list.length ? `<div class="aptitude-grid">${list.map((f) => {
       const setting = featureSettingOf(settings, f), current = featureSettingCurrent(setting);
       return featureSettingFrame(setting, f, `<details class="panel aptitude-card" data-detail="aptitude-${esc(f.id)}" data-feature-id="${esc(f.id)}"><summary>${current ? `<span><strong>${esc(f.name)}</strong>${current}</span>` : `<strong>${esc(f.name)}</strong>`}<span class="tiny muted">${esc(f.source)}</span></summary>${f.current ? `<p class="pill purple">${esc(f.current)}</p>` : ""}<p class="aptitude-copy">${esc(f.description)}</p>${featureSettingBody(setting, f) || `<div class="carnet-feature-actions"></div>`}</details>`);
-    }).join("")}</div>` : notice(uiText("Aucune aptitude ne correspond. Change la recherche ou le filtre."))}
+    }).join("")}</div>` : notice(uiText("Aucune aptitude ne correspond. Change la recherche ou le filtre.")))}
 `;
 }
 const BEAST_SIZES = { TP: "Très petite", P: "Petite", M: "Moyenne", G: "Grande", TG: "Très grande", Gig: "Gigantesque" };
@@ -59443,7 +59717,7 @@ function renderWildShape(c) {
     ["locked", uiText("audit.wild.unavailable")],
   ]
     .map(([id, label]) => `<button type="button" data-action="beast-tab" data-value="${id}" class="${tab === id ? "active" : ""}">${label} <span class="count">${groups[id].length}</span></button>`)
-    .join("")}</div><div class="search-wrap beast-search">${icon("search", 18)}<input id="beast-search" class="search-input" data-bind="ui.beastQuery" value="${esc(ui.beastQuery || "")}" placeholder="${uiText("Rechercher une forme…")}" aria-label="${uiText("Chercher une bête")}"></div><details class="section-gap" data-detail="beast-filters"><summary>${uiText("Filtres")}</summary><div class="form-grid">${selectField(uiText("Type de profil"), "ui.beastFilters.type", ui.beastFilters?.type || "", { "": uiText("Tous"), beast: uiText("Bêtes individuelles"), elemental: uiText("Élémentaires"), swarm: uiText("Nuées, consultation") })}${selectField(uiText("FP maximum"), "ui.beastFilters.maxCR", ui.beastFilters?.maxCR ?? "", Object.fromEntries([["", uiText("Tous")], ...[0, .125, .25, .5, 1, 2, 3, 4, 5, 6, 7, 8].map((n) => [n, formatCR(n)])]))}${selectField(uiText("Nage"), "ui.beastFilters.swim", ui.beastFilters?.swim || "", { "": uiText("Avec ou sans nage"), yes: uiText("Avec nage"), no: uiText("Sans nage") })}${selectField(uiText("Vol"), "ui.beastFilters.fly", ui.beastFilters?.fly || "", { "": uiText("Avec ou sans vol"), yes: uiText("Avec vol"), no: uiText("Sans vol") })}${selectField(uiText("Source du profil"), "ui.beastFilters.source", ui.beastFilters?.source || "", Object.fromEntries([["", uiText("Toutes")], ...[...new Set(catalogue.map((b) => b.source))].sort().map((source) => [source, source])]))}${selectField(uiText("Accessible au plus tard au niveau"), "ui.beastFilters.level", ui.beastFilters?.level || "", Object.fromEntries([["", uiText("Tous les niveaux")], ...Array.from({ length: 19 }, (_, i) => [i + 2, uiText("Druide {p0}", { p0: i + 2 })])]))}</div><div class="actions">${button(uiText("Réinitialiser les filtres"), "beast-reset-filters", "", "small-btn ghost")}${head("name", uiText("Nom"))}${head("cr", uiText("FP"))}${head("ac", uiText("CA"))}${head("hp", uiText("PV"))}${head("type", "Type")}${head("source", "Source")}${head("level", uiText("Niveau"))}</div></details><div class="beast-card-list" aria-label="${uiText("Formes animales")}">${rows || `<div class="small muted beast-empty" role="status"><p>${esc(emptyText)}</p>${filtersActive ? button(uiText("Réinitialiser les filtres"), "beast-reset-filters", "", "small-btn ghost") : q ? button(uiText("Effacer la recherche"), "beast-clear-search", "", "small-btn ghost") : tab === "available" ? button(uiText("À découvrir"), "beast-discover", "", "small-btn ghost") : ""}</div>`}</div></div>`;
+    .join("")}</div><div class="search-wrap beast-search">${icon("search", 18)}<input id="beast-search" class="search-input" data-bind="ui.beastQuery" value="${esc(ui.beastQuery || "")}" placeholder="${uiText("Rechercher une forme…")}" aria-label="${uiText("Chercher une bête")}"></div><details class="section-gap" data-detail="beast-filters"><summary>${uiText("Filtres")}</summary><div class="form-grid">${selectField(uiText("Type de profil"), "ui.beastFilters.type", ui.beastFilters?.type || "", { "": uiText("Tous"), beast: uiText("Bêtes individuelles"), elemental: uiText("Élémentaires"), swarm: uiText("Nuées, consultation") })}${selectField(uiText("FP maximum"), "ui.beastFilters.maxCR", ui.beastFilters?.maxCR ?? "", Object.fromEntries([["", uiText("Tous")], ...[0, .125, .25, .5, 1, 2, 3, 4, 5, 6, 7, 8].map((n) => [n, formatCR(n)])]))}${selectField(uiText("Nage"), "ui.beastFilters.swim", ui.beastFilters?.swim || "", { "": uiText("Avec ou sans nage"), yes: uiText("Avec nage"), no: uiText("Sans nage") })}${selectField(uiText("Vol"), "ui.beastFilters.fly", ui.beastFilters?.fly || "", { "": uiText("Avec ou sans vol"), yes: uiText("Avec vol"), no: uiText("Sans vol") })}${selectField(uiText("Source du profil"), "ui.beastFilters.source", ui.beastFilters?.source || "", Object.fromEntries([["", uiText("Toutes")], ...[...new Set(catalogue.map((b) => b.source))].sort().map((source) => [source, source])]))}${selectField(uiText("Accessible au plus tard au niveau"), "ui.beastFilters.level", ui.beastFilters?.level || "", Object.fromEntries([["", uiText("Tous les niveaux")], ...Array.from({ length: 19 }, (_, i) => [i + 2, uiText("Druide {p0}", { p0: i + 2 })])]))}</div><div class="actions">${button(uiText("Réinitialiser les filtres"), "beast-reset-filters", "", "small-btn ghost")}${head("name", uiText("Nom"))}${head("cr", uiText("FP"))}${head("ac", uiText("CA"))}${head("hp", uiText("PV"))}${head("type", "Type")}${head("source", "Source")}${head("level", uiText("Niveau"))}</div></details>${searchResults(`<div class="beast-card-list" aria-label="${uiText("Formes animales")}">${rows || `<div class="small muted beast-empty" role="status"><p>${esc(emptyText)}</p>${filtersActive ? button(uiText("Réinitialiser les filtres"), "beast-reset-filters", "", "small-btn ghost") : q ? button(uiText("Effacer la recherche"), "beast-clear-search", "", "small-btn ghost") : tab === "available" ? button(uiText("À découvrir"), "beast-discover", "", "small-btn ghost") : ""}</div>`}</div>`)}</div>`;
 }
 
 function renderArtificerSummary(c, upTo = levelOf(c)) {
@@ -60794,12 +61068,14 @@ function renderDiceDialog() {
 }
 function mountDiceTray() {
   if (ui.modal !== "roll" || !ui.roll) return;
-  const canvas = modalRoot.querySelector(".dice-canvas");
-  diceRenderer = createDice3D(canvas, {
+  // Le plateau 3D gardé d'une ouverture à l'autre prend la place du canevas de la fenêtre (keep).
+  const tray = modalRoot.querySelector(".dice-canvas").parentNode;
+  diceRenderer = createDice3D(tray.querySelector(".dice-canvas"), {
+    keep: true,
     theme: document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"),
     reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
     // Hauteur prise par la légende au bas du plateau : des dés sur plusieurs rangées s’arrêtent au-dessus.
-    clearBelow: () => { const hint = canvas.parentNode.querySelector(".dice-tray-hint"); return hint ? canvas.clientHeight - hint.offsetTop : 0; },
+    clearBelow: () => { const hint = tray.querySelector(".dice-tray-hint"); return hint ? tray.querySelector(".dice-canvas").clientHeight - hint.offsetTop : 0; },
   });
   diceRendererRoll = ui.roll;
   diceRenderer.show(diceDisplayItems(ui.roll), { reveal: ui.roll.phase === "result" });
@@ -61270,8 +61546,8 @@ function renderSheetMagic(c, d) {
   const counts = sheetSlotCounts(c, d);
   if (!counts.max && !sheetSpellIds(c).size) return "";
   const actions = `<div class="actions sheet-magic-actions">${button(uiText("nav.spells"), "navigate", 'data-route="spells"', "small-btn ghost")}${counts.max ? smallIcon("info", "slot-help", uiText("Comment utiliser les emplacements de sorts")) : ""}</div>`;
-  const concentration = c.state.concentration ? `<div class="notice purple section-gap">${icon("sparkles", 17)}<div><strong>${uiText("Concentration")}</strong> ${esc(c.state.concentration)}<br><button class="link-btn" data-action="end-concentration">${uiText("Mettre fin")}</button></div></div>` : "";
-  return `<section class="panel sheet-magic-panel">${counts.max ? `<details class="magic-panel compact-slots" data-detail="sheet-slots-${c.id}"><summary><h2 class="panel-title">${uiText("Emplacements de sorts")}</h2><span class="slots-remaining" aria-label="${uiText("sheet.availableSlots", { count: counts.remaining })}">${counts.remaining}</span>${icon("chevron", 16)}</summary>${renderSlots(c, { compact: true, sheet: true })}${button(uiText("sheet.correctSlots"), "sheet-slot-correction", "", "small-btn ghost")}${actions}${concentration}</details>` : actions + concentration}</section>`;
+  const concentration = c.state.concentration ? `<div class="notice purple section-gap sheet-concentration">${icon("sparkles", 17)}<div><strong>${uiText("Concentration")}</strong> ${esc(c.state.concentration)}</div><button class="link-btn" data-action="end-concentration">${uiText("Mettre fin")}</button></div>` : "";
+  return `<section class="panel sheet-magic-panel">${counts.max ? `<details class="magic-panel compact-slots" data-detail="sheet-slots-${c.id}"><summary><h2 class="panel-title">${uiText("Emplacements de sorts")}</h2><span class="slots-remaining" aria-label="${uiText("sheet.availableSlots", { count: counts.remaining })}">${counts.remaining}</span>${icon("chevron", 16)}</summary>${renderSlots(c, { compact: true, sheet: true })}${button(uiText("sheet.correctSlots"), "sheet-slot-correction", "", "small-btn ghost")}${actions}</details>${concentration}` : actions + concentration}</section>`;
 }
 function sheetSlotModes(c, d, spell, target) {
   return Object.entries(castOptions(c, d, spell).details).filter(([, mode]) => target.pactPearl ? mode.pactPearl : target.pact ? mode.pact && !mode.resource : mode.slot === target.level && !mode.pact && !mode.pactPearl);
@@ -61284,12 +61560,12 @@ window.exportDashboard = () => {
 };
 function saveDashboardLayout(layout) {
   return mutateApp((next) => {
-    const character = next.characters.find((entry) => entry.id === layout.characterId);
+    const index = next.characters.findIndex((entry) => entry.id === layout.characterId), character = next.characters[index];
     if (!character) throw new Error(uiText("dashboard.missingCharacter"));
     next.snapshots.push({ id: uid(), characterId: character.id, label: uiText("dashboard.history"), date: new Date().toISOString(), character: clone(character) });
     next.snapshots = retainJournalSnapshots(next.snapshots);
-    character.dashboard = normalizeDashboard(layout, character.id);
-    character.updatedAt = new Date().toISOString();
+    // La fiche est partagée avec l'état enregistré : elle est remplacée, pas modifiée.
+    next.characters[index] = { ...character, dashboard: normalizeDashboard(layout, character.id), updatedAt: new Date().toISOString() };
   }, { redraw: false });
 }
 function renderDashboardSkillPreview(d) {
@@ -61514,6 +61790,27 @@ function printSheet(c) {
   }
   return `<section class="print-only"><h1>${esc(c.name)}</h1>${content}<p class="print-footer">${uiText("Compagnon {p2}. Résumés de règles originaux ; contenu SRD 5.1 sous CC BY 4.0.", { p2: APP_VERSION })}</p></section>`;
 }
+// La fiche à imprimer n'existe dans la page que le temps d'une impression : la reconstruire à chaque rendu, invisible, coûtait plus que la page affichée.
+// Le prochain rendu la retire de lui-même en remplaçant la page.
+function mountPrintSheet() {
+  unmountPrintSheet();
+  const c = activeCharacter(), main = document.getElementById("main-content");
+  if (c && main) main.insertAdjacentHTML("beforeend", withRenderMemo(appData.characters, () => printSheet(c)));
+}
+function unmountPrintSheet() {
+  document.querySelector("#main-content > .print-only")?.remove();
+}
+/** Bouton Imprimer : les photos du journal sont lues et les images décodées avant d'ouvrir l'impression du navigateur. */
+async function printCharacterSheet() {
+  const c = activeCharacter();
+  printPreparing = true;
+  try {
+    if (ui.printSections?.journal !== false) await preloadJournalPhotos(c);
+    mountPrintSheet();
+    await Promise.all([...document.querySelectorAll("#main-content > .print-only img")].map((img) => img.decode().catch(() => {})));
+  } finally { printPreparing = false; }
+  window.print();
+}
 
 /** Actions de la fiche : portrait, tableau de bord, points de vie et impression, appelées par perform. */
 async function performSheet(action, el, c, data, d) {
@@ -61607,13 +61904,16 @@ async function performSheet(action, el, c, data, d) {
       }
       else if (type === "gold") next.gold = Math.round(amount * 100) / 100;
       else next.xp = amount;
+      const typed = ui.amount, form = ui.form;
       await saveCharacter(
         next,
         { damage: "Dégâts", heal: "Soins", temporary: "PV temporaires", gold: "Monnaie", xp: "Expérience" }[type],
         "session",
         c,
         // L'historique garde le montant et les réserves touchées, dégâts comme soins, sous les noms de l'annonce.
-        { description: uiText("Montant : {p0}", { p0: amount }), impactRows: steps.map((step) => ({ label: damageReserveNames(c)[step.reserve], before: step.before, after: step.after })) },
+        // La fiche revient dès OK ; si l'écriture échoue ensuite, la fenêtre se rouvre avec la saisie, sur la fiche enregistrée.
+        { description: uiText("Montant : {p0}", { p0: amount }), impactRows: steps.map((step) => ({ label: damageReserveNames(c)[step.reserve], before: step.before, after: step.after })),
+          ahead: () => { if (!ui.modal) { ui.amount = typed; ui.form = form; openModal(type); } } },
       );
       closeModal();
       // Acharnement et ses semblables : à 0 PV, la dépense est proposée dans la revue habituelle, que le joueur valide ou annule.
@@ -61639,7 +61939,7 @@ async function performSheet(action, el, c, data, d) {
       // L’impression native du navigateur reprend également le dernier choix validé.
       ui.printSections = { ...ui.form.sections };
       closeModal();
-      window.print();
+      await printCharacterSheet();
       break;
     case "ac-info":
       openInfo("Classe d’armure", `${d.ac} = ${d.acExplanation}.`);
@@ -61674,6 +61974,9 @@ function renderSheetModals(c, d, cancel) {
 
 // Module : app-bindings
 // Liaisons des champs : lecture et écriture des valeurs data-bind dans ui.form, les brouillons et la fiche.
+// Recherches qui ne redessinent que leurs résultats (updateSearch).
+const SEARCH_BINDS = ["ui.sheetSlotQuery", "ui.copyQuery", "ui.creationClassQuery", "ui.creationBackgroundQuery", "ui.creationChoiceQuery", "ui.raceQuery", "ui.libraryQuery", "ui.spellQuery", "ui.editorQuery", "ui.catalogQuery", "ui.beastQuery", "ui.featureQuery", "ui.inventoryQuery"];
+const searchBinding = (path) => SEARCH_BINDS.includes(path) || ui.modal === "received-effect" && path === "ui.receivedQuery";
 function getBinding(path) {
   const parts = path.split("."),
     base = parts.shift(),
@@ -61833,8 +62136,14 @@ function handleBinding(el, redraw) {
     if (gold) gold.textContent = uiText("Monnaie : {p0} → {p1} PO. L’objet reste dans le sac.", { p0: c.gold, p1: Math.round((c.gold - (requirement?.cost ?? Number(m.amount || 0))) * 100) / 100 });
     return;
   }
-  const live = el.dataset.live === "1" || ui.modal === "received-effect" && (path.startsWith("form.") || path === "ui.receivedQuery") || ["ui.sheetSlotQuery", "ui.copyQuery", "ui.creationClassQuery", "ui.creationBackgroundQuery", "ui.creationChoiceQuery", "ui.raceQuery", "ui.libraryQuery", "ui.spellQuery", "ui.editorQuery", "ui.catalogQuery", "ui.beastQuery", "ui.featureQuery", "ui.inventoryQuery"].includes(path) || ui.modal === "druid-feature" && path === "form.amount" || ["fighter-feature", "monk-technique"].includes(ui.modal) && path === "form.roll";
-  if (live || (redraw && path.startsWith("ui.cast.material.")) || (redraw && ui.modal === "equipment-pack") || (redraw && path.startsWith("wiz.abilities.")) || (redraw && (path.startsWith("ui.rest.") || ["replace-choice", "replace-spell"].includes(ui.modal))) || (redraw && el.matches("select,[type=radio],[type=checkbox]"))) render();
+  // Une recherche ne redessine que ses résultats.
+  if (searchBinding(path)) { updateSearch(el, path); return; }
+  const live = el.dataset.live === "1" || ui.modal === "received-effect" && path.startsWith("form.") || ui.modal === "druid-feature" && path === "form.amount" || ["fighter-feature", "monk-technique"].includes(ui.modal) && path === "form.roll";
+  if (live || (redraw && path.startsWith("ui.cast.material.")) || (redraw && ui.modal === "equipment-pack") || (redraw && path.startsWith("wiz.abilities.")) || (redraw && (path.startsWith("ui.rest.") || ["replace-choice", "replace-spell"].includes(ui.modal))) || (redraw && el.matches("select,[type=radio],[type=checkbox]"))) {
+    // Un champ de fenêtre ne change que la fenêtre.
+    if (modalRoot.contains(el)) renderWindow();
+    else render();
+  }
 }
 
 
@@ -61843,6 +62152,9 @@ function handleBinding(el, redraw) {
 const AIDEDD_IMPORT_ENABLED = false;
 const welcomePortrait = PORTRAITS[Math.floor(Math.random() * PORTRAITS.length)];
 const dashboardDesktopMedia = window.matchMedia("(min-width: 1001px)");
+const printMedia = window.matchMedia("print");
+// Vrai entre la demande d'impression et l'ouverture de la fenêtre du navigateur, le temps de lire les photos du journal.
+let printPreparing = false;
 dashboardDesktopMedia.addEventListener("change", () => render());
 const root = document.getElementById("app"),
   modalRoot = document.getElementById("modal-root"),
@@ -62144,65 +62456,100 @@ function impactHtml(before, after, extraRows = []) {
 // Vrai pendant un rendu : le champ actif remplacé par innerHTML perd le focus et Chrome émet « change » à ce moment-là.
 // Ce « change » ne doit pas relancer un rendu imbriqué (NotFoundError sur innerHTML) ; la frappe a déjà été lue par « input ».
 let renderRunning = false;
+// Page affichée : HTML posé par le dernier rendu complet (ou mis à jour par une recherche), repère de ce dont elle dépend,
+// indicateur d'enregistrement qu'elle montrait, et volets que ce HTML ouvrait. HTML de la fenêtre affichée, null pour la fenêtre des dés mise à jour sur place.
+let shownPage = null, shownModalHtml = null;
+// Les bandeaux d'avancement et les recherches du journal et des compétences avancent sur place, et les descriptions des sorts suivent
+// les morceaux du catalogue lus depuis le rendu : un changement demande un rendu complet.
+const shownPageKey = () => [appData, ui.route, ui.wizard, ui.levelFlow, uiLanguage(), ui.saving, ui.online, ui.update, ui.updateDownloading, ui.languageWarning, localStore.mode, localStore.readOnly, localStore.pendingState,
+  contentBannerHtml(), updateProgressHtml(), ui.journalQuery, ui.sheetSkillQuery, contentLibrary.version, contentLibrary.index.length, [...contentLibrary.chunks.keys()].join("|")];
 function render() {
   renderRunning = true;
-  try { renderNow(); } finally { renderRunning = false; }
+  try { withRenderMemo(appData?.characters || [], renderNow); } finally { renderRunning = false; }
 }
-function renderNow() {
-  document.documentElement.lang = uiLanguage();
+/**
+ * L'état montré d'avance (mutateApp, `ahead`) vient d'être écrit tel quel : la page le montre déjà, son repère suit l'objet écrit et les
+ * fenêtres suivantes ne redessinent pas la page. Si un rendu survenu pendant l'écriture y a laissé l'indicateur d'enregistrement, elle est redessinée.
+ */
+function pageWritten(early) {
+  if (shownPage?.key[0] !== early) return;
+  if (shownPage.saving) { render(); return; }
+  shownPage.key[0] = appData;
+}
+/**
+ * Fenêtre seule : ouvrir, fermer ou changer de fenêtre ne redessine que la couche des fenêtres quand la page derrière n'a pas pu changer
+ * depuis son dernier rendu (même sauvegarde, même page, même langue, mêmes bandeaux, hors création et passage de niveau). Sinon, rendu complet.
+ * Contrôle de recette (COMPANION_RENDER_AUDIT) : la page d'un rendu complet est recalculée et comparée à celle affichée.
+ */
+function renderWindow() {
+  const key = shownPageKey();
+  // Création et passage de niveau : une fenêtre (dés, choix) écrit dans le brouillon que la page affiche.
+  if (ui.fatal || ui.wizard || ui.levelFlow || !shownPage || key.some((part, index) => part !== shownPage.key[index])) return render();
+  renderRunning = true;
+  try { withRenderMemo(appData?.characters || [], () => renderNow(false)); } finally { renderRunning = false; }
+}
+function auditShownPage(gesture) {
+  if (!globalThis.COMPANION_RENDER_AUDIT) return;
+  const html = pageShellHtml(), shown = shownPage.html;
+  if (html === shown) return;
+  let at = 0;
+  while (html[at] === shown[at]) at++;
+  const message = `Rendu partiel périmé (${gesture}) : la page affichée « ${shown.slice(Math.max(0, at - 120), at + 120)} » diffère du rendu complet « ${html.slice(Math.max(0, at - 120), at + 120)} »`;
+  console.error(message);
+  throw new Error(message);
+}
+// Résultats d'une recherche : une lettre tapée ne redessine que ce qui est entre ces repères (updateSearch). Le champ et le reste
+// de la page restent en place. Tout ce qui suit la recherche (liste, compteur, message « aucun résultat ») va entre les repères.
+const searchResults = (html) => `<!--results-->${html}<!--/results-->`;
+/** Morceaux d'un HTML : les résultats, et le reste sans les attributs du champ de recherche, dont la valeur change à chaque lettre. */
+function searchParts(html, path) {
+  const pieces = html.split(/<!--\/?results-->/), rest = pieces.filter((_, index) => index % 2 === 0).join("<!--results-->"), bind = rest.indexOf(`data-bind="${path}"`);
+  return { regions: pieces.filter((_, index) => index % 2), rest: bind < 0 ? rest : rest.slice(0, bind) + rest.slice(rest.indexOf(">", bind)) };
+}
+/** Une lettre tapée dans une recherche : seuls ses résultats sont remplacés. Si autre chose change dans la page ou la fenêtre, rendu complet. */
+function updateSearch(el, path) {
+  const layer = modalRoot.contains(el) ? modalRoot : root, shown = layer === root ? shownPage?.html : shownModalHtml;
+  if (!shown?.includes("<!--results-->") || renderRunning || ui.fatal || shownPageKey().some((part, index) => part !== shownPage.key[index])) { render(); return; }
+  renderRunning = true;
+  try {
+    withRenderMemo(appData?.characters || [], () => {
+      const html = layer === root ? pageShellHtml() : renderModal(), next = searchParts(html, path), before = searchParts(shown, path);
+      const marks = [], walker = document.createTreeWalker(layer, NodeFilter.SHOW_COMMENT);
+      while (walker.nextNode()) if (/^\/?results$/.test(walker.currentNode.data)) marks.push(walker.currentNode);
+      if (next.rest !== before.rest || marks.length !== 2 * next.regions.length || next.regions.length !== before.regions.length) { renderNow(); return; }
+      if (layer === modalRoot) auditShownPage("recherche");
+      const view = captureView(), range = document.createRange();
+      next.regions.forEach((region, index) => {
+        if (region === before.regions[index]) return;
+        range.setStartAfter(marks[2 * index]);
+        range.setEndBefore(marks[2 * index + 1]);
+        range.deleteContents();
+        const fragment = range.createContextualFragment(region);
+        if (layer === root) for (const detail of fragment.querySelectorAll("details[open]")) shownPage.opened.add(detail);
+        range.insertNode(fragment);
+      });
+      if (layer === root) shownPage.html = html;
+      else shownModalHtml = html;
+      restoreView(view);
+    });
+  } finally { renderRunning = false; }
+}
+/** Ce qu'un rendu remet en place : focus et sélection, volets ouverts, défilements. */
+function captureView() {
   const focused = document.activeElement,
-    focusId = focused?.id,
-    selection =
-      focused && "selectionStart" in focused ? { start: focused.selectionStart, end: focused.selectionEnd } : null;
-  const openDetails = [...document.querySelectorAll("details[data-detail][open]")].map((el) => el.dataset.detail),
-    modalScroll = modalRoot.querySelector(".modal-body")?.scrollTop || 0;
-  const choiceScroll = document.querySelector(".creation-choice-list");
-  const choicePosition = choiceScroll ? { key: choiceScroll.dataset.scrollKey, top: choiceScroll.scrollTop } : null;
-  const workflowScroll = document.getElementById("workflow-spell-scroll");
-  const workflowPosition = workflowScroll ? { key: workflowScroll.dataset.scrollKey, top: workflowScroll.scrollTop } : null;
-  const workflowFocus = focused?.closest(".workflow-spell-scroll") && focused.dataset.action ? { ...focused.dataset } : null;
-  if (ui.fatal) {
-    root.innerHTML = `<div class="fatal">${icon("warning", 35)}<h1>${uiText("error.load")}</h1><p class="section-gap">${esc(uiSystemText(ui.fatal))}</p>${button(uiText("action.retry"), "reload", "", "primary")}</div>`;
-    return;
-  }
-  const c = activeCharacter(),
-    wizardActive = !!ui.wizard || !!ui.levelFlow,
-    emptyHome = !appData.characters.length && ui.route === "home" && !wizardActive;
-  const saveLabel = ui.saving ? uiText("save.saving") : localStore.readOnly ? uiText("save.readonly") : localStore.mode === "memory" ? uiText("save.memory") : ui.online ? uiText("save.local") : uiText("save.offline");
-  const mobileStatus = ui.saving ? uiText("save.saving") : localStore.readOnly ? uiText("save.readonly") : localStore.mode === "memory" ? uiText("save.unsaved") : ui.online ? uiText("save.saved") : uiText("save.offlineShort");
-  clearDashboardMount();
-  root.innerHTML = `<a class="skip" href="#main-content">${uiText("shell.skip")}</a><div class="app-shell ${emptyHome ? "empty-home" : ""}" style="--livery:${liveryOf(c)}"><aside class="sidebar"><button class="brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 30)}</span><span><span class="brand-name">Compagnon</span></span></button><div class="sidebar-label">${uiText("shell.table")}</div>${navFor(c).map(([route, ico, label]) => `<button class="nav-btn ${ui.route === route && !wizardActive ? "active" : ""}" data-action="navigate" data-route="${route}" ${ui.route === route && !wizardActive ? 'aria-current="page"' : ""} ${!c ? "disabled" : ""}>${icon(ico, 20)}${uiText(`nav.${route}`)}</button>`).join("")}<div class="sidebar-bottom"><button class="nav-btn ${ui.route === "library" ? "active" : ""}" data-action="navigate" data-route="library">${uiText("{p6}Bibliothèque", { p6: icon("book", 20) })}</button><button class="nav-btn ${ui.route === "offline" ? "active" : ""}" data-action="navigate" data-route="offline">${uiText("{p8}Contenu hors ligne", { p8: icon("download", 20) })}</button><button class="nav-btn ${ui.route === "home" && !wizardActive ? "active" : ""}" data-action="navigate" data-route="home">${uiText("{p10}Mes personnages", { p10: icon("users", 20) })}</button><button class="nav-btn ${ui.route === "settings" ? "active" : ""}" data-action="navigate" data-route="settings">${uiText("{p12}Réglages & sauvegardes", { p12: icon("settings", 20) })}</button><div class="local-note">${icon("lock", 19)}<div>${uiText("shell.local")}</div></div><div class="side-footer"><span>${uiText("shell.rules")}</span><span>v${APP_VERSION}</span></div></div></aside><div class="main-shell"><header class="topbar"><div class="top-title"><strong>${wizardActive ? uiText("shell.creation") : uiText(`nav.${ui.route}`)}</strong></div><button class="brand mobile-brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 26)}</span><span><span class="brand-name">Compagnon</span><span class="brand-sub">${uiText("shell.rules")}</span></span></button><div class="top-actions"><span class="save-status" title="${esc(saveLabel)}" role="status"><span class="status-dot" style="${localStore.mode === "memory" || localStore.readOnly ? "background:var(--warning)" : ""}" aria-hidden="true"></span><span class="status-text">${esc(saveLabel)}</span><span class="status-mobile">${esc(mobileStatus)}</span></span>${c && !wizardActive ? renderCharacterMenu(c) : !isInstalledApp() ? `<span class="top-utility">${smallIcon("phone", "install", uiText("shell.install"))}</span>` : ""}</div></header>${ui.languageWarning ? notice(uiText("language.failure"), "warning") : ""}${ui.update ? `<div class="update-banner">${uiText("Une nouvelle version est prête. Tes fiches seront conservées.{p0}", { p0: button(uiText("Mettre à jour"), "update-app", "", "small-btn") })}</div>` : ui.updateDownloading ? `<div class="update-banner" role="status"><span>${uiText("update.downloading")}</span>${updateProgressHtml()}</div>` : ""}${contentBannerHtml()}${localStore.mode === "memory" ? notice(("Le navigateur bloque le stockage. <strong>" + uiText("Les changements ne survivront pas à la fermeture.") + "</strong> Exporte tes fiches et ouvre l’application hors navigation privée."), "error") : ""}${localStore.readOnly ? notice(uiText("Le stockage de ce navigateur est en lecture seule. Exporte tes fiches pour les conserver dans un navigateur compatible."), "warning") : ""}${localStore.pendingState ? notice(uiText("Une modification n’a pas été enregistrée. {p0}", { p0: button(uiText("Exporter les modifications en attente"), "export-pending", "", "small-btn") }), "warning") : ""}${appData.recovery?.length ? notice(uiText("{p0} fiche(s) nécessitent une récupération. Les autres restent accessibles. {p1}", { p0: appData.recovery.length, p1: button(uiText("Exporter les données à récupérer"), "export-recovery", "", "small-btn") }), "warning") : ""}<main class="main ${wizardActive ? "wizard-active" : ""}" id="main-content" tabindex="-1">${ui.wizard ? renderWizard() : ui.levelFlow ? renderLevelFlow() : renderPage(c)}${c ? printSheet(c) : ""}</main></div></div><nav class="mobile-nav" aria-label="${esc(uiText("shell.navigation"))}">${[
-    ["sheet", "clipboard", uiText("Fiche")],
-    ["spells", "book", uiText("Sorts")],
-    ["features", "swords", uiText("Aptitudes")],
-    ["inventory", "bag", uiText("Sac")],
-    ["more", "more", uiText("Plus")],
-  ]
-    .map(
-      ([route, ico, label]) =>
-        `<button data-action="navigate" data-route="${route}" class="${ui.route === route && !wizardActive ? "active" : ""}" ${ui.route === route && !wizardActive ? 'aria-current="page"' : ""} ${!c && route !== "more" ? "disabled" : ""}>${icon(ico)}${uiText(`nav.${route}`)}</button>`,
-    )
-    .join("")}</nav>`;
-  if (diceRenderer && diceRendererRoll === ui.roll && ui.modal === "roll") {
-    // Un rendu venu d'ailleurs (retour en ligne, par exemple) ne doit pas effacer un effet en cours.
-    if (!ui.roll.critical?.live) updateDiceDialog();
-  } else {
-    const modalWasOpen = !!modalRoot.querySelector(".modal-backdrop");
-    stopDiceFx();
-    diceRenderer?.dispose();
-    diceRenderer = null;
-    modalRoot.innerHTML = renderModal();
-    // La fondue accompagne l’ouverture : la rejouer à chaque rendu ferait clignoter l’écran.
-    if (modalWasOpen) modalRoot.querySelector(".modal-backdrop")?.classList.add("modal-steady");
-    mountDiceTray();
-  }
-  if (c && ui.route === "sheet" && !wizardActive && dashboardDesktopMedia.matches) mountDashboard(root, c, { save: saveDashboardLayout, tell: toast, onError: reportError });
-  paintPortraitEditor();
-  // Le message de bas d'écran s'efface dès qu'une fenêtre s'ouvre, ou qu'une autre la remplace.
-  const sameModal = !!ui.modal && ui.modal === shownModal;
-  if (ui.modal && !sameModal) clearToast();
-  shownModal = ui.modal || null;
-  document.body.classList.toggle("modal-open", !!ui.modal);
+    choiceScroll = document.querySelector(".creation-choice-list"),
+    workflowScroll = document.getElementById("workflow-spell-scroll");
+  return {
+    focusId: focused?.id,
+    selection: focused && "selectionStart" in focused ? { start: focused.selectionStart, end: focused.selectionEnd } : null,
+    openDetails: [...document.querySelectorAll("details[data-detail][open]")].map((el) => el.dataset.detail),
+    modalScroll: modalRoot.querySelector(".modal-body")?.scrollTop || 0,
+    choicePosition: choiceScroll ? { key: choiceScroll.dataset.scrollKey, top: choiceScroll.scrollTop } : null,
+    workflowPosition: workflowScroll ? { key: workflowScroll.dataset.scrollKey, top: workflowScroll.scrollTop } : null,
+    workflowFocus: focused?.closest(".workflow-spell-scroll") && focused.dataset.action ? { ...focused.dataset } : null,
+  };
+}
+function restoreView({ focusId, selection, openDetails, modalScroll, choicePosition, workflowPosition, workflowFocus }) {
   for (const key of openDetails) {
     const detail = [...document.querySelectorAll("details[data-detail]")].find((el) => el.dataset.detail === key);
     if (detail) detail.open = true;
@@ -62223,19 +62570,85 @@ function renderNow() {
     const sameControl = [...nextWorkflowScroll.querySelectorAll("[data-action]")].find((el) => Object.entries(workflowFocus).every(([key, value]) => el.dataset[key] === value));
     sameControl?.focus({ preventScroll: true });
   }
-  if (focusId) {
-    const input = document.getElementById(focusId);
-    if (input) {
-      input.focus({ preventScroll: true });
-      if (selection && selection.start !== null && typeof input.setSelectionRange === "function")
-        try {
-          input.setSelectionRange(selection.start, selection.end);
-        } catch {}
-    }
+  const input = focusId ? document.getElementById(focusId) : null;
+  // Un champ resté en place garde son focus et son curseur : y toucher dérangerait une saisie en cours (clavier de téléphone).
+  if (input && input !== document.activeElement) {
+    input.focus({ preventScroll: true });
+    if (selection && selection.start !== null && typeof input.setSelectionRange === "function")
+      try {
+        input.setSelectionRange(selection.start, selection.end);
+      } catch {}
   }
   const mb = modalRoot.querySelector(".modal-body");
   if (mb) mb.scrollTop = modalScroll;
+}
+/** full : la page est redessinée ; sinon seule la couche des fenêtres l'est (renderWindow). */
+function renderNow(full = true) {
+  document.documentElement.lang = uiLanguage();
+  const view = captureView();
+  if (ui.fatal) {
+    shownPage = null;
+    root.innerHTML = `<div class="fatal">${icon("warning", 35)}<h1>${uiText("error.load")}</h1><p class="section-gap">${esc(uiSystemText(ui.fatal))}</p>${button(uiText("action.retry"), "reload", "", "primary")}</div>`;
+    return;
+  }
+  const c = activeCharacter(),
+    wizardActive = !!ui.wizard || !!ui.levelFlow;
+  if (full) {
+    clearDashboardMount();
+    const html = pageShellHtml();
+    root.innerHTML = html;
+    shownPage = { html, key: shownPageKey(), saving: ui.saving, opened: new Set(root.querySelectorAll("details[open]")) };
+  } else {
+    auditShownPage("fenêtre");
+    // Un rendu complet aurait refermé les volets que son HTML n'ouvre pas : menus, aides.
+    for (const detail of root.querySelectorAll("details")) if (!detail.dataset.detail || !detail.open) detail.open = shownPage.opened.has(detail);
+  }
+  if (diceRenderer && diceRendererRoll === ui.roll && ui.modal === "roll") {
+    // Un rendu venu d'ailleurs (retour en ligne, par exemple) ne doit pas effacer un effet en cours.
+    if (!ui.roll.critical?.live) updateDiceDialog();
+    shownModalHtml = null;
+  } else {
+    const modalWasOpen = !!modalRoot.querySelector(".modal-backdrop");
+    stopDiceFx();
+    diceRenderer?.dispose();
+    diceRenderer = null;
+    modalRoot.innerHTML = shownModalHtml = renderModal();
+    // La fondue accompagne l’ouverture : la rejouer à chaque rendu ferait clignoter l’écran.
+    if (modalWasOpen) modalRoot.querySelector(".modal-backdrop")?.classList.add("modal-steady");
+    mountDiceTray();
+  }
+  // Un rendu survenu pendant une impression remet la fiche à imprimer que le remplacement de la page vient d'emporter.
+  if (full && (printMedia.matches || printPreparing)) mountPrintSheet();
+  syncJournalPhotos();
+  if (full && c && ui.route === "sheet" && !wizardActive && dashboardDesktopMedia.matches) mountDashboard(root, c, { save: saveDashboardLayout, tell: toast, onError: reportError });
+  paintPortraitEditor();
+  // Le message de bas d'écran s'efface dès qu'une fenêtre s'ouvre, ou qu'une autre la remplace.
+  const sameModal = !!ui.modal && ui.modal === shownModal;
+  if (ui.modal && !sameModal) clearToast();
+  shownModal = ui.modal || null;
+  document.body.classList.toggle("modal-open", !!ui.modal);
+  restoreView(view);
   if (sameModal && ui.modal === "damage") revealDamageOutcome();
+}
+/** HTML de la page entière : coquille, bandeaux, page en cours ou assistant, barre du bas. */
+function pageShellHtml() {
+  const c = activeCharacter(),
+    wizardActive = !!ui.wizard || !!ui.levelFlow,
+    emptyHome = !appData.characters.length && ui.route === "home" && !wizardActive;
+  const saveLabel = ui.saving ? uiText("save.saving") : localStore.readOnly ? uiText("save.readonly") : localStore.mode === "memory" ? uiText("save.memory") : ui.online ? uiText("save.local") : uiText("save.offline");
+  const mobileStatus = ui.saving ? uiText("save.saving") : localStore.readOnly ? uiText("save.readonly") : localStore.mode === "memory" ? uiText("save.unsaved") : ui.online ? uiText("save.saved") : uiText("save.offlineShort");
+  return `<a class="skip" href="#main-content">${uiText("shell.skip")}</a><div class="app-shell ${emptyHome ? "empty-home" : ""}" style="--livery:${liveryOf(c)}"><aside class="sidebar"><button class="brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 30)}</span><span><span class="brand-name">Compagnon</span></span></button><div class="sidebar-label">${uiText("shell.table")}</div>${navFor(c).map(([route, ico, label]) => `<button class="nav-btn ${ui.route === route && !wizardActive ? "active" : ""}" data-action="navigate" data-route="${route}" ${ui.route === route && !wizardActive ? 'aria-current="page"' : ""} ${!c ? "disabled" : ""}>${icon(ico, 20)}${uiText(`nav.${route}`)}</button>`).join("")}<div class="sidebar-bottom"><button class="nav-btn ${ui.route === "library" ? "active" : ""}" data-action="navigate" data-route="library">${uiText("{p6}Bibliothèque", { p6: icon("book", 20) })}</button><button class="nav-btn ${ui.route === "offline" ? "active" : ""}" data-action="navigate" data-route="offline">${uiText("{p8}Contenu hors ligne", { p8: icon("download", 20) })}</button><button class="nav-btn ${ui.route === "home" && !wizardActive ? "active" : ""}" data-action="navigate" data-route="home">${uiText("{p10}Mes personnages", { p10: icon("users", 20) })}</button><button class="nav-btn ${ui.route === "settings" ? "active" : ""}" data-action="navigate" data-route="settings">${uiText("{p12}Réglages & sauvegardes", { p12: icon("settings", 20) })}</button><div class="local-note">${icon("lock", 19)}<div>${uiText("shell.local")}</div></div><div class="side-footer"><span>${uiText("shell.rules")}</span><span>v${APP_VERSION}</span></div></div></aside><div class="main-shell"><header class="topbar"><div class="top-title"><strong>${wizardActive ? uiText("shell.creation") : uiText(`nav.${ui.route}`)}</strong></div><button class="brand mobile-brand" data-action="navigate" data-route="home"><span class="brand-mark">${icon("gem", 26)}</span><span><span class="brand-name">Compagnon</span><span class="brand-sub">${uiText("shell.rules")}</span></span></button><div class="top-actions"><span class="save-status" title="${esc(saveLabel)}" role="status"><span class="status-dot" style="${localStore.mode === "memory" || localStore.readOnly ? "background:var(--warning)" : ""}" aria-hidden="true"></span><span class="status-text">${esc(saveLabel)}</span><span class="status-mobile">${esc(mobileStatus)}</span></span>${c && !wizardActive ? renderCharacterMenu(c) : !isInstalledApp() ? `<span class="top-utility">${smallIcon("phone", "install", uiText("shell.install"))}</span>` : ""}</div></header>${ui.languageWarning ? notice(uiText("language.failure"), "warning") : ""}${ui.update ? `<div class="update-banner">${uiText("Une nouvelle version est prête. Tes fiches seront conservées.{p0}", { p0: button(uiText("Mettre à jour"), "update-app", "", "small-btn") })}</div>` : ui.updateDownloading ? `<div class="update-banner" role="status"><span>${uiText("update.downloading")}</span>${updateProgressHtml()}</div>` : ""}${contentBannerHtml()}${localStore.mode === "memory" ? notice(("Le navigateur bloque le stockage. <strong>" + uiText("Les changements ne survivront pas à la fermeture.") + "</strong> Exporte tes fiches et ouvre l’application hors navigation privée."), "error") : ""}${localStore.readOnly ? notice(uiText("Le stockage de ce navigateur est en lecture seule. Exporte tes fiches pour les conserver dans un navigateur compatible."), "warning") : ""}${localStore.pendingState ? notice(uiText("Une modification n’a pas été enregistrée. {p0}", { p0: button(uiText("Exporter les modifications en attente"), "export-pending", "", "small-btn") }), "warning") : ""}${appData.recovery?.length ? notice(uiText("{p0} fiche(s) nécessitent une récupération. Les autres restent accessibles. {p1}", { p0: appData.recovery.length, p1: button(uiText("Exporter les données à récupérer"), "export-recovery", "", "small-btn") }), "warning") : ""}<main class="main ${wizardActive ? "wizard-active" : ""}" id="main-content" tabindex="-1">${ui.wizard ? renderWizard() : ui.levelFlow ? renderLevelFlow() : renderPage(c)}</main></div></div><nav class="mobile-nav" aria-label="${esc(uiText("shell.navigation"))}">${[
+    ["sheet", "clipboard", uiText("Fiche")],
+    ["spells", "book", uiText("Sorts")],
+    ["features", "swords", uiText("Aptitudes")],
+    ["inventory", "bag", uiText("Sac")],
+    ["more", "more", uiText("Plus")],
+  ]
+    .map(
+      ([route, ico, label]) =>
+        `<button data-action="navigate" data-route="${route}" class="${ui.route === route && !wizardActive ? "active" : ""}" ${ui.route === route && !wizardActive ? 'aria-current="page"' : ""} ${!c && route !== "more" ? "disabled" : ""}>${icon(ico)}${uiText(`nav.${route}`)}</button>`,
+    )
+    .join("")}</nav>`;
 }
 function renderPage(c) {
   if (ui.route === "home") return renderHome() + (!appData.characters.length || window.COMPANION_STANDALONE ? "" : `<div class="actions section-gap">${button(uiText("{p0} Bibliothèque 2014", { p0: icon("book", 18) }), "navigate", 'data-route="library"')}${button(uiText("{p0} Contenu hors ligne", { p0: icon("download", 18) }), "navigate", 'data-route="offline"')}</div>`);
@@ -62385,32 +62798,63 @@ function reportError(error) {
     null, true,
   );
 }
-function mutateApp(mutator, { redraw = true } = {}) {
+/**
+ * Modifie l'état puis l'enregistre, chaque modification à son tour dans la file `saveQueue`.
+ * Le mutateur reçoit une copie de premier niveau de `appData`, avec ses propres tableaux `characters` et `snapshots` : les fiches,
+ * les versions de l'historique et le brouillon y restent ceux de `appData`. Il remplace l'objet qu'il change, il ne le modifie jamais
+ * en place, pour que `appData` garde l'état enregistré si l'écriture échoue (lenteurs sur vieux téléphones, 25 novembre 2026 :
+ * la copie complète de tout l'état coûtait autant que l'écriture).
+ * Sans `ahead`, la promesse se résout une fois l'écriture finie. Avec `ahead`, elle se résout dès que la modification est en mémoire :
+ * l'appelant montre aussitôt la fiche et l'écriture se termine derrière, à son tour dans la file. Si elle échoue, l'état enregistré
+ * revient en mémoire, `ahead(error)` (une fonction, sinon rien) reprend ce que l'appelant avait refermé, puis l'erreur est annoncée.
+ */
+function mutateApp(mutator, { redraw = true, ahead = null } = {}) {
+  let shown = null;
+  const visible = ahead ? new Promise((resolve, reject) => { shown = { resolve, reject }; }) : null;
   const task = saveQueue.then(async () => {
-    ui.saving = true;
-    const next = clone(appData);
+    // Avec `ahead`, l'indicateur ne couvre que l'écriture : la fiche montrée juste avant l'est comme après un enregistrement.
+    ui.saving = !ahead;
+    const saved = appData, next = { ...saved, characters: [...saved.characters], snapshots: [...saved.snapshots] }, pending = !!localStore.pendingState;
+    let applied = false, early = null;
     try {
       await mutator(next);
-      appData = await localStore.write(next, appData.revision);
+      if (ahead) {
+        appData = early = { ...next, revision: saved.revision + 1 };
+        applied = true;
+        if (redraw) render();
+        shown.resolve(appData);
+        // L'appelant dessine la fiche avant que l'écriture ne commence.
+        await new Promise((resolve) => setTimeout(resolve));
+        ui.saving = true;
+      }
+      appData = await localStore.write(next, saved.revision);
     } catch (error) {
       if (error.message === "CONFLICT") {
         error.pendingState = localStore.pendingState;
         appData = await localStore.read();
-      }
+      } else appData = saved;
+      ui.saving = false;
+      if (!applied) { shown?.reject(error); throw error; }
+      if (typeof ahead === "function") ahead(error);
+      reportError(error);
+      render();
       throw error;
     } finally {
       ui.saving = false;
     }
-    if (redraw) render();
+    // Après un échec, la fiche montrée d'avance portait encore l'avis « modification non enregistrée » : il part avec cette écriture.
+    if (ahead ? pending : redraw) render();
+    else if (ahead) pageWritten(early);
     return appData;
   });
   saveQueue = task.catch(() => {});
-  return task;
+  return visible || task;
 }
 /**
  * Enregistre la fiche et garde l’opération dans l’historique. Son titre (label), sa description et ses lignes d’impact (options) y restent
  * tels qu’ils sont écrits : un texte système en dur est une clé des dictionnaires, que l’affichage lit par uiStoredText dans la langue en cours ;
  * un texte à paramètres passe par uiText, morceaux compris.
+ * `options.ahead` rend la main dès que la fiche est en mémoire, l'écriture se terminant derrière (voir mutateApp).
  */
 async function saveCharacter(character, label = "Modification", mode = "settings", original = null, options = {}) {
   const candidate = clone(character);
@@ -62436,9 +62880,10 @@ async function saveCharacter(character, label = "Modification", mode = "settings
       if (!previous && mode !== "restore") result.state.hp = uiDerive(result).maxHp;
       if (!transaction) reconcileState(result, mode === "settings" && previous ? previous : null);
       if (options.undoSnapshotId) {
-        const undone = next.snapshots.find((entry) => entry.id === options.undoSnapshotId);
+        const position = next.snapshots.findIndex((entry) => entry.id === options.undoSnapshotId), undone = next.snapshots[position];
         if (!undone?.operation || undone.operation.undone) throw new Error(uiText("Cette opération a déjà été annulée ou n’est plus disponible."));
-        undone.operation.undone = true;
+        // La version est partagée avec l'état enregistré : elle est remplacée, pas modifiée.
+        next.snapshots[position] = { ...undone, operation: { ...undone.operation, undone: true } };
       }
       // Les changements d'équipement, de mains et de lumière ne gardent pas de version (option 2 choisie par Luca le 24 novembre 2026) :
       // ils prenaient les 30 places de « Retour en arrière » et chassaient les versions utiles.
@@ -62460,7 +62905,7 @@ async function saveCharacter(character, label = "Modification", mode = "settings
       else next.characters.push(result);
       next.activeId = result.id;
     },
-    { redraw: false },
+    { redraw: false, ahead: options.ahead },
   );
   } catch (error) {
     if (original && (error.code === "CONFLICT" || error.message === "CONFLICT")) {
@@ -62477,18 +62922,19 @@ async function saveCharacter(character, label = "Modification", mode = "settings
   if (repairContext()) delete repairContext().conflict;
   return result;
 }
+/** Changement de séance d'un seul geste : la fiche se montre aussitôt, l'enregistrement se termine derrière (voir mutateApp). */
 async function sessionChange(change, label) {
   const before = clone(activeCharacter()),
     next = clone(before);
   change(next);
-  await saveCharacter(next, label, "session", before);
+  await saveCharacter(next, label, "session", before, { ahead: true });
   render();
 }
 function openModal(type) {
   // Une fenêtre ouverte depuis une autre (choix, puis revue) garde le repère de la commande qui a ouvert la première.
   if (!modalRoot.contains(document.activeElement)) lastFocus = focusMark(document.activeElement);
   ui.modal = type;
-  render();
+  renderWindow();
   requestAnimationFrame(() => {
     if (ui.modal !== type || modalRoot.contains(document.activeElement)) return;
     // La fiche d'une création se lit d'abord : le focus va à sa première commande, pas au champ « Nom » de sa correction.
@@ -62499,7 +62945,7 @@ function openModal(type) {
   });
 }
 function closeModal() {
-  if (ui.modal === "confirm" && ui.confirm?.action === "discard-repair-conflict") { ui.modal = "review"; render(); return; }
+  if (ui.modal === "confirm" && ui.confirm?.action === "discard-repair-conflict") { ui.modal = "review"; renderWindow(); return; }
   if (ui.modal === "review" && ui.pending?.conflict) {
     askConfirm(uiText("Oublier ce brouillon ?"), uiText("La fiche enregistrée dans l’autre fenêtre sera conservée. Exporte ton brouillon avant de l’oublier si tu veux le récupérer."), "discard-repair-conflict", null, { label: uiText("Oublier le brouillon"), danger: true });
     return;
@@ -62515,10 +62961,10 @@ function closeModal() {
     restoreLibraryOrigin(origin); return;
   }
   // Revue d'un achat refermée sans valider : retour au panier.
-  if (ui.modal === "review" && ui.pending?.shop && ui.shop) { ui.pending = null; ui.modal = "shop"; render(); return; }
+  if (ui.modal === "review" && ui.pending?.shop && ui.shop) { ui.pending = null; ui.modal = "shop"; renderWindow(); return; }
   // Prix convenu ou conditions rouvertes depuis la boutique, refermés : retour à la boutique. À l'entrée, refermer les conditions quitte le marchand.
-  if (ui.modal === "shop-price" && ui.shop) { ui.shop.price = null; ui.modal = "shop"; render(); return; }
-  if (ui.modal === "shop-terms" && ui.shop && !ui.shop.draft?.entry) { ui.shop.draft = null; ui.modal = "shop"; render(); return; }
+  if (ui.modal === "shop-price" && ui.shop) { ui.shop.price = null; ui.modal = "shop"; renderWindow(); return; }
+  if (ui.modal === "shop-terms" && ui.shop && !ui.shop.draft?.entry) { ui.shop.draft = null; ui.modal = "shop"; renderWindow(); return; }
   if (ui.modal === "review" && ui.pending?.libraryBack) {
     const origin = ui.pending.libraryBack;
     ui.pending = null; restoreLibraryOrigin(origin); return;
@@ -62526,12 +62972,12 @@ function closeModal() {
   if (ui.modal === "journal-photo") {
     const back = ui.journalPhotoViewer?.returnTo;
     ui.journalPhotoViewer = null;
-    if (back && ui.journalDraft) { ui.modal = back; render(); modalRoot.querySelector('[data-action="journal-photo-view"]')?.focus({ preventScroll: true }); return; }
+    if (back && ui.journalDraft) { ui.modal = back; renderWindow(); modalRoot.querySelector('[data-action="journal-photo-view"]')?.focus({ preventScroll: true }); return; }
   }
   if (ui.journalSaving && ["journal-editor", "journal-discard"].includes(ui.modal)) return;
-  if (ui.modal === "journal-discard") { ui.modal = "journal-editor"; render(); modalRoot.querySelector("textarea")?.focus(); return; }
+  if (ui.modal === "journal-discard") { ui.modal = "journal-editor"; renderWindow(); modalRoot.querySelector("textarea")?.focus(); return; }
   if (ui.modal === "journal-editor") {
-    if (journalDraftDirty()) { ui.modal = "journal-discard"; render(); modalRoot.querySelector('[data-action="journal-keep-editing"]')?.focus(); return; }
+    if (journalDraftDirty()) { ui.modal = "journal-discard"; renderWindow(); modalRoot.querySelector('[data-action="journal-keep-editing"]')?.focus(); return; }
     ui.journalDraft = null; ui.journalPhotoLoading = false;
   }
   if (ui.modal === "roll") {
@@ -62540,16 +62986,16 @@ function closeModal() {
     ui.roll = null;
     // Sauvegarde de concentration ratée : elle prend fin en fermant la fenêtre, après d'éventuelles relances (Chanceux, Inspiration).
     if (lost) void endLostConcentration(lost);
-    if (back) { ui.modal = back; render(); modalRoot.querySelector("button")?.focus({ preventScroll: true }); return; }
+    if (back) { ui.modal = back; renderWindow(); modalRoot.querySelector("button")?.focus({ preventScroll: true }); return; }
     // Jet suivant d'une même dépense (élixir : soins, puis PV temporaires).
     if (following) { openSpendRoll(following); return; }
   }
-  if (ui.modal === "replace-spell") { const target = ui.spellReplacementTarget; ui.spellReplacementTarget = null; ui.modal = target === "modal" ? "magic" : null; render(); return; }
+  if (ui.modal === "replace-spell") { const target = ui.spellReplacementTarget; ui.spellReplacementTarget = null; ui.modal = target === "modal" ? "magic" : null; renderWindow(); return; }
   if (ui.modal === "portrait") disposePortraitEditor();
   ui.modal = null;
   ui.pending = null;
   ui.magic = null;
-  render();
+  renderWindow();
   (modalOrigin() || document.getElementById("main-content"))?.focus({ preventScroll: true });
 }
 /** Commandes du document qui portent ces attributs data-* : deux menus peuvent répéter la même. */
@@ -63009,6 +63455,9 @@ document.addEventListener("change", (event) => {
   if (el.dataset.portraitFilter && portraitSession) {
     portraitSession[el.dataset.portraitFilter] = el.value; render(); return;
   }
+  // Une recherche garde son champ (updateSearch) : en le quittant, « change » répète la valeur déjà lue. Redessiner ses résultats ou
+  // ramener le focus sur la ligne de choix ferait perdre le toucher en cours ailleurs.
+  if (el.matches("[data-bind]") && searchBinding(el.dataset.bind) && boundValue(el.dataset.bind) === el.value) return;
   if (el.matches("[data-bind],[data-array]"))
     try {
       handleBinding(el, true);
@@ -63199,6 +63648,19 @@ window.addEventListener("offline", () => {
   ui.online = false;
   render();
 });
+// Impression : la fiche à imprimer est montée juste avant (bouton Imprimer comme menu du navigateur) et retirée après, avec les photos lues pour elle.
+// Une fiche déjà montée est à jour : tout changement de la fiche passe par un rendu, qui la retire.
+const printSheetNeeded = () => { if (!document.querySelector("#main-content > .print-only")) mountPrintSheet(); };
+const printSheetDone = () => { unmountPrintSheet(); journalPhotoPrints.clear(); syncJournalPhotos(); };
+// Ctrl+P ou Cmd+P : même chemin que le bouton Imprimer, pour que les photos du journal soient lues avant de partir.
+document.addEventListener("keydown", (event) => {
+  if (!(event.ctrlKey || event.metaKey) || event.altKey || event.shiftKey || event.key.toLowerCase() !== "p" || ui.fatal || !activeCharacter()) return;
+  event.preventDefault();
+  printCharacterSheet().catch(reportError);
+});
+window.addEventListener("beforeprint", printSheetNeeded);
+window.addEventListener("afterprint", printSheetDone);
+printMedia.addEventListener("change", () => (printMedia.matches ? printSheetNeeded() : printSheetDone()));
 window.addEventListener("beforeinstallprompt", (event) => {
   event.preventDefault();
   deferredInstall = event;
@@ -63241,6 +63703,8 @@ async function checkForUpdate() {
     if (!ui.updateDownloading) { ui.updateDownloading = true; render(); }
     await swRegistration.update();
   } catch { /* Hors ligne : le prochain retour sur l’onglet vérifiera de nouveau. */ }
+  // Rien ne se télécharge (nouveau service worker pas encore servi, ou vérification interrompue) : le bandeau ne reste pas affiché.
+  if (ui.updateDownloading && !ui.update && !swRegistration.installing && !swRegistration.waiting) { ui.updateDownloading = false; ui.updateProgress = null; render(); }
 }
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) { hiddenSince = Date.now(); return; }
@@ -63288,6 +63752,16 @@ async function setupServiceWorker() {
     toast(uiText("Le cache hors ligne n’a pas pu être installé. Vérifie la connexion et l’hébergement HTTPS."));
   }
 }
+/** Première ouverture après la mise à jour : les photos encore écrites dans les fiches et l'historique sont rangées à part, chacune une seule fois.
+ * Ensuite, à chaque ouverture, les photos que plus rien ne cite sont effacées. Un échec ne perd rien : les photos restent dans les fiches jusqu'au prochain essai. */
+async function tidyJournalPhotos() {
+  if (!localStore.storesPhotos) return;
+  const whole = (character) => (character?.journalEntries || []).some((entry) => entry?.image && !journalPhotoStored(entry.image));
+  try {
+    if ([...appData.characters, ...appData.snapshots.map((snapshot) => snapshot.character)].some(whole)) await mutateApp(() => {}, { redraw: false });
+    await localStore.sweepPhotos();
+  } catch (error) { console.warn("Rangement des photos du journal remis à la prochaine ouverture :", error); }
+}
 (async () => {
   try {
     appData = await localStore.open();
@@ -63312,6 +63786,7 @@ async function setupServiceWorker() {
     window.addEventListener("offline", () => contentStore.goOffline());
     window.addEventListener("online", () => { if (contentReady && contentStore.state.status === "idle" && !contentStore.downloading) void contentReady.then(() => contentStore.load(null, { quiet: true })).then(startContentTexts).catch(() => {}); });
     void importSharedSave();
+    void tidyJournalPhotos();
   } catch (error) {
     ui.fatal = error.message;
     render();
