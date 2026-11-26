@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-candidate-15";
+const APP_VERSION = "2.0.0-candidate-16";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -666,7 +666,6 @@ const UI_FR = Object.freeze({
   "Origine": "Origine",
   "Outils": "Outils",
   "Ouvrir le grimoire": "Ouvrir le grimoire",
-  "PV après application": "PV après application",
   "PV temporaires": "PV temporaires",
   "Paliers et limites": "Paliers et limites",
   "Parties infusées": "Parties infusées",
@@ -841,7 +840,8 @@ const UI_FR = Object.freeze({
   "Ajouter au sac": "Ajouter au sac",
   "Ajouter aux favoris": "Ajouter aux favoris",
   "Ajouter ces personnages ?": "Ajouter ces personnages ?",
-  "Ajouter des PV ou corriger une réserve": "Ajouter des PV ou corriger une réserve",
+  "Recevoir des soins": "Recevoir des soins",
+  "Indique les PV récupérés.": "Indique les PV récupérés.",
   "Ajouter des points de vie temporaires": "Ajouter des points de vie temporaires",
   "Ajouter un compagnon": "Ajouter un compagnon",
   "Ajouter un effet": "Ajouter un effet",
@@ -900,7 +900,7 @@ const UI_FR = Object.freeze({
   "Aucun ki supplémentaire pour cette main.": "Aucun ki supplémentaire pour cette main.",
   "Aucun profil ne correspond à tes filtres dans cet onglet.": "Aucun profil ne correspond à tes filtres dans cet onglet.",
   "Aucun résultat déclaré": "Aucun résultat déclaré",
-  "Aucun sort sélectionné": "Aucun sort sélectionné",
+  "Aucun sort": "Aucun sort",
   "Aucun sort trouvé": "Aucun sort trouvé",
   "Aucune (psionique)": "Aucune (psionique)",
   "Aucune acquisition enregistrée.": "Aucune acquisition enregistrée.",
@@ -1188,7 +1188,6 @@ const UI_FR = Object.freeze({
   "Imprimer la fiche": "Imprimer la fiche",
   "Indique le coût réglé ou déjà dépensé dans le grimoire ou les ressources. Cette fiche ne débite aucune ressource.": "Indique le coût réglé ou déjà dépensé dans le grimoire ou les ressources. Cette fiche ne débite aucune ressource.",
   "Indique le montant déjà arbitré à la table.": "Indique le montant déjà arbitré à la table.",
-  "Indique le montant à ajouter. La réserve ne dépasse pas son maximum.": "Indique le montant à ajouter. La réserve ne dépasse pas son maximum.",
   "Indique le total de pièces d’or, pas la différence.": "Indique le total de pièces d’or, pas la différence.",
   "Indique le total d’XP. Le niveau ne change jamais sans validation séparée.": "Indique le total d’XP. Le niveau ne change jamais sans validation séparée.",
   "Infuser un objet": "Infuser un objet",
@@ -1550,7 +1549,6 @@ const UI_FR = Object.freeze({
   "Sur Android : menu du navigateur, Installer. Sur iPhone : Safari, Partager, Sur l’écran d’accueil.": "Sur Android : menu du navigateur, Installer. Sur iPhone : Safari, Partager, Sur l’écran d’accueil.",
   "Suspendu, données conservées": "Suspendu, données conservées",
   "Série standard": "Série standard",
-  "Ta classe ne lance pas de sorts. La magie d’origine, de don ou maison reste utilisable.": "Ta classe ne lance pas de sorts. La magie d’origine, de don ou maison reste utilisable.",
   "Ta photo": "Ta photo",
   "Talisman : porteur et notes": "Talisman : porteur et notes",
   "Technique de moine": "Technique de moine",
@@ -1764,9 +1762,6 @@ const UI_FR = Object.freeze({
   "Résultat ({p0})": "Résultat ({p0})",
   "Coût : {p0}. Stock : 0 → 1.": "Coût : {p0}. Stock : 0 → 1.",
   "L’arme de la bête se choisit à l’entrée en rage.{p0}": "L’arme de la bête se choisit à l’entrée en rage.{p0}",
-  "Corps ({p0} PV)": "Corps ({p0} PV)",
-  "Forme ({p0} PV)": "Forme ({p0} PV)",
-  "Protection arcanique ({p0} PV)": "Protection arcanique ({p0} PV)",
   "Conserver {p0} PV": "Conserver {p0} PV",
   "{p0} actuellement dépensée(s), réserve totale : {p1}.": "{p0} actuellement dépensée(s), réserve totale : {p1}.",
   "{p0} d{p1} · {p2} restant{p3}": "{p0} d{p1} · {p2} restant{p3}",
@@ -5694,7 +5689,6 @@ const UI_EN = Object.freeze({
   "Origine": "Race",
   "Outils": "Tools",
   "Ouvrir le grimoire": "Open spellbook",
-  "PV après application": "HP after applying",
   "PV temporaires": "Temporary HP",
   "Paliers et limites": "Thresholds and limits",
   "Parties infusées": "Infused parts",
@@ -5869,7 +5863,8 @@ const UI_EN = Object.freeze({
   "Ajouter au sac": "Add to inventory",
   "Ajouter aux favoris": "Add to favorites",
   "Ajouter ces personnages ?": "Add these characters?",
-  "Ajouter des PV ou corriger une réserve": "Add HP or correct a resource",
+  "Recevoir des soins": "Receive healing",
+  "Indique les PV récupérés.": "Enter the hit points regained.",
   "Ajouter des points de vie temporaires": "Add temporary hit points",
   "Ajouter un compagnon": "Add a companion",
   "Ajouter un effet": "Add an effect",
@@ -5928,7 +5923,7 @@ const UI_EN = Object.freeze({
   "Aucun ki supplémentaire pour cette main.": "No additional ki for this hand.",
   "Aucun profil ne correspond à tes filtres dans cet onglet.": "No profiles match your filters in this tab.",
   "Aucun résultat déclaré": "No declared result",
-  "Aucun sort sélectionné": "No selected spells",
+  "Aucun sort": "No spells",
   "Aucun sort trouvé": "No spells found",
   "Aucune (psionique)": "None (psionic)",
   "Aucune acquisition enregistrée.": "No recorded acquisitions.",
@@ -6216,7 +6211,6 @@ const UI_EN = Object.freeze({
   "Imprimer la fiche": "Print sheet",
   "Indique le coût réglé ou déjà dépensé dans le grimoire ou les ressources. Cette fiche ne débite aucune ressource.": "Record the cost already paid or expended in the spellbook or resources. This sheet does not debit any resource.",
   "Indique le montant déjà arbitré à la table.": "Enter the amount already decided at the table.",
-  "Indique le montant à ajouter. La réserve ne dépasse pas son maximum.": "Enter the amount to add. The resource cannot exceed its maximum.",
   "Indique le total de pièces d’or, pas la différence.": "Enter the total gold pieces, not the difference.",
   "Indique le total d’XP. Le niveau ne change jamais sans validation séparée.": "Enter total XP. The level never changes without separate confirmation.",
   "Infuser un objet": "Infuse an item",
@@ -6578,7 +6572,6 @@ const UI_EN = Object.freeze({
   "Sur Android : menu du navigateur, Installer. Sur iPhone : Safari, Partager, Sur l’écran d’accueil.": "On Android: browser menu, Install. On iPhone: Safari, Share, Add to Home Screen.",
   "Suspendu, données conservées": "Paused, data retained",
   "Série standard": "Standard array",
-  "Ta classe ne lance pas de sorts. La magie d’origine, de don ou maison reste utilisable.": "Your class does not cast spells. Racial, feat and homebrew magic remain available.",
   "Ta photo": "Your photo",
   "Talisman : porteur et notes": "Talisman: wearer and notes",
   "Technique de moine": "Monk technique",
@@ -6792,9 +6785,6 @@ const UI_EN = Object.freeze({
   "Résultat ({p0})": "Result ({p0})",
   "Coût : {p0}. Stock : 0 → 1.": "Cost: {p0}. Stock: 0 → 1.",
   "L’arme de la bête se choisit à l’entrée en rage.{p0}": "Choose the beast's weapon when entering Rage.{p0}",
-  "Corps ({p0} PV)": "Body ({p0} HP)",
-  "Forme ({p0} PV)": "Form ({p0} HP)",
-  "Protection arcanique ({p0} PV)": "Arcane Ward ({p0} HP)",
   "Conserver {p0} PV": "Keep {p0} HP",
   "{p0} actuellement dépensée(s), réserve totale : {p1}.": "{p0} currently expended, total resource: {p1}.",
   "{p0} d{p1} · {p2} restant{p3}": "{p0} d{p1} · {p2} remaining{p3}",
@@ -51135,7 +51125,11 @@ const dice3DInternals = (() => {
         write(faceLabel(face, die), ox + cell / 2, oy + cell / 2 + 2, size);
       }
     });
-    return { canvas: atlas, columns, rows };
+    // Dessinées en 256 px par face puis réduites à 128 px : une texture quatre fois plus légère à envoyer à la carte graphique.
+    const small = document.createElement("canvas"); small.width = atlas.width / 2; small.height = atlas.height / 2;
+    const smallCtx = small.getContext("2d"); smallCtx.imageSmoothingQuality = "high"; smallCtx.drawImage(atlas, 0, 0, small.width, small.height);
+    atlas.width = atlas.height = 1;
+    return { canvas: small, columns, rows };
   }
 
   function meshVertices(mesh, atlas) {
@@ -51179,14 +51173,14 @@ const dice3DInternals = (() => {
     const vertexShader = shader(gl.VERTEX_SHADER, `
       attribute vec3 position; attribute vec3 normal; attribute vec2 uv;
       uniform mat4 camera; uniform mat4 model;
-      varying vec3 worldNormal; varying vec3 worldPosition; varying vec3 localPosition; varying vec2 textureUV;
-      void main(){ vec4 world=model*vec4(position,1.0); worldPosition=world.xyz;
+      varying vec3 worldNormal; varying vec3 localPosition; varying vec2 textureUV;
+      void main(){ vec4 world=model*vec4(position,1.0);
         worldNormal=mat3(model)*normal; localPosition=position; textureUV=uv; gl_Position=camera*world; }
     `);
     const fragmentShader = shader(gl.FRAGMENT_SHADER, `
       precision mediump float;
       uniform sampler2D atlas; uniform float shadow; uniform float opacity; uniform float dissolve; uniform float muted;
-      varying vec3 worldNormal; varying vec3 worldPosition; varying vec3 localPosition; varying vec2 textureUV;
+      varying vec3 worldNormal; varying vec3 localPosition; varying vec2 textureUV;
       // Un petit multiplicateur conserve les fractions sur les GPU mediump 16 bits.
       float grain(vec3 p){ return fract(sin(dot(p,vec3(12.9898,78.233,37.719)))*31.7); }
       float noise(vec3 p){
@@ -51200,9 +51194,9 @@ const dice3DInternals = (() => {
         if(shadow>0.5){ vec2 p=(textureUV-0.5)*2.0; float d=dot(p,p);
           gl_FragColor=vec4(0.13,0.09,0.05,exp(-d*3.0)*0.52*opacity*(1.0-smoothstep(0.6,1.0,d))); }
         else { vec3 n=normalize(worldNormal); vec3 light=normalize(vec3(-3.0,7.0,5.0));
-          float diffuse=max(dot(n,light),0.0); vec3 eye=normalize(vec3(0.0,7.8,10.0)-worldPosition);
-          float shine=pow(max(dot(n,normalize(light+eye)),0.0),38.0)*0.17;
-          vec3 color=texture2D(atlas,textureUV).rgb*(0.57+0.43*diffuse)+vec3(shine);
+          // Lumière diffuse seule, sans reflet.
+          float diffuse=max(dot(n,light),0.0);
+          vec3 color=texture2D(atlas,textureUV).rgb*(0.57+0.43*diffuse);
           if(muted>0.5){ float grey=dot(color,vec3(0.299,0.587,0.114)); color=mix(color,vec3(grey)*0.78,0.85); }
           if(dissolve>0.0){
             float field=(localPosition.y+1.0)*0.3+noise(localPosition*7.0)*0.3+noise(localPosition*19.0)*0.1;
@@ -51328,6 +51322,23 @@ const dice3DInternals = (() => {
     }
   }
 
+  /** Élan de chaque dé : axe, nombre de tours et dérive, tirés à chaque lancer. Seule l'animation en dépend, jamais la valeur.
+   * Un tirage groupé à part, hors de Math.random : la suite des tirages des dés et des effets reste la même. */
+  function randomThrows(count) {
+    const bits = new Uint32Array(count * 8);
+    try { crypto.getRandomValues(bits); } catch { bits.forEach((_, i) => { bits[i] = Math.random() * 2 ** 32; }); }
+    let next = 0;
+    const draw = () => bits[next++] / 2 ** 32, turn = () => draw() * Math.PI * 2;
+    return () => {
+      const heading = turn(), tumble = turn(), lean = (draw() - 0.5) * 1.2;
+      return {
+        axis: unit([Math.cos(heading), lean, Math.sin(heading)]), turn: Math.PI * (4.4 + draw() * 1.8),
+        tumbleAxis: unit([Math.cos(tumble), draw() * 2 - 1, Math.sin(tumble)]), tumble: Math.PI * (0.8 + draw() * 1.4),
+        drift: [turn(), turn()],
+      };
+    };
+  }
+
   function create(canvas, options = {}) {
     if (!canvas || typeof canvas.getContext !== "function") throw new TypeError("Un canvas est attendu pour les dés.");
     if (options.keep) canvas = board(canvas);
@@ -51389,13 +51400,14 @@ const dice3DInternals = (() => {
         item.muted = !item.die.kept && reveal === 1 && reducedMotion();
         item.dissolve = item.die.kept || item.muted ? 0 : reveal;
         // Un dé déjà lancé (die.still) reste posé pendant que les autres roulent.
-        const own = item.die.still ? 1 : progress, rest = 1 - own, phase = own * Math.PI * 3;
-        item.rotation = own === 1 ? item.target : quaternionMultiply(axisAngle(item.axis, rest * rest * (Math.PI * 5.2 + index * 0.53)), item.target);
+        const own = item.die.still ? 1 : progress, rest = 1 - own, phase = own * Math.PI * 3, { throw: spin } = item, ease = rest * rest;
+        // Deux rotations composées : l'axe de rotation change pendant le lancer, aucune face ne reste immobile sur le côté.
+        item.rotation = own === 1 ? item.target : quaternionMultiply(axisAngle(spin.axis, ease * spin.turn), quaternionMultiply(axisAngle(spin.tumbleAxis, ease * spin.tumble), item.target));
         item.lift = own === 1 ? 0 : Math.abs(Math.sin(phase)) * rest * rest * 1.05;
         pose?.(item, index, { axisAngle, quaternionMultiply, orient: (value) => orientation({ ...item.die, value }, item.mesh) });
         const bottom = Math.min(...item.mesh.vertices.map((v) => rotate(v, item.rotation)[1])) * item.scale;
         const spread = item === survivor ? 1 - slide : 1;
-        item.position = [item.base[0] * spread + Math.sin(progress * Math.PI * 2 + index) * rest * 0.3, -bottom + item.lift + 0.025, item.base[2] * spread + Math.sin(progress * Math.PI * 2) * rest * 0.24];
+        item.position = [item.base[0] * spread + Math.sin(progress * Math.PI * 2 + spin.drift[0]) * rest * 0.3, -bottom + item.lift + 0.025, item.base[2] * spread + Math.sin(progress * Math.PI * 2 + spin.drift[1]) * rest * 0.24];
       });
       try {
         if (mode === "webgl" && gpu) gpu.draw(items, camera, width, height);
@@ -51405,9 +51417,10 @@ const dice3DInternals = (() => {
       }
     }
     function setDice(dice) {
-      items = visibleDice(dice).map((die, index) => {
+      const visible = visibleDice(dice), random = randomThrows(visible.length);
+      items = visible.map((die) => {
         const mesh = geometry(die.sides);
-        return { die, mesh, target: orientation(die, mesh), rotation: [0, 0, 0, 1], position: [0, 0, 0], scale: die.sides === 6 ? 1.35 : die.sides === 10 ? 1.2 : 1.13, axis: unit([1 + index * 0.17, 0.6, 0.8 + index * 0.11]), lift: 0 };
+        return { die, mesh, target: orientation(die, mesh), rotation: [0, 0, 0, 1], position: [0, 0, 0], scale: die.sides === 6 ? 1.35 : die.sides === 10 ? 1.2 : 1.13, throw: random(), lift: 0 };
       });
       const kept = items.filter((item) => item.die.kept);
       survivor = items.length > 1 && kept.length === 1 ? kept[0] : null;
@@ -58529,11 +58542,11 @@ function renderSpells(c) {
   return `<div class="page-head mobile-stack carnet-spell-head"><h1>${uiText("nav.spells")}</h1><details class="carnet-edit-menu"><summary aria-label="${uiText("Choisir mes sorts")}">${icon("edit", 17)}</summary><div class="carnet-edit-popover">${casters.length ? button(uiText("Choisir mes sorts"), "edit-magic", "", "ghost") : ""}${spellCopyBooks(c).length ? button(uiText("Copier un sort"), "copy-spell", "", "ghost") : ""}<div class="segmented"><button data-action="spell-tab" data-value="mine" class="${ui.spellTab === "mine" ? "active" : ""}">${uiText("Mes sorts ({p13})", { p13: ids.size })}</button>${casters.length || c.spells.allowExceptions ? `<button data-action="spell-tab" data-value="catalogue" class="${ui.spellTab === "catalogue" ? "active" : ""}">${uiText("Catalogue de ma classe")}</button>` : ""}</div></div></details></div>${renderProgressionRequirements(c, featSpellRequirements(c))}${overview ? `<div class="desktop-magic-overview magic-overview"><div class="desktop-magic-metrics">` : ""}${metrics}${innateNote.length ? `<p class="tiny muted">${uiText("Magie d’origine ou de don : {p0}.", { p0: innateNote.map((a) => uiText("{p0} DD {p1}, attaque {p2}", { p0: uiAbilities[a].name, p1: 8 + d.prof + d.mods[a], p2: signed(d.prof + d.mods[a]) })).join(" · ") })}</p>` : ""}${overview ? "</div>" : ""}${
     slotGroupCount
       ? `<details class="panel slot-summary-panel" data-detail="spell-slots-${c.id}"><summary><strong>${uiText("Emplacements")}</strong><span>${Array.from({ length: 9 }, (_, i) => { const max = (d.slots[i] || 0) + (c.state.temporarySlots?.[i + 1] || 0); return max ? `${i + 1} · ${Math.max(0, max - (c.state.slotsUsed?.[i + 1] || 0))}/${max}` : ""; }).filter(Boolean).join(" · ")}${d.pact ? ` · ${uiText("Pacte")} ${Math.max(0, d.pact.count - (c.state.pactUsed || 0))}/${d.pact.count}` : ""}</span></summary>${renderSlots(c, { compact: true })}</details>`
-      : notice(casters.length ? uiText("Tes premiers emplacements arrivent avec le prochain niveau de ta classe.") : uiText("Ta classe ne lance pas de sorts. La magie d’origine, de don ou maison reste utilisable."))
+      : casters.length ? notice(uiText("Tes premiers emplacements arrivent avec le prochain niveau de ta classe.")) : ""
   }${overview ? "</div>" : ""}${renderRunePanel(c)}${c.state.concentration ? `<div class="notice purple section-gap">${icon("sparkles", 19)}<div><strong>${uiText("Concentration : {p1}", { p1: esc(c.state.concentration) })}</strong><button class="link-btn" data-action="end-concentration">${uiText("Mettre fin à la concentration")}</button>${renderCompactHelp(uiText("Un seul sort de concentration à la fois."))}</div></div>` : ""}<div class="spell-toolbar"><div class="search-wrap">${icon("search", 18)}<input id="spell-search" class="search-input" data-bind="ui.spellQuery" value="${esc(ui.spellQuery)}" placeholder="${uiText("Rechercher un sort…")}" aria-label="${uiText("Rechercher un sort")}"></div></div><div class="carnet-spell-levels" role="group" aria-label="${uiText("Niveau de sort")}">${levels.map((level) => button(level === "all" ? uiText("Tous") : level === "0" ? uiText("Mineurs") : uiText("Niv. {p0}", { p0: level }), "spell-level", `data-value="${level}" aria-pressed="${ui.spellLevel === level}"`, `ghost ${ui.spellLevel === level ? "active" : ""}`)).join("")}</div>${searchResults(
     list.length
       ? `<div class="spell-grid">${grouped}</div>`
-      : `<div class="panel empty"><span class="empty-icon">${icon("book", 29)}</span><h2>${ui.spellQuery ? uiText("Aucun sort trouvé") : uiText("Aucun sort sélectionné")}</h2>${ui.spellQuery ? ("<p>" + uiText("Essaie un autre nom ou ajoute un sort maison.") + "</p>") : ""}${casters.length ? button(uiText("Choisir mes sorts"), "edit-magic", "", "primary") : ""}</div>`
+      : `<div class="panel empty"><span class="empty-icon">${icon("book", 29)}</span><h2>${ui.spellQuery ? uiText("Aucun sort trouvé") : uiText("Aucun sort")}</h2>${ui.spellQuery ? ("<p>" + uiText("Essaie un autre nom ou ajoute un sort maison.") + "</p>") : ""}${casters.length ? button(uiText("Choisir mes sorts"), "edit-magic", "", "primary") : ""}</div>`
   )}<div class="catalogue-note">${esc(uiText("spells.catalogueNote").replace("{count}", SPELLS.length))}</div>`;
 }
 function magicDraft(target) {
@@ -61731,6 +61744,11 @@ function renderDamageOutcome(c, d) {
   const focus = !outcome.concentration ? "" : `<p data-damage-concentration="${outcome.concentration.dc}">${uiText("damage.concentration", { spell: esc(outcome.concentration.spell), dc: `<strong>${esc(uiText("damage.concentration.dc", { dc: outcome.concentration.dc }))}</strong>` })}</p>${reminder("war-caster")}`;
   return `${steps ? `<div class="damage-steps">${steps}</div>` : ""}${zero ? `<div data-hp-zero ${outcome.instantDeath ? "data-instant-death" : ""}>${notice(esc(zero), "warning")}</div>` : ""}${focus ? `<div class="damage-concentration">${focus}</div>` : ""}`;
 }
+/** Fenêtre « Recevoir des soins » : comme les dégâts, la règle choisit la réserve (la forme sauvage pendant la transformation, sinon le corps). */
+function renderHealOutcome(c) {
+  const step = healOutcome(c, Math.max(0, Number(ui.amount) || 0)).steps[0];
+  return `<div class="damage-steps"><p class="damage-step" data-heal-step="${step.reserve}">${esc(uiText("damage.step", { name: damageReserveNames(c)[step.reserve], before: step.before, after: step.after }))}</p></div>`;
+}
 function featureGroups(c) {
   const groups = new Map();
   for (const f of uiCharacterFeatures(c)) {
@@ -61868,7 +61886,7 @@ async function performSheet(action, el, c, data, d) {
     case "gold":
     case "xp":
       ui.amount = action === "gold" ? c.gold : action === "xp" ? c.xp : 5;
-      ui.form = { reserve: "" };
+      ui.form = {};
       openModal(action);
       break;
     case "hp-details": openModal("hp-details"); break;
@@ -61896,8 +61914,7 @@ async function performSheet(action, el, c, data, d) {
         ({ character: next, concentration: focus, steps } = damageOutcome(c, amount, d));
         message = "Dégâts appliqués.";
       } else if (type === "heal") {
-        if (!ui.form.reserve) break;
-        ({ character: next, steps } = healOutcome(c, amount, ui.form.reserve));
+        ({ character: next, steps } = healOutcome(c, amount));
         message = "Soins appliqués.";
       } else if (type === "temporary") {
         if (c.state.tempHp === 0 || ui.form.tempChoice === "replace") next = setTemporaryHitPoints(c, amount);
@@ -61960,14 +61977,12 @@ function renderSheetModals(c, d, cancel) {
   if (["damage", "heal", "temporary", "gold", "xp"].includes(ui.modal)) {
     const details = {
       damage: [uiText("Subir des dégâts"), uiText("Indique le montant déjà arbitré à la table."), uiText("Appliquer les dégâts")],
-      heal: [uiText("Ajouter des PV ou corriger une réserve"), uiText("Indique le montant à ajouter. La réserve ne dépasse pas son maximum."), uiText("Appliquer")],
+      heal: [uiText("Recevoir des soins"), uiText("Indique les PV récupérés."), uiText("Appliquer")],
       temporary: [uiText("PV temporaires"), uiText("Les PV temporaires ne s’additionnent pas. Choisis la réserve à conserver. Pour la retirer, indique 0 et choisis « Utiliser le montant indiqué »."), uiText("Enregistrer")],
       gold: [uiText("Ajuster la bourse"), uiText("Indique le total de pièces d’or, pas la différence."), uiText("Enregistrer")],
       xp: [uiText("Points d’expérience"), uiText("Indique le total d’XP. Le niveau ne change jamais sans validation séparée."), uiText("Enregistrer")],
     }[ui.modal];
-    const reserves = { body: uiText("Corps ({p0} PV)", { p0: c.state.hp }), ...(c.state.wildShape ? { form: uiText("Forme ({p0} PV)", { p0: d.currentHp }) } : {}), ...(d.arcaneWard?.created ? { ward: uiText("Protection arcanique ({p0} PV)", { p0: d.arcaneWard.hp }) } : {}) };
-    const healed = ui.modal === "heal" && ui.form.reserve ? healOutcome(c, Number(ui.amount || 0), ui.form.reserve).steps[0] : null;
-    return modalShell(details[0], `<p class="modal-copy">${details[1]}</p>${ui.modal === "damage" ? renderDamageReminders(c, d) : ""}${ui.modal === "heal" ? selectField(uiText("Réserve concernée"), "form.reserve", ui.form.reserve, { "": uiText("Choisis une réserve"), ...reserves }) : ""}<label for="amount" class="sr-only">${uiText("Montant")}</label><input id="amount" class="big-number-input" type="number" inputmode="decimal" min="0" max="${ui.modal === "xp" ? 99999999 : 999999}" step="${ui.modal === "gold" ? "0.01" : "1"}" data-bind="ui.amount" value="${ui.amount}">${["damage", "heal"].includes(ui.modal) ? `<div class="quick-values">${[1, 5, 10, 20].map((n) => button(String(n), "quick-amount", `data-value="${n}"`, "small-btn")).join("")}</div>${ui.modal === "damage" ? `<div class="damage-outcome" data-damage-outcome aria-live="polite">${renderDamageOutcome(c, d)}</div>` : healed ? `<div class="summary-row"><span>${uiText("PV après application")}</span><strong data-hp-preview>${healed.after}</strong></div>` : ""}` : ""}${ui.modal === "temporary" && c.state.tempHp > 0 ? selectField(uiText("Réserve à conserver"), "form.tempChoice", ui.form.tempChoice, { keep: uiText("Conserver {p0} PV", { p0: c.state.tempHp }), replace: uiText("Utiliser le montant indiqué") }) : ""}`, cancel + button(details[2], "apply-amount", ui.modal === "heal" && !ui.form.reserve ? "disabled" : "", "primary"));
+    return modalShell(details[0], `<p class="modal-copy">${details[1]}</p>${ui.modal === "damage" ? renderDamageReminders(c, d) : ""}<label for="amount" class="sr-only">${uiText("Montant")}</label><input id="amount" class="big-number-input" type="number" inputmode="decimal" min="0" max="${ui.modal === "xp" ? 99999999 : 999999}" step="${ui.modal === "gold" ? "0.01" : "1"}" data-bind="ui.amount" value="${ui.amount}">${["damage", "heal"].includes(ui.modal) ? `<div class="quick-values">${[1, 5, 10, 20].map((n) => button(String(n), "quick-amount", `data-value="${n}"`, "small-btn")).join("")}</div>${ui.modal === "damage" ? `<div class="damage-outcome" data-damage-outcome aria-live="polite">${renderDamageOutcome(c, d)}</div>` : `<div class="damage-outcome" data-heal-outcome aria-live="polite">${renderHealOutcome(c)}</div>`}` : ""}${ui.modal === "temporary" && c.state.tempHp > 0 ? selectField(uiText("Réserve à conserver"), "form.tempChoice", ui.form.tempChoice, { keep: uiText("Conserver {p0} PV", { p0: c.state.tempHp }), replace: uiText("Utiliser le montant indiqué") }) : ""}`, cancel + button(details[2], "apply-amount", "", "primary"));
   }
 }
 
@@ -63410,9 +63425,9 @@ document.addEventListener("input", (event) => {
         const c = activeCharacter(), outcome = document.querySelector("[data-damage-outcome]");
         if (outcome) { outcome.innerHTML = renderDamageOutcome(c, uiDerive(c)); revealDamageOutcome(); }
       }
-      if (el.dataset.bind === "ui.amount" && ui.form.reserve && ui.modal === "heal") {
-        const preview = document.querySelector("[data-hp-preview]");
-        if (preview) preview.textContent = String(healOutcome(activeCharacter(), Math.max(0, Number(ui.amount) || 0), ui.form.reserve).steps[0].after);
+      if (el.dataset.bind === "ui.amount" && ui.modal === "heal") {
+        const outcome = document.querySelector("[data-heal-outcome]");
+        if (outcome) outcome.innerHTML = renderHealOutcome(activeCharacter());
       }
     } catch (error) {
       reportError(error);
