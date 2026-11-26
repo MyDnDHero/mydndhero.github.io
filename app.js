@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-candidate-16";
+const APP_VERSION = "2.0.0-candidate-17";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -60546,7 +60546,7 @@ function renderAttacks(c, d) {
  */
 function openConcentrationSave(c, { spell, dc }) {
   rollCheck(uiText("Jet de sauvegarde de {p0}", { p0: uiAbilities.con.name }), uiDerive(c).saves.con, "check", {
-    modeRoll: { kind: "save", ability: "con", concentration: true }, received: "save", launchLabel: uiText("Lancer la sauvegarde"),
+    fxAbility: "con", modeRoll: { kind: "save", ability: "con", concentration: true }, received: "save", launchLabel: uiText("Lancer la sauvegarde"),
     dc: { value: dc, concentration: spell, label: uiText("roll.concentration.dc", { spell, dc }), success: uiText("roll.concentration.success", { spell, dc }), failure: uiText("roll.concentration.failure", { spell, dc }) },
   });
 }
@@ -60931,7 +60931,11 @@ function revealAfterRoll() {
 // Mot du 1 ou du 20 naturel pour le jet affiché, sans rejouer l'effet (startDiceDialog le joue au lancer).
 function rollCriticalWord(r) {
   const attackFx = r.sequence?.step === "attack" && !r.result.external;
-  return attackFx || r.fxAbility && !r.result.parts ? diceFxVerdict(r.result, { total: r.fxTotal, critThreshold: attackFx ? rollCritThreshold(r) : 20 }) : null;
+  return attackFx || r.fxAbility ? diceFxVerdict(r.result, { total: rollFxTotal(r), critThreshold: attackFx ? rollCritThreshold(r) : 20 }) : null;
+}
+// Le calcul reste sous le mot quand le total compte : initiative, seuil connu (concentration), dé ajouté (Bénédiction) à un test ou une sauvegarde.
+function rollFxTotal(r) {
+  return r.fxTotal || !r.sequence && r.request.kind !== "death" && (!!r.dc || !!r.result?.parts);
 }
 // Note d'un jet lancé : sources du mode, Savoir-faire, lecture du d20 d'une attaque, dés relancés ou relevés.
 function rollResultNote(r) {
@@ -61105,8 +61109,12 @@ function updateDiceDialog() {
   dialog.dataset.rollPhase = fresh.dataset.rollPhase;
   dialog.querySelector(".dice-tray").disabled = fresh.querySelector(".dice-tray").disabled;
   for (const part of [".dice-head-actions", ".dice-panel-body", ".dice-after-roll", ".dice-verdict-zone", ".dice-sequence", ".dice-roll-modes", ".dice-quantity", ".dice-tray-hint", ".dice-outcome", ".dice-roll-extra", ".modal-footer"]) {
-    // Pendant un effet, le mot et son style appartiennent à l'effet.
-    if (part === ".dice-outcome" && ui.roll.critical?.live) continue;
+    // Pendant un effet, le mot et son style appartiennent à l'effet ; seul le verdict du seuil connu (concentration) suit le résultat.
+    if (part === ".dice-outcome" && ui.roll.critical?.live) {
+      const target = dialog.querySelector("[data-roll-dc]"), source = fresh.querySelector("[data-roll-dc]");
+      if (target && source) target.replaceWith(source); else if (source) dialog.querySelector(part)?.append(source); else target?.remove();
+      continue;
+    }
     const target = dialog.querySelector(part), source = fresh.querySelector(part);
     if (target && source && target.innerHTML !== source.innerHTML) target.innerHTML = source.innerHTML;
   }
@@ -61139,7 +61147,7 @@ function showPreparedDice() {
 function playCriticalFx(r, plan) {
   const c = activeCharacter(), focusFinish = () => modalRoot.querySelector("#dice-accept, #dice-finish")?.focus({ preventScroll: true });
   return playDiceFx(plan, {
-    dialog: modalRoot.querySelector(".dice-roll-dialog"), renderer: diceRenderer, kind: r.critical.kind, value: r.result.natural, bonus: r.result.bonus, detail: r.critical.detail, keepTotal: r.fxTotal,
+    dialog: modalRoot.querySelector(".dice-roll-dialog"), renderer: diceRenderer, kind: r.critical.kind, value: r.result.natural, bonus: r.result.bonus, detail: r.critical.detail, keepTotal: rollFxTotal(r),
     hero: { name: c?.name, portrait: portraitUrl(c), ability: r.fxAbility },
     onResult() { r.phase = "result"; updateDiceDialog(); focusFinish(); revealAfterRoll(); },
     onFailure(error) {
@@ -61163,9 +61171,8 @@ async function startDiceDialog() {
   r.phase = "rolling";
   const result = r.result;
   r.note = rollResultNote(r);
-  // 1 ou 20 naturel sur un test de caractéristique ou de compétence, une sauvegarde ou l'initiative : le mot remplace le total.
-  // L'initiative garde son calcul sous le mot, car le MJ en a besoin pour l'ordre des tours.
-  // Les attaques ont aussi leurs effets de critique et de fumble, même avec un dé ajouté (Bénédiction).
+  // 1 ou 20 naturel sur tout jet de d20 (test, sauvegarde, concentration, initiative, attaque, contre la mort), même avec un dé ajouté
+  // (Bénédiction) : le mot remplace le total, qui reste sous le mot quand il compte (rollFxTotal).
   r.critical = rollCriticalWord(r);
   const plan = r.critical && !matchMedia("(prefers-reduced-motion: reduce)").matches
     ? planDiceFx(r.critical.kind, { single: result.dice.length === 1, portrait: !!portraitUrl(activeCharacter()) }) : null;
@@ -61177,7 +61184,7 @@ async function startDiceDialog() {
     if (r.request.kind === "death") await applyDeathDiceResult(r);
     await animation;
     if (ui.roll !== r || ui.modal !== "roll") { if (r.request.kind === "death") render(); return; }
-    if (plan) { await playCriticalFx(r, plan); return; }
+    if (plan) { await playCriticalFx(r, plan); if (r.request.kind === "death" && ui.roll === r) render(); return; }
     r.phase = "result";
     // Seule la sauvegarde contre la mort change la fiche pendant le jet.
     if (r.request.kind === "death") render(); else updateDiceDialog();
@@ -61441,7 +61448,7 @@ async function performDice(action, el, c, data, d) {
           const modeSources = rollModeSources(c, { kind: "death" }, d);
           return { modeSources, optionList: [...modeOptions(modeSources), ...checkRollOptions(c, { kind: "death" }, d), ...receivedRollOptions(c, ["save"])] };
         },
-        help: "Le résultat est enregistré dès le lancer.",
+        help: "Le résultat est enregistré dès le lancer.", fxAbility: "death",
       });
       break;
     }
