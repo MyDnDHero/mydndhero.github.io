@@ -2987,6 +2987,7 @@ img[data-photo-id]:not([src]):not([data-photo-missing]){color:transparent}
 .audit-more-identity{margin:0 0 10px;color:var(--muted)}
 .audit-settings-more{margin-top:16px}
 .audit-settings-version{margin:12px 0 0;color:var(--muted);font-size:12px}
+.audit-update-now{margin-top:8px}
 .audit-settings-more>.btn{padding:6px 0;border:0;background:transparent;color:var(--muted);font-family:inherit}
 .audit-back{margin-bottom:16px}
 .audit-character-actions{margin-top:20px;font-size:14px;color:var(--muted)}

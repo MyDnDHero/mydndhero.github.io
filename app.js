@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-candidate-18";
+const APP_VERSION = "2.0.0-candidate-19";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -4030,6 +4030,9 @@ const UI_FR = Object.freeze({
   "listOrder.help": "Races, classes et historiques. « Manuel d’abord » place ceux du Manuel des joueurs en tête, puis les autres de A à Z.",
   "listOrder.failure": "L’ordre choisi est actif, mais ce navigateur n’a pas pu le conserver.",
   "update.downloading": "Nouvelle version en cours de téléchargement…",
+  "update.now": "Mettre à jour maintenant",
+  "update.latest": "Tu as déjà la dernière version.",
+  "update.failed": "Mise à jour impossible pour l’instant. Vérifie ta connexion.",
   "settings.version": "Version {p0} · build {p1}",
   "units.capacityKnown": "Au moins {p0} pour {p1} de capacité.",
   "units.overCapacity": "Sac trop lourd : {p0} / {p1}.",
@@ -9073,6 +9076,9 @@ const UI_EN = Object.freeze({
   "listOrder.help": "Races, classes and backgrounds. “Handbook first” lists the Player’s Handbook entries first, then the others from A to Z.",
   "listOrder.failure": "The order is active, but this browser could not save it.",
   "update.downloading": "Downloading a new version…",
+  "update.now": "Update now",
+  "update.latest": "You already have the latest version.",
+  "update.failed": "Update not possible right now. Check your connection.",
   "settings.version": "Version {p0} · build {p1}",
   "units.capacityKnown": "At least {p0} for {p1} carrying capacity.",
   "units.overCapacity": "Bag too heavy: {p0} / {p1}.",
@@ -56494,9 +56500,29 @@ function renderHomebrew(c) {
 function auditMenuRow(route, ico, title, { action = "navigate", disabled = false, extra = "" } = {}) {
   return `<button type="button" class="audit-menu-row" data-action="${action}" data-route="${route}" ${disabled ? "disabled" : ""} ${extra}>${icon(ico, 20)}<span>${title}</span><b aria-hidden="true">›</b></button>`;
 }
-// Version et build, en bas de « Plus » (mobile) et de « Réglages ».
+// Version et build, en bas de « Plus » (mobile) et de « Réglages », avec « Mettre à jour maintenant » quand l’appli gère ses mises à jour.
 function appVersionLine() {
-  return `<p class="audit-settings-version">${uiText("settings.version", { p0: APP_VERSION, p1: (document.querySelector('meta[name="compagnon-build"]')?.content || "").slice(0, 12) })}</p>`;
+  return `<p class="audit-settings-version">${uiText("settings.version", { p0: APP_VERSION, p1: (document.querySelector('meta[name="compagnon-build"]')?.content || "").slice(0, 12) })}</p>${SERVICE_WORKER_POSSIBLE ? button(uiText("update.now"), "update-now", "", "small-btn ghost audit-update-now") : ""}`;
+}
+/** Bascule sur la version téléchargée, après avoir gardé le brouillon de création ; refusé pendant un import AideDD ou une progression. */
+async function applyUpdate() {
+  if (ui.wizard?.aidedd || ui.modal === "aidedd") return toast(uiText("aidedd.finishBeforeUpdate"));
+  if (ui.levelFlow) return toast(uiText("Valide ou annule d’abord la progression en cours."));
+  if (ui.wizard) {
+    clearTimeout(draftTimeout);
+    const draft = clone(ui.wizard);
+    await mutateApp(
+      (s) => {
+        s.draft = draft;
+      },
+      { redraw: false },
+    );
+  }
+  if (swRegistration?.waiting) {
+    await saveQueue;
+    updateRequested = true;
+    swRegistration.waiting.postMessage({ type: "SKIP_WAITING" });
+  } else location.reload();
 }
 function renderMore(c) {
   if (ui.auditMoreCompanions && c) return `<div class="audit-more"><div class="page-head"><h1>${uiText("audit.more.companions")}</h1></div>${button(uiText("audit.settings.back"), "audit-more-back", "", "small-btn ghost audit-back")}<section class="panel">${renderCreations(c, true)}</section></div>`;
@@ -57081,30 +57107,18 @@ async function performMore(action, el, c, data, d) {
       } else openModal("install");
       break;
     case "update-app":
-      if (ui.wizard?.aidedd || ui.modal === "aidedd") {
-        toast(uiText("aidedd.finishBeforeUpdate"));
-        break;
-      }
-      if (ui.levelFlow) {
-        toast(uiText("Valide ou annule d’abord la progression en cours."));
-        break;
-      }
-      if (ui.wizard) {
-        clearTimeout(draftTimeout);
-        const draft = clone(ui.wizard);
-        await mutateApp(
-          (s) => {
-            s.draft = draft;
-          },
-          { redraw: false },
-        );
-      }
-      if (swRegistration?.waiting) {
-        await saveQueue;
-        updateRequested = true;
-        swRegistration.waiting.postMessage({ type: "SKIP_WAITING" });
-      } else location.reload();
+      await applyUpdate();
       break;
+    case "update-now": {
+      // Une version déjà téléchargée s’installe ; sinon la vérification part tout de suite, et la version trouvée s’installe à la fin du téléchargement.
+      if (ui.update) { await applyUpdate(); break; }
+      updateNow = true;
+      const result = await checkForUpdate();
+      if (result === "new") { if (ui.update && updateNow) { updateNow = false; await applyUpdate(); } break; }
+      updateNow = false;
+      toast(uiText(result === "latest" ? "update.latest" : "update.failed"));
+      break;
+    }
     case "copy-export": {
       const box = document.getElementById("export-json");
       try {
@@ -63583,6 +63597,7 @@ let appData = emptyState(),
   deferredInstall = null,
   swRegistration = null,
   updateRequested = false,
+  updateNow = false,
   lastFocus = null;
 const installedAppMedia = ["standalone", "fullscreen", "minimal-ui", "window-controls-overlay"].map((mode) => window.matchMedia(`(display-mode: ${mode})`));
 let appInstalled = false;
@@ -64566,7 +64581,7 @@ async function perform(action, el) {
     case "edit-trait": case "review-trait": case "toggle-trait": case "delete-trait": case "new-custom-spell": case "edit-custom-spell": case "review-custom-spell":
     case "delete-custom-spell": case "export-one": case "export-all": case "aidedd-same-class": case "aidedd-resolve": case "aidedd-open": case "aidedd-back":
     case "aidedd-export": case "aidedd-report": case "aidedd-edit": case "aidedd-confirm": case "import": case "import-choice": case "confirm-import": case "persist-storage": case "install":
-    case "update-app": case "copy-export": case "paste-import": case "parse-import-text": case "toggle-components": case "toggle-ammunition": case "set-theme":
+    case "update-app": case "update-now": case "copy-export": case "paste-import": case "parse-import-text": case "toggle-components": case "toggle-ammunition": case "set-theme":
       await performMore(action, el, c, data, d); break;
     case "reload-library": case "library-browse": case "inventory-library": case "library-home": case "library-group": case "library-type": case "library-all":
     case "library-clear-filters": case "library-favorites": case "library-favorite": case "library-page": case "library-select": case "open-reference":
@@ -65106,31 +65121,42 @@ function receiveUpdateProgress(event) {
   const percent = document.querySelector("[data-update-percent]");
   if (percent) percent.textContent = uiText("update.percent", { percent: Math.floor(100 * data.done / data.total) });
 }
-// L’appli installée reste ouverte des jours : à l’ouverture, puis au retour sur l’onglet après une minute d’absence,
-// un petit fichier dit quel build est publié. S’il a changé, le téléchargement part aussitôt et le bandeau le signale.
+// L’appli installée reste ouverte des jours : un petit fichier dit quel build est publié. Elle le lit au démarrage, puis au retour sur l’appli
+// et à chaque toucher ou touche, au plus une fois par minute (décision de Luca du 28 novembre 2026) : un iPhone peut rendre la main avant le réseau,
+// et un échec se retente ainsi au geste suivant. Si le build a changé, le téléchargement part aussitôt et le bandeau le signale.
 const UPDATE_CHECK_PAUSE = 60 * 1000;
-let hiddenSince = null;
-async function checkForUpdate() {
-  if (!swRegistration || ui.update) return;
+let lastUpdateCheck = 0, updateCheck = null;
+const SERVICE_WORKER_POSSIBLE = !window.COMPANION_STANDALONE && "serviceWorker" in navigator && /^https?:$/.test(location.protocol);
+/** "new" : une version se télécharge ou attend ; "latest" : l’appli a déjà le build publié ; "failed" : fichier illisible, hors ligne, ou nouveau worker pas encore servi. */
+function checkForUpdate() {
+  if (!swRegistration) return Promise.resolve("failed");
+  if (ui.update) return Promise.resolve("new");
+  lastUpdateCheck = Date.now();
+  return updateCheck ||= runUpdateCheck().finally(() => { updateCheck = null; });
+}
+async function runUpdateCheck() {
+  let result = "failed";
   try {
     const response = await fetch(`./version.json?t=${Date.now()}`, { cache: "no-store" });
-    if (!response.ok) return;
-    const { appBuild } = await response.json();
-    if (!appBuild || appBuild === document.querySelector('meta[name="compagnon-build"]')?.content) return;
-    if (!ui.updateDownloading) { ui.updateDownloading = true; render(); }
-    await swRegistration.update();
-  } catch { /* Hors ligne : le prochain retour sur l’onglet vérifiera de nouveau. */ }
+    const { appBuild } = response.ok ? await response.json() : {};
+    if (appBuild && appBuild === document.querySelector('meta[name="compagnon-build"]')?.content) result = "latest";
+    else if (appBuild) {
+      if (!ui.updateDownloading) { ui.updateDownloading = true; render(); }
+      await swRegistration.update();
+      if (swRegistration.installing || swRegistration.waiting || ui.update) result = "new";
+    }
+  } catch { /* Hors ligne : le prochain geste, une minute plus tard, vérifiera de nouveau. */ }
   // Rien ne se télécharge (nouveau service worker pas encore servi, ou vérification interrompue) : le bandeau ne reste pas affiché.
   if (ui.updateDownloading && !ui.update && !swRegistration.installing && !swRegistration.waiting) { ui.updateDownloading = false; ui.updateProgress = null; render(); }
+  return result;
 }
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden) { hiddenSince = Date.now(); return; }
-  const away = hiddenSince !== null && Date.now() - hiddenSince >= UPDATE_CHECK_PAUSE;
-  hiddenSince = null;
-  if (away) void checkForUpdate();
-});
+function checkForUpdateIfDue() {
+  if (Date.now() - lastUpdateCheck >= UPDATE_CHECK_PAUSE) void checkForUpdate();
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden) checkForUpdateIfDue(); });
+for (const type of ["pointerdown", "keydown"]) document.addEventListener(type, checkForUpdateIfDue, { capture: true, passive: true });
 async function setupServiceWorker() {
-  if (window.COMPANION_STANDALONE || !("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) return;
+  if (!SERVICE_WORKER_POSSIBLE) return;
   try {
     navigator.serviceWorker.addEventListener("message", receiveUpdateProgress);
     swRegistration = await navigator.serviceWorker.register("./sw.js");
@@ -65146,12 +65172,14 @@ async function setupServiceWorker() {
           ui.updateDownloading = false;
           ui.updateProgress = null;
           render();
+          if (updateNow) { updateNow = false; void applyUpdate(); }
         }
         // Téléchargement abandonné : le bandeau disparaît, la prochaine vérification relancera.
         if (worker.state === "redundant" && ui.updateDownloading && !ui.update) {
           ui.updateDownloading = false;
           ui.updateProgress = null;
           render();
+          if (updateNow) { updateNow = false; toast(uiText("update.failed")); }
         }
       });
     });
