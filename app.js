@@ -6,7 +6,7 @@
 /** Constantes de règles D&D 5e (2014) : caractéristiques, compétences, classes de base, tables.
  * Données mécaniques et résumés originaux. Voir ATTRIBUTIONS.md pour les sources et licences.
  */
-const APP_VERSION = "2.0.0-candidate-17";
+const APP_VERSION = "2.0.0-candidate-18";
 const SCHEMA_VERSION = 2;
 const ABILITIES = {
   str: { name: "Force", short: "FOR", help: "Attaques de mêlée, Athlétisme, charge portée." },
@@ -5221,10 +5221,31 @@ const UI_FR = Object.freeze({
   "shop.sort.za": "Z → A",
   "shop.sort.desc": "Plus cher",
   "shop.sort.asc": "Moins cher",
-  "shop.full.open": "Chercher dans le catalogue complet",
-  "shop.full.close": "Revenir au catalogue rapide",
-  "shop.full.title": "Catalogue complet",
-  "shop.full.help": "Objets du Manuel des joueurs absents du catalogue rapide : montures, harnachement, nourriture, marchandises, véhicules…",
+  "shop.tab.all": "Tout",
+  "shop.tab.ammo": "Munitions",
+  "shop.tab.potions": "Potions",
+  "shop.tab.magic": "Magie",
+  "shop.category": "Catégorie",
+  "shop.terms.shop": "Échoppe",
+  "shop.terms.wealth": "Richesse",
+  "shop.wealth.pauvre": "Pauvre",
+  "shop.wealth.modeste": "Modeste",
+  "shop.wealth.classique": "Classique",
+  "shop.wealth.prospere": "Prospère",
+  "shop.kind.village": "Village",
+  "shop.kind.mage": "Mage",
+  "shop.kind.forgeron": "Forgeron",
+  "shop.kind.alchimiste": "Alchimiste",
+  "shop.kind.voleur": "Voleur",
+  "shop.kind.luxe": "Luxe",
+  "shop.rarity.common": "Commun",
+  "shop.rarity.uncommon": "Peu commun",
+  "shop.rarity.rare": "Rare",
+  "shop.rarity.veryRare": "Très rare",
+  "shop.rarity.legendary": "Légendaire",
+  "shop.drawn": "Tiré à cette visite",
+  "shop.choose": "Choisir",
+  "shop.basePlus": "Prix de l’arme + {price}",
   "shop.free": "Objet hors catalogue",
   "shop.cartEmpty": "Ajoute des objets depuis le catalogue, ou un objet hors catalogue.",
   "shop.remove": "Retirer du panier",
@@ -5320,7 +5341,6 @@ const UI_FR = Object.freeze({
   "shop.terms.buy": "Prix d’achat",
   "shop.terms.rule": "Règle 2014",
   "shop.terms.enter": "Entrer",
-  "shop.terms.apply": "Appliquer",
   "shop.price.sell": "Vendre : {name}",
   "shop.price.buy": "Acheter : {name}",
   "shop.price.add": "Ajouter au panier",
@@ -10244,10 +10264,31 @@ const UI_EN = Object.freeze({
   "shop.sort.za": "Z → A",
   "shop.sort.desc": "Most expensive",
   "shop.sort.asc": "Cheapest",
-  "shop.full.open": "Search the full catalogue",
-  "shop.full.close": "Back to the quick catalogue",
-  "shop.full.title": "Full catalogue",
-  "shop.full.help": "Player’s Handbook items missing from the quick catalogue: mounts, tack, food, trade goods, vehicles…",
+  "shop.tab.all": "All",
+  "shop.tab.ammo": "Ammunition",
+  "shop.tab.potions": "Potions",
+  "shop.tab.magic": "Magic",
+  "shop.category": "Category",
+  "shop.terms.shop": "Shop",
+  "shop.terms.wealth": "Wealth",
+  "shop.wealth.pauvre": "Poor",
+  "shop.wealth.modeste": "Modest",
+  "shop.wealth.classique": "Standard",
+  "shop.wealth.prospere": "Prosperous",
+  "shop.kind.village": "Village",
+  "shop.kind.mage": "Mage",
+  "shop.kind.forgeron": "Blacksmith",
+  "shop.kind.alchimiste": "Alchemist",
+  "shop.kind.voleur": "Thief",
+  "shop.kind.luxe": "Luxury",
+  "shop.rarity.common": "Common",
+  "shop.rarity.uncommon": "Uncommon",
+  "shop.rarity.rare": "Rare",
+  "shop.rarity.veryRare": "Very rare",
+  "shop.rarity.legendary": "Legendary",
+  "shop.drawn": "Drawn for this visit",
+  "shop.choose": "Choose",
+  "shop.basePlus": "Weapon price + {price}",
   "shop.free": "Item not in the catalogue",
   "shop.cartEmpty": "Add items from the catalogue, or an item that is not in it.",
   "shop.remove": "Remove from cart",
@@ -10343,7 +10384,6 @@ const UI_EN = Object.freeze({
   "shop.terms.buy": "Buying price",
   "shop.terms.rule": "2014 rule",
   "shop.terms.enter": "Enter",
-  "shop.terms.apply": "Apply",
   "shop.price.sell": "Sell: {name}",
   "shop.price.buy": "Buy: {name}",
   "shop.price.add": "Add to cart",
@@ -11035,6 +11075,13 @@ const ARMORS = {
   shield: { name: "Bouclier", type: "shield", bonus: 2, weight: 3, cost: "10 po" },
 };
 
+// Prix d'un lot de munitions spéciales en po : 20 flèches ou carreaux, 50 aiguilles ; le lot de 20 billes de fronde coûte la moitié.
+// Décision de Luca du 26 novembre 2026, après la page d'arbitrage des prix au lot.
+const SPECIAL_AMMUNITION_LOT_PRICES = Object.freeze({
+  "magicvariant||silvered ammunition": 100, "magicvariant||adamantine ammunition": 400, "item|xge|unbreakable arrow": 50, "magicvariant||walloping ammunition": 100,
+  "magicvariant||+1 ammunition": 400, "magicvariant||winged ammunition": 50, "magicvariant||dried leech": 30, "magicvariant||+2 ammunition": 1000,
+  "magicvariant||+3 ammunition": 5000, "magicvariant||arrow of slaying (*)": 10000, "magicvariant||bloodseeker ammunition": 2500,
+});
 const GEAR = {
   "burglars-pack": {
     name: "Sac de cambrioleur",
@@ -11205,7 +11252,9 @@ const GEAR = {
   "iron-pot": { name: "Pot en fer", kind: "gear", weight: 5, cost: "2 po" },
   shovel: { name: "Pelle", kind: "gear", weight: 2.5, cost: "2 po" },
   "hunting-trap": { name: "Piège à mâchoires", kind: "gear", weight: 12.5, cost: "5 po" },
-  "ball-bearings": { name: "Billes (sac de 1 000)", kind: "gear", weight: 1, cost: "1 po" },
+  // Sacs que le catalogue « + » ajoute à l'unité (décision de Luca du 26 novembre 2026) : unit, la pièce seule de la Bibliothèque.
+  "ball-bearings": { name: "Billes (sac de 1 000)", kind: "gear", weight: 1, cost: "1 po", unit: { id: "item|phb|ball bearing", name: "Bille" } },
+  caltrops: { name: "Chausse-trappes (sac de 20)", kind: "gear", weight: 1, cost: "1 po", unit: { id: "item|phb|caltrop", name: "Chausse-trappe" } },
   bell: { name: "Cloche", kind: "gear", weight: 0, cost: "1 po" },
   ink: { name: "Encre (bouteille de 30 ml)", kind: "gear", weight: 0, cost: "10 po" },
   "ink-pen": { name: "Plume d’écriture", kind: "gear", weight: 0, cost: "2 pc" },
@@ -25788,6 +25837,117 @@ const isEditorialDiagnostic = (code) => typeof code === "string" && (code.starts
   ["negation-review", "exception-review", "expansion", "untranslated-markup", "source-ambiguity:markup"].includes(code));
 
 
+// Module : generated/variant-names
+/** Noms français des objets composés, tirés de locales/fr/items.json. Généré hors réseau. */
+const VARIANT_BASES = Object.freeze({
+  "baseitem|dmg|antimatter rifle": "Fusil à antimatière",
+  "baseitem|dmg|automatic pistol": "Pistolet automatique",
+  "baseitem|dmg|automatic rifle": "Fusil automatique",
+  "baseitem|dmg|energy cell": "Cellule énergétique",
+  "baseitem|dmg|hunting rifle": "Fusil de chasse",
+  "baseitem|dmg|laser pistol": "Pistolet laser",
+  "baseitem|dmg|laser rifle": "Fusil laser",
+  "baseitem|dmg|modern bullet": "Balle moderne",
+  "baseitem|dmg|musket": "Mousquet",
+  "baseitem|dmg|pistol": "Pistolet",
+  "baseitem|dmg|renaissance bullet": "Balle de la Renaissance",
+  "baseitem|dmg|revolver": "Revolver",
+  "baseitem|dmg|shotgun": "Fusil à pompe",
+  "baseitem|dsotdq|hoopak": "Hoopak",
+  "baseitem|erlw|double-bladed scimitar": "Cimeterre à double lame",
+  "baseitem|oota|hooked shortspear": "Lance courte à crochet",
+  "baseitem|oota|light repeating crossbow": "Arbalète légère à répétition",
+  "baseitem|phb|arrow": "Flèche",
+  "baseitem|phb|battleaxe": "Hache d’armes",
+  "baseitem|phb|blowgun": "Sarbacane",
+  "baseitem|phb|blowgun needle": "Aiguille de sarbacane",
+  "baseitem|phb|breastplate": "Cuirasse",
+  "baseitem|phb|chain mail": "Cotte de mailles",
+  "baseitem|phb|chain shirt": "Chemise de mailles",
+  "baseitem|phb|club": "Gourdin",
+  "baseitem|phb|crossbow bolt": "Carreau d’arbalète",
+  "baseitem|phb|crystal": "Cristal",
+  "baseitem|phb|dagger": "Dague",
+  "baseitem|phb|dart": "Fléchette",
+  "baseitem|phb|flail": "Fléau d’armes",
+  "baseitem|phb|glaive": "Coutille",
+  "baseitem|phb|greataxe": "Hache à deux mains",
+  "baseitem|phb|greatclub": "Massue",
+  "baseitem|phb|greatsword": "Épée à deux mains",
+  "baseitem|phb|halberd": "Hallebarde",
+  "baseitem|phb|half plate armor": "Demi-plate",
+  "baseitem|phb|hand crossbow": "Arbalète de poing",
+  "baseitem|phb|handaxe": "Hachette",
+  "baseitem|phb|heavy crossbow": "Arbalète lourde",
+  "baseitem|phb|hide armor": "Armure de peaux",
+  "baseitem|phb|javelin": "Javeline",
+  "baseitem|phb|lance": "Lance d’arçon",
+  "baseitem|phb|leather armor": "Armure de cuir",
+  "baseitem|phb|light crossbow": "Arbalète légère",
+  "baseitem|phb|light hammer": "Marteau léger",
+  "baseitem|phb|longbow": "Arc long",
+  "baseitem|phb|longsword": "Épée longue",
+  "baseitem|phb|mace": "Masse d’armes",
+  "baseitem|phb|maul": "Maillet",
+  "baseitem|phb|morningstar": "Morgenstern",
+  "baseitem|phb|net": "Filet",
+  "baseitem|phb|orb": "Orbe",
+  "baseitem|phb|padded armor": "Armure matelassée",
+  "baseitem|phb|pike": "Pique",
+  "baseitem|phb|plate armor": "Harnois",
+  "baseitem|phb|quarterstaff": "Bâton",
+  "baseitem|phb|rapier": "Rapière",
+  "baseitem|phb|ring mail": "Broigne",
+  "baseitem|phb|rod": "Sceptre",
+  "baseitem|phb|scale mail": "Armure d’écailles",
+  "baseitem|phb|scimitar": "Cimeterre",
+  "baseitem|phb|shield": "Bouclier",
+  "baseitem|phb|shortbow": "Arc court",
+  "baseitem|phb|shortsword": "Épée courte",
+  "baseitem|phb|sickle": "Serpe",
+  "baseitem|phb|sling": "Fronde",
+  "baseitem|phb|sling bullet": "Bille de fronde",
+  "baseitem|phb|spear": "Lance",
+  "baseitem|phb|splint armor": "Clibanion",
+  "baseitem|phb|staff": "Bâton",
+  "baseitem|phb|studded leather armor": "Armure de cuir clouté",
+  "baseitem|phb|trident": "Trident",
+  "baseitem|phb|wand": "Baguette",
+  "baseitem|phb|war pick": "Pic de guerre",
+  "baseitem|phb|warhammer": "Marteau de guerre",
+  "baseitem|phb|whip": "Fouet",
+  "baseitem|phb|wooden staff": "Bâton en bois",
+  "baseitem|scag|spiked armor": "Armure à pointes",
+  "baseitem|toa|yklwa": "Yklwa"
+});
+const VARIANT_QUALIFIERS = Object.freeze({"magicvariant||+1 ammunition":["+1"],"magicvariant||+1 armor":["+1"],"magicvariant||+1 shield (*)":["+1"],"magicvariant||+1 weapon":["+1"],"magicvariant||+1 weapon (no damage)":["+1"],"magicvariant||+2 ammunition":["+2"],"magicvariant||+2 armor":["+2"],"magicvariant||+2 shield (*)":["+2"],"magicvariant||+2 weapon":["+2"],"magicvariant||+2 weapon (no damage)":["+2"],"magicvariant||+3 ammunition":["+3"],"magicvariant||+3 armor":["+3"],"magicvariant||+3 shield (*)":["+3"],"magicvariant||+3 weapon":["+3"],"magicvariant||+3 weapon (no damage)":["+3"],"magicvariant||acheron blade":["d’Achéron"],"magicvariant||adamantine ammunition":["en adamantium"],"magicvariant||adamantine armor":["d’adamantium"],"magicvariant||adamantine weapon":["en adamantium"],"magicvariant||antimagic armor":["d’antimagie"],"magicvariant||armblade":["Lame de bras ({base})"],"magicvariant||armor of acid resistance":["de résistance aux dégâts d’acide"],"magicvariant||armor of cold resistance":["de résistance aux dégâts de froid"],"magicvariant||armor of fire resistance":["de résistance aux dégâts de feu"],"magicvariant||armor of force resistance":["de résistance aux dégâts de force"],"magicvariant||armor of fungal spores":["de spores fongiques"],"magicvariant||armor of gleaming":["rutilant|rutilante"],"magicvariant||armor of lightning resistance":["de résistance aux dégâts de foudre"],"magicvariant||armor of necrotic resistance":["de résistance aux dégâts nécrotiques"],"magicvariant||armor of poison resistance":["de résistance aux dégâts de poison"],"magicvariant||armor of psychic resistance":["de résistance aux dégâts psychiques"],"magicvariant||armor of radiant resistance":["de résistance aux dégâts radiants"],"magicvariant||armor of safeguarding":["de préservation"],"magicvariant||armor of the fallen":["des défunts"],"magicvariant||armor of thunder resistance":["de résistance aux dégâts de tonnerre"],"magicvariant||armor of weightlessness":["d’apesanteur"],"magicvariant||arrow of slaying (*)":["tueur|tueuse"],"magicvariant||ascendant dragon's wrath weapon":["du courroux draconique ascendant|du courroux draconique ascendante"],"magicvariant||barding":["Barde ({base})"],"magicvariant||berserker axe":["du berserker"],"magicvariant||blade of the medusa":["de la Méduse"],"magicvariant||bloodseeker ammunition":["chercheur de sang|chercheuse de sang"],"magicvariant||bloodshed blade":["sanguinaire"],"magicvariant||bow of conflagration":["incendiaire"],"magicvariant||bow of melodies":["des mélodies"],"magicvariant||cast-off armor":["à retrait rapide"],"magicvariant||clockwork armor":["mécanique"],"magicvariant||corpse slayer":["tueur de cadavres|tueuse de cadavres"],"magicvariant||crystal blade":["de cristal"],"magicvariant||dancing sword":["dansant|dansante"],"magicvariant||defender":["gardien|gardienne"],"magicvariant||demon skin":["Peau de démon ({base})"],"magicvariant||demonbone polearm":["en os de démon"],"magicvariant||dragon slayer":["tueur de dragons|tueuse de dragons"],"magicvariant||dragon wing bow":["de l’essor draconique"],"magicvariant||dragonlance":["Lance dragon ({base})"],"magicvariant||dried leech":["à sangsue séchée"],"magicvariant||drow +1 armor":["drow +1"],"magicvariant||drow +1 weapon":["drow +1"],"magicvariant||drow +2 armor":["drow +2"],"magicvariant||drow +2 weapon":["drow +2"],"magicvariant||drow +3 armor":["drow +3"],"magicvariant||drow +3 weapon":["drow +3"],"magicvariant||feywrought armor":["forgé par les fées|forgée par les fées"],"magicvariant||flame tongue":["ardent|ardente"],"magicvariant||fool's blade":["du fou"],"magicvariant||forcebreaker weapon":["brise-force"],"magicvariant||frost brand":["de fer gelé"],"magicvariant||gambler's blade":["du flambeur"],"magicvariant||giant slayer":["tueur de géants|tueuse de géants"],"magicvariant||glimmering moonbow":["lunaire scintillant|lunaire scintillante"],"magicvariant||gloomwrought armor":["forgé par les ombres|forgée par les ombres"],"magicvariant||hellfire weapon":["du feu infernal"],"magicvariant||holy avenger":["vengeur sacré|vengeresse sacrée"],"magicvariant||imbued wood (fernian ash)":["en frêne de Fernia"],"magicvariant||imbued wood (irian rosewood)":["en palissandre d’Irian"],"magicvariant||imbued wood (kythrian manchineel)":["en mancenillier de Kythri"],"magicvariant||imbued wood (lamannian oak)":["en chêne de Lamannia"],"magicvariant||imbued wood (mabaran ebony)":["en ébène de Mabar"],"magicvariant||imbued wood (risian pine)":["en pin de Risia"],"magicvariant||imbued wood (shavarran birch)":["en bouleau de Shavarath"],"magicvariant||imbued wood (xorian wenge)":["en wengé de Xoriat"],"magicvariant||last stand armor":["du dernier combat"],"magicvariant||living armor":["vivant|vivante"],"magicvariant||luck blade":["porte-bonheur"],"magicvariant||mariner's armor":["de matelot"],"magicvariant||mind blade":["Lame mentale ({base})"],"magicvariant||mind carapace armor":["à carapace mentale"],"magicvariant||mithral +1 armor":["de mithral +1"],"magicvariant||mithral armor":["de mithral"],"magicvariant||mizzium armor":["de mizzium"],"magicvariant||molten bronze skin":["Peau de bronze en fusion ({base})"],"magicvariant||moon-touched sword":["de lumière lunaire"],"magicvariant||nine lives stealer":["voleur des neuf vies|voleuse des neuf vies"],"magicvariant||orb of shielding (fernian basalt)":["en basalte de Fernia"],"magicvariant||orb of shielding (irian quartz)":["en quartz d’Irian"],"magicvariant||orb of shielding (kythrian skarn)":["en skarn de Kythri"],"magicvariant||orb of shielding (lamannian flint)":["en silex de Lamannia"],"magicvariant||orb of shielding (mabaran obsidian)":["en obsidienne de Mabar"],"magicvariant||orb of shielding (risian shale)":["en schiste de Risia"],"magicvariant||orb of shielding (shavarran chert)":["en chaille de Shavarath"],"magicvariant||orb of shielding (xorian marble)":["en marbre de Xoriat"],"magicvariant||polymorph blade":["de métamorphose"],"magicvariant||ruidium armor":["de ruidium"],"magicvariant||ruidium weapon":["en ruidium"],"magicvariant||silvered ammunition":["argenté|argentée"],"magicvariant||silvered weapon":["argenté|argentée"],"magicvariant||slumbering dragon's wrath weapon":["du courroux draconique assoupi|du courroux draconique assoupie"],"magicvariant||smoldering armor":["fumant|fumante"],"magicvariant||starshot crossbow":["stellaire"],"magicvariant||stirring dragon's wrath weapon":["du courroux draconique frémissant|du courroux draconique frémissante"],"magicvariant||stygian spear":["stygien|stygienne"],"magicvariant||sword of life stealing":["voleur de vie|voleuse de vie"],"magicvariant||sword of retribution":["du châtiment"],"magicvariant||sword of sharpness":["acéré|acérée"],"magicvariant||sword of the planes":["des plans"],"magicvariant||sword of vengeance":["vengeur|vengeresse"],"magicvariant||sword of wounding":["mordant|mordante"],"magicvariant||vicious +1 weapon":["vicieux +1|vicieuse +1"],"magicvariant||vicious weapon":["vicieux|vicieuse"],"magicvariant||vorpal sword":["vorpal|vorpale"],"magicvariant||wakened dragon's wrath weapon":["du courroux draconique éveillé|du courroux draconique éveillée"],"magicvariant||walloping ammunition":["percutant|percutante"],"magicvariant||weapon of agonizing paralysis":["de paralysie déchirante"],"magicvariant||weapon of certain death":["de mort certaine"],"magicvariant||weapon of throne's command":["de commandement du trône"],"magicvariant||weapon of warning":["vigilant|vigilante"],"magicvariant||winged ammunition":["ailé|ailée"],"magicvariant||zephyr armor":["du zéphyr"]});
+
+
+// Module : variant-names
+
+// Objets de base masculins, reconnus au premier mot de leur nom ; les autres (épée, flèche, armure, cuirasse…) sont féminins.
+const VARIANT_MASCULINE = new Set(["arc", "bâton", "bouclier", "carreau", "cimeterre", "clibanion", "cristal", "filet", "fléau", "fouet", "fusil", "gourdin", "harnois", "hoopak", "maillet", "marteau", "morgenstern", "mousquet", "orbe", "pic", "pistolet", "revolver", "sceptre", "trident", "yklwa"]);
+
+/**
+ * Nom français d'une arme, d'une armure ou d'une munition spéciale : l'objet, puis son qualificatif accordé avec lui
+ * (demande de Luca du 25 novembre 2026 : « Carreau d’arbalète argenté », « Bille de fronde +2 »).
+ * Un qualificatif qui s'accorde porte ses deux formes, « argenté|argentée » ; « Barde ({base}) » met l'objet à la place de {base}.
+ */
+function variantItemName(base, ...qualifiers) {
+  const masculine = VARIANT_MASCULINE.has(base.toLowerCase().split(/[\s-]/)[0]);
+  return qualifiers.map((qualifier) => (qualifier || "").trim()).filter(Boolean).reduce((name, qualifier) => {
+    const [first, second = first] = qualifier.split("|"), form = masculine ? first : second;
+    return form.includes("{base}") ? form.replace("{base}", name[0].toLowerCase() + name.slice(1)) : `${name} ${form}`;
+  }, base);
+}
+
+/** Nom français d'un exemplaire, d'après l'objet de base et la variante qu'il garde ; vide si l'un des deux n'en a pas. */
+function variantReferenceName(baseReference, variantReference) {
+  const base = VARIANT_BASES[baseReference], qualifiers = VARIANT_QUALIFIERS[variantReference];
+  return base && qualifiers ? variantItemName(base, ...qualifiers) : "";
+}
+
+
 // Module : library
 
 const LIBRARY_TRANSLATION_PENDING = "Traduction à venir.";
@@ -25848,7 +26008,8 @@ function libraryReading(entry, definitions = new Map(), language = "fr") {
     }
   };
   copyTexts(base, baseEntry.type); copyTexts(variant, variantEntry.type);
-  data.name = `${variant.namePrefix || ""}${base.name}${variant.nameSuffix || ""}`;
+  // Sans qualificatif français, l'objet garde son nom anglais entier.
+  if (![variant.namePrefix, variant.nameSuffix].includes(LIBRARY_TRANSLATION_PENDING)) data.name = variantItemName(base.name, variant.namePrefix, variant.nameSuffix);
   data.entries = [...(variant.entries || []), ...(base.entries || [])];
   return data;
 }
@@ -28103,9 +28264,9 @@ const UI_CATALOGUE_UNIQUE_NAMES = Object.freeze({
   "Armure de résistance aux dégâts de force": "Armor of Force Resistance",
   "Armure de résistance aux dégâts de foudre": "Armor of Lightning Resistance",
   "Armure de résistance aux dégâts de froid": "Armor of Cold Resistance",
-  "Armure de résistance aux dégâts de nécrose": "Armor of Necrotic Resistance",
   "Armure de résistance aux dégâts de poison": "Armor of Poison Resistance",
   "Armure de résistance aux dégâts de tonnerre": "Armor of Thunder Resistance",
+  "Armure de résistance aux dégâts nécrotiques": "Armor of Necrotic Resistance",
   "Armure de résistance aux dégâts psychiques": "Armor of Psychic Resistance",
   "Armure de résistance aux dégâts radiants": "Armor of Radiant Resistance",
   "Armure de vulnérabilité": "Armor of Vulnerability",
@@ -28322,7 +28483,6 @@ const UI_CATALOGUE_UNIQUE_NAMES = Object.freeze({
   "Baies nourricières": "Goodberry",
   "Balai volant": "Broom of Flying",
   "Balance de marchand": "Merchant's Scale",
-  "Balle de fronde": "Sling Bullet",
   "Balle de la Renaissance": "Renaissance Bullet",
   "Balle moderne": "Modern Bullet",
   "Balles modernes (10)": "Modern Bullets (10)",
@@ -28397,6 +28557,7 @@ const UI_CATALOGUE_UNIQUE_NAMES = Object.freeze({
   "Bière (chope)": "Ale (mug)",
   "Bière (gallon)": "Ale (gallon)",
   "Bille": "Ball Bearing",
+  "Bille de fronde": "Sling Bullet",
   "Billes (sac de 1 000)": "Ball Bearings (bag of 1,000)",
   "Billes de fronde (20)": "Sling Bullets (20)",
   "Bishatar et Tirahar": "Elf (Kaladesh) (Bishatar and Tirahar)",
@@ -29443,12 +29604,12 @@ const UI_CATALOGUE_UNIQUE_NAMES = Object.freeze({
   "Épée acérée": "Sword of Sharpness",
   "Épée arcanique": "Mordenkainen's Sword",
   "Épée ardente": "Flame Tongue",
-  "Épée au clair de lune": "Moon-Touched Sword",
   "Épée courte": "Shortsword",
   "Épée courte (forme humaine ou hybride uniquement)": "Shortsword (Human or Hybrid Form Only)",
   "Épée courte (forme humanoïde ou hybride uniquement)": "Shortsword (Humanoid or Hybrid Form Only)",
   "Épée dansante": "Dancing Sword",
   "Épée de Kas": "Sword of Kas",
+  "Épée de lumière lunaire": "Moon-Touched Sword",
   "Épée de réponse": "Sword of Answering",
   "Épée de réponse (Cinglante)": "Sword of Answering (Scather)",
   "Épée de réponse (Conclusion)": "Sword of Answering (Concluder)",
@@ -36695,6 +36856,9 @@ function normalizeInventory(character) {
   for (const item of character.inventory) {
     const french = LEGACY_BACKGROUND_ITEM_NAMES[String(item?.name || "").toLowerCase()];
     if (french && String(item.instance?.origin?.sourceKey || "").startsWith("bg|")) item.name = french;
+    // Arme, armure ou munition spéciale ajoutée sous son nom anglais avant le 25 novembre 2026 : elle prend son nom français ; un nom choisi par le joueur reste.
+    const state = item?.instance;
+    if (uiLanguage() === "fr" && state?.variantReference && item.name === state.snapshot?.name) item.name = variantReferenceName(state.baseReference, state.variantReference) || item.name;
   }
   for (const item of character.inventory) {
     if (item.instance !== undefined) continue;
@@ -36769,7 +36933,7 @@ function validateInventory(character) {
     if (state.twoHands !== undefined && typeof state.twoHands !== "boolean") throw itemError("state");
     if (state.charges !== null && (!itemPlain(state.charges) || !Number.isSafeInteger(state.charges.max) || !Number.isSafeInteger(state.charges.current) ||
       state.charges.max < 0 || state.charges.current < 0 || state.charges.current > state.charges.max)) throw itemError("charges");
-    if ((state.charges || state.attunement.required || state.equippedSlot || state.variantReference) && item.qty !== 1 && !((state.ammunition || inventoryConsumableKind(item)) && item.qty === 0)) throw itemError("single");
+    if ((state.charges || state.attunement.required || state.equippedSlot || state.variantReference && !state.ammunition) && item.qty !== 1 && !((state.ammunition || inventoryConsumableKind(item)) && item.qty === 0)) throw itemError("single");
     for (const key of ["baseReference", "variantReference", "infusionId"]) if (state[key] !== null && typeof state[key] !== "string") throw itemError("reference");
     if (state.origin !== null && (!itemPlain(state.origin) || !["feature", "spell", "infusion", "homebrew"].includes(state.origin.kind) || typeof state.origin.sourceId !== "string")) throw itemError("origin");
     if (inventoryItemCarried(character, item) && state.equippedSlot && !["ready", "worn", "focus"].includes(state.equippedSlot)) {
@@ -36803,16 +36967,18 @@ function ammunitionKindOf(item) {
   const raw = item?.instance ? itemVerifiedDefinition(item) : null;
   if (!item?.instance?.ammunition && String(raw?.type || "").split("|")[0] !== "A") return null;
   const name = String(raw?.baseName || raw?.name || "").toLowerCase().replace(/\s*\(\d+\)$/, "").trim().replaceAll(" ", "-");
-  const kind = name.endsWith("s") ? name : `${name}s`;
+  // La flèche incassable est un objet à part, sans objet de base : elle se tire comme une flèche.
+  const kind = name === "unbreakable-arrow" ? "arrows" : name.endsWith("s") ? name : `${name}s`;
   return AMMUNITION_KINDS.includes(kind) ? kind : null;
 }
 /** Sorte d'une pile de munitions suivie à l'unité (« Flèches », « +1 Arrow ») ; null pour tout autre objet. */
 function ammunitionKind(item) {
   return item?.instance?.ammunition ? ammunitionKindOf(item) : null;
 }
-/** Munition spéciale : une variante (argentée, tueuse, adamantium) ou un bonus magique ; jamais tirée sans être choisie. */
+/** Munition spéciale : une variante (argentée, tueuse, adamantium), un bonus magique ou un objet magique (flèche incassable) ; jamais tirée sans être choisie. */
 function specialAmmunition(item) {
-  return !!item.instance?.variantReference || Number(itemVerifiedDefinition(item)?.bonusWeapon) > 0;
+  const raw = itemVerifiedDefinition(item);
+  return !!item.instance?.variantReference || Number(raw?.bonusWeapon) > 0 || !!raw?.rarity && !["none", "unknown"].includes(raw.rarity);
 }
 /**
  * Munitions emportées d'une sorte, regroupées pour le choix au tir (demande de Luca du 22 novembre 2026) : d'abord les ordinaires (id « plain »),
@@ -36860,13 +37026,22 @@ function recoverAmmunition(character, kind) {
 /**
  * Prix du Manuel d'un objet du sac, à l'unité, en pièces de cuivre ; null sans prix connu (objet libre, objet magique sans prix).
  * Une pile de munitions suivie à l'unité divise le prix du lot du catalogue (« Flèches (20) », 1 po) : 5 pc la flèche.
+ * Une munition spéciale, sans prix au livre, divise le prix de son lot (specialAmmunitionLotPrice).
  */
 function inventoryItemPrice(item) {
   const snapshot = item?.instance?.snapshot, legacy = itemLegacy(item?.ref);
   const lot = (name, fallback) => item.instance?.ammunition ? Number(String(name || "").match(/\((\d+)\)$/)?.[1] || fallback || 1) : 1;
-  if (Number.isInteger(snapshot?.value) && snapshot.value >= 0) return snapshot.value / lot(snapshot.name, legacy?.count);
+  // Prix du livre en pièces de cuivre, parfois en fraction (une bille : 0,1 pc) ; le total d'une vente s'arrondit au pc.
+  if (Number.isFinite(snapshot?.value) && snapshot.value >= 0) return snapshot.value / lot(snapshot.name, legacy?.count);
+  const kind = ammunitionKind(item), special = kind && specialAmmunitionLotPrice(item.instance.variantReference || item.ref, kind);
+  if (special) return special / GEAR[kind].count;
   const cost = legacy ? parseCoins(legacy.cost) : null;
   return cost === null ? null : cost / lot("", legacy.count);
+}
+/** Prix d'un lot d'une munition spéciale (20 flèches, carreaux ou billes, 50 aiguilles) en pièces de cuivre ; null pour une autre munition. */
+function specialAmmunitionLotPrice(key, kind) {
+  const gold = SPECIAL_AMMUNITION_LOT_PRICES[key];
+  return gold === undefined || GEAR[kind]?.kind !== "ammo" ? null : gold * 100 / (kind === "sling-bullets" ? 2 : 1);
 }
 /** Bien de troc (toile, épices, bétail) : il garde sa pleine valeur, le marchand le reprend à son prix de vente (Manuel des joueurs, Revente). */
 function inventoryItemTrade(item) {
@@ -37206,6 +37381,1025 @@ function declareInventoryUseResult(character, id, result) {
   item.instance.lastUse.result = result;
   validateInventory(next);
   return next;
+}
+
+
+// Module : catalogue-ammunition
+
+const UNBREAKABLE_ARROW = "item|xge|unbreakable arrow";
+/** Sorte (« arrows ») d'une munition spéciale, d'après son objet de base. */
+const catalogueAmmunitionKind = (id, rule) => id === UNBREAKABLE_ARROW ? "arrows" : `${String(rule.baseReference || "").split("|").pop().replaceAll(" ", "-")}s`;
+let catalogueAmmunitionCache = null;
+/**
+ * Munitions spéciales du catalogue rapide (demande de Luca du 25 novembre 2026) : les variantes d'une flèche, d'un carreau, d'une bille de fronde
+ * ou d'une aiguille de sarbacane, et la flèche incassable. Chaque ligne a la forme d'un objet du catalogue ; elle s'ajoute à l'unité et affiche
+ * le prix de son lot, celui de la munition ordinaire (décision de Luca du 26 novembre 2026) ; copper : ce prix en pc, unitWeight : le poids d’une munition.
+ */
+function catalogueAmmunition() {
+  const language = uiLanguage();
+  if (catalogueAmmunitionCache?.language === language) return catalogueAmmunitionCache.rows;
+  const rows = Object.entries(ITEM_REFERENCE_RULES).flatMap(([id, rule]) => {
+    if (rule.type !== "A" || !rule.variantReference && id !== UNBREAKABLE_ARROW) return [];
+    const kind = catalogueAmmunitionKind(id, rule);
+    if (!AMMUNITION_KINDS.includes(kind)) return [];
+    const french = rule.variantReference ? variantReferenceName(rule.baseReference, rule.variantReference) : Object.entries(UI_CATALOGUE_UNIQUE_NAMES).find(([, english]) => english === rule.name)?.[0];
+    const name = language === "fr" && french || rule.name, base = GEAR[kind], lot = specialAmmunitionLotPrice(rule.variantReference || id, kind);
+    return [{ id, kind, name, englishName: rule.name, lot: base.count, copper: lot, unitWeight: base.weight / base.count, cost: lot === null ? "" : uiText("shop.lot", { price: formatCoins(lot, language), count: base.count }) }];
+  });
+  catalogueAmmunitionCache = { language, rows };
+  return rows;
+}
+/** Ajoute au sac count munitions spéciales du catalogue : elles rejoignent la pile de la même munition, sinon ouvrent une pile. */
+function addCatalogueAmmunition(character, id, { itemId, count = 1 }) {
+  const row = catalogueAmmunition().find((entry) => entry.id === id);
+  if (!row || !Number.isSafeInteger(count) || count < 1) return;
+  const stack = character.inventory.find((item) => item.ref === id && item.instance?.ammunition && item.instance.ownerId === character.id && item.instance.carried && !item.instance.destroyed);
+  if (stack) { stack.qty += count; return; }
+  const rule = ITEM_REFERENCE_RULES[id];
+  const item = createCatalogueItem({ id, type: "item", revision: rule.revision, sourceHash: rule.sourceHash, en: rule, baseReference: rule.baseReference, variantReference: rule.variantReference }, character.id, { id: itemId, name: row.name });
+  item.qty = count; item.weight = row.unitWeight;
+  character.inventory.push(item);
+}
+
+
+// Module : merchant-shop-data
+// Échoppes du Marchand : décisions de Luca des 26 et 27 novembre 2026, après les pages d'arbitrage des échoppes (classement objet par objet).
+// Écrit une fois depuis ce classement ; il se maintient ici, à la main.
+
+/** Les échoppes, dans l'ordre des conditions de l'échoppe. */
+const MERCHANT_SHOPS = Object.freeze(["village", "mage", "forgeron", "alchimiste", "voleur", "luxe"]);
+/** Objets rares, très rares et légendaires tirés à chaque entrée ; rien au village. */
+const MERCHANT_DRAWS = Object.freeze({ village: [0, 0, 0], mage: [3, 2, 1], forgeron: [3, 2, 1], alchimiste: [3, 2, 1], voleur: [3, 2, 1], luxe: [3, 2, 1] });
+/** Richesse de l'échoppe (décision de Luca du 28 novembre 2026) : prix le plus haut des objets toujours là, en pièces de cuivre ; 10 po, 100 po, 1 000 po, sans plafond. */
+const MERCHANT_WEALTH = Object.freeze({ pauvre: 1000, modeste: 10000, classique: 100000, prospere: Infinity });
+/**
+ * Échoppes de chaque objet, par référence de la Bibliothèque : objets du Manuel des joueurs, poisons du Guide du maître,
+ * objets magiques (artefacts jamais) et familles d'armes, d'armures et de munitions magiques. Un objet absent n'est dans aucune échoppe.
+ */
+const MERCHANT_STOCK = Object.freeze({
+  "baseitem|phb|alchemist's supplies": "alchimiste",
+  "baseitem|phb|arrows (20)": "village forgeron",
+  "baseitem|phb|bagpipes": "luxe",
+  "baseitem|phb|battleaxe": "forgeron",
+  "baseitem|phb|blowgun": "forgeron voleur",
+  "baseitem|phb|blowgun needles (50)": "forgeron voleur",
+  "baseitem|phb|breastplate": "forgeron",
+  "baseitem|phb|brewer's supplies": "alchimiste",
+  "baseitem|phb|calligrapher's supplies": "mage",
+  "baseitem|phb|carpenter's tools": "village",
+  "baseitem|phb|cartographer's tools": "mage",
+  "baseitem|phb|chain mail": "forgeron",
+  "baseitem|phb|chain shirt": "forgeron",
+  "baseitem|phb|club": "village forgeron",
+  "baseitem|phb|cobbler's tools": "village",
+  "baseitem|phb|cook's utensils": "village",
+  "baseitem|phb|crossbow bolts (20)": "forgeron",
+  "baseitem|phb|crystal": "mage",
+  "baseitem|phb|dagger": "village forgeron",
+  "baseitem|phb|dart": "village forgeron",
+  "baseitem|phb|drum": "luxe",
+  "baseitem|phb|dulcimer": "luxe",
+  "baseitem|phb|flail": "forgeron",
+  "baseitem|phb|flute": "village luxe",
+  "baseitem|phb|glaive": "forgeron",
+  "baseitem|phb|glassblower's tools": "alchimiste",
+  "baseitem|phb|greataxe": "forgeron",
+  "baseitem|phb|greatclub": "forgeron",
+  "baseitem|phb|greatsword": "forgeron",
+  "baseitem|phb|halberd": "forgeron",
+  "baseitem|phb|half plate armor": "forgeron",
+  "baseitem|phb|hand crossbow": "forgeron voleur",
+  "baseitem|phb|handaxe": "village forgeron",
+  "baseitem|phb|heavy crossbow": "forgeron",
+  "baseitem|phb|hide armor": "village forgeron",
+  "baseitem|phb|horn": "village luxe",
+  "baseitem|phb|javelin": "forgeron",
+  "baseitem|phb|jeweler's tools": "alchimiste luxe",
+  "baseitem|phb|lance": "forgeron",
+  "baseitem|phb|leather armor": "forgeron",
+  "baseitem|phb|leatherworker's tools": "village",
+  "baseitem|phb|light crossbow": "forgeron",
+  "baseitem|phb|light hammer": "forgeron",
+  "baseitem|phb|longbow": "forgeron",
+  "baseitem|phb|longsword": "forgeron",
+  "baseitem|phb|lute": "luxe",
+  "baseitem|phb|lyre": "luxe",
+  "baseitem|phb|mace": "forgeron",
+  "baseitem|phb|mason's tools": "village",
+  "baseitem|phb|maul": "forgeron",
+  "baseitem|phb|morningstar": "forgeron",
+  "baseitem|phb|net": "village forgeron",
+  "baseitem|phb|orb": "mage",
+  "baseitem|phb|padded armor": "village forgeron",
+  "baseitem|phb|painter's supplies": "mage luxe",
+  "baseitem|phb|pan flute": "luxe",
+  "baseitem|phb|pike": "forgeron",
+  "baseitem|phb|plate armor": "forgeron",
+  "baseitem|phb|potter's tools": "village",
+  "baseitem|phb|quarterstaff": "village forgeron",
+  "baseitem|phb|rapier": "forgeron",
+  "baseitem|phb|ring mail": "forgeron",
+  "baseitem|phb|rod": "mage",
+  "baseitem|phb|scale mail": "forgeron",
+  "baseitem|phb|scimitar": "forgeron",
+  "baseitem|phb|shawm": "luxe",
+  "baseitem|phb|shield": "forgeron",
+  "baseitem|phb|shortbow": "village forgeron",
+  "baseitem|phb|shortsword": "forgeron",
+  "baseitem|phb|sickle": "village forgeron",
+  "baseitem|phb|sling": "village forgeron",
+  "baseitem|phb|sling bullets (20)": "village forgeron",
+  "baseitem|phb|smith's tools": "forgeron",
+  "baseitem|phb|spear": "village forgeron",
+  "baseitem|phb|splint armor": "forgeron",
+  "baseitem|phb|staff": "mage",
+  "baseitem|phb|studded leather armor": "forgeron",
+  "baseitem|phb|tinker's tools": "village forgeron",
+  "baseitem|phb|trident": "forgeron",
+  "baseitem|phb|viol": "luxe",
+  "baseitem|phb|wand": "mage",
+  "baseitem|phb|war pick": "forgeron",
+  "baseitem|phb|warhammer": "forgeron",
+  "baseitem|phb|weaver's tools": "village",
+  "baseitem|phb|whip": "village forgeron",
+  "baseitem|phb|woodcarver's tools": "village",
+  "baseitem|phb|wooden staff": "mage",
+  "baseitem|scag|spiked armor": "forgeron",
+  "catalog:arcane-focus": "alchimiste",
+  "catalog:druidic-focus": "mage alchimiste",
+  "catalog:holy-symbol": "mage",
+  "catalog:string": "village",
+  "item|dmg|+1 rod of the pact keeper": "mage",
+  "item|dmg|+1 wand of the war mage": "mage",
+  "item|dmg|+2 rod of the pact keeper": "mage",
+  "item|dmg|+2 wand of the war mage": "mage",
+  "item|dmg|+3 rod of the pact keeper": "mage",
+  "item|dmg|+3 wand of the war mage": "mage",
+  "item|dmg|alchemy jug": "alchimiste",
+  "item|dmg|amulet of health": "mage alchimiste",
+  "item|dmg|amulet of proof against detection and location": "mage voleur",
+  "item|dmg|amulet of the planes": "mage",
+  "item|dmg|animated shield": "forgeron",
+  "item|dmg|armor of invulnerability": "forgeron",
+  "item|dmg|arrow-catching shield": "forgeron",
+  "item|dmg|assassin's blood": "voleur",
+  "item|dmg|bag of beans": "mage alchimiste",
+  "item|dmg|bag of holding": "mage",
+  "item|dmg|bag of tricks, gray": "mage",
+  "item|dmg|bag of tricks, rust": "mage",
+  "item|dmg|bag of tricks, tan": "mage",
+  "item|dmg|bead of force": "mage alchimiste",
+  "item|dmg|belt of cloud giant strength": "mage forgeron",
+  "item|dmg|belt of dwarvenkind": "mage forgeron",
+  "item|dmg|belt of fire giant strength": "mage forgeron",
+  "item|dmg|belt of frost giant strength": "mage forgeron",
+  "item|dmg|belt of hill giant strength": "mage forgeron",
+  "item|dmg|belt of stone giant strength": "mage forgeron",
+  "item|dmg|belt of storm giant strength": "mage forgeron",
+  "item|dmg|black dragon scale mail": "forgeron",
+  "item|dmg|blue dragon scale mail": "forgeron",
+  "item|dmg|boots of elvenkind": "voleur",
+  "item|dmg|boots of levitation": "mage",
+  "item|dmg|boots of speed": "mage",
+  "item|dmg|boots of striding and springing": "mage voleur",
+  "item|dmg|boots of the winterlands": "mage",
+  "item|dmg|bowl of commanding water elementals": "mage",
+  "item|dmg|bracers of archery": "forgeron",
+  "item|dmg|bracers of defense": "mage forgeron",
+  "item|dmg|brass dragon scale mail": "forgeron",
+  "item|dmg|brazier of commanding fire elementals": "mage",
+  "item|dmg|bronze dragon scale mail": "forgeron",
+  "item|dmg|brooch of shielding": "mage",
+  "item|dmg|broom of flying": "mage",
+  "item|dmg|burnt othur fumes": "voleur",
+  "item|dmg|candle of invocation": "mage",
+  "item|dmg|cap of water breathing": "mage",
+  "item|dmg|cape of the mountebank": "mage voleur",
+  "item|dmg|carpet of flying, 3 ft. × 5 ft.": "mage",
+  "item|dmg|carpet of flying, 4 ft. × 6 ft.": "mage",
+  "item|dmg|carpet of flying, 5 ft. × 7 ft.": "mage",
+  "item|dmg|carpet of flying, 6 ft. × 9 ft.": "mage",
+  "item|dmg|carrion crawler mucus": "voleur",
+  "item|dmg|censer of controlling air elementals": "mage",
+  "item|dmg|chime of opening": "mage voleur",
+  "item|dmg|circlet of blasting": "mage",
+  "item|dmg|cloak of arachnida": "mage",
+  "item|dmg|cloak of displacement": "mage",
+  "item|dmg|cloak of elvenkind": "voleur",
+  "item|dmg|cloak of invisibility": "mage voleur",
+  "item|dmg|cloak of protection": "mage",
+  "item|dmg|cloak of the bat": "mage",
+  "item|dmg|cloak of the manta ray": "mage",
+  "item|dmg|copper dragon scale mail": "forgeron",
+  "item|dmg|crystal ball": "mage",
+  "item|dmg|crystal ball of mind reading": "mage",
+  "item|dmg|crystal ball of telepathy": "mage",
+  "item|dmg|crystal ball of true seeing": "mage",
+  "item|dmg|cube of force": "mage",
+  "item|dmg|cubic gate": "mage",
+  "item|dmg|daern's instant fortress": "mage",
+  "item|dmg|dagger of venom": "forgeron voleur",
+  "item|dmg|decanter of endless water": "mage",
+  "item|dmg|deck of illusions": "mage voleur luxe",
+  "item|dmg|demon armor": "forgeron voleur",
+  "item|dmg|dimensional shackles": "mage voleur",
+  "item|dmg|driftglobe": "mage",
+  "item|dmg|drow poison": "voleur",
+  "item|dmg|dust of disappearance": "alchimiste voleur",
+  "item|dmg|dust of dryness": "alchimiste",
+  "item|dmg|dust of sneezing and choking": "alchimiste voleur",
+  "item|dmg|dwarven plate": "forgeron",
+  "item|dmg|dwarven thrower": "forgeron",
+  "item|dmg|efreeti bottle": "mage",
+  "item|dmg|efreeti chain": "forgeron",
+  "item|dmg|elemental gem, blue sapphire": "mage",
+  "item|dmg|elemental gem, emerald": "mage",
+  "item|dmg|elemental gem, red corundum": "mage",
+  "item|dmg|elemental gem, yellow diamond": "mage",
+  "item|dmg|elixir of health": "alchimiste",
+  "item|dmg|elven chain": "forgeron",
+  "item|dmg|essence of ether": "voleur",
+  "item|dmg|eversmoking bottle": "alchimiste voleur",
+  "item|dmg|eyes of charming": "mage voleur",
+  "item|dmg|eyes of minute seeing": "alchimiste voleur",
+  "item|dmg|eyes of the eagle": "mage voleur",
+  "item|dmg|figurine of wondrous power, bronze griffon": "mage",
+  "item|dmg|figurine of wondrous power, ebony fly": "mage",
+  "item|dmg|figurine of wondrous power, golden lions": "mage",
+  "item|dmg|figurine of wondrous power, ivory goats": "mage",
+  "item|dmg|figurine of wondrous power, marble elephant": "mage",
+  "item|dmg|figurine of wondrous power, obsidian steed": "mage",
+  "item|dmg|figurine of wondrous power, onyx dog": "mage",
+  "item|dmg|figurine of wondrous power, serpentine owl": "mage",
+  "item|dmg|figurine of wondrous power, silver raven": "mage",
+  "item|dmg|folding boat": "mage",
+  "item|dmg|gauntlets of ogre power": "forgeron",
+  "item|dmg|gem of brightness": "mage",
+  "item|dmg|gem of seeing": "mage",
+  "item|dmg|glamoured studded leather": "mage voleur",
+  "item|dmg|gloves of missile snaring": "mage forgeron",
+  "item|dmg|gloves of swimming and climbing": "mage",
+  "item|dmg|gloves of thievery": "voleur",
+  "item|dmg|goggles of night": "mage voleur",
+  "item|dmg|gold dragon scale mail": "forgeron",
+  "item|dmg|green dragon scale mail": "forgeron",
+  "item|dmg|hammer of thunderbolts": "forgeron",
+  "item|dmg|hat of disguise": "mage voleur",
+  "item|dmg|headband of intellect": "mage",
+  "item|dmg|helm of brilliance": "mage",
+  "item|dmg|helm of comprehending languages": "mage",
+  "item|dmg|helm of telepathy": "mage",
+  "item|dmg|helm of teleportation": "mage",
+  "item|dmg|heward's handy haversack": "mage",
+  "item|dmg|horn of blasting": "mage",
+  "item|dmg|horn of valhalla, brass": "forgeron",
+  "item|dmg|horn of valhalla, bronze": "mage forgeron",
+  "item|dmg|horn of valhalla, iron": "mage forgeron",
+  "item|dmg|horn of valhalla, silver": "alchimiste",
+  "item|dmg|horseshoes of a zephyr": "forgeron",
+  "item|dmg|horseshoes of speed": "forgeron",
+  "item|dmg|immovable rod": "mage",
+  "item|dmg|instrument of the bards, anstruth harp": "luxe",
+  "item|dmg|instrument of the bards, canaith mandolin": "luxe",
+  "item|dmg|instrument of the bards, cli lyre": "luxe",
+  "item|dmg|instrument of the bards, doss lute": "luxe",
+  "item|dmg|instrument of the bards, fochlucan bandore": "luxe",
+  "item|dmg|instrument of the bards, mac-fuirmidh cittern": "luxe",
+  "item|dmg|instrument of the bards, ollamh harp": "luxe",
+  "item|dmg|ioun stone, absorption": "mage",
+  "item|dmg|ioun stone, agility": "mage",
+  "item|dmg|ioun stone, awareness": "mage",
+  "item|dmg|ioun stone, fortitude": "mage",
+  "item|dmg|ioun stone, greater absorption": "mage",
+  "item|dmg|ioun stone, insight": "mage",
+  "item|dmg|ioun stone, intellect": "mage",
+  "item|dmg|ioun stone, leadership": "mage",
+  "item|dmg|ioun stone, mastery": "mage",
+  "item|dmg|ioun stone, protection": "mage",
+  "item|dmg|ioun stone, regeneration": "mage",
+  "item|dmg|ioun stone, reserve": "mage",
+  "item|dmg|ioun stone, strength": "mage",
+  "item|dmg|ioun stone, sustenance": "mage",
+  "item|dmg|iron bands of bilarro": "mage",
+  "item|dmg|iron flask": "mage",
+  "item|dmg|javelin of lightning": "alchimiste",
+  "item|dmg|keoghtom's ointment": "alchimiste",
+  "item|dmg|lantern of revealing": "mage",
+  "item|dmg|mace of disruption": "forgeron",
+  "item|dmg|mace of smiting": "forgeron",
+  "item|dmg|mace of terror": "forgeron",
+  "item|dmg|malice": "voleur",
+  "item|dmg|mantle of spell resistance": "mage",
+  "item|dmg|manual of bodily health": "mage",
+  "item|dmg|manual of clay golems": "mage",
+  "item|dmg|manual of flesh golems": "mage",
+  "item|dmg|manual of gainful exercise": "mage",
+  "item|dmg|manual of iron golems": "mage",
+  "item|dmg|manual of quickness of action": "mage",
+  "item|dmg|manual of stone golems": "mage",
+  "item|dmg|medallion of thoughts": "mage",
+  "item|dmg|midnight tears": "voleur",
+  "item|dmg|mirror of life trapping": "mage",
+  "item|dmg|necklace of adaptation": "mage",
+  "item|dmg|necklace of fireballs": "mage",
+  "item|dmg|necklace of prayer beads": "mage",
+  "item|dmg|nolzur's marvelous pigments": "mage alchimiste",
+  "item|dmg|oathbow": "forgeron",
+  "item|dmg|oil of etherealness": "alchimiste",
+  "item|dmg|oil of sharpness": "forgeron alchimiste",
+  "item|dmg|oil of slipperiness": "alchimiste voleur",
+  "item|dmg|oil of taggit": "voleur",
+  "item|dmg|pale tincture": "voleur",
+  "item|dmg|pearl of power": "mage",
+  "item|dmg|periapt of health": "alchimiste luxe",
+  "item|dmg|periapt of proof against poison": "mage alchimiste",
+  "item|dmg|periapt of wound closure": "mage",
+  "item|dmg|philter of love": "alchimiste luxe",
+  "item|dmg|pipes of haunting": "luxe",
+  "item|dmg|pipes of the sewers": "voleur luxe",
+  "item|dmg|plate armor of etherealness": "forgeron",
+  "item|dmg|portable hole": "mage voleur",
+  "item|dmg|potion of acid resistance": "alchimiste",
+  "item|dmg|potion of animal friendship": "alchimiste",
+  "item|dmg|potion of clairvoyance": "alchimiste",
+  "item|dmg|potion of climbing": "alchimiste",
+  "item|dmg|potion of cloud giant strength": "alchimiste",
+  "item|dmg|potion of cold resistance": "alchimiste",
+  "item|dmg|potion of diminution": "alchimiste",
+  "item|dmg|potion of fire breath": "alchimiste",
+  "item|dmg|potion of fire giant strength": "alchimiste",
+  "item|dmg|potion of fire resistance": "alchimiste",
+  "item|dmg|potion of flying": "alchimiste",
+  "item|dmg|potion of force resistance": "alchimiste",
+  "item|dmg|potion of frost giant strength": "alchimiste",
+  "item|dmg|potion of gaseous form": "alchimiste",
+  "item|dmg|potion of greater healing": "alchimiste",
+  "item|dmg|potion of growth": "alchimiste",
+  "item|dmg|potion of healing": "mage alchimiste",
+  "item|dmg|potion of heroism": "alchimiste",
+  "item|dmg|potion of hill giant strength": "alchimiste",
+  "item|dmg|potion of invisibility": "alchimiste voleur",
+  "item|dmg|potion of invulnerability": "alchimiste",
+  "item|dmg|potion of lightning resistance": "alchimiste",
+  "item|dmg|potion of longevity": "alchimiste",
+  "item|dmg|potion of mind reading": "alchimiste",
+  "item|dmg|potion of necrotic resistance": "alchimiste",
+  "item|dmg|potion of poison": "alchimiste voleur",
+  "item|dmg|potion of poison resistance": "alchimiste",
+  "item|dmg|potion of psychic resistance": "alchimiste",
+  "item|dmg|potion of radiant resistance": "alchimiste",
+  "item|dmg|potion of speed": "alchimiste",
+  "item|dmg|potion of stone giant strength": "alchimiste",
+  "item|dmg|potion of storm giant strength": "alchimiste",
+  "item|dmg|potion of superior healing": "alchimiste",
+  "item|dmg|potion of supreme healing": "alchimiste",
+  "item|dmg|potion of thunder resistance": "alchimiste",
+  "item|dmg|potion of vitality": "alchimiste",
+  "item|dmg|potion of water breathing": "alchimiste",
+  "item|dmg|purple worm poison": "voleur",
+  "item|dmg|quaal's feather token, anchor": "mage",
+  "item|dmg|quaal's feather token, bird": "mage",
+  "item|dmg|quaal's feather token, fan": "mage",
+  "item|dmg|quaal's feather token, swan boat": "mage",
+  "item|dmg|quaal's feather token, tree": "mage",
+  "item|dmg|quaal's feather token, whip": "mage",
+  "item|dmg|quiver of ehlonna": "mage forgeron",
+  "item|dmg|red dragon scale mail": "forgeron",
+  "item|dmg|ring of acid resistance": "mage",
+  "item|dmg|ring of air elemental command": "mage",
+  "item|dmg|ring of animal influence": "mage alchimiste",
+  "item|dmg|ring of cold resistance": "mage",
+  "item|dmg|ring of djinni summoning": "mage",
+  "item|dmg|ring of earth elemental command": "mage",
+  "item|dmg|ring of evasion": "mage voleur",
+  "item|dmg|ring of feather falling": "mage voleur",
+  "item|dmg|ring of fire elemental command": "mage",
+  "item|dmg|ring of fire resistance": "mage",
+  "item|dmg|ring of force resistance": "mage",
+  "item|dmg|ring of free action": "mage",
+  "item|dmg|ring of invisibility": "mage voleur",
+  "item|dmg|ring of jumping": "mage",
+  "item|dmg|ring of lightning resistance": "mage",
+  "item|dmg|ring of mind shielding": "mage voleur",
+  "item|dmg|ring of necrotic resistance": "mage",
+  "item|dmg|ring of poison resistance": "mage",
+  "item|dmg|ring of protection": "mage",
+  "item|dmg|ring of psychic resistance": "mage",
+  "item|dmg|ring of radiant resistance": "mage",
+  "item|dmg|ring of regeneration": "mage",
+  "item|dmg|ring of shooting stars": "mage",
+  "item|dmg|ring of spell storing": "mage",
+  "item|dmg|ring of spell turning": "mage",
+  "item|dmg|ring of swimming": "mage",
+  "item|dmg|ring of telekinesis": "mage",
+  "item|dmg|ring of the ram": "mage",
+  "item|dmg|ring of thunder resistance": "mage",
+  "item|dmg|ring of warmth": "mage",
+  "item|dmg|ring of water elemental command": "mage",
+  "item|dmg|ring of water walking": "mage",
+  "item|dmg|ring of x-ray vision": "mage voleur",
+  "item|dmg|robe of eyes": "mage",
+  "item|dmg|robe of scintillating colors": "mage",
+  "item|dmg|robe of stars": "mage",
+  "item|dmg|robe of the archmagi": "mage",
+  "item|dmg|robe of useful items": "mage",
+  "item|dmg|rod of absorption": "mage",
+  "item|dmg|rod of alertness": "mage",
+  "item|dmg|rod of lordly might": "mage forgeron",
+  "item|dmg|rod of resurrection": "mage",
+  "item|dmg|rod of rulership": "mage luxe",
+  "item|dmg|rod of security": "mage",
+  "item|dmg|rope of climbing": "mage voleur",
+  "item|dmg|rope of entanglement": "mage",
+  "item|dmg|saddle of the cavalier": "forgeron",
+  "item|dmg|scarab of protection": "mage",
+  "item|dmg|scimitar of speed": "forgeron",
+  "item|dmg|scroll of protection from aberrations": "mage",
+  "item|dmg|scroll of protection from beasts": "mage",
+  "item|dmg|scroll of protection from celestials": "mage",
+  "item|dmg|scroll of protection from elementals": "mage",
+  "item|dmg|scroll of protection from fey": "mage",
+  "item|dmg|scroll of protection from fiends": "mage",
+  "item|dmg|scroll of protection from plants": "mage",
+  "item|dmg|scroll of protection from undead": "mage",
+  "item|dmg|sending stones": "mage voleur",
+  "item|dmg|sentinel shield": "forgeron",
+  "item|dmg|serpent venom": "voleur",
+  "item|dmg|silver dragon scale mail": "forgeron",
+  "item|dmg|slippers of spider climbing": "mage voleur",
+  "item|dmg|sovereign glue": "alchimiste",
+  "item|dmg|spell scroll (1st level)": "mage",
+  "item|dmg|spell scroll (2nd level)": "mage",
+  "item|dmg|spell scroll (3rd level)": "mage",
+  "item|dmg|spell scroll (4th level)": "mage luxe",
+  "item|dmg|spell scroll (5th level)": "mage luxe",
+  "item|dmg|spell scroll (6th level)": "mage",
+  "item|dmg|spell scroll (7th level)": "mage",
+  "item|dmg|spell scroll (8th level)": "mage",
+  "item|dmg|spell scroll (9th level)": "mage",
+  "item|dmg|spell scroll (cantrip)": "mage",
+  "item|dmg|spellguard shield": "mage forgeron",
+  "item|dmg|staff of charming": "mage luxe",
+  "item|dmg|staff of fire": "mage",
+  "item|dmg|staff of frost": "mage",
+  "item|dmg|staff of healing": "mage",
+  "item|dmg|staff of power": "mage",
+  "item|dmg|staff of striking": "mage forgeron",
+  "item|dmg|staff of swarming insects": "mage",
+  "item|dmg|staff of the adder": "mage",
+  "item|dmg|staff of the magi": "mage",
+  "item|dmg|staff of the python": "mage",
+  "item|dmg|staff of the woodlands": "mage",
+  "item|dmg|staff of thunder and lightning": "mage",
+  "item|dmg|staff of withering": "mage",
+  "item|dmg|stone of controlling earth elementals": "mage",
+  "item|dmg|stone of good luck": "mage",
+  "item|dmg|sun blade": "forgeron",
+  "item|dmg|tentacle rod": "mage",
+  "item|dmg|tome of clear thought": "mage",
+  "item|dmg|tome of leadership and influence": "mage",
+  "item|dmg|tome of understanding": "mage",
+  "item|dmg|torpor": "voleur",
+  "item|dmg|trident of fish command": "forgeron",
+  "item|dmg|truth serum": "alchimiste voleur",
+  "item|dmg|universal solvent": "alchimiste",
+  "item|dmg|wand of binding": "mage",
+  "item|dmg|wand of enemy detection": "mage",
+  "item|dmg|wand of fear": "mage",
+  "item|dmg|wand of fireballs": "mage",
+  "item|dmg|wand of lightning bolts": "mage",
+  "item|dmg|wand of magic detection": "mage",
+  "item|dmg|wand of magic missiles": "mage",
+  "item|dmg|wand of paralysis": "mage",
+  "item|dmg|wand of polymorph": "mage",
+  "item|dmg|wand of secrets": "mage voleur",
+  "item|dmg|wand of web": "mage luxe",
+  "item|dmg|wand of wonder": "mage",
+  "item|dmg|white dragon scale mail": "forgeron",
+  "item|dmg|wind fan": "mage luxe",
+  "item|dmg|winged boots": "mage voleur",
+  "item|dmg|wings of flying": "mage",
+  "item|dmg|wyvern poison": "voleur",
+  "item|phb|abacus": "alchimiste voleur",
+  "item|phb|acid (vial)": "alchimiste",
+  "item|phb|alchemist's fire (flask)": "alchimiste",
+  "item|phb|amulet": "mage",
+  "item|phb|antitoxin (vial)": "alchimiste",
+  "item|phb|backpack": "alchimiste voleur",
+  "item|phb|ball bearings (bag of 1,000)": "village voleur",
+  "item|phb|barrel": "village",
+  "item|phb|basic poison (vial)": "alchimiste voleur",
+  "item|phb|bedroll": "village",
+  "item|phb|bell": "village",
+  "item|phb|blanket": "village",
+  "item|phb|block and tackle": "village",
+  "item|phb|book": "mage alchimiste",
+  "item|phb|bullseye lantern": "luxe",
+  "item|phb|burglar's pack": "voleur",
+  "item|phb|caltrops (bag of 20)": "forgeron voleur",
+  "item|phb|candle": "village alchimiste",
+  "item|phb|canvas (1 sq. yd.)": "luxe",
+  "item|phb|cart": "village",
+  "item|phb|chain (10 feet)": "village forgeron",
+  "item|phb|chalk (1 piece)": "village",
+  "item|phb|chest": "village",
+  "item|phb|chicken": "village",
+  "item|phb|chunk of meat": "village",
+  "item|phb|cinnamon": "village alchimiste",
+  "item|phb|climber's kit": "voleur",
+  "item|phb|cloves": "village alchimiste",
+  "item|phb|common clothes": "village",
+  "item|phb|common wine (pitcher)": "village",
+  "item|phb|component pouch": "mage",
+  "item|phb|copper": "forgeron",
+  "item|phb|costume clothes": "voleur luxe",
+  "item|phb|cotton cloth (1 sq. yd.)": "luxe",
+  "item|phb|crossbow bolt case": "forgeron",
+  "item|phb|crowbar": "village forgeron voleur",
+  "item|phb|dice set": "village luxe",
+  "item|phb|diplomat's pack": "luxe",
+  "item|phb|disguise kit": "voleur",
+  "item|phb|dragonchess set": "luxe",
+  "item|phb|dungeoneer's pack": "forgeron alchimiste",
+  "item|phb|emblem": "mage",
+  "item|phb|entertainer's pack": "luxe",
+  "item|phb|exotic saddle": "luxe",
+  "item|phb|explorer's pack": "village",
+  "item|phb|feed (per day)": "village",
+  "item|phb|fine clothes": "luxe",
+  "item|phb|fine wine (bottle)": "luxe",
+  "item|phb|fishing tackle": "village",
+  "item|phb|flask": "alchimiste",
+  "item|phb|forgery kit": "voleur",
+  "item|phb|ginger": "alchimiste",
+  "item|phb|glass bottle": "village alchimiste",
+  "item|phb|gold": "luxe",
+  "item|phb|grappling hook": "voleur",
+  "item|phb|hammer": "village forgeron",
+  "item|phb|healer's kit": "alchimiste voleur",
+  "item|phb|hempen rope (50 feet)": "village",
+  "item|phb|herbalism kit": "alchimiste",
+  "item|phb|holy water (flask)": "alchimiste",
+  "item|phb|hooded lantern": "village voleur",
+  "item|phb|hourglass": "mage alchimiste luxe",
+  "item|phb|hunk of cheese": "village",
+  "item|phb|hunting trap": "village forgeron",
+  "item|phb|ink (1-ounce bottle)": "mage alchimiste",
+  "item|phb|ink pen": "village mage alchimiste",
+  "item|phb|iron": "forgeron",
+  "item|phb|iron pot": "village forgeron",
+  "item|phb|iron spikes (10)": "forgeron voleur",
+  "item|phb|ladder (10-foot)": "village voleur",
+  "item|phb|lamp": "village alchimiste",
+  "item|phb|linen (1 sq. yd.)": "alchimiste luxe",
+  "item|phb|loaf of bread": "village",
+  "item|phb|lock": "village forgeron voleur",
+  "item|phb|magnifying glass": "mage",
+  "item|phb|manacles": "forgeron",
+  "item|phb|map or scroll case": "village mage",
+  "item|phb|merchant's scale": "village",
+  "item|phb|mess kit": "village",
+  "item|phb|military saddle": "forgeron",
+  "item|phb|miner's pick": "forgeron",
+  "item|phb|navigator's tools": "luxe",
+  "item|phb|oil (flask)": "village alchimiste",
+  "item|phb|paper (one sheet)": "mage luxe",
+  "item|phb|parchment (one sheet)": "village mage alchimiste",
+  "item|phb|pepper": "alchimiste luxe",
+  "item|phb|perfume (vial)": "alchimiste luxe",
+  "item|phb|piton": "forgeron voleur",
+  "item|phb|platinum": "forgeron",
+  "item|phb|playing card set": "village luxe",
+  "item|phb|poisoner's kit": "alchimiste voleur",
+  "item|phb|pole (10-foot)": "village",
+  "item|phb|portable ram": "forgeron",
+  "item|phb|pouch": "village",
+  "item|phb|priest's pack": "mage",
+  "item|phb|quiver": "village forgeron",
+  "item|phb|rations (1 day)": "village",
+  "item|phb|reliquary": "mage",
+  "item|phb|riding saddle": "village",
+  "item|phb|robes": "mage luxe",
+  "item|phb|sack": "village",
+  "item|phb|saffron": "alchimiste luxe",
+  "item|phb|salt": "village",
+  "item|phb|scholar's pack": "mage alchimiste",
+  "item|phb|sealing wax": "mage alchimiste",
+  "item|phb|shovel": "village",
+  "item|phb|signal whistle": "village voleur",
+  "item|phb|signet ring": "forgeron luxe",
+  "item|phb|silk (1 sq. yd.)": "luxe",
+  "item|phb|silk rope (50 feet)": "voleur luxe",
+  "item|phb|silver": "forgeron",
+  "item|phb|sledgehammer": "forgeron",
+  "item|phb|soap": "village luxe",
+  "item|phb|spellbook": "mage",
+  "item|phb|sprig of mistletoe": "mage alchimiste",
+  "item|phb|spyglass": "luxe",
+  "item|phb|stabling (per day)": "village",
+  "item|phb|steel mirror": "village",
+  "item|phb|thieves' tools": "voleur",
+  "item|phb|three-dragon ante set": "luxe",
+  "item|phb|tinderbox": "village alchimiste voleur",
+  "item|phb|torch": "village",
+  "item|phb|totem": "mage",
+  "item|phb|traveler's clothes": "village alchimiste",
+  "item|phb|two-person tent": "village",
+  "item|phb|vial": "alchimiste",
+  "item|phb|waterskin": "village",
+  "item|phb|whetstone": "village forgeron",
+  "item|phb|yew wand": "mage",
+  "item|tce|+1 all-purpose tool": "mage forgeron alchimiste",
+  "item|tce|+1 amulet of the devout": "mage",
+  "item|tce|+1 arcane grimoire": "mage",
+  "item|tce|+1 bloodwell vial": "mage",
+  "item|tce|+1 moon sickle": "forgeron alchimiste",
+  "item|tce|+1 rhythm-maker's drum": "luxe",
+  "item|tce|+2 all-purpose tool": "mage forgeron alchimiste",
+  "item|tce|+2 amulet of the devout": "mage",
+  "item|tce|+2 arcane grimoire": "mage",
+  "item|tce|+2 bloodwell vial": "mage",
+  "item|tce|+2 moon sickle": "forgeron alchimiste",
+  "item|tce|+2 rhythm-maker's drum": "luxe",
+  "item|tce|+3 all-purpose tool": "mage forgeron alchimiste",
+  "item|tce|+3 amulet of the devout": "mage",
+  "item|tce|+3 arcane grimoire": "mage",
+  "item|tce|+3 bloodwell vial": "mage",
+  "item|tce|+3 moon sickle": "forgeron alchimiste",
+  "item|tce|+3 rhythm-maker's drum": "luxe",
+  "item|tce|acid absorbing tattoo": "mage",
+  "item|tce|alchemical compendium": "alchimiste",
+  "item|tce|astral shard": "mage",
+  "item|tce|astromancy archive": "mage",
+  "item|tce|atlas of endless horizons": "mage",
+  "item|tce|barrier tattoo (large)": "mage",
+  "item|tce|barrier tattoo (medium)": "mage",
+  "item|tce|barrier tattoo (small)": "mage",
+  "item|tce|bell branch": "mage alchimiste",
+  "item|tce|blood fury tattoo": "mage",
+  "item|tce|cauldron of rebirth": "mage alchimiste",
+  "item|tce|coiling grasp tattoo": "mage",
+  "item|tce|cold absorbing tattoo": "mage",
+  "item|tce|crystalline chronicle": "mage",
+  "item|tce|devotee's censer": "mage forgeron",
+  "item|tce|duplicitous manuscript": "mage voleur",
+  "item|tce|eldritch claw tattoo": "mage",
+  "item|tce|elemental essence shard": "mage",
+  "item|tce|elemental essence shard (air)": "mage",
+  "item|tce|elemental essence shard (earth)": "mage",
+  "item|tce|elemental essence shard (fire)": "mage",
+  "item|tce|elemental essence shard (water)": "mage",
+  "item|tce|far realm shard": "mage",
+  "item|tce|feywild shard": "mage",
+  "item|tce|fire absorbing tattoo": "mage",
+  "item|tce|force absorbing tattoo": "mage",
+  "item|tce|fulminating treatise": "mage",
+  "item|tce|ghost step tattoo": "mage",
+  "item|tce|guardian emblem": "mage forgeron",
+  "item|tce|heart weaver's primer": "mage",
+  "item|tce|illuminator's tattoo": "mage",
+  "item|tce|libram of souls and flesh": "mage",
+  "item|tce|lifewell tattoo": "mage",
+  "item|tce|lightning absorbing tattoo": "mage",
+  "item|tce|lyre of building": "luxe",
+  "item|tce|masquerade tattoo": "mage voleur",
+  "item|tce|nature's mantle": "mage",
+  "item|tce|necrotic absorbing tattoo": "mage",
+  "item|tce|outer essence shard": "mage",
+  "item|tce|outer essence shard (chaotic)": "mage",
+  "item|tce|outer essence shard (evil)": "mage",
+  "item|tce|outer essence shard (good)": "mage",
+  "item|tce|outer essence shard (lawful)": "mage",
+  "item|tce|planecaller's codex": "mage",
+  "item|tce|poison absorbing tattoo": "mage",
+  "item|tce|prosthetic limb": "mage luxe",
+  "item|tce|protective verses": "mage",
+  "item|tce|psychic absorbing tattoo": "mage",
+  "item|tce|radiant absorbing tattoo": "mage",
+  "item|tce|reveler's concertina": "luxe",
+  "item|tce|shadowfell brand tattoo": "mage",
+  "item|tce|shadowfell shard": "mage",
+  "item|tce|spellwrought tattoo (1st level)": "mage",
+  "item|tce|spellwrought tattoo (2nd level)": "mage",
+  "item|tce|spellwrought tattoo (3rd level)": "mage",
+  "item|tce|spellwrought tattoo (4th level)": "mage",
+  "item|tce|spellwrought tattoo (5th level)": "mage",
+  "item|tce|spellwrought tattoo (cantrip)": "mage",
+  "item|tce|thunder absorbing tattoo": "mage",
+  "item|xge|bead of nourishment": "alchimiste luxe",
+  "item|xge|bead of refreshment": "alchimiste luxe",
+  "item|xge|boots of false tracks": "voleur",
+  "item|xge|candle of the deep": "mage alchimiste",
+  "item|xge|charlatan's die": "voleur",
+  "item|xge|cloak of billowing": "mage luxe",
+  "item|xge|cloak of many fashions": "mage luxe",
+  "item|xge|clockwork amulet": "luxe",
+  "item|xge|clothes of mending": "mage luxe",
+  "item|xge|dark shard amulet": "mage",
+  "item|xge|dread helm": "forgeron",
+  "item|xge|enduring spellbook": "mage",
+  "item|xge|ersatz eye": "mage luxe",
+  "item|xge|hat of vermin": "mage voleur",
+  "item|xge|hat of wizardry": "mage",
+  "item|xge|heward's handy spice pouch": "mage alchimiste",
+  "item|xge|horn of silent alarm": "voleur",
+  "item|xge|instrument of illusions": "luxe",
+  "item|xge|instrument of scribing": "luxe",
+  "item|xge|lock of trickery": "voleur luxe",
+  "item|xge|mystery key": "voleur",
+  "item|xge|orb of direction": "alchimiste luxe",
+  "item|xge|orb of time": "alchimiste luxe",
+  "item|xge|perfume of bewitching": "alchimiste voleur luxe",
+  "item|xge|pipe of smoke monsters": "alchimiste luxe",
+  "item|xge|pole of angling": "village",
+  "item|xge|pole of collapsing": "village",
+  "item|xge|pot of awakening": "mage alchimiste",
+  "item|xge|rope of mending": "mage voleur",
+  "item|xge|ruby of the war mage": "mage alchimiste",
+  "item|xge|shield of expression": "forgeron",
+  "item|xge|staff of adornment": "mage luxe",
+  "item|xge|staff of birdcalls": "mage luxe",
+  "item|xge|staff of flowers": "mage luxe",
+  "item|xge|talking doll": "mage",
+  "item|xge|tankard of sobriety": "mage voleur",
+  "item|xge|unbreakable arrow": "forgeron alchimiste",
+  "item|xge|veteran's cane": "forgeron voleur",
+  "item|xge|wand of conducting": "luxe",
+  "item|xge|wand of pyrotechnics": "mage luxe",
+  "item|xge|wand of scowls": "mage",
+  "item|xge|wand of smiles": "luxe",
+  "magicvariant||+1 ammunition": "forgeron",
+  "magicvariant||+1 armor": "forgeron",
+  "magicvariant||+1 shield (*)": "forgeron",
+  "magicvariant||+1 weapon": "forgeron",
+  "magicvariant||+1 weapon (no damage)": "forgeron",
+  "magicvariant||+2 ammunition": "forgeron",
+  "magicvariant||+2 armor": "forgeron",
+  "magicvariant||+2 shield (*)": "forgeron",
+  "magicvariant||+2 weapon": "forgeron",
+  "magicvariant||+2 weapon (no damage)": "forgeron",
+  "magicvariant||+3 ammunition": "forgeron",
+  "magicvariant||+3 armor": "forgeron",
+  "magicvariant||+3 shield (*)": "forgeron",
+  "magicvariant||+3 weapon": "forgeron",
+  "magicvariant||+3 weapon (no damage)": "forgeron",
+  "magicvariant||adamantine ammunition": "forgeron",
+  "magicvariant||adamantine armor": "forgeron",
+  "magicvariant||adamantine weapon": "forgeron",
+  "magicvariant||armor of acid resistance": "forgeron",
+  "magicvariant||armor of cold resistance": "forgeron",
+  "magicvariant||armor of fire resistance": "forgeron",
+  "magicvariant||armor of force resistance": "forgeron",
+  "magicvariant||armor of gleaming": "mage forgeron",
+  "magicvariant||armor of lightning resistance": "forgeron",
+  "magicvariant||armor of necrotic resistance": "forgeron",
+  "magicvariant||armor of poison resistance": "forgeron",
+  "magicvariant||armor of psychic resistance": "forgeron",
+  "magicvariant||armor of radiant resistance": "forgeron",
+  "magicvariant||armor of thunder resistance": "forgeron",
+  "magicvariant||arrow of slaying (*)": "forgeron voleur",
+  "magicvariant||berserker axe": "forgeron",
+  "magicvariant||bloodseeker ammunition": "forgeron",
+  "magicvariant||cast-off armor": "forgeron voleur",
+  "magicvariant||dancing sword": "forgeron",
+  "magicvariant||defender": "forgeron",
+  "magicvariant||dragon slayer": "forgeron",
+  "magicvariant||dried leech": "alchimiste",
+  "magicvariant||flame tongue": "forgeron",
+  "magicvariant||frost brand": "forgeron",
+  "magicvariant||giant slayer": "forgeron",
+  "magicvariant||holy avenger": "forgeron",
+  "magicvariant||luck blade": "forgeron",
+  "magicvariant||mariner's armor": "forgeron",
+  "magicvariant||mithral armor": "forgeron",
+  "magicvariant||moon-touched sword": "mage forgeron",
+  "magicvariant||nine lives stealer": "forgeron",
+  "magicvariant||silvered ammunition": "forgeron",
+  "magicvariant||smoldering armor": "mage voleur",
+  "magicvariant||sword of life stealing": "forgeron",
+  "magicvariant||sword of sharpness": "forgeron",
+  "magicvariant||sword of vengeance": "forgeron",
+  "magicvariant||sword of wounding": "forgeron",
+  "magicvariant||vicious weapon": "forgeron",
+  "magicvariant||vorpal sword": "forgeron",
+  "magicvariant||walloping ammunition": "alchimiste voleur",
+  "magicvariant||weapon of warning": "forgeron",
+  "magicvariant||winged ammunition": "mage"
+});
+/** Prix des poisons du Guide du maître (p. 258), en po. */
+const MERCHANT_POISON_PRICES = Object.freeze({
+  "item|dmg|assassin's blood": 150,
+  "item|dmg|burnt othur fumes": 500,
+  "item|dmg|carrion crawler mucus": 200,
+  "item|dmg|drow poison": 200,
+  "item|dmg|essence of ether": 300,
+  "item|dmg|malice": 250,
+  "item|dmg|midnight tears": 1500,
+  "item|dmg|oil of taggit": 400,
+  "item|dmg|pale tincture": 250,
+  "item|dmg|purple worm poison": 2000,
+  "item|dmg|serpent venom": 200,
+  "item|dmg|torpor": 600,
+  "item|dmg|truth serum": 150,
+  "item|dmg|wyvern poison": 1200
+});
+/** Objets magiques qui disparaissent à l'usage : moitié prix (Xanathar p. 126). */
+const MERCHANT_CONSUMABLES = Object.freeze(new Set([
+  "item|dmg|bag of beans",
+  "item|dmg|bead of force",
+  "item|dmg|candle of invocation",
+  "item|dmg|chime of opening",
+  "item|dmg|deck of illusions",
+  "item|dmg|dust of disappearance",
+  "item|dmg|dust of dryness",
+  "item|dmg|dust of sneezing and choking",
+  "item|dmg|efreeti bottle",
+  "item|dmg|elemental gem, blue sapphire",
+  "item|dmg|elemental gem, emerald",
+  "item|dmg|elemental gem, red corundum",
+  "item|dmg|elemental gem, yellow diamond",
+  "item|dmg|elixir of health",
+  "item|dmg|gem of brightness",
+  "item|dmg|helm of brilliance",
+  "item|dmg|keoghtom's ointment",
+  "item|dmg|manual of bodily health",
+  "item|dmg|manual of clay golems",
+  "item|dmg|manual of flesh golems",
+  "item|dmg|manual of gainful exercise",
+  "item|dmg|manual of iron golems",
+  "item|dmg|manual of quickness of action",
+  "item|dmg|manual of stone golems",
+  "item|dmg|necklace of fireballs",
+  "item|dmg|nolzur's marvelous pigments",
+  "item|dmg|oil of etherealness",
+  "item|dmg|oil of sharpness",
+  "item|dmg|oil of slipperiness",
+  "item|dmg|philter of love",
+  "item|dmg|potion of acid resistance",
+  "item|dmg|potion of animal friendship",
+  "item|dmg|potion of clairvoyance",
+  "item|dmg|potion of climbing",
+  "item|dmg|potion of cloud giant strength",
+  "item|dmg|potion of cold resistance",
+  "item|dmg|potion of diminution",
+  "item|dmg|potion of fire breath",
+  "item|dmg|potion of fire giant strength",
+  "item|dmg|potion of fire resistance",
+  "item|dmg|potion of flying",
+  "item|dmg|potion of force resistance",
+  "item|dmg|potion of frost giant strength",
+  "item|dmg|potion of gaseous form",
+  "item|dmg|potion of greater healing",
+  "item|dmg|potion of growth",
+  "item|dmg|potion of heroism",
+  "item|dmg|potion of hill giant strength",
+  "item|dmg|potion of invisibility",
+  "item|dmg|potion of invulnerability",
+  "item|dmg|potion of lightning resistance",
+  "item|dmg|potion of longevity",
+  "item|dmg|potion of mind reading",
+  "item|dmg|potion of necrotic resistance",
+  "item|dmg|potion of poison",
+  "item|dmg|potion of poison resistance",
+  "item|dmg|potion of psychic resistance",
+  "item|dmg|potion of radiant resistance",
+  "item|dmg|potion of speed",
+  "item|dmg|potion of stone giant strength",
+  "item|dmg|potion of storm giant strength",
+  "item|dmg|potion of superior healing",
+  "item|dmg|potion of supreme healing",
+  "item|dmg|potion of thunder resistance",
+  "item|dmg|potion of vitality",
+  "item|dmg|potion of water breathing",
+  "item|dmg|quaal's feather token, anchor",
+  "item|dmg|quaal's feather token, bird",
+  "item|dmg|quaal's feather token, fan",
+  "item|dmg|quaal's feather token, swan boat",
+  "item|dmg|quaal's feather token, tree",
+  "item|dmg|quaal's feather token, whip",
+  "item|dmg|robe of useful items",
+  "item|dmg|scarab of protection",
+  "item|dmg|scroll of protection from aberrations",
+  "item|dmg|scroll of protection from beasts",
+  "item|dmg|scroll of protection from celestials",
+  "item|dmg|scroll of protection from elementals",
+  "item|dmg|scroll of protection from fey",
+  "item|dmg|scroll of protection from fiends",
+  "item|dmg|scroll of protection from plants",
+  "item|dmg|scroll of protection from undead",
+  "item|dmg|sovereign glue",
+  "item|dmg|spell scroll (1st level)",
+  "item|dmg|spell scroll (2nd level)",
+  "item|dmg|spell scroll (3rd level)",
+  "item|dmg|spell scroll (4th level)",
+  "item|dmg|spell scroll (5th level)",
+  "item|dmg|spell scroll (6th level)",
+  "item|dmg|spell scroll (7th level)",
+  "item|dmg|spell scroll (8th level)",
+  "item|dmg|spell scroll (9th level)",
+  "item|dmg|spell scroll (cantrip)",
+  "item|dmg|tome of clear thought",
+  "item|dmg|tome of leadership and influence",
+  "item|dmg|tome of understanding",
+  "item|dmg|universal solvent",
+  "item|tce|spellwrought tattoo (1st level)",
+  "item|tce|spellwrought tattoo (2nd level)",
+  "item|tce|spellwrought tattoo (3rd level)",
+  "item|tce|spellwrought tattoo (4th level)",
+  "item|tce|spellwrought tattoo (5th level)",
+  "item|tce|spellwrought tattoo (cantrip)",
+  "item|xge|bead of nourishment",
+  "item|xge|bead of refreshment",
+  "item|xge|candle of the deep",
+  "item|xge|mystery key",
+  "item|xge|perfume of bewitching",
+  "item|xge|pot of awakening"
+]));
+/** Familles vendues sur une ligne, l'arme ou l'armure choisie à l'ajout : nom français, puis anglais. */
+const MERCHANT_FAMILY_NAMES = Object.freeze({
+  "magicvariant||+1 weapon": ["Arme +1", "+1 Weapon"],
+  "magicvariant||adamantine armor": ["Armure d’adamantium", "Adamantine Armor"],
+  "magicvariant||adamantine weapon": ["Arme en adamantium", "Adamantine Weapon"],
+  "magicvariant||armor of gleaming": ["Armure rutilante", "Armor of Gleaming"],
+  "magicvariant||cast-off armor": ["Armure à retrait rapide", "Cast-Off Armor"],
+  "magicvariant||mariner's armor": ["Armure de matelot", "Mariner's Armor"],
+  "magicvariant||mithral armor": ["Armure de mithral", "Mithral Armor"],
+  "magicvariant||moon-touched sword": ["Épée de lumière lunaire", "Moon-Touched Sword"],
+  "magicvariant||smoldering armor": ["Armure fumante", "Smoldering Armor"],
+  "magicvariant||sword of vengeance": ["Épée vengeresse", "Sword of Vengeance"],
+  "magicvariant||weapon of warning": ["Arme vigilante", "Weapon of Warning"]
+});
+
+
+// Module : merchant-shops
+
+// Échoppes du Marchand (décisions de Luca des 26 et 27 novembre 2026) : chaque échoppe a toujours ses objets courants, communs et peu communs,
+// et tire à chaque entrée ses rares, très rares et légendaires ; les objets magiques ont un prix tiré au dé, figé pour la visite.
+const MERCHANT_RARITIES = Object.freeze(["common", "uncommon", "rare", "very rare", "legendary"]);
+const MERCHANT_DRAWN_RARITIES = Object.freeze(["rare", "very rare", "legendary"]);
+
+/** L'échoppe vend cet objet (référence de la Bibliothèque ou famille d'objets magiques). */
+const merchantSells = (shop, id) => !!shop && String(MERCHANT_STOCK[id] || "").split(" ").includes(shop);
+/** Objet magique qui disparaît à l'usage : potion, parchemin, perle, poussière… */
+const merchantConsumable = (...ids) => ids.some((id) => MERCHANT_CONSUMABLES.has(id));
+
+/**
+ * Prix demandé d'un objet magique selon sa rareté (Xanathar p. 126), en pièces de cuivre : (1d6 + 1) × 10 po, 1d6 × 100 po, 2d10 × 1 000 po,
+ * (1d4 + 1) × 10 000 po, 2d6 × 25 000 po ; la moitié pour un consommable. null pour une autre rareté (artefact, sans rareté).
+ */
+function merchantMagicPrice(rarity, consumable = false, random = Math.random) {
+  const die = (faces) => 1 + Math.floor(random() * faces);
+  const gold = { common: () => (die(6) + 1) * 10, uncommon: () => die(6) * 100, rare: () => (die(10) + die(10)) * 1000, "very rare": () => (die(4) + 1) * 10000, legendary: () => (die(6) + die(6)) * 25000 }[rarity];
+  return gold ? gold() * 100 / (consumable ? 2 : 1) : null;
+}
+
+/**
+ * Objets toujours là selon la richesse de l'échoppe (décision de Luca du 28 novembre 2026) : ceux dont le prix ne dépasse pas cap, en pièces de cuivre.
+ * Une famille garde ses objets sous le plafond, et devient l'objet quand il n'en reste qu'un ; un objet sans prix (focaliseur, prix convenu à la table) reste.
+ */
+function merchantWealthRows(rows, cap) {
+  if (!Number.isFinite(cap)) return rows;
+  const within = (row) => !Number.isFinite(row.copper) || row.copper <= cap;
+  return rows.flatMap((row) => {
+    if (!row.options) return within(row) ? [row] : [];
+    const options = row.options.filter(within);
+    return options.length === row.options.length ? [row] : options.length > 1 ? [{ ...row, options }] : options;
+  });
+}
+
+/** count éléments de pool, tirés au hasard sans remise ; tout le pool s'il en a moins. */
+function merchantDraw(pool, count, random = Math.random) {
+  const rest = [...pool], drawn = [];
+  while (drawn.length < count && rest.length) drawn.push(...rest.splice(Math.floor(random() * rest.length), 1));
+  return drawn;
+}
+
+let merchantFrenchNames = null;
+/** Nom français d'un objet d'après son nom anglais, quand un seul objet le porte ; "" sinon. */
+function merchantFrenchName(englishName) {
+  if (!merchantFrenchNames) {
+    merchantFrenchNames = new Map();
+    for (const [french, english] of Object.entries(UI_CATALOGUE_UNIQUE_NAMES)) merchantFrenchNames.set(english, merchantFrenchNames.has(english) ? "" : french);
+  }
+  return merchantFrenchNames.get(englishName) || "";
+}
+/** Nom affiché d'un objet du registre des règles : une arme ou une armure composée prend le nom de son objet de base et de sa variante. */
+function merchantItemName(id) {
+  const rule = ITEM_REFERENCE_RULES[id];
+  if (!rule) return id;
+  if (uiLanguage() !== "fr") return rule.name;
+  return (rule.variantReference ? variantReferenceName(rule.baseReference, rule.variantReference) : merchantFrenchName(rule.name)) || rule.name;
+}
+
+let merchantFamilies = null;
+/** Armes ou armures d'une famille magique (« Arme +1 ») dont l'objet de base est vendu dans une échoppe, par nom. */
+function merchantFamilyOptions(family) {
+  if (!merchantFamilies) {
+    merchantFamilies = new Map();
+    for (const [id, rule] of Object.entries(ITEM_REFERENCE_RULES))
+      if (rule.variantReference && MERCHANT_STOCK[rule.variantReference] && MERCHANT_STOCK[rule.baseReference]) merchantFamilies.set(rule.variantReference, [...merchantFamilies.get(rule.variantReference) || [], id]);
+  }
+  return merchantFamilies.get(family) || [];
 }
 
 
@@ -50727,7 +51921,8 @@ const iconPaths={
  clipboard:'<rect x="5" y="4" width="14" height="18" rx="2"/><path d="M9 4V2h6v2M9 9h6m-6 4h6"/>',
  coffee:'<path d="M4 8h12v8a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4ZM16 9h2a3 3 0 0 1 0 6h-2M2 22h18M7 2v3m5-3v3"/>',
  bed:'<path d="M3 4v17m18-9v9M3 17h18M3 12h18M7 12V8h4v4m0-4h7a3 3 0 0 1 3 3v1"/>',
- clock:'<circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/>',zap:'<path d="m13 2-9 12h7l-1 8 10-13h-7Z"/>',
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/>',
+ "shooting-star":'<path d="M16 2.5l1.4 3.6 3.8.2-2.9 2.4.9 3.7-3.2-2-3.2 2 .9-3.7-2.9-2.4 3.8-.2Z"/><path d="M3 21l7-7M3 15.5l5.5-5.5M8.5 21l5.5-5.5"/>',zap:'<path d="m13 2-9 12h7l-1 8 10-13h-7Z"/>',
  cloud:'<path d="M7 18a5 5 0 1 1 0-10 7 7 0 0 1 13 3 4 4 0 0 1-1 7Z"/>',
  lock:'<rect x="4" y="10" width="16" height="12" rx="3"/><path d="M7 10V7a5 5 0 0 1 10 0v3m-5 5v3"/>',
  unlock:'<rect x="4" y="10" width="16" height="12" rx="3"/><path d="M7 10V7a5 5 0 0 1 9.6-2m-4.6 10v3"/>',
@@ -54879,7 +56074,7 @@ async function performEffects(action, el, c, data, d) {
     case "received-all": ui.receivedAll = true; render(); break;
     case "received-custom": openReceivedEffect(c, { name: "Effet personnalisé" }); break;
     case "received-library": {
-      const entry = ui.libraryEntry, spell = SPELLS.find((row) => row.referenceId === entry.id), localized = libraryLocalized(entry, ui.libraryLanguage || uiLanguage());
+      const entry = ui.libraryEntry, spell = SPELLS.find((row) => row.referenceId === entry.id), localized = libraryReading(entry, ui.libraryReading?.definitions, ui.libraryLanguage || uiLanguage());
       openReceivedEffect(c, { spellId: spell?.id || "", referenceId: entry.id, name: localized.name }); break;
     }
     case "received-cast": {
@@ -57730,7 +58925,7 @@ async function performInventory(action, el, c, data, d) {
     case "add-library-item": {
       if (librarySelection(ui.libraryEntry)?.type !== "item") break;
       const libraryBack = captureLibraryOrigin();
-      const entry = ui.libraryEntry, localized = libraryLocalized(entry, ui.libraryLanguage);
+      const entry = ui.libraryEntry, localized = libraryReading(entry, ui.libraryReading?.definitions, ui.libraryLanguage);
       if (equipmentPack(entry.id)) { ui.packLibraryBack = libraryBack; ui.form = { packId: entry.id, quantity: 1, mode: "free", totalCost: equipmentPack(entry.id).raw.value / 100, convertId: null }; openModal("equipment-pack"); break; }
       const item = createCatalogueItem(entry, c.id, { id: uid(), name: localized.name });
       const next = clone(c); next.inventory.push(item);
@@ -57900,8 +59095,8 @@ async function performInventory(action, el, c, data, d) {
       if (ui.form.pactWeaponId === removedWeapon?.instanceId) ui.form.pactWeaponId = null;
       render();
       break;
-    case "shop-open": case "shop-tab": case "shop-view": case "shop-full": case "shop-add": case "shop-free": case "shop-remove": case "shop-minus": case "shop-plus": case "shop-detail": case "shop-review":
-    case "shop-terms-open": case "shop-terms-rule": case "shop-terms-ok": case "shop-terms-cancel": case "shop-back": case "shop-sell": case "shop-price-ok":
+    case "shop-open": case "shop-view": case "shop-add": case "shop-pick": case "shop-pick-add": case "shop-terms-shop": case "shop-terms-wealth": case "shop-free": case "shop-remove": case "shop-minus": case "shop-plus": case "shop-detail": case "shop-review":
+    case "shop-terms-rule": case "shop-terms-ok": case "shop-terms-cancel": case "shop-back": case "shop-sell": case "shop-price-ok":
       await performShop(action, c, data); break;
     case "catalog-item":
       ui.catalogQuery = "";
@@ -57912,7 +59107,21 @@ async function performInventory(action, el, c, data, d) {
       ui.catalogTab = data.value;
       render();
       break;
+    case "catalog-count-minus": case "catalog-count-plus":
+      ui.catalogCount.qty = String(Math.min(CATALOGUE_COUNT_MAX, Math.max(1, catalogueCount() + (action === "catalog-count-plus" ? 1 : -1))));
+      renderWindow(); modalRoot.querySelector(`[data-action="${action}"]`)?.focus({ preventScroll: true });
+      break;
+    case "catalog-count-add": {
+      const { id } = ui.catalogCount, count = catalogueCount(), name = `${catalogueLotName(id)} ×${count}`;
+      if (count < 1) break;
+      await sessionChange((n) => addCatalogueUnits(n, id, count), uiText("Sac : {p0}", { p0: name }));
+      catalogueCountClose();
+      toast(uiText("{p0} ajouté au sac.", { p0: name }), null, true);
+      break;
+    }
     case "add-catalog-item": {
+      // Objet vendu par lot (munitions, billes, chausse-trappes) : le nombre trouvé se choisit, à partir de 1 (décision de Luca du 26 novembre 2026).
+      if (catalogueLotName(data.id)) { ui.catalogCount = { id: data.id, qty: "1" }; openModal("catalog-count"); break; }
       const info = itemInfo(data.id);
       if (!info) break;
       if (equipmentPack(data.id)) { ui.packLibraryBack = null; ui.form = { packId: data.id, quantity: 1, mode: "free", totalCost: equipmentPack(data.id).raw.value / 100, convertId: null }; openModal("equipment-pack"); break; }
@@ -57925,12 +59134,20 @@ async function performInventory(action, el, c, data, d) {
 
 /* ---------------------------------------------------------------- Achats */
 // Un panier d'objets du catalogue ou hors catalogue : la bourse est débitée et les objets rejoignent le sac à la validation.
-const SHOP_TABS = [["gear", "Matériel"], ["weapons", "Armes"], ["armor", "Armures"], ["tools", "Outils"]];
+// Catégories du Marchand, dans une liste déroulante : « Tout », puis chaque catégorie qui a des objets (demande de Luca du 27 novembre 2026).
+const SHOP_TABS = [["all", "shop.tab.all"], ["gear", "Matériel"], ["weapons", "Armes"], ["ammo", "shop.tab.ammo"], ["armor", "Armures"], ["tools", "Outils"], ["potions", "shop.tab.potions"], ["magic", "shop.tab.magic"]];
+// Munitions et potions ont leur catégorie, d'après le type de l'objet dans les livres ; huiles et philtres sont des potions (type P).
+const shopCategory = (referenceId, tab) => ({ A: "ammo", P: "potions" })[String(ITEM_REFERENCE_RULES[referenceId]?.type || "").split("|")[0]] || tab;
+// Onglet d'un objet du Manuel hors catalogue rapide, d'après son type ; le reste va dans Matériel.
+const SHOP_TAB_OF_TYPE = { M: "weapons", R: "weapons", LA: "armor", MA: "armor", HA: "armor", S: "armor", AT: "tools", T: "tools", GS: "tools", INS: "tools" };
+// Arme en adamantium : le prix de l'arme plus 500 po (Xanathar p. 78), dans l'onglet Armes.
+const SHOP_BASE_PLUS = { "magicvariant||adamantine weapon": 50000 };
+const SHOP_RARITY_KEYS = { common: "common", uncommon: "uncommon", rare: "rare", "very rare": "veryRare", legendary: "legendary" };
 const SHOP_SORTS = ["az", "za", "desc", "asc"];
 // Objets du catalogue rapide que l'équipement de départ garde hors de la Bibliothèque : leur fiche s'y lit quand même.
 const SHOP_REFERENCES = {
   arrows: "baseitem|phb|arrows (20)", "crossbow-bolts": "baseitem|phb|crossbow bolts (20)", "sling-bullets": "baseitem|phb|sling bullets (20)", "blowgun-needles": "baseitem|phb|blowgun needles (50)",
-  oil: "item|phb|oil (flask)", "hempen-rope": "item|phb|hempen rope (50 feet)", "silk-rope": "item|phb|silk rope (50 feet)", "ball-bearings": "item|phb|ball bearings (bag of 1,000)",
+  caltrops: "item|phb|caltrops (bag of 20)", oil: "item|phb|oil (flask)", "hempen-rope": "item|phb|hempen rope (50 feet)", "silk-rope": "item|phb|silk rope (50 feet)", "ball-bearings": "item|phb|ball bearings (bag of 1,000)",
   parchment: "item|phb|parchment (one sheet)", paper: "item|phb|paper (one sheet)", perfume: "item|phb|perfume (vial)", "potion-of-healing": "item|dmg|potion of healing",
   "double-bladed-scimitar": "baseitem|erlw|double-bladed scimitar", spiked: "baseitem|scag|spiked armor",
 };
@@ -57945,16 +59162,18 @@ const shopId = (prefix, key) => `${prefix}-${String(key).replace(/[^a-z0-9]+/gi,
 const MERCHANT_RATES = [10, 15, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90, 100, 110, 120, 125, 150, 175, 200, 250, 300, 400, 500, 750, 1000];
 // Règle 2014 (Manuel des joueurs, Revente) : le marchand vend au prix du Manuel et rachète l'équipement à moitié prix.
 const MERCHANT_RULE = Object.freeze({ sell: 100, buy: 50 });
-/** Conditions gardées sur l'appareil (demande de Luca), sinon la règle 2014. */
+/** Conditions gardées sur l'appareil (demande de Luca), sinon la règle 2014 ; la dernière échoppe et la dernière richesse choisies, aucune la première fois. */
 function merchantTerms() {
   try {
     const saved = JSON.parse(localStorage.getItem("compagnon-merchant") || "null");
-    if (MERCHANT_RATES.includes(saved?.sell) && MERCHANT_RATES.includes(saved?.buy)) return { sell: saved.sell, buy: saved.buy };
+    const shop = MERCHANT_SHOPS.includes(saved?.shop) ? saved.shop : null, wealth = Object.hasOwn(MERCHANT_WEALTH, saved?.wealth ?? "") ? saved.wealth : null;
+    if (MERCHANT_RATES.includes(saved?.sell) && MERCHANT_RATES.includes(saved?.buy)) return { sell: saved.sell, buy: saved.buy, shop, wealth };
+    return { ...MERCHANT_RULE, shop, wealth };
   } catch {}
-  return { ...MERCHANT_RULE };
+  return { ...MERCHANT_RULE, shop: null, wealth: null };
 }
 function saveMerchantTerms(terms) {
-  try { localStorage.setItem("compagnon-merchant", JSON.stringify({ sell: terms.sell, buy: terms.buy })); } catch {}
+  try { localStorage.setItem("compagnon-merchant", JSON.stringify({ sell: terms.sell, buy: terms.buy, shop: terms.shop, wealth: terms.wealth })); } catch {}
 }
 const merchantRate = (rate) => uiText("shop.rate", { rate: new Intl.NumberFormat(uiLanguage() === "en" ? "en" : "fr").format(rate) });
 /** Objets du sac que le personnage peut vendre : les siens, même laissés au campement, ni détruits ni épuisés. */
@@ -57967,18 +59186,71 @@ function shopCatalogue() {
   for (const [tab, source] of Object.entries({ gear: uiGear, weapons: uiWeapons, armor: uiArmors, tools: uiTools }))
     quick[tab] = Object.entries(source).filter(([id]) => id !== "unarmed" && id !== "none").map(([id, x]) => {
       const alias = SHOP_REFERENCES[id], reference = alias ? kit.find((entry) => entry.id === alias) || { id: alias, raw: null } : runtimeItemReference(id);
-      return { key: `${tab}:${id}`, kind: tab, id, name: x.name, search: librarySearchText([x.name, x.englishName, x.referenceEnglishName].filter(Boolean).join(" ")), copper: parseCoins(itemInfo(id)?.cost), cost: x.cost || "", weight: x.weight || 0,
+      return { key: `${tab}:${id}`, kind: tab, tab: shopCategory(reference?.id, tab), id, name: x.name, search: librarySearchText([x.name, x.englishName, x.referenceEnglishName].filter(Boolean).join(" ")), copper: parseCoins(itemInfo(id)?.cost), cost: x.cost || "", weight: x.weight || 0,
         facts: x.damage ? `${x.damage} ${x.type}` : x.base ? uiText("CA {p0}", { p0: x.base }) : "", referenceId: reference?.id || null, raw: reference?.raw || null, note: x.contents || x.note || x.special || "" };
     });
   const used = new Set(Object.values(quick).flat().map((row) => row.referenceId));
   // Hors pièces de monnaie et prix inférieurs à une pièce de cuivre, qui ne s'achètent pas à l'unité.
-  const complete = kit.filter((entry) => !used.has(entry.id) && entry.raw.type?.split("|")[0] !== "$C" && Number.isInteger(entry.raw.value) && entry.raw.value > 0)
-    .map((entry) => ({ key: `ref:${entry.id}`, kind: "ref", id: entry.id, name: entry.raw.name, search: librarySearchText(entry.raw.name), copper: entry.raw.value, cost: "", weight: (entry.raw.weight || 0) * 0.5, facts: "", referenceId: entry.id, raw: entry.raw, note: "" }));
-  return shopCatalogueCache = { language, quick, complete, named: language === "en" };
+  const complete = kit.filter((entry) => !used.has(entry.id) && entry.raw.type?.split("|")[0] !== "$C" && Number.isInteger(entry.raw.value) && entry.raw.value > 0).map((entry) => {
+    const name = language === "fr" && merchantFrenchName(entry.raw.name) || entry.raw.name;
+    return { key: `ref:${entry.id}`, kind: "ref", tab: shopCategory(entry.id, SHOP_TAB_OF_TYPE[entry.raw.type?.split("|")[0]] || "gear"), id: entry.id, name, search: librarySearchText(`${name} ${entry.raw.name}`), copper: entry.raw.value, cost: "", weight: (entry.raw.weight || 0) * 0.5, facts: "", referenceId: entry.id, raw: entry.raw, note: "" };
+  });
+  return shopCatalogueCache = { language, quick, complete };
 }
+/** Ligne d'un objet magique ou d'un poison : nom, rareté et prix de la visite ; sa fiche vient de la Bibliothèque. */
+function shopMagicRow(id, copper, extra = {}) {
+  const rule = ITEM_REFERENCE_RULES[id], name = merchantItemName(id);
+  return { key: `magic:${id}`, kind: "magic", tab: shopCategory(id, "magic"), id, name, search: librarySearchText(`${name} ${rule.name}`), copper, cost: "", weight: 0, facts: "", referenceId: id, raw: null, note: "", rarity: rule.rarity, ...extra };
+}
+const shopDrawn = (rarity) => MERCHANT_DRAWN_RARITIES.includes(rarity);
+/**
+ * Une visite de l'échoppe (décisions de Luca des 26 et 27 novembre 2026) : ses objets du Manuel, ses munitions spéciales à leur prix au lot,
+ * ses poisons, ses objets magiques communs et peu communs, une ligne par famille d'armes ou d'armures magiques, et le tirage de ses rares,
+ * très rares et légendaires (une famille compte pour un objet, l'arme ou l'armure tirée au hasard). Chaque objet magique a son prix tiré au dé pour la visite.
+ * La richesse de l'échoppe plafonne le prix des objets toujours là, pas celui du tirage (décisions de Luca des 27 et 28 novembre 2026).
+ */
+function shopVisit(shop, wealth) {
+  const catalogue = shopCatalogue(), rows = [], pools = Object.fromEntries(MERCHANT_DRAWN_RARITIES.map((rarity) => [rarity, []])), used = new Set();
+  const pick = (list) => list[Math.floor(Math.random() * list.length)];
+  // Objet du catalogue rapide sans référence (focaliseur arcanique, ficelle) : classé sous « catalog: » et son identifiant.
+  for (const row of [...Object.values(catalogue.quick).flat(), ...catalogue.complete]) { const id = row.referenceId || `catalog:${row.id}`; used.add(id); if (merchantSells(shop, id)) rows.push(row); }
+  const ammo = new Map();
+  for (const entry of catalogueAmmunition()) {
+    const rule = ITEM_REFERENCE_RULES[entry.id], family = rule.variantReference || entry.id;
+    used.add(entry.id);
+    if (!merchantSells(shop, family) || entry.copper === null) continue;
+    const row = { key: `ammo:${entry.id}`, kind: "ammo", tab: "ammo", id: entry.id, name: `${entry.name} (${entry.lot})`, search: librarySearchText(`${entry.name} ${entry.englishName}`), copper: entry.copper, cost: "", weight: entry.unitWeight * entry.lot, facts: "", referenceId: entry.id, raw: null, note: "", rarity: rule.rarity, lot: entry.lot };
+    if (shopDrawn(rule.rarity)) ammo.set(family, [...ammo.get(family) || [], row]); else rows.push(row);
+  }
+  for (const options of ammo.values()) pools[options[0].rarity].push(() => pick(options));
+  for (const id of Object.keys(MERCHANT_STOCK)) {
+    if (!merchantSells(shop, id) || used.has(id)) continue;
+    // Poisons dans Matériel (décision de Luca du 27 novembre 2026).
+    if (MERCHANT_POISON_PRICES[id]) { rows.push(shopMagicRow(id, MERCHANT_POISON_PRICES[id] * 100, { tab: "gear" })); continue; }
+    if (id.startsWith("magicvariant||")) {
+      const options = merchantFamilyOptions(id), rarity = ITEM_REFERENCE_RULES[options[0]]?.rarity;
+      if (!options.length) continue;
+      if (shopDrawn(rarity)) { pools[rarity].push(() => shopMagicRow(pick(options), merchantMagicPrice(rarity))); continue; }
+      const plus = SHOP_BASE_PLUS[id], price = plus ? null : merchantMagicPrice(rarity), tab = plus ? "weapons" : "magic";
+      const base = (option) => catalogue.quick.weapons.find((row) => row.referenceId === ITEM_REFERENCE_RULES[option].baseReference)?.copper ?? null;
+      const choices = options.map((option) => shopMagicRow(option, plus ? base(option) === null ? null : base(option) + plus : price, { tab }));
+      if (choices.length === 1) { rows.push(choices[0]); continue; }
+      const [french, english] = MERCHANT_FAMILY_NAMES[id], name = uiLanguage() === "fr" ? french : english;
+      rows.push({ key: `family:${id}`, kind: "family", tab, id, name, search: librarySearchText(`${name} ${english}`), copper: price, cost: "", weight: 0, facts: "", referenceId: id, raw: null, note: "", rarity, plus, options: choices });
+      continue;
+    }
+    const rarity = ITEM_REFERENCE_RULES[id]?.rarity, consumable = merchantConsumable(id);
+    if (shopDrawn(rarity)) pools[rarity].push(() => shopMagicRow(id, merchantMagicPrice(rarity, consumable)));
+    else if (MERCHANT_RARITIES.includes(rarity)) rows.push(shopMagicRow(id, merchantMagicPrice(rarity, consumable)));
+  }
+  const kept = merchantWealthRows(rows, MERCHANT_WEALTH[wealth] ?? Infinity);
+  MERCHANT_DRAWN_RARITIES.forEach((rarity, index) => { for (const make of merchantDraw(pools[rarity], MERCHANT_DRAWS[shop]?.[index] || 0)) kept.push({ ...make(), drawn: true }); });
+  return { shop, wealth, rows: kept };
+}
+/** Ligne de la visite en cours, ou arme et armure d'une famille. */
 function shopRow(key) {
-  const catalogue = shopCatalogue();
-  return [...Object.values(catalogue.quick).flat(), ...catalogue.complete].find((row) => row.key === key) || null;
+  const rows = ui.shop?.visit?.rows || [];
+  return rows.find((row) => row.key === key) || rows.flatMap((row) => row.options || []).find((row) => row.key === key) || null;
 }
 const shopHasDetail = (row) => !!row.note || (row.raw ? SHOP_DETAIL_FIELDS.some((field) => row.raw[field] !== undefined) : !!row.referenceId);
 /** Prix à l'unité d'une ligne du panier en pièces de cuivre, ou null tant qu'aucun des trois champs n'est rempli. */
@@ -58006,25 +59278,45 @@ const shopCount = () => ui.shop.cart.reduce((sum, line) => sum + shopLineQty(lin
 const shopPurse = (c) => Math.round(c.gold * 100);
 const shopAfter = (c) => shopPurse(c) - shopBuys() + shopSales();
 const shopSaleMax = (c, line) => c.inventory.find((item) => item.id === line.itemId)?.qty || 0;
+/** Nombre maximal d'une ligne : ce que le sac contient pour une vente, un seul objet tiré, 999 sinon. */
+const shopLineMax = (c, line) => line.sale ? shopSaleMax(c, line) : line.item?.drawn ? 1 : 999;
 function shopReady(c) {
   const cart = ui.shop.cart;
-  return cart.length > 0 && cart.every((line) => shopLineQty(line) >= 1 && shopLineQty(line) <= (line.sale ? shopSaleMax(c, line) : 999) && (!shopFreeLine(line) || shopLineUnit(line) !== null && line.name.trim() && Number(line.weight || 0) >= 0)) && shopAfter(c) >= 0;
+  return cart.length > 0 && cart.every((line) => shopLineQty(line) >= 1 && shopLineQty(line) <= shopLineMax(c, line) && (!shopFreeLine(line) || shopLineUnit(line) !== null && line.name.trim() && Number(line.weight || 0) >= 0)) && shopAfter(c) >= 0;
 }
+/** Rareté d'un objet magique, en couleur ; rien pour un objet sans rareté. */
+const shopRarity = (rarity) => SHOP_RARITY_KEYS[rarity] ? `<span class="shop-rarity rarity-${SHOP_RARITY_KEYS[rarity]}">${esc(uiText(`shop.rarity.${SHOP_RARITY_KEYS[rarity]}`))}</span>` : "";
+/** Prix d'une ligne au taux de vente du marchand : le lot pour une munition, l'arme plus son supplément pour l'adamantium. */
+function shopRowPrice(row) {
+  const sell = (copper) => shopCoins(Math.ceil(copper * ui.shop.terms.sell / 100 - 1e-9));
+  if (row.plus) return uiText("shop.basePlus", { price: sell(row.plus) });
+  if (row.copper === null) return row.cost;
+  return row.lot ? uiText("shop.lot", { price: sell(row.copper), count: row.lot }) : sell(row.copper);
+}
+/** Pièces d'une ligne déjà dans le panier : pour une famille, ses armes ou armures choisies. */
+const shopInCart = (row) => { const keys = row.options ? row.options.map((option) => option.key) : [row.key]; return ui.shop.cart.filter((line) => keys.includes(line.row)).reduce((sum, line) => sum + shopLineQty(line), 0); };
+// Objet tiré à cette visite : une étoile filante à la couleur de sa rareté (choix de Luca du 27 novembre 2026).
+const shopDrawnMark = (row) => row.drawn ? `<span class="shop-drawn rarity-${SHOP_RARITY_KEYS[row.rarity] || "common"}" role="img" aria-label="${uiText("shop.drawn")}" title="${uiText("shop.drawn")}">${icon("shooting-star", 15)}</span>` : "";
 function shopRowsHtml() {
-  const shop = ui.shop, catalogue = shopCatalogue(), q = librarySearchText(shop.query.trim()), tabs = Object.fromEntries(SHOP_TABS);
-  // Une recherche couvre les quatre onglets : on cherche une dague sans savoir qu'elle est rangée dans Armes.
-  const list = shop.full ? catalogue.complete : q ? SHOP_TABS.flatMap(([tab]) => catalogue.quick[tab]) : catalogue.quick[shop.tab];
+  const shop = ui.shop, q = librarySearchText(shop.query.trim());
+  // La recherche porte sur la catégorie choisie ; « Tout » montre tous les objets de l'échoppe.
+  const list = shop.tab === "all" ? shop.visit.rows : shop.visit.rows.filter((row) => row.tab === shop.tab);
   const byName = (a, b) => compareUnitLabels(a.name, b.name, uiLanguage()), price = (row, direction) => row.copper === null ? Infinity : direction * row.copper;
+  // A → Z comme le catalogue « + » (décision de Luca du 26 novembre 2026) : premier mot, puis prix ; les objets tirés se rangent avec les autres.
+  const az = (a, b) => catalogueOrder([a.id, a], [b.id, b]);
   // Prix variable : en fin de liste dans les deux tris par prix.
-  const order = { az: byName, za: (a, b) => byName(b, a), desc: (a, b) => price(a, -1) - price(b, -1) || byName(a, b), asc: (a, b) => price(a, 1) - price(b, 1) || byName(a, b) }[shop.sort] || byName;
+  const order = { az, za: (a, b) => az(b, a), desc: (a, b) => price(a, -1) - price(b, -1) || byName(a, b), asc: (a, b) => price(a, 1) - price(b, 1) || byName(a, b) }[shop.sort] || az;
   const c = activeCharacter(), acc = c && collect(c), kinds = { weapons: "weapon", armor: "armor", tools: "tool" };
-  const proficient = (row) => c ? itemProficiency(c, kinds[row.kind] ? { kind: kinds[row.kind], id: row.id } : { reference: row.referenceId }, acc) : null;
+  const proficient = (row) => c && row.kind !== "family" ? itemProficiency(c, kinds[row.kind] ? { kind: kinds[row.kind], id: row.id } : { reference: row.referenceId }, acc) : null;
   return list.filter((row) => row.search.includes(q) && !(shop.proficientOnly && proficient(row) === false)).sort(order).map((row) => {
-    const inCart = shop.cart.filter((line) => line.row === row.key).reduce((sum, line) => sum + shopLineQty(line), 0), open = shop.opened.includes(row.key);
-    const meta = [row.copper === null ? row.cost : shopCoins(Math.ceil(row.copper * shop.terms.sell / 100 - 1e-9)), row.weight ? formatCarriedWeight(row.weight) : "", row.facts, q && !shop.full ? uiText(tabs[row.kind]) : ""].filter(Boolean).map(esc).join(" · ");
-    const title = `<span class="shop-title"><strong>${esc(row.name)}${inCart ? ` <span class="pill outline">×${inCart}</span>` : ""}${proficiencyPill(proficient(row))}</strong><small>${meta}</small></span>`;
+    const inCart = shopInCart(row), open = shop.opened.includes(row.key);
+    const meta = [shopRarity(row.rarity), ...[shopRowPrice(row), row.weight ? formatCarriedWeight(row.weight) : "", row.facts].filter(Boolean).map(esc)].filter(Boolean).join(" · ");
+    const title = `<span class="shop-title"><strong>${esc(row.name)}${shopDrawnMark(row)}${inCart ? ` <span class="pill outline">×${inCart}</span>` : ""}${proficiencyPill(proficient(row))}</strong><small>${meta}</small></span>`;
     const head = shopHasDetail(row) ? `<button type="button" id="${shopId("shop-detail", row.key)}" class="shop-info" data-action="shop-detail" data-id="${esc(row.key)}" aria-expanded="${open}">${title}<span class="shop-chevron">${icon("chevron", 16)}</span></button>` : `<div class="shop-text">${title}</div>`;
-    return `<div class="catalog-row shop-row${open ? " open" : ""}">${head}${button(uiText("{p0} Ajouter", { p0: icon("plus", 14) }), "shop-add", `id="${shopId("shop-add", row.key)}" data-id="${esc(row.key)}"`, "small-btn")}${open ? `<div class="shop-detail">${shopDetailHtml(row)}</div>` : ""}</div>`;
+    // Un objet tiré n'existe qu'en un exemplaire.
+    const add = row.options ? button(uiText("shop.choose"), "shop-pick", `id="${shopId("shop-pick", row.key)}" data-id="${esc(row.key)}"`, "small-btn")
+      : button(uiText("{p0} Ajouter", { p0: icon("plus", 14) }), "shop-add", `id="${shopId("shop-add", row.key)}" data-id="${esc(row.key)}" ${row.drawn && inCart ? "disabled" : ""}`, "small-btn");
+    return `<div class="catalog-row shop-row${open ? " open" : ""}">${head}${add}${open ? `<div class="shop-detail">${shopDetailHtml(row)}</div>` : ""}</div>`;
   }).join("") || `<p class="small muted section-gap">${uiText("Aucun objet.")}</p>`;
 }
 function shopDetailHtml(row) {
@@ -58061,7 +59353,7 @@ function shopStepper(line, base, id, max) {
 }
 function shopCartLineHtml(c, line, index) {
   const names = shopCoinNames(), base = `ui.shop.cart.${index}`, id = `shop-line-${line.key}`, remove = smallIcon("x", "shop-remove", uiText("shop.remove"), `id="${id}-remove" data-id="${line.key}"`);
-  if (!shopFreeLine(line)) return `<div class="shop-line" data-line="${line.key}"><div class="shop-line-head"><strong>${esc(line.name)}</strong><strong class="shop-line-total${line.sale ? " gain" : ""}">${esc(shopLineTotal(line))}</strong></div><div class="shop-line-body shop-line-computed">${shopStepper(line, base, id, line.sale ? shopSaleMax(c, line) : 999)}${remove}</div></div>`;
+  if (!shopFreeLine(line)) return `<div class="shop-line" data-line="${line.key}"><div class="shop-line-head"><strong>${esc(line.name)}</strong><strong class="shop-line-total${line.sale ? " gain" : ""}">${esc(shopLineTotal(line))}</strong></div><div class="shop-line-body shop-line-computed">${shopStepper(line, base, id, shopLineMax(c, line))}${remove}</div></div>`;
   return `<div class="shop-line" data-line="${line.key}"><div class="shop-line-head"><input id="${id}-name" class="shop-line-name" type="text" data-bind="${base}.name" value="${esc(line.name)}" placeholder="${uiText("Nom de l’objet")}" aria-label="${uiText("Nom de l’objet")}" maxlength="120">${remove}</div><div class="shop-line-body">${shopStepper(line, base, id, 999)}<div class="shop-price" role="group" aria-label="${uiText("shop.unitPrice")}">${["po", "pa", "pc"].map((coin) => `<label><input id="${id}-${coin}" type="number" inputmode="numeric" min="0" step="1" data-bind="${base}.${coin}" value="${esc(line[coin])}" aria-label="${names[coin]}"><span>${names[coin]}</span></label>`).join("")}</div><strong class="shop-line-total">${esc(shopLineTotal(line))}</strong></div><label class="shop-weight">${uiText("Poids unitaire (kg)")} <input id="${id}-weight" type="number" inputmode="decimal" min="0" max="10000" step="0.1" data-bind="${base}.weight" value="${esc(line.weight)}"></label></div>`;
 }
 function shopCartHtml(c) {
@@ -58075,7 +59367,7 @@ function shopCartHtml(c) {
 function shopBagHtml(c) {
   const shop = ui.shop, q = librarySearchText(shop.bagQuery.trim());
   return shopBagItems(c).filter((item) => librarySearchText(item.name).includes(q)).map((item) => {
-    const unit = inventoryItemPrice(item), sold = shop.cart.filter((line) => line.sale && line.itemId === item.id).reduce((sum, line) => sum + shopLineQty(line), 0);
+    const unit = inventoryItemPrice(item) ?? shop.sales[item.id] ?? null, sold = shop.cart.filter((line) => line.sale && line.itemId === item.id).reduce((sum, line) => sum + shopLineQty(line), 0);
     const rate = (inventoryItemTrade(item) ? shop.terms.sell : shop.terms.buy) / 100, total = unit === null ? null : Math.floor(unit * item.qty * rate + 1e-9);
     const meta = [item.qty > 1 ? `×${item.qty}` : "", total === null ? "" : item.qty > 1 ? uiText("shop.lot", { price: shopCoins(total), count: item.qty }) : shopCoins(total)].filter(Boolean).map(esc).join(" · ");
     return `<div class="catalog-row shop-row"><div class="shop-text"><span class="shop-title"><strong>${esc(item.name)}${sold ? ` <span class="pill outline">×${sold}</span>` : ""}</strong>${meta ? `<small>${meta}</small>` : ""}</span></div>${button(uiText("{p0} Vendre", { p0: icon("plus", 14) }), "shop-sell", `id="${shopId("shop-sell", item.id)}" data-id="${esc(item.id)}" ${sold >= item.qty ? "disabled" : ""}`, "small-btn")}</div>`;
@@ -58089,21 +59381,38 @@ function shopSummaryHtml(c) {
 const shopCartLabel = () => shopCount() ? uiText("shop.cartCount", { count: shopCount() }) : uiText("shop.cart");
 function renderShop(c, cancel) {
   const shop = ui.shop, count = shopCount();
-  const head = shop.full ? `<div class="shop-full-head"><strong>${uiText("shop.full.title")}</strong><small class="muted">${uiText("shop.full.help")}</small></div>` : `<div class="segmented four">${SHOP_TABS.map(([id, label]) => `<button type="button" data-action="shop-tab" data-value="${id}" class="${shop.tab === id ? "active" : ""}">${uiText(label)}</button>`).join("")}</div>`;
-  const catalog = `<div class="shop-catalog">${head}<div class="spell-toolbar shop-toolbar"><div class="search-wrap">${icon("search", 18)}<input id="shop-search" class="search-input" type="search" data-bind="ui.shop.query" value="${esc(shop.query)}" placeholder="${uiText("Chercher…")}" aria-label="${uiText("Chercher un objet")}"></div><select id="shop-sort" class="select-plain" data-bind="ui.shop.sort" aria-label="${uiText("shop.sort")}">${SHOP_SORTS.map((id) => `<option value="${id}" ${shop.sort === id ? "selected" : ""}>${uiText(`shop.sort.${id}`)}</option>`).join("")}</select></div>${checkField(uiText("Masquer les non maîtrisés"), "ui.shop.proficientOnly", shop.proficientOnly)}<div class="shop-rows">${shopRowsHtml()}</div>${window.COMPANION_STANDALONE ? "" : button(uiText(shop.full ? "shop.full.close" : "shop.full.open"), "shop-full", "", "ghost shop-switch")}</div>`;
+  // Une catégorie sans objet dans cette échoppe n'apparaît pas (demande de Luca du 27 novembre 2026).
+  const head = `<select id="shop-category" class="select-plain shop-category" data-bind="ui.shop.tab" aria-label="${uiText("shop.category")}">${shopTabs().map(([id, label]) => `<option value="${id}" ${shop.tab === id ? "selected" : ""}>${uiText(label)}</option>`).join("")}</select>`;
+  const catalog = `<div class="shop-catalog">${head}<div class="spell-toolbar shop-toolbar"><div class="search-wrap">${icon("search", 18)}<input id="shop-search" class="search-input" type="search" data-bind="ui.shop.query" value="${esc(shop.query)}" placeholder="${uiText("Chercher…")}" aria-label="${uiText("Chercher un objet")}"></div><select id="shop-sort" class="select-plain" data-bind="ui.shop.sort" aria-label="${uiText("shop.sort")}">${SHOP_SORTS.map((id) => `<option value="${id}" ${shop.sort === id ? "selected" : ""}>${uiText(`shop.sort.${id}`)}</option>`).join("")}</select></div>${checkField(uiText("Masquer les non maîtrisés"), "ui.shop.proficientOnly", shop.proficientOnly)}<div class="shop-rows">${shopRowsHtml()}</div></div>`;
   const cart = `<div class="shop-cart"><h3 class="shop-cart-title">${uiText("shop.cart")}${count ? ` <span class="pill">${count}</span>` : ""}</h3>${shopCartHtml(c)}${button(`${icon("plus", 14)} ${uiText("shop.free")}`, "shop-free", "", "ghost shop-free")}</div>`;
   const bag = `<div class="shop-bag"><div class="spell-toolbar shop-toolbar"><div class="search-wrap">${icon("search", 18)}<input id="shop-bag-search" class="search-input" type="search" data-bind="ui.shop.bagQuery" value="${esc(shop.bagQuery)}" placeholder="${uiText("Chercher…")}" aria-label="${uiText("shop.bagSearch")}"></div></div><div class="shop-bag-rows">${shopBagHtml(c)}</div></div>`;
   const views = `<div class="shop-views segmented">${[["catalog", uiText("shop.catalogue")], ["bag", uiText("shop.bag")], ["cart", shopCartLabel()]].map(([id, label]) => `<button type="button" data-action="shop-view" data-value="${id}" class="${shop.view === id ? "active" : ""}" aria-pressed="${shop.view === id}">${esc(label)}</button>`).join("")}</div>`;
-  const terms = `<button type="button" class="shop-terms" data-action="shop-terms-open" aria-label="${uiText("shop.terms")}" title="${uiText("shop.terms")}">${icon("shop", 18)}<span>${esc(merchantRate(shop.terms.sell))} / ${esc(merchantRate(shop.terms.buy))}</span></button>`;
+  // Les conditions se règlent à l'entrée seulement (décision de Luca du 27 novembre 2026) : l'en-tête les rappelle.
+  const terms = `<span class="shop-terms">${icon("shop", 18)}<span>${[uiText(`shop.kind.${shop.terms.shop}`), uiText(`shop.wealth.${shop.terms.wealth}`), `${merchantRate(shop.terms.sell)} / ${merchantRate(shop.terms.buy)}`].map((part) => `<span>${esc(part)}</span>`).join(" · ")}</span></span>`;
   return modalShell(uiText("shop.merchant"), `${views}<div class="shop-body" data-view="${shop.view}">${catalog}${bag}${cart}</div>`, `${shopSummaryHtml(c)}<div class="shop-buttons">${cancel}${button(uiText("shop.review"), "shop-review", shopReady(c) ? "" : "disabled", "primary")}</div>`, true, "", "shop-modal", terms);
 }
-/** Conditions de l'échoppe : prix de vente et prix d'achat du marchand, en curseur ; « Règle 2014 » revient à 100 % / 50 %. */
+const shopTabs = () => SHOP_TABS.filter(([id]) => id === "all" || ui.shop.visit.rows.some((row) => row.tab === id));
+/**
+ * Conditions de l'échoppe, à l'entrée : l'échoppe, sa richesse, puis prix de vente et prix d'achat du marchand, en curseur ; « Règle 2014 » revient à 100 % / 50 %.
+ * La première fois, ni échoppe ni richesse : « Entrer » attend les deux (décisions de Luca du 27 novembre 2026).
+ */
 function renderShopTerms() {
   const draft = ui.shop.draft;
+  const group = (label, action, ids, value, prefix, extra = "") => `<div class="shop-rate-head"><span>${uiText(label)}</span></div><div class="shop-kinds${extra}" role="group" aria-label="${uiText(label)}">${ids.map((id) => `<button type="button" data-action="${action}" data-value="${id}" class="${value === id ? "active" : ""}" aria-pressed="${value === id}">${esc(uiText(`${prefix}.${id}`))}</button>`).join("")}</div>`;
+  const shops = group("shop.terms.shop", "shop-terms-shop", MERCHANT_SHOPS, draft.shop, "shop.kind") + group("shop.terms.wealth", "shop-terms-wealth", Object.keys(MERCHANT_WEALTH), draft.wealth, "shop.wealth", " shop-wealth");
   const rate = (key) => `<div class="shop-rate"><div class="shop-rate-head"><label for="shop-rate-${key}">${uiText(`shop.terms.${key}`)}</label><b data-shop-rate-value="${key}">${esc(merchantRate(draft[key]))}</b></div><input id="shop-rate-${key}" type="range" min="0" max="${MERCHANT_RATES.length - 1}" step="1" value="${MERCHANT_RATES.indexOf(draft[key])}" data-bind="ui.shop.draft.${key}"><div class="shop-rate-ticks"><span>${esc(merchantRate(10))}</span><span>${esc(merchantRate(100))}</span><span>${esc(merchantRate(1000))}</span></div></div>`;
-  return modalShell(uiText("shop.terms"), `${rate("sell")}${rate("buy")}${button(uiText("shop.terms.rule"), "shop-terms-rule", "", "ghost")}`, button(uiText("Annuler"), "shop-terms-cancel", "", "ghost") + button(uiText(draft.entry ? "shop.terms.enter" : "shop.terms.apply"), "shop-terms-ok", "", "primary"), false, "", "shop-terms-modal");
+  return modalShell(uiText("shop.terms"), `${shops}${rate("sell")}${rate("buy")}${button(uiText("shop.terms.rule"), "shop-terms-rule", "", "ghost")}`, button(uiText("Annuler"), "shop-terms-cancel", "", "ghost") + button(uiText("shop.terms.enter"), "shop-terms-ok", draft.shop && draft.wealth ? "" : "disabled", "primary"), false, "", "shop-terms-modal");
 }
 /** Objet sans prix connu (objet magique, objet libre, prix variable) : le prix convenu à la table, à l'unité, en pièces d'or. */
+/** « Choisir » d'une famille d'objets magiques : les armes ou armures du Marchand, au prix de la famille pour cette visite. */
+function renderShopPick() {
+  const family = shopRow(ui.shop.pick);
+  const rows = [...family.options].sort((a, b) => catalogueOrder([a.id, a], [b.id, b])).map((row) => {
+    const inCart = shopInCart(row);
+    return `<div class="catalog-row shop-row"><div class="shop-text"><span class="shop-title"><strong>${esc(row.name)}${inCart ? ` <span class="pill outline">×${inCart}</span>` : ""}</strong><small>${esc(shopRowPrice(row))}</small></span></div>${button(uiText("{p0} Ajouter", { p0: icon("plus", 14) }), "shop-pick-add", `id="${shopId("shop-pick-add", row.key)}" data-id="${esc(row.key)}"`, "small-btn")}</div>`;
+  }).join("");
+  return modalShell(family.name, `<div class="shop-rows">${rows}</div>`, button(uiText("Annuler"), "shop-back", "", "ghost"), false, "", "shop-pick-modal");
+}
 const shopAgreedPrice = () => { const value = String(ui.shop.price?.value ?? "").trim().replace(",", "."); return value === "" || !(Number(value) >= 0) ? null : Math.round(Number(value) * 100); };
 function renderShopPrice() {
   const price = ui.shop.price, coin = shopCoinNames().po;
@@ -58123,13 +59432,13 @@ function shopInput(path, el) {
   setBinding(path, value);
   if (path === "ui.shop.price.value") { const add = modalRoot.querySelector('[data-action="shop-price-ok"]'); if (add) add.disabled = shopAgreedPrice() === null; return; }
   if (path === "ui.shop.bagQuery") { const rows = modalRoot.querySelector(".shop-bag-rows"); if (rows) rows.innerHTML = shopBagHtml(activeCharacter()); return; }
-  if (["ui.shop.query", "ui.shop.sort", "ui.shop.proficientOnly"].includes(path)) { const rows = modalRoot.querySelector(".shop-rows"); if (rows) rows.innerHTML = shopRowsHtml(); return; }
+  if (["ui.shop.query", "ui.shop.sort", "ui.shop.proficientOnly", "ui.shop.tab"].includes(path)) { const rows = modalRoot.querySelector(".shop-rows"); if (rows) rows.innerHTML = shopRowsHtml(); return; }
   const c = activeCharacter();
   for (const line of ui.shop.cart) {
     const node = modalRoot.querySelector(`.shop-line[data-line="${line.key}"]`);
     if (!node) continue;
     node.querySelector(".shop-line-total").textContent = shopLineTotal(line);
-    const plus = node.querySelector('[data-action="shop-plus"]'); if (plus) plus.disabled = shopLineQty(line) >= (line.sale ? shopSaleMax(c, line) : 999);
+    const plus = node.querySelector('[data-action="shop-plus"]'); if (plus) plus.disabled = shopLineQty(line) >= shopLineMax(c, line);
   }
   const summary = modalRoot.querySelector(".shop-summary"); if (summary) summary.outerHTML = shopSummaryHtml(c);
   const review = modalRoot.querySelector('[data-action="shop-review"]'); if (review) review.disabled = !shopReady(c);
@@ -58137,21 +59446,82 @@ function shopInput(path, el) {
 }
 function shopCartLine(row) {
   if (!row) return { key: String(ui.shop.nextKey++), row: null, name: "", qty: "1", po: "", pa: "", pc: "", weight: "0" };
-  return { key: String(ui.shop.nextKey++), row: row.key, name: row.name, qty: "1", unit: row.copper };
+  // La ligne garde son objet : une autre échoppe choisie en cours de visite ne vide pas le panier.
+  return { key: String(ui.shop.nextKey++), row: row.key, item: row, name: row.name, qty: "1", unit: row.copper };
 }
-/** Ajoute au sac un objet du catalogue rapide comme le fait « Objet du catalogue » : une pile par objet, un exemplaire par arme ou armure. */
-function addRuntimeItem(character, id) {
+/**
+ * Ajoute au sac un objet du catalogue rapide comme le fait « Objet du catalogue » : une pile par objet, un exemplaire par arme ou armure.
+ * Une munition arrive par lot (achat), ou par units quand le nombre est choisi dans le catalogue « + ».
+ */
+function addRuntimeItem(character, id, units = null) {
   const info = itemInfo(id);
   const existing = character.inventory.find((x) => x.ref === id && !x.instance?.container && !["weapon", "armor", "shield"].includes(info.kind) && !x.instance?.equippedSlot && !x.instance?.charges);
-  if (existing) existing.qty += info.kind === "ammo" && existing.instance?.ammunition ? info.count : 1;
-  else character.inventory.push(createRuntimeItem(id, character.id, { id: uid() }));
+  if (existing) existing.qty += info.kind === "ammo" && existing.instance?.ammunition ? units ?? info.count : 1;
+  else {
+    const item = createRuntimeItem(id, character.id, { id: uid() });
+    if (units !== null && item.instance?.ammunition) item.qty = units;
+    character.inventory.push(item);
+  }
+}
+// Objets vendus par lot que le catalogue « + » ajoute à l'unité : munitions ordinaires et spéciales, billes, chausse-trappes.
+const CATALOGUE_COUNT_MAX = 99999;
+/** Nom d'une unité d'un objet vendu par lot (« Flèches », « Bille »), null pour un objet qui s'ajoute tel quel. */
+function catalogueLotName(id) {
+  const ammo = catalogueAmmunition().find((row) => row.id === id), info = ammo ? null : itemInfo(id);
+  if (ammo) return ammo.name;
+  if (info?.unit) return uiCatalogueName(info.unit.name);
+  return info?.kind === "ammo" ? uiCatalogueName(info.name).replace(/\s*\([^)]*\)$/, "") : null;
+}
+/**
+ * Ordre du catalogue « + » (demande de Luca du 26 novembre 2026) : premier mot, pluriel ramené au singulier, puis prix, puis nom.
+ * « Flèches (20) » à 1 po passe ainsi devant « Flèche argentée » ; un prix variable (« 5 à 20 po ») va en fin de son groupe.
+ */
+function catalogueOrder([idA, a], [idB, b]) {
+  const language = uiLanguage(), word = (name) => name.split(/\s+/)[0].replace(/[sx]$/i, ""), price = (id, x) => x.copper ?? parseCoins(itemInfo(id)?.cost) ?? Infinity;
+  return compareUnitLabels(word(a.name), word(b.name), language) || price(idA, a) - price(idB, b) || compareUnitLabels(a.name, b.name, language);
+}
+/** Retour au catalogue « + », le focus sur le bouton « Ajouter » de l'objet : la liste se reconstruit, la ligne reste à l'écran. */
+function catalogueCountClose() {
+  const id = ui.catalogCount?.id || "";
+  ui.catalogCount = null; ui.modal = "catalog"; renderWindow();
+  modalRoot.querySelector(`[data-action="add-catalog-item"][data-id="${CSS.escape(id)}"]`)?.focus();
+}
+/** Grise « − » à 1 et « + » au maximum, d'après le nombre tapé. */
+function catalogueCountButtons() {
+  const qty = catalogueCount(), minus = modalRoot.querySelector('[data-action="catalog-count-minus"]'), plus = modalRoot.querySelector('[data-action="catalog-count-plus"]');
+  if (minus) minus.disabled = qty <= 1;
+  if (plus) plus.disabled = qty >= CATALOGUE_COUNT_MAX;
+}
+const catalogueCount = () => Math.floor(Number(String(ui.catalogCount?.qty ?? "").replace(",", ".")) || 0);
+/** Ajoute count unités au sac, dans la pile portée du même objet : munition ordinaire ou spéciale, pièce seule d'un sac (bille, chausse-trappe). */
+function addCatalogueUnits(character, id, count) {
+  if (!Number.isSafeInteger(count) || count < 1 || count > CATALOGUE_COUNT_MAX) return;
+  if (catalogueAmmunition().some((row) => row.id === id)) return addCatalogueAmmunition(character, id, { itemId: uid(), count });
+  const unit = itemInfo(id)?.unit;
+  if (!unit) return addRuntimeItem(character, id, count);
+  const stack = character.inventory.find((item) => item.ref === unit.id && item.instance?.ownerId === character.id && item.instance.carried && !item.instance.destroyed && !item.instance.container && !item.instance.equippedSlot);
+  if (stack) { stack.qty += count; return; }
+  const item = createCatalogueItem(Object.values(KIT_ITEM_REFERENCES).find((entry) => entry.id === unit.id), character.id, { id: uid(), name: uiCatalogueName(unit.name) });
+  item.qty = count; character.inventory.push(item);
+}
+/** Fiche d'un objet magique à ranger dans le sac : celle de la Bibliothèque (poids, texte), sinon ses règles embarquées, comme une munition spéciale. */
+async function shopReferenceEntry(id) {
+  if (!window.COMPANION_STANDALONE) try { await ensureContent(); const entry = await contentLibrary.entry(id); if (entry) return entry; } catch {}
+  const rule = ITEM_REFERENCE_RULES[id];
+  return { id, type: "item", revision: rule.revision, sourceHash: rule.sourceHash, en: rule, baseReference: rule.baseReference, variantReference: rule.variantReference };
+}
+/** Prix de rachat d'un objet magique sans prix du livre, tiré au dé selon sa rareté (Xanathar p. 126), une fois par visite ; null sans rareté connue. */
+function shopSalePrice(item) {
+  const sales = ui.shop.sales;
+  if (!(item.id in sales)) sales[item.id] = merchantMagicPrice(item.instance?.snapshot?.rarity, merchantConsumable(item.ref, item.instance?.variantReference));
+  return sales[item.id];
 }
 /** Fiche après le passage chez le marchand, avec les lignes de la revue : bourse, objets achetés, objets vendus. */
 function shopTrade(c) {
   let next = clone(c);
   const noteOf = new Map(), buys = ui.shop.cart.filter((line) => !line.sale), sales = ui.shop.cart.filter((line) => line.sale);
   for (const line of buys) {
-    const row = line.row && shopRow(line.row), qty = shopLineQty(line), before = new Map(next.inventory.map((item) => [item.id, item.qty]));
+    const row = line.row && line.item, qty = shopLineQty(line), before = new Map(next.inventory.map((item) => [item.id, item.qty]));
     if (!row) {
       const item = { id: uid(), name: line.name.trim(), qty, weight: Math.round((Number(line.weight) || 0) * 100) / 100, description: "" };
       normalizeInventory({ id: next.id, inventory: [item] }); next.inventory.push(item);
@@ -58159,6 +59529,14 @@ function shopTrade(c) {
       const item = createCatalogueItem(Object.values(KIT_ITEM_REFERENCES).find((entry) => entry.id === row.id), next.id, { id: uid(), name: row.name });
       const existing = next.inventory.find((x) => x.ref === row.id && !x.instance?.container && !x.instance?.equippedSlot && !x.instance?.charges);
       if (existing) existing.qty += item.qty * qty; else { item.qty *= qty; next.inventory.push(item); }
+    } else if (row.kind === "ammo") addCatalogueAmmunition(next, row.id, { itemId: uid(), count: row.lot * qty });
+    else if (row.kind === "magic") {
+      // Potion, parchemin, poison : une pile ; un objet à charges, une arme ou une armure : un exemplaire chacun.
+      for (let count = 0; count < qty; count++) {
+        const item = createCatalogueItem(line.entry, next.id, { id: uid(), name: row.name });
+        const stack = !item.instance.charges && (merchantConsumable(row.id) || MERCHANT_POISON_PRICES[row.id]) && next.inventory.find((x) => x.ref === row.id && x.instance?.ownerId === next.id && !x.instance.container && !x.instance.equippedSlot && !x.instance.charges);
+        if (stack) stack.qty += 1; else next.inventory.push(item);
+      }
     } else for (let count = 0; count < qty; count++) addRuntimeItem(next, row.id);
     const note = shopCoins(shopLineAmount(line));
     for (const item of next.inventory) if (before.get(item.id) !== item.qty) noteOf.set(item.id, note);
@@ -58188,18 +59566,26 @@ async function performShop(action, c, data) {
     case "shop-open": {
       // En entrant chez le marchand, ses conditions d'abord (demande de Luca) ; elles reprennent les derniers réglages de l'appareil.
       const terms = merchantTerms();
-      ui.shop = { view: "catalog", tab: "gear", full: false, query: "", bagQuery: "", sort: "az", proficientOnly: false, opened: [], details: {}, cart: [], nextKey: 1, terms, draft: { ...terms, entry: true }, price: null };
+      ui.shop = { view: "catalog", tab: "all", query: "", bagQuery: "", sort: "az", proficientOnly: false, opened: [], details: {}, cart: [], nextKey: 1, terms, draft: { ...terms }, price: null, pick: null, visit: null, sales: {} };
       openModal("shop-terms"); break;
     }
-    case "shop-terms-open": shop.draft = { ...shop.terms, entry: false }; openModal("shop-terms"); break;
     case "shop-terms-rule": shop.draft = { ...shop.draft, ...MERCHANT_RULE }; render(); break;
-    case "shop-terms-ok": shop.terms = { sell: shop.draft.sell, buy: shop.draft.buy }; saveMerchantTerms(shop.terms); shop.draft = null; openModal("shop"); break;
+    case "shop-terms-shop": shop.draft.shop = data.value; render(); break;
+    case "shop-terms-wealth": shop.draft.wealth = data.value; render(); break;
+    case "shop-terms-ok": {
+      const { sell, buy, shop: kind, wealth } = shop.draft;
+      if (!kind || !wealth) break;
+      // Nouveau tirage à chaque entrée (décision de Luca du 26 novembre 2026) ; une fois entré, on ne revient plus aux conditions.
+      shop.visit = shopVisit(kind, wealth);
+      shop.terms = { sell, buy, shop: kind, wealth }; saveMerchantTerms(shop.terms); shop.draft = null; openModal("shop"); break;
+    }
     case "shop-terms-cancel": case "shop-back": closeModal(); break;
     case "shop-sell": {
       const item = shopBagItems(c).find((entry) => entry.id === data.id), existing = item && shop.cart.find((entry) => entry.sale && entry.itemId === item.id);
       if (!item) break;
       if (existing) { if (shopLineQty(existing) < item.qty) existing.qty = String(shopLineQty(existing) + 1); redraw(shopId("shop-sell", item.id)); break; }
-      const unit = inventoryItemPrice(item);
+      // Objet magique sans prix du livre : prix tiré au dé (décision de Luca du 26 novembre 2026) ; sinon un prix convenu à la table.
+      const unit = inventoryItemPrice(item) ?? shopSalePrice(item);
       if (unit === null) { shop.price = { sale: true, itemId: item.id, name: item.name, value: "" }; openModal("shop-price"); break; }
       shop.cart.push({ key: String(shop.nextKey++), sale: true, itemId: item.id, name: item.name, qty: "1", unit, trade: inventoryItemTrade(item) });
       redraw(shopId("shop-sell", item.id)); break;
@@ -58211,29 +59597,25 @@ async function performShop(action, c, data) {
       shop.cart.push(price.sale ? { key: String(shop.nextKey++), sale: true, itemId: item.id, name: item.name, qty: "1", unit: null, agreed, trade: false } : { ...shopCartLine(row), agreed });
       shop.price = null; openModal("shop"); break;
     }
-    case "shop-tab": shop.tab = data.value; shop.query = ""; redraw(); break;
     case "shop-view": shop.view = data.value; redraw(); break;
-    case "shop-full": {
-      const catalogue = shopCatalogue();
-      if (!shop.full && !catalogue.named) {
-        // Les noms français du Manuel viennent de l'index de la Bibliothèque.
-        await ensureContent(); await contentLibrary.open();
-        for (const row of catalogue.complete) { row.name = contentLibrary.labels().get(row.id) || row.name; row.search = librarySearchText(`${row.name} ${row.raw.name}`); }
-        catalogue.named = true;
-      }
-      shop.full = !shop.full; shop.query = ""; redraw(); break;
-    }
     case "shop-add": {
       const row = shopRow(data.id), existing = shop.cart.find((entry) => entry.row === row.key);
       // Prix variable au catalogue : le prix convenu à la table, une fois.
       if (!existing && row.copper === null) { shop.price = { sale: false, row: row.key, name: row.name, value: "" }; openModal("shop-price"); break; }
-      if (existing) existing.qty = String(Math.min(999, shopLineQty(existing) + 1)); else shop.cart.push(shopCartLine(row));
+      if (existing) existing.qty = String(Math.min(shopLineMax(c, existing), shopLineQty(existing) + 1)); else shop.cart.push(shopCartLine(row));
       redraw(shopId("shop-add", row.key)); break;
+    }
+    case "shop-pick": shop.pick = data.id; openModal("shop-pick"); break;
+    case "shop-pick-add": {
+      const row = shopRow(data.id), existing = row && shop.cart.find((entry) => entry.row === row.key), family = shop.pick;
+      if (!row) break;
+      if (existing) existing.qty = String(Math.min(999, shopLineQty(existing) + 1)); else shop.cart.push(shopCartLine(row));
+      shop.pick = null; openModal("shop"); document.getElementById(shopId("shop-pick", family))?.focus({ preventScroll: true }); break;
     }
     case "shop-free": { const added = shopCartLine(null); shop.cart.push(added); shop.view = "cart"; redraw(`shop-line-${added.key}-name`); break; }
     case "shop-remove": shop.cart = shop.cart.filter((entry) => entry !== line); redraw(); break;
     case "shop-minus": if (line && shopLineQty(line) > 1) { line.qty = String(shopLineQty(line) - 1); redraw(`shop-line-${line.key}-minus`); } break;
-    case "shop-plus": if (line && shopLineQty(line) < (line.sale ? shopSaleMax(c, line) : 999)) { line.qty = String(shopLineQty(line) + 1); redraw(`shop-line-${line.key}-plus`); } break;
+    case "shop-plus": if (line && shopLineQty(line) < shopLineMax(c, line)) { line.qty = String(shopLineQty(line) + 1); redraw(`shop-line-${line.key}-plus`); } break;
     case "shop-detail": {
       const row = shopRow(data.id), focusId = shopId("shop-detail", row.key);
       if (shop.opened.includes(row.key)) shop.opened = shop.opened.filter((key) => key !== row.key);
@@ -58245,6 +59627,8 @@ async function performShop(action, c, data) {
     }
     case "shop-review": {
       if (!shopReady(c)) break;
+      for (const entry of shop.cart) if (entry.item?.kind === "magic" && !entry.entry) entry.entry = await shopReferenceEntry(entry.item.id);
+      if (ui.shop !== shop) break;
       const { next, impactRows } = shopTrade(c);
       openReview(next, shopLabel(), "", "session", { impactRows, shop: true }); break;
     }
@@ -58304,18 +59688,25 @@ function renderInventoryModals(c, d, cancel) {
       `${field(uiText("Nom de l’objet"), "form.name", ui.form.name, "text", "", 'maxlength="120"')}<div class="form-grid">${field(uiText("Quantité"), "form.qty", ui.form.qty, "number", "", 'min="0" max="99999" step="1"')}${field(uiText("Poids unitaire (kg)"), "form.weight", ui.form.weight, "number", "", 'min="0" max="10000" step="0.01"')}</div>${field(uiText("Notes et propriétés"), "form.description", ui.form.description, "textarea", uiText("Les objets du sac n’appliquent pas de bonus automatiquement."), 'maxlength="4000"')}${renderInstanceFields(ui.form)}`,
       cancel + button(uiText(ui.form.editing ? "Vérifier" : "Vérifier l’ajout"), "review-item", "", "primary"),
     );
+  if (ui.modal === "catalog-count") {
+    const qty = catalogueCount();
+    return modalShell(catalogueLotName(ui.catalogCount.id), `<div class="catalog-count"><button type="button" data-action="catalog-count-minus" aria-label="${uiText("shop.minus")}" ${qty <= 1 ? "disabled" : ""}>−</button><input id="catalog-count-qty" class="big-number-input" type="number" inputmode="numeric" min="1" max="${CATALOGUE_COUNT_MAX}" step="1" data-bind="ui.catalogCount.qty" value="${esc(ui.catalogCount.qty)}" aria-label="${uiText("Quantité")}"><button type="button" data-action="catalog-count-plus" aria-label="${uiText("shop.plus")}" ${qty >= CATALOGUE_COUNT_MAX ? "disabled" : ""}>+</button></div>`,
+      cancel + button(uiText("Ajouter"), "catalog-count-add", "", "primary"), false, "", "catalog-count-modal");
+  }
   if (ui.modal === "shop") return renderShop(c, cancel);
   if (ui.modal === "shop-terms") return renderShopTerms();
   if (ui.modal === "shop-price") return renderShopPrice();
+  if (ui.modal === "shop-pick") return renderShopPick();
   if (ui.modal === "catalog") {
     const q = librarySearchText(ui.catalogQuery || ""),
       tab = ui.catalogTab || "gear";
     const source = { weapons: uiWeapons, armor: uiArmors, gear: uiGear, tools: uiTools }[tab] || uiGear;
     // Pastille rouge « Non maîtrisé » sur les armes, armures et outils, comme dans l'achat (décision de Luca du 21 novembre 2026).
     const acc = collect(c), kind = { weapons: "weapon", armor: "armor", tools: "tool" }[tab], unskilled = (id) => kind ? proficiencyPill(itemProficiency(c, { kind, id }, acc)) : "";
-    const rows = Object.entries(source)
+    // Le matériel compte aussi les munitions spéciales (demande de Luca du 25 novembre 2026).
+    const rows = [...Object.entries(source), ...(tab === "gear" ? catalogueAmmunition().map((row) => [row.id, row]) : [])]
       .filter(([id, x]) => id !== "unarmed" && id !== "none" && librarySearchText([x.name, x.englishName, x.referenceEnglishName].filter(Boolean).join(" ")).includes(q))
-      .sort((a, b) => compareUnitLabels(a[1].name, b[1].name, uiLanguage()))
+      .sort(catalogueOrder)
       .map(
         ([id, x]) =>
           `<div class="catalog-row"><div><strong>${esc(x.name)}${unskilled(id)}</strong><small>${[x.cost, x.weight ? formatCarriedWeight(x.weight) : "", x.damage ? `${x.damage} ${x.type}` : "", x.base ? uiText("CA {p0}", { p0: x.base }) : "", x.contents || ""].filter(Boolean).map(esc).join(" · ")}</small></div>${button(uiText("{p0} Ajouter", { p0: icon("plus", 14) }), "add-catalog-item", `data-id="${esc(id)}" data-tab="${tab}"`, "small-btn")}</div>`,
@@ -62118,6 +63509,8 @@ function handleBinding(el, redraw) {
     return;
   }
   setBinding(path, value);
+  // Nombre d'un lot tapé au clavier : « − » et « + » suivent sans redessiner la fenêtre, le champ garde le focus.
+  if (path === "ui.catalogCount.qty") { catalogueCountButtons(); return; }
   if (ui.modal === "creation-add" && path === "form.payment" && ui.form.origin === "elixir" && previous !== value) {
     const rolled = value === "resource" ? rollFormDice(1, 6) : null;
     Object.assign(ui.form, { choice: rolled ? String(rolled.total) : "", rollText: rolled?.text || "" });
@@ -62246,6 +63639,7 @@ const ui = {
   cast: null,
   imported: null,
   catalogQuery: "",
+  catalogCount: null,
   shop: null,
   catalogTab: "gear",
   editorClass: null,
@@ -62756,7 +64150,7 @@ function renderModal() {
   if (["journal-editor", "journal-photo", "journal-discard"].includes(ui.modal)) return renderJournalModals(c, d, cancel);
   if (["rune-inscriptions", "rune-expense", "copy-spell", "magic", "sheet-slot-correction", "sheet-slot", "cast", "cast-target", "spell-stock-consume"].includes(ui.modal)) return renderSpellModals(c, d, cancel);
   if (["rest", "resource-uses", "resource-conversions", "dawn-item", "resource-event"].includes(ui.modal)) return renderResourceModals(c, d, cancel);
-  if (["use-inventory-item", "resolve-last-charge", "declare-item-result", "item-spell-stock", "item-spell-deposit", "item-spell-remove", "item-slot-recovery", "equipment", "equip-instance", "item", "catalog", "shop", "shop-terms", "shop-price", "attunements", "light", "ground-pick"].includes(ui.modal)) return renderInventoryModals(c, d, cancel);
+  if (["use-inventory-item", "resolve-last-charge", "declare-item-result", "item-spell-stock", "item-spell-deposit", "item-spell-remove", "item-slot-recovery", "equipment", "equip-instance", "item", "catalog", "catalog-count", "shop", "shop-terms", "shop-price", "shop-pick", "attunements", "light", "ground-pick"].includes(ui.modal)) return renderInventoryModals(c, d, cancel);
   if (ui.modal.startsWith("creation-")) return renderCreationModal(c, cancel);
   if (["replace-spell", "replace-choice", "calculation-details", "acquisition-history", "rule-options", "adjustments"].includes(ui.modal)) return renderLevelModals(c, d, cancel);
   if (["conditions"].includes(ui.modal)) return renderEffectModals(c, d, cancel);
@@ -62984,9 +64378,10 @@ function closeModal() {
   }
   // Revue d'un achat refermée sans valider : retour au panier.
   if (ui.modal === "review" && ui.pending?.shop && ui.shop) { ui.pending = null; ui.modal = "shop"; renderWindow(); return; }
-  // Prix convenu ou conditions rouvertes depuis la boutique, refermés : retour à la boutique. À l'entrée, refermer les conditions quitte le marchand.
-  if (ui.modal === "shop-price" && ui.shop) { ui.shop.price = null; ui.modal = "shop"; renderWindow(); return; }
-  if (ui.modal === "shop-terms" && ui.shop && !ui.shop.draft?.entry) { ui.shop.draft = null; ui.modal = "shop"; renderWindow(); return; }
+  // Prix convenu ou « Choisir » refermés : retour à la boutique. Refermer les conditions de l'échoppe quitte le marchand.
+  if (["shop-price", "shop-pick"].includes(ui.modal) && ui.shop) { ui.shop.price = null; ui.shop.pick = null; ui.modal = "shop"; renderWindow(); return; }
+  // Nombre d'objets d'un lot refermé sans ajouter : retour au catalogue « + ».
+  if (ui.modal === "catalog-count") { catalogueCountClose(); return; }
   if (ui.modal === "review" && ui.pending?.libraryBack) {
     const origin = ui.pending.libraryBack;
     ui.pending = null; restoreLibraryOrigin(origin); return;
@@ -63245,9 +64640,9 @@ async function perform(action, el) {
     case "review-item-slot-recovery": case "review-reset-item-recovery": case "declare-item-result": case "use-inventory-item": case "resolve-last-charge":
     case "review-use-inventory-item": case "review-item-result": case "review-last-charge": case "consume-ammunition": case "new-item": case "convert-equipment-pack":
     case "review-equipment-pack": case "edit-item": case "review-item": case "delete-item": case "equip-add-weapon": case "equip-remove-weapon": case "catalog-item":
-    case "catalog-tab": case "add-catalog-item": case "toggle-item-effect": case "shop-open": case "shop-tab": case "shop-view": case "shop-full": case "shop-add":
+    case "catalog-tab": case "add-catalog-item": case "catalog-count-minus": case "catalog-count-plus": case "catalog-count-add": case "toggle-item-effect": case "shop-open": case "shop-view": case "shop-add": case "shop-pick": case "shop-pick-add": case "shop-terms-shop": case "shop-terms-wealth":
     case "shop-free": case "shop-remove": case "shop-minus": case "shop-plus": case "shop-detail": case "shop-review":
-    case "shop-terms-open": case "shop-terms-rule": case "shop-terms-ok": case "shop-terms-cancel": case "shop-back": case "shop-sell": case "shop-price-ok":
+    case "shop-terms-rule": case "shop-terms-ok": case "shop-terms-cancel": case "shop-back": case "shop-sell": case "shop-price-ok":
       await performInventory(action, el, c, data, d); break;
     case "campaign-new": case "campaign-personal-new": case "campaign-language": case "campaign-edit": case "campaign-proposal": case "campaign-track-new":
     case "campaign-track-edit": case "campaign-track-review": case "campaign-acquisition-review": case "campaign-personal-review": case "campaign-toggle":

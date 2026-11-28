@@ -12,6 +12,7 @@
   --selection-bg:#efe0d9; --focus:#9b4f3e;
   --success:#386748; --success-bg:#e8efe6; --warning:#795d25; --warning-bg:#f4edda;
   --error:#a1342c; --error-bg:#f7e5e0; --magic:#71546f; --magic-bg:#efe8ef;
+  --rarity-uncommon:#2f7a46; --rarity-rare:#2d5ea8; --rarity-very-rare:#7b3ea8; --rarity-legendary:#9a6010;
   --overlay:#211e1a70; --shadow-color:#211e1a16; --shadow:none; --radius:6px;
   --sans:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   --serif:"Alegreya",Georgia,"Times New Roman",serif;
@@ -87,8 +88,9 @@ button span{pointer-events:none}
 .eq-chip svg{color:var(--muted)}
 /* Munitions : pastille sur la carte d'attaque, ligne dans la fenêtre de dés, récupération après le combat (22 novembre 2026). */
 /* Marchand (22 novembre 2026) : conditions de l'échoppe, groupes du panier, gain d'une vente. */
-.shop-terms{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 10px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);border-radius:8px;font:inherit;font-size:13px;font-weight:650;white-space:nowrap;cursor:pointer}
-.shop-terms svg{color:var(--accent)}
+.shop-terms{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 4px;color:var(--muted);font-size:13px;font-weight:650;line-height:1.25;text-align:right}
+.shop-terms svg{flex:none;color:var(--accent)}
+.shop-terms>span>span{white-space:nowrap}
 .shop-rate{margin:4px 0 22px}
 .shop-rate-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
 .shop-rate-head label{font-size:15px;font-weight:650}
@@ -1551,8 +1553,8 @@ button.state-active::after{content:"";position:absolute;inset:-11px 0}
 }
 
 /* Palette sombre générée par tools/dark.py. Composants communs dans styles.css. */
-@media screen and (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#211f1c;--panel:#282521;--surface:#322e29;--sidebar:#25221e;--ink:#eee8dd;--muted:#bdb3a5;--line:#494138;--line-strong:#766858;--accent:#d9937d;--accent-hover:#e5a48f;--accent-contrast:#281c16;--selection-bg:#453129;--focus:#e3a18a;--success:#9fc39e;--success-bg:#29372b;--warning:#d6b776;--warning-bg:#3c3220;--error:#f0a097;--error-bg:#472b27;--magic:#c7aec6;--magic-bg:#392e3c;--overlay:#100e0b9c;--shadow-color:#00000038;color-scheme:dark}}
-@media screen{:root[data-theme="dark"]{--bg:#211f1c;--panel:#282521;--surface:#322e29;--sidebar:#25221e;--ink:#eee8dd;--muted:#bdb3a5;--line:#494138;--line-strong:#766858;--accent:#d9937d;--accent-hover:#e5a48f;--accent-contrast:#281c16;--selection-bg:#453129;--focus:#e3a18a;--success:#9fc39e;--success-bg:#29372b;--warning:#d6b776;--warning-bg:#3c3220;--error:#f0a097;--error-bg:#472b27;--magic:#c7aec6;--magic-bg:#392e3c;--overlay:#100e0b9c;--shadow-color:#00000038;color-scheme:dark}}
+@media screen and (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#211f1c;--panel:#282521;--surface:#322e29;--sidebar:#25221e;--ink:#eee8dd;--muted:#bdb3a5;--line:#494138;--line-strong:#766858;--accent:#d9937d;--accent-hover:#e5a48f;--accent-contrast:#281c16;--selection-bg:#453129;--focus:#e3a18a;--success:#9fc39e;--success-bg:#29372b;--warning:#d6b776;--warning-bg:#3c3220;--error:#f0a097;--error-bg:#472b27;--magic:#c7aec6;--magic-bg:#392e3c;--rarity-uncommon:#8fc79c;--rarity-rare:#8fb0e6;--rarity-very-rare:#c49be0;--rarity-legendary:#dcb064;--overlay:#100e0b9c;--shadow-color:#00000038;color-scheme:dark}}
+@media screen{:root[data-theme="dark"]{--bg:#211f1c;--panel:#282521;--surface:#322e29;--sidebar:#25221e;--ink:#eee8dd;--muted:#bdb3a5;--line:#494138;--line-strong:#766858;--accent:#d9937d;--accent-hover:#e5a48f;--accent-contrast:#281c16;--selection-bg:#453129;--focus:#e3a18a;--success:#9fc39e;--success-bg:#29372b;--warning:#d6b776;--warning-bg:#3c3220;--error:#f0a097;--error-bg:#472b27;--magic:#c7aec6;--magic-bg:#392e3c;--rarity-uncommon:#8fc79c;--rarity-rare:#8fb0e6;--rarity-very-rare:#c49be0;--rarity-legendary:#dcb064;--overlay:#100e0b9c;--shadow-color:#00000038;color-scheme:dark}}
 
 /* Plateau de dés : mêmes couleurs et même papier que le carnet. */
 .dice-roll-dialog{width:min(560px,100%)}
@@ -2844,13 +2846,19 @@ img[data-photo-id]:not([src]):not([data-photo-missing]){color:transparent}
 .shop-views [data-value="cart"]{display:none}
 .shop-body{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:24px;align-items:start}
 .shop-body[data-view="bag"] .shop-catalog,.shop-body:not([data-view="bag"]) .shop-bag{display:none}
-.shop-catalog .segmented{margin-bottom:12px}
+.shop-catalog .shop-category{display:block;width:100%;margin:0 0 12px}
 .spell-toolbar.shop-toolbar{margin:0 0 6px;gap:8px;flex-wrap:nowrap;align-items:stretch}
 .spell-toolbar.shop-toolbar .search-wrap{flex-basis:auto}
 .spell-toolbar.shop-toolbar select{width:128px;flex-shrink:0;font-size:13px}
-.btn.shop-switch{width:100%;margin-top:12px}
-.shop-full-head{display:grid;gap:4px;margin-bottom:12px}
-.shop-full-head small{font-size:12px;line-height:1.5}
+/* Échoppes (27 novembre 2026) : l'échoppe choisie à l'entrée, la rareté en couleur, l'étoile filante d'un objet tiré à cette visite. */
+.shop-rate-head>span{font-size:15px;font-weight:650}
+.shop-kinds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0 0 22px}
+.shop-kinds button{min-height:44px;padding:6px 4px;border:1px solid var(--line-strong);background:var(--panel);color:var(--ink);border-radius:8px;font-size:14px}
+.shop-kinds button.active{border-color:var(--accent);background:var(--selection-bg);color:var(--accent);font-weight:650}
+.shop-kinds.shop-wealth{grid-template-columns:repeat(4,minmax(0,1fr))}
+.rarity-common{color:var(--muted)}.rarity-uncommon{color:var(--rarity-uncommon)}.rarity-rare{color:var(--rarity-rare)}.rarity-veryRare{color:var(--rarity-very-rare)}.rarity-legendary{color:var(--rarity-legendary)}
+.shop-rarity{font-weight:650}
+.shop-drawn{display:inline-flex;vertical-align:-2px;margin-left:5px}
 .shop-row{flex-wrap:wrap}
 .shop-text,.shop-info{flex:1;min-width:0}
 .shop-info{display:flex;align-items:center;gap:8px;min-height:44px;padding:0;border:0;background:none;color:inherit;text-align:left;cursor:pointer}
@@ -2882,6 +2890,12 @@ img[data-photo-id]:not([src]):not([data-photo-missing]){color:transparent}
 .shop-stepper{display:inline-flex;align-items:center;border:1px solid var(--line-strong);border-radius:4px;overflow:hidden}
 .shop-stepper button{width:36px;height:38px;border:0;background:var(--surface);color:var(--ink);font-size:16px}
 .shop-stepper input{width:44px;height:38px;border:0;text-align:center;background:var(--panel);color:var(--ink);font-size:16px;font-variant-numeric:tabular-nums;-moz-appearance:textfield}
+/* Nombre d'objets d'un lot ajoutés depuis le catalogue « + ». */
+.catalog-count{display:flex;align-items:center;gap:10px}
+.catalog-count .big-number-input{flex:1;min-width:0;margin:8px 0;-moz-appearance:textfield}
+.catalog-count .big-number-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.catalog-count button{flex:none;width:56px;height:56px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface);color:var(--ink);font-size:24px}
+.catalog-count button:disabled{opacity:.4}
 .shop-price{display:inline-flex;gap:4px}
 .shop-price label{display:inline-flex;align-items:center;gap:2px;font-size:12px;color:var(--muted)}
 .shop-price input,.shop-weight input{width:50px;height:38px;border:1px solid var(--line-strong);border-radius:4px;text-align:right;padding:0 6px;background:var(--panel);color:var(--ink);font-size:16px;font-variant-numeric:tabular-nums;-moz-appearance:textfield}
